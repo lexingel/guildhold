@@ -122,7 +122,9 @@ func run() -> void:
 	GameState.write_legacy([])
 	var rec: Dictionary = (GameState.legacy["guilds"] as Array)[-1]
 	check(str((rec.get("branches", {}) as Dictionary).get("vaelith", "")) == "spared" and int(rec.get("fragments", 0)) == 2, "the Hall remembers she was let go")
-	check(GameState._hall_has("spared_vaelith") and GameState.lore_gate(GameData.FRAGMENTS["f_footprints"], {"region": "vale"}), "which opens the footprints for later guilds")
+	check(not GameState._hall_has("spared_vaelith"), "a guild's own record doesn't open its gates")
+	_guild("After the Lamps")
+	check(GameState._hall_has("spared_vaelith") and GameState.lore_gate(GameData.FRAGMENTS["f_footprints"], {"region": "vale"}), "it opens the footprints for later guilds")
 
 	# B5: Hesper signs.
 	_guild("Green Ink")

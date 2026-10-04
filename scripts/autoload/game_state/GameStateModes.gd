@@ -901,7 +901,7 @@ func boon_family_counts() -> Dictionary:
 
 ## Three boons not yet owned; when you already lean into a family, one slot
 ## favours it so a build can come together.
-func roll_boon_offer() -> Array:
+func roll_boon_offer(size: int = GameData.BOON_OFFER_SIZE) -> Array:
 	var owned: Array = run.get("boons", [])
 	var pool: Array = GameData.BOONS.filter(func(b): return not owned.has(b["id"])).map(func(b): return str(b["id"]))
 	pool.shuffle()
@@ -915,7 +915,7 @@ func roll_boon_offer() -> Array:
 				offer.append(id)
 				break
 	for id in pool:
-		if offer.size() >= GameData.BOON_OFFER_SIZE:
+		if offer.size() >= size:
 			break
 		if not offer.has(id):
 			offer.append(id)

@@ -12,6 +12,8 @@ extends Node
 ##   ... -- attr=agility          every attribute point into one attribute
 ##   ... -- hand                  fight like a careful player (see _hand_action)
 ##                                instead of Quick fight
+##   ... -- chain                one player's guilds in a row: the legacy carries, endings
+##                                cycle renew/break/rewrite (the story web's pacing)
 ##   ... -- charter=expose|quiet  the Charter War's turn (default: never
 ##                                answered, as before 0.32.0); echoes are
 ##                                given back or kept 50/50, the Accord renewed
@@ -30,6 +32,8 @@ var seeds := 4
 var seed0 := 7000   # the first seed (seed0=7100 for a second batch)
 var profile := ""
 var log_days := false
+var chain := false         # chain: one player's guilds in a row, sharing a legacy (the story web)
+var chain_guild := 0
 var bold := false
 var hand := false
 var force_attr := ""
@@ -90,6 +94,8 @@ func _ready() -> void:
 			bold = true
 		elif a == "log":
 			log_days = true
+		elif a == "chain":
+			chain = true
 	# The legacy file is shared by every guild on this machine: keep the
 	# player's, and give each simulated guild an empty one.
 	# A copy waits on disk too, in case a run is stopped before the end.
@@ -170,11 +176,21 @@ func _guild(p: String, s: int) -> void:
 	hall_days = []
 	tides = []
 	GameState.active_slot = 9
+	var carried: Dictionary = GameState.legacy.duplicate(true) if chain and chain_guild > 0 else {}
 	GameState.reset()
-	GameState.guild_name = "Sim"
+	GameState.guild_name = "Sim %d" % s
 	GameState.tips_off = true
-	GameState.legacy = {"laurels": 0, "guilds": [], "champions": {}, "charters": GameData.FOUNDINGS.keys()}   # the sim may found under any charter
-	GameData.LEGACY_CHAMPIONS = GameState.legacy["champions"]
+	if chain:   # one player's guilds in a row: the legacy carries, the endings vary
+		GameState.legacy = carried if not carried.is_empty() else {"laurels": 0, "guilds": [], "champions": {}, "charters": GameData.FOUNDINGS.keys()}
+		GameData.LEGACY_CHAMPIONS = GameState.legacy["champions"]
+		ending = ["renew", "break", "rewrite"][chain_guild % 3]
+		if ending == "rewrite" and not GameState.rewrite_open():
+			ending = "renew"
+		charter = ["quiet", "expose"][chain_guild % 2]
+		chain_guild += 1
+	else:
+		GameState.legacy = {"laurels": 0, "guilds": [], "champions": {}, "charters": GameData.FOUNDINGS.keys()}   # the sim may found under any charter
+		GameData.LEGACY_CHAMPIONS = GameState.legacy["champions"]
 	if ending == "rewrite":   # the third ending needs both others in the Hall and the whole line
 		GameState.legacy["guilds"] = [{"name": "Kept", "ending": "renew"}, {"name": "Broke", "ending": "break"}]
 		GameState.legacy["line"] = GameData.LINE_PIECES.size()
@@ -220,8 +236,12 @@ func _guild(p: String, s: int) -> void:
 		("  · " + "; ".join(notes)) if not notes.is_empty() else ""])
 	if gate_tries[0] + gate_tries[1] > 0:
 		print("     the City's gate: %d held, %d lost" % gate_tries)
-	print("     story web: %d fragments found here (%s) · %d known in all · truths %s" % [GameState.lore_found_here.size(), ", ".join(GameState.lore_found_here),
-		(GameState.legacy.get("fragments", []) as Array).size(), ", ".join(GameState.legacy.get("truths", []))])
+	print("     story web: %d fragments found here (%s) · %d of %d known in all · %d of %d truths · ending %s · epilogue %s" % [GameState.lore_found_here.size(), ", ".join(GameState.lore_found_here),
+		(GameState.legacy.get("fragments", []) as Array).size(), GameData.FRAGMENTS.size(), (GameState.legacy.get("truths", []) as Array).size(), GameData.TRUTHS.size(),
+		GameState.accord_ending, str(GameState.legacy.get("epilogue", "-"))])
+	print("     feats done by hand: %d of %d elite/boss wins · flawless wins: %d" % [GameState.feats_done, GameState.elites_won + GameState.bosses_won, GameState.flawless_wins])
+	if not GameState.feat_tally.is_empty():
+		print("     feats by kind: %s" % "  ".join(GameState.feat_tally.keys().map(func(k): return "%s %d/%d" % [k, GameState.feat_tally[k][0], GameState.feat_tally[k][1]])))
 	var cur := GameState.current_act()
 	if not cur.is_empty():
 		var unmet: Array = (cur["objectives"] as Array).filter(func(o): return not GameState.campaign_objective_met(o)).map(func(o): return "%s (%d/%d)" % [str(o["label"]), GameState.campaign_objective_progress(o), int(o["target"])])

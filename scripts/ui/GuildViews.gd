@@ -513,6 +513,7 @@ func _render_stats(v: VBoxContainer) -> void:
 		["Monsters defeated", str(kills)],
 		["Elites / Bosses defeated", "%d / %d" % [GameState.elites_won, GameState.bosses_won]],
 		["Flawless fights", str(GameState.flawless_wins)],
+		["Feats done", str(GameState.feats_done)],
 		["Campaign", "complete" if GameState.campaign_done() else tr("Act %s") % tr(str(GameState._roman(GameState.campaign_act)))],
 		["Tower of Trials, best floor", str(GameState.tower_best)],
 		["Endless Rift, best time", "%d:%02d" % [GameState.best_endless_time / 60, GameState.best_endless_time % 60]],

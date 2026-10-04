@@ -1198,6 +1198,10 @@ func _render_combat_node(v: VBoxContainer) -> void:
 		left.add_child(gains_row)
 		if result.has("heroes"):
 			left.add_child(_victory_party(result))
+		if int(result.get("feat_gold", 0)) > 0:
+			var fb := _label(tr("Feat done: +%d Gold, +%d Essence.") % [int(result["feat_gold"]), int(result.get("feat_ess", 0))], 12)
+			fb.add_theme_color_override("font_color", Palette.RANK_S)
+			left.add_child(fb)
 		if int(result.get("hand_bonus", 0)) > 0:
 			var hb := _label(tr("Flawless, by hand: +%d Gold, +%d Essence (no one went down and you played every turn).") % [int(result["hand_bonus"]), int(result.get("hand_bonus_ess", 0))], 12)
 			hb.add_theme_color_override("font_color", Palette.RANK_S)
@@ -2103,6 +2107,18 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 	_shadow(round_chip)
 	round_chip.position = Vector2(14, 8)
 	arena.add_child(round_chip)
+	if state.has("feat"):   # the fight's Feat, live
+		var ft: Array = Combat.feat_text(state["feat"])
+		var fst := Combat.feat_status(state)
+		var auto_on := bool(state.get("auto_used", false))
+		var mark: String = {"done": "✓ ", "failed": "✗ "}.get(fst, "◇ ")
+		var feat_chip := _label(mark + tr("Feat: %s") % str(ft[0]) + (tr(" (by hand only)") if auto_on else ""), 13)
+		feat_chip.add_theme_color_override("font_color", Palette.RANK_S if fst == "done" and not auto_on else (Palette.MUTED if fst == "failed" or auto_on else Palette.COINS))
+		feat_chip.tooltip_text = tr("%s Won by hand (no Auto), it pays +%d%% Gold and Essence, and an elite offers one more boon.") % [str(ft[1]), int(GameData.FEAT_BONUS * 100)]
+		feat_chip.mouse_filter = Control.MOUSE_FILTER_STOP
+		_shadow(feat_chip)
+		feat_chip.position = Vector2(14, 34)
+		arena.add_child(feat_chip)
 	# The rank's rules that bite in this fight, top-right of the arena.
 	var fight_rank := str(GameState.run.get("rift_rank", ""))
 	if fight_rank != "":

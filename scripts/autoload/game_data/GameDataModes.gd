@@ -123,6 +123,23 @@ const HERO_REQUESTS := {
 ## A fight won by hand (Auto never on) with no hero down pays this share
 ## of its Gold and its Essence again, where GameState.hand_bonus_here says.
 const HAND_BONUS := 0.3
+## Feats (sim, careful hand play: swift ~63%, unbloodied ~56%, double ~50%;
+## "answer every wind-up" was 93% and is now "break one"; ending on 6
+## Momentum was 12% and is now "bank 8"; "first" picked the main foe, 0%).
+## Feats: elites, bosses, pillars and finales each set one optional objective
+## that suits the fight. Done by hand (no Auto) in a won fight, it pays
+## FEAT_BONUS more Gold and Essence, and an elite offers one more boon.
+const FEAT_BONUS := 0.4
+const FEAT_MOMENTUM := 8
+const FEAT_ROUNDS := {"elite": 4, "boss": 6}
+const FEATS := {
+	"break": {"name": "Break a wind-up", "desc": "Stun, freeze or bash a foe while it winds up, before its heavy blow lands. One winds up in round 2."},
+	"swift": {"name": "Win by round %d", "desc": "Down every foe by the end of round %d."},
+	"unbloodied": {"name": "Stay on your feet", "desc": "No hero loses more than half their health in this fight."},
+	"first": {"name": "Down %s first", "desc": "The first foe to fall is %s.", "min_foes": 2},
+	"double": {"name": "Two at once", "desc": "Down two foes in the same round.", "min_foes": 2},
+	"momentum": {"name": "Full of fight", "desc": "Bank %d Momentum at any point in the fight."},
+}
 ## A party at this share of a rank's Recommended power ("Favored") may Quick
 ## fight it before sealing it: a tester way above the content couldn't.
 const QUICK_FIGHT_FAVORED := 1.2

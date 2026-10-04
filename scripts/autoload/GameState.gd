@@ -103,6 +103,8 @@ func reset() -> void:
 	monster_kill_counts = {}
 	crafts_performed = 0
 	flawless_wins = 0
+	feats_done = 0
+	feat_tally = {}
 	elites_won = 0
 	bosses_won = 0
 	guild_board = []
@@ -204,6 +206,7 @@ func load_save() -> bool:
 	monster_kill_counts = data.get("monster_kill_counts", {})
 	crafts_performed = data.get("crafts_performed", 0)
 	flawless_wins = data.get("flawless_wins", 0)
+	feats_done = int(data.get("feats_done", 0))
 	elites_won = data.get("elites_won", 0)
 	bosses_won = data.get("bosses_won", 0)
 	guild_board.assign(data.get("guild_board", []))

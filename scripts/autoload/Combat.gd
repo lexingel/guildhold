@@ -590,6 +590,11 @@ func _start_round(state: Dictionary) -> void:
 			if float(mw["hp"]) > 0 and not mw.get("_charged", false):
 				mw["_winding"] = true
 				break
+	if str(state.get("feat", {}).get("id", "")) == "break" and int(state["round_num"]) == 2:   # the Feat's wind-up
+		for mw in monsters:
+			if float(mw["hp"]) > 0 and not mw.get("_charged", false) and not (mw.get("affixes", []) as Array).has("hasted"):
+				mw["_winding"] = true
+				break
 	if int(state["round_num"]) % 3 == 0 and not living.is_empty():
 		_fire("round_third", state, living[0])
 	var intents := {}
@@ -762,6 +767,8 @@ func _role_skill_effect(state: Dictionary, h: Hero, sk: Dictionary, target_idx: 
 				var m: Dictionary = monsters[target_idx]
 				if float(m["hp"]) > 0:
 					var broke: bool = m.get("_winding", false) or m.get("_charged", false)
+					if broke:
+						_tally(state, "broke_windup")
 					m["_winding"] = false
 					m["_charged"] = false
 					if str(m.get("tier", "")) != "boss":
@@ -788,6 +795,7 @@ func _role_skill_effect(state: Dictionary, h: Hero, sk: Dictionary, target_idx: 
 				if float(monsters[i]["hp"]) > 0:
 					_hero_hit(state, h, i, val)
 					if str(sk["effect"]) == "nova" and (monsters[i].get("_winding", false) or monsters[i].get("_charged", false)):
+						_tally(state, "broke_windup")
 						monsters[i]["_winding"] = false
 						monsters[i]["_charged"] = false
 						log.append(tr("%s's wind-up is broken!") % tr(str(monsters[i]["name"])))
@@ -995,6 +1003,8 @@ func _resolve_hero_action(state: Dictionary, h: Hero) -> void:
 					match eff:
 						"stun_strike":
 							tm["hp"] = float(tm["hp"]) - round(team_dmg_base * escalate_mult * val)
+							if tm.get("_winding", false) or tm.get("_charged", false):
+								_tally(state, "broke_windup")
 							tm["_winding"] = false
 							tm["_charged"] = false
 							if boss:
@@ -1002,6 +1012,8 @@ func _resolve_hero_action(state: Dictionary, h: Hero) -> void:
 							elif stun_monster(state, ti, 1):
 								log.append(tr("%s is stunned!") % tr(str(tm["name"])))
 						"freeze_target":
+							if tm.get("_winding", false) or tm.get("_charged", false):
+								_tally(state, "broke_windup")
 							tm["_winding"] = false
 							tm["_charged"] = false
 							if stun_monster(state, ti, 1 if boss else 2):
@@ -1435,6 +1447,106 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 # ---------------- Defeat analysis ----------------
 
 ## Fight tallies for the "why you lost" card (state["_stats"]).
+## A Feat for this fight (GameData.FEATS): one that suits it, picked from the
+## fight's own seed. `kind` is "elite", "boss" or "pillar".
+func roll_feat(state: Dictionary, kind: String) -> Dictionary:
+	var monsters: Array = state["monsters"]
+	var ids: Array = ["break", "swift", "unbloodied", "momentum"]
+	var adds: Array = range(monsters.size()).filter(func(i): return not monsters[i].get("is_main", false))
+	if not adds.is_empty():
+		ids.append("first")
+	if monsters.size() >= 2:
+		ids.append("double")
+	var id := str(ids[randi() % ids.size()])
+	var feat := {"id": id}
+	var start := {}
+	for h in state["party"]:
+		start[h.id] = h.hp
+	state["_feat_start_hp"] = start
+	match id:
+		"swift":
+			feat["rounds"] = int(GameData.FEAT_ROUNDS.get("elite" if kind == "elite" else "boss", 6))
+		"first":   # the toughest of the main foe's company
+			var pick: int = adds[0]
+			for i in adds:
+				if float(monsters[i]["max_hp"]) > float(monsters[pick]["max_hp"]):
+					pick = i
+			feat["foe"] = str(monsters[pick]["name"]).split(",")[0]
+		"momentum":
+			feat["momentum"] = GameData.FEAT_MOMENTUM
+	return feat
+
+
+## The Feat's name and what it asks, for the battle screen.
+func feat_text(feat: Dictionary) -> Array:
+	var d: Dictionary = GameData.FEATS.get(str(feat.get("id", "")), {})
+	if d.is_empty():
+		return ["", ""]
+	var arg: Variant = feat.get("rounds", feat.get("foe", feat.get("momentum", null)))
+	var nm := tr(str(d["name"]))
+	var ds := tr(str(d["desc"]))
+	if arg != null:
+		var a2: Variant = tr(str(arg)) if arg is String else arg
+		nm = nm % a2 if nm.contains("%") else nm
+		ds = ds % a2 if ds.contains("%") else ds
+	return [nm, ds]
+
+
+## Watches the fight for the Feat (after every turn): the first foe down,
+## two down in one round, a hero who lost half their health.
+func _feat_watch(state: Dictionary) -> void:
+	if not state.has("feat"):
+		return
+	var downed: Dictionary = state.get_or_add("_feat_downed", {})
+	var round_num := int(state["round_num"])
+	for i in (state["monsters"] as Array).size():
+		var m: Dictionary = state["monsters"][i]
+		if float(m["hp"]) <= 0 and not downed.has(i):
+			downed[i] = round_num
+			if not state.has("_feat_first"):
+				state["_feat_first"] = str(m["name"]).split(",")[0]
+	state["_feat_max_mom"] = maxi(int(state.get("_feat_max_mom", 0)), int(state.get("momentum", 0)))
+	var start: Dictionary = state.get("_feat_start_hp", {})
+	for h in state["party"]:
+		if h.hp < int(start.get(h.id, max_hp(h))) - max_hp(h) * 0.5:
+			state["_feat_hurt"] = true
+
+
+## "done", "failed" or "open": how the Feat stands (`ended`: the fight is over).
+func feat_status(state: Dictionary, ended: bool = false) -> String:
+	var feat: Dictionary = state.get("feat", {})
+	if feat.is_empty():
+		return ""
+	var stats: Dictionary = state.get("_stats", {})
+	match str(feat["id"]):
+		"break":
+			if float(stats.get("broke_windup", 0.0)) > 0:
+				return "done"
+			return "failed" if ended else "open"
+		"swift":
+			if int(state["round_num"]) > int(feat["rounds"]):
+				return "failed"
+		"unbloodied":
+			if state.get("_feat_hurt", false):
+				return "failed"
+		"first":
+			if state.has("_feat_first"):
+				return "done" if str(state["_feat_first"]) == str(feat["foe"]) else "failed"
+		"double":
+			var per_round := {}
+			for i in state.get("_feat_downed", {}):
+				var r := int(state["_feat_downed"][i])
+				per_round[r] = int(per_round.get(r, 0)) + 1
+			if per_round.values().any(func(n): return n >= 2):
+				return "done"
+			return "failed" if ended else "open"
+		"momentum":
+			if int(state.get("_feat_max_mom", 0)) >= int(feat["momentum"]):
+				return "done"
+			return "failed" if ended else "open"
+	return "done" if ended else "open"
+
+
 func _tally(state: Dictionary, key: String, amount: float = 1.0) -> void:
 	var st: Dictionary = state.get_or_add("_stats", {})
 	st[key] = float(st.get(key, 0.0)) + amount
@@ -1669,6 +1781,7 @@ func resolve_turn(state: Dictionary) -> Dictionary:
 				elif ph.hp > 0 and ph.hp < max_hp(ph) * 0.25:
 					_bark(state, ph, "low_hp", 0.7)
 	_check_phases(state)
+	_feat_watch(state)
 
 	var outcome := _check_monsters_defeated(state)
 	if not outcome.is_empty():
@@ -1679,6 +1792,7 @@ func resolve_turn(state: Dictionary) -> Dictionary:
 
 	if int(state["turn_idx"]) >= state["turn_order"].size():
 		_end_round_effects(state)
+		_feat_watch(state)
 		outcome = _check_monsters_defeated(state)
 		if not outcome.is_empty():
 			return outcome
@@ -1726,6 +1840,9 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 		"won": won, "retreated": retreated, "log": log, "rounds": int(state["round_num"]), "monster_name": state["monsters"][0]["name"],
 		"coin": 0, "crystal": 0, "bonus_crystal": 0, "reward_options": [],
 	}
+	if won and state.has("feat"):   # the Feat, settled
+		_feat_watch(state)
+		result["feat_done"] = feat_status(state, true) == "done"
 	if won:
 		var is_boss: bool = state["is_boss"]
 		var is_elite: bool = state["is_elite"]

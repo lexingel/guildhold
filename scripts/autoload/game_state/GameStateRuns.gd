@@ -161,6 +161,8 @@ func engage_node() -> void:
 	seed(hash([int(run.get("seed", 0)), int(run["pos"])]))
 	var floor_i := int(run["pos"]) % GameData.DESCENT_FLOORS if run.has("descent") else int(run["pos"])
 	var state := Combat.start_combat(party, "boss" if kind == "pillar" else kind, diff, floor_i)
+	if (kind in ["elite", "boss", "pillar"] or int(run.get("finale", 0)) > 0) and not run.has("tower") and not run.get("training", false):
+		state["feat"] = Combat.roll_feat(state, kind)   # an optional objective, by hand
 	randomize()
 	var prior_bg_idx := int(run["node_state"].get("bg_idx", -1))
 	if prior_bg_idx >= 0:
@@ -176,6 +178,11 @@ func engage_node() -> void:
 	run["node_state"] = {"type": "combat", "combat_state": state, "reward_chosen": false, "bg_idx": int(state.get("background_idx", prior_bg_idx))}
 	save()
 	state_changed.emit()
+
+
+## A Feat done by hand (no Auto) in a won fight pays out.
+func feat_earned(state: Dictionary, result: Dictionary) -> bool:
+	return bool(result.get("feat_done", false)) and not state.get("auto_used", false)
 
 
 ## Whether a flawless fight played by hand pays HAND_BONUS here: elites,
@@ -308,7 +315,7 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 			elif kind == "elite":
 				elites_won += 1
 				if not run.has("tower"):
-					result["boon_offer"] = roll_boon_offer()
+					result["boon_offer"] = roll_boon_offer(GameData.BOON_OFFER_SIZE + (1 if feat_earned(state, result) else 0))
 			elif kind == "pillar":
 				result["freed"] = free_lost_champion(next_lost_champion())
 			# Quest tallies — every monster in a won fight is by definition dead,
@@ -320,6 +327,15 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 					monster_kill_counts[mname] = int(monster_kill_counts.get(mname, 0)) + 1
 					if mname == "Company Crossbowman":   # the story web: a Bestiary note
 						lore_event("bestiary", mname)
+			if state.has("feat") and not state.get("auto_used", false):
+				var ft: Array = feat_tally.get(str(state["feat"]["id"]), [0, 0])
+				feat_tally[str(state["feat"]["id"])] = [int(ft[0]) + (1 if result.get("feat_done", false) else 0), int(ft[1]) + 1]
+			if feat_earned(state, result):   # a Feat, done by hand
+				feats_done += 1
+				result["feat_gold"] = maxi(1, int(round(int(result["coin"]) * GameData.FEAT_BONUS)))
+				result["feat_ess"] = maxi(1, int(round(int(result["crystal"]) * GameData.FEAT_BONUS)))
+				coins += int(result["feat_gold"])
+				crystals += int(result["feat_ess"])
 			var flawless := true
 			for h in state.get("party", []):
 				if h.hp <= 0:

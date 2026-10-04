@@ -38,7 +38,7 @@ const THREAT_MAX := 1.6
 const CHAMPIONS := {
 	# Warriors
 	"brannoch": {"name": "Brannoch", "title": "the Unbroken", "role": "warrior",
-		"lore": "The last knight of the old guilds held a rift shut with his own body for eleven years. The chains are still on his wrists; he says they help him remember why.",
+		"lore": "The knight who asked for the deepest post, under a city nobody on our side has seen, and held its door with his shoulder for twenty years. The chains are still on his wrists; he says they help him remember why.",
 		"boon": {"kind": "hp_pct", "value": 0.08, "name": "Unbroken Line"},
 		"call": {"name": "Last Stand", "effect": "team_shield_burst", "value": 0.35, "desc": "shields every ally for 35% of their max HP"},
 		"mods": ["stagger", "bulwark"]},
@@ -209,7 +209,7 @@ static func champion_portrait(id: String) -> String:
 ## told when they're freed, kept in the Codex's Chronicle. Each stands alone,
 ## since a guild meets its champions in any order.
 const CHAMPION_MEMORY := {
-	"brannoch": "The Grandmaster said one night. One night, and the Hollow would be quiet for good. I counted. It was eleven years.",
+	"brannoch": "There was a girl on the other side of my door. I told her to wait, that I'd come back for her. I'd like to know if she did.",
 	"grell": "We drew lots for the posts. I drew a deep one. I remember thinking that was lucky.",
 	"mordrake": "When the light closed over me it didn't hurt. It felt like being told to wait, very firmly.",
 	"sigrun": "My whole shield-company walked into the light together. I came out alone. Ask the others if they're still holding.",

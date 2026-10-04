@@ -79,9 +79,10 @@ func lore_gate(f: Dictionary, ctx: Dictionary = {}) -> bool:
 	return true
 
 
-## A guild in the Hall of Guilds did `what`.
+## A past guild in the Hall of Guilds did `what` (this guild's own record,
+## written at its ending, doesn't count).
 func _hall_has(what: String) -> bool:
-	var hall: Array = legacy.get("guilds", [])
+	var hall: Array = (legacy.get("guilds", []) as Array).filter(func(g): return str(g.get("name", "")) != guild_name or g.get("retired", false))
 	match what:
 		"spared_vaelith":
 			return hall.any(func(g): return str((g.get("branches", {}) as Dictionary).get("vaelith", "")) == "spared")
