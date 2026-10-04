@@ -841,7 +841,7 @@ func _update_screen_music() -> void:
 	elif screen == "rift_run":
 		var kind := GameState.current_node_kind()
 		var ns: Dictionary = GameState.run.get("node_state", {})
-		if kind in ["combat", "boss", "elite"] and ns.has("combat_state"):
+		if kind in ["combat", "boss", "elite", "pillar"] and ns.has("combat_state"):
 			if _combat_track == "":
 				_combat_track = GameData.pick_track(GameData.COMBAT_MUSIC, _last_combat_track)
 				_last_combat_track = _combat_track
@@ -1779,7 +1779,7 @@ func _render_rift_hall(v: VBoxContainer) -> void:
 	var gates := [
 		[tr("Rank %s Rift") % tr(str(lesser_pick)), Rect2(0, 0, 230, 340), Rect2(18, 65, 68, 98), go.bind(lesser_pick, false)],
 		["Endless Rift" if endless_open else tr("Endless Rift — locked"), Rect2(230, 0, 240, 340), Rect2(110, 20, 97, 130),
-			go.bind("", true) if endless_open else Callable()],
+			(func(): _endless_choice_overlay(go)) if endless_open else Callable()],
 		[tr("Rank %s Rift") % tr(str(greater_pick)) if greater_open else (tr("Ranks C-SSS — locked") if not unlocked else tr("Rank C — %s") % tr(str(GameState.ladder_rank_lock("C")))),
 			Rect2(470, 0, 230, 340), Rect2(230, 30, 78, 140), go.bind(greater_pick, false) if greater_open else Callable()],
 	]
@@ -1905,6 +1905,53 @@ func _rift_hall_wide(v: VBoxContainer, gates: Array, best: int, go: Callable) ->
 	row.add_child(modes)
 	dock.add_child(row)
 	v.add_child(dock)
+
+
+## The Endless Rift's gate: the two ways in (the Descent and the real-time
+## run), as a pop-up over the hall. A click outside or Cancel closes it.
+func _endless_choice_overlay(go: Callable) -> void:
+	var overlay := Control.new()
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var dim := ColorRect.new()
+	dim.color = Color(0, 0, 0, 0.7)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dim.gui_input.connect(func(e):
+		if e is InputEventMouseButton and e.pressed:
+			overlay.queue_free())
+	overlay.add_child(dim)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(center)
+	var panel := PanelContainer.new()
+	panel.theme_type_variation = &"CardPanelViolet"
+	panel.custom_minimum_size.x = minf(560.0, get_viewport().get_visible_rect().size.x - 40.0)
+	var col := _vbox(12)
+	col.add_child(_label("The Endless Rift", 20))
+	col.add_child(_wrap_label("Two ways down. Either one can free the lost champions.", 12, true))
+	var best := _best_party_power()
+	for cd in _rift_mode_defs(go).slice(0, 2):
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var tv := _vbox(2)
+		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.add_child(_label(str(cd[0]), 16))
+		tv.add_child(_wrap_label(str(cd[1]), 12, true))
+		tv.add_child(_power_readout(best, int(cd[2]), "Your best"))
+		row.add_child(tv)
+		var cb: Callable = cd[3]
+		var b := _button("Choose", func():
+			overlay.queue_free()
+			cb.call())
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(b)
+		col.add_child(row)
+	var cancel := _button("Cancel", overlay.queue_free)
+	cancel.size_flags_horizontal = Control.SIZE_SHRINK_END
+	col.add_child(cancel)
+	panel.add_child(col)
+	center.add_child(panel)
+	root.add_child(overlay)
 
 
 ## The modes besides the ladder: [name, what it is, recommended power,
