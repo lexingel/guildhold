@@ -1669,7 +1669,7 @@ func _past_guild_title(g: Dictionary) -> String:
 
 ## A past guild's record: its ending, day, rifts, Laurels, who it left behind.
 func _past_guild_line(g: Dictionary) -> String:
-	var how := tr("Renewed the Accord") if str(g.get("ending", "")) == "renew" else tr("Broke the Accord") if str(g.get("ending", "")) == "break" else tr("Retired in Act %s") % tr(GameState._roman(maxi(1, int(g.get("act", 1)) - 1)))
+	var how := tr("Renewed the Accord") if str(g.get("ending", "")) == "renew" else tr("Broke the Accord") if str(g.get("ending", "")) == "break" else tr("Rewrote the Terms") if str(g.get("ending", "")) == "rewrite" else tr("Retired in Act %s") % tr(GameState._roman(maxi(1, int(g.get("act", 1)) - 1)))
 	var names: Array = g.get("remembered", [])
 	var kept: Array = g.get("oaths", [])
 	var oath_txt := (tr(" · oaths kept: %d") % kept.size()) if not kept.is_empty() else ""
@@ -2195,7 +2195,7 @@ func _render_open_hollow(v: VBoxContainer) -> void:
 
 
 func _render_management(v: VBoxContainer) -> void:
-	if GameState.accord_ending == "renew":
+	if GameState.keepers():
 		_render_accord_halls(v)
 	elif GameState.accord_ending == "break":
 		_render_open_hollow(v)

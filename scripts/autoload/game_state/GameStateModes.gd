@@ -174,8 +174,14 @@ func _complete_act(act_num: int) -> void:
 		if sworn("never_sell"):
 			turn_card["choices"] = ["expose"]   # the oath: the page goes to the Crown
 		pending_stories.append(turn_card)   # after Act III's intro (below)
+	if act_num == 3:
+		_find_line_piece()
 	if act_num == 4:
-		pending_stories.append(GameData.ACCORD_CHOICE.duplicate(true))   # the ending, then The End
+		var choice: Dictionary = GameData.ACCORD_CHOICE.duplicate(true)
+		if rewrite_open():   # the third ending: Hesper's forty-second line
+			choice["text"] = tr(str(choice["text"])) + "\n\n" + tr(GameData.REWRITE_HINT)
+			(choice["choices"] as Array).append("rewrite")
+		pending_stories.append(choice)   # the ending, then The End
 	elif campaign_done():
 		pending_stories.append(_the_end_card())
 	else:
@@ -316,6 +322,39 @@ func _the_end_card() -> Dictionary:
 	return {"title": tr("The End"), "subtitle": tr("The campaign is complete"), "text": tr("Thank you for playing. Your guild endures: push the Endless Rift, climb the rift ladder, and take on quests for as long as rifts keep opening.")}
 
 
+## The mystery across guilds: this guild's piece of the forty-second line
+## (once per guild, at the end of Act III; the count lives in the legacy).
+func _find_line_piece() -> void:
+	if line_piece_seen:
+		return
+	if legacy.is_empty():
+		load_legacy()
+	var n := int(legacy.get("line", 0))
+	if n >= GameData.LINE_PIECES.size():
+		return
+	line_piece_seen = true
+	legacy["line"] = n + 1
+	save_legacy()
+	var p: Dictionary = GameData.LINE_PIECES[n]
+	var text := tr(str(p["text"]))
+	var hall: Array = legacy.get("guilds", [])
+	if n == 1:
+		text = text % (str(hall[-1]["name"]) if not hall.is_empty() else tr("the guild before you"))
+	elif n == 2:
+		var kept := hall.filter(func(g): return str(g.get("ending", "")) == "renew")
+		var broke := hall.filter(func(g): return str(g.get("ending", "")) == "break")
+		text = text % [str(kept[-1]["name"]), str(broke[-1]["name"])] if not kept.is_empty() and not broke.is_empty() else tr(str(p["text_wait"]))
+	pending_stories.append({"title": tr(str(p["title"])), "subtitle": tr(str(p["subtitle"])), "text": text})
+
+
+## Whether this guild may rewrite the Terms: the Hall of Guilds holds a guild
+## that renewed the Accord and one that broke it, and the line is found.
+func rewrite_open() -> bool:
+	var hall: Array = legacy.get("guilds", [])
+	return int(legacy.get("line", 0)) >= GameData.LINE_PIECES.size() \
+		and hall.any(func(g): return str(g.get("ending", "")) == "renew") and hall.any(func(g): return str(g.get("ending", "")) == "break")
+
+
 ## The Broken Accord's ending (the choice card after Act IV). "renew" needs
 ## the hero who takes the forty-first post; "break" frees every champion of
 ## this guild. Returns "" or why not.
@@ -324,6 +363,8 @@ func choose_accord_ending(choice: String, hero_id: String = "") -> String:
 		return ""
 	var end: Dictionary = GameData.ACCORD_ENDING[choice]
 	var card := {"title": tr(str(end["title"])), "subtitle": tr(str(end["subtitle"])), "text": tr(str(end["text"]))}
+	if choice == "rewrite" and not rewrite_open():
+		return tr("The forty-second line isn't open to this guild.")
 	if choice == "renew":
 		var h := find_hero(hero_id)
 		if h == null or h.is_champion:
@@ -341,6 +382,9 @@ func choose_accord_ending(choice: String, hero_id: String = "") -> String:
 	else:
 		for id in champion_roll:
 			unlock_champion(str(id))
+		if choice == "rewrite":   # the posts held in turns: everyone home, and the rifts shut
+			breach = {}
+			breach_next_day = -1
 	accord_ending = choice
 	if not pending_stories.is_empty() and pending_stories[0].has("choices"):
 		pending_stories.pop_front()
@@ -655,6 +699,7 @@ func laurels_earned() -> int:
 	var L: Dictionary = GameData.LAURELS
 	var n := clampi(campaign_act - 1, 0, GameData.CAMPAIGN.size()) * int(L["act"])
 	n += int(L["ending"]) if accord_ending != "" else 0
+	n += GameData.REWRITE_LAURELS if accord_ending == "rewrite" else 0
 	n += posts_freed() * int(L["freed"])
 	n += int(L["charter"]) if charter_result == "won" else 0
 	n += int(L["morrow"]) if morrow_defeated else 0
@@ -879,7 +924,7 @@ func hall_cost(id: String) -> Array:
 
 ## "" if hall `id` can be restored now, else why not.
 func hall_lock(id: String) -> String:
-	if accord_ending != "renew":
+	if not keepers():
 		return tr("Only Keepers of the Vale restore the old halls")
 	if halls_restored.has(id):
 		return tr("Restored")
@@ -937,7 +982,8 @@ func board_done(id: String) -> bool:
 
 ## Lines for this guild's ending, in board order.
 func board_lines() -> Array:
-	return GameData.COMPLETION_BOARD.filter(func(l): return str(l.get("ending", accord_ending)) == accord_ending)
+	var as_ending := "renew" if accord_ending == "rewrite" else accord_ending   # rewritten: the halls are the Keepers' work
+	return GameData.COMPLETION_BOARD.filter(func(l): return str(l.get("ending", as_ending)) == as_ending)
 
 
 ## Pays BOARD_LAURELS for each line finished since the legacy was written.

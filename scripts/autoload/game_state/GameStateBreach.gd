@@ -112,7 +112,7 @@ var _resolving := false
 
 func _on_day_passed() -> void:
 	check_completion_board()
-	if not breach_unlocked() or _resolving or accord_ending == "renew":   # the Accord renewed: the rifts stay shut
+	if not breach_unlocked() or _resolving or keepers():   # the Accord renewed or rewritten: the rifts stay shut
 		return
 	if breach.is_empty():
 		if breach_next_day < 0:

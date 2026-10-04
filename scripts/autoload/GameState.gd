@@ -67,6 +67,7 @@ func reset() -> void:
 	relics_found = []
 	accord_pages = 0
 	accord_ending = ""
+	line_piece_seen = false
 	accord_hero = ""
 	echoes_seen = []
 	charter_choice = ""
@@ -283,6 +284,7 @@ func load_save() -> bool:
 	relics_found = data.get("relics_found", [])
 	accord_pages = int(data.get("accord_pages", 0))
 	accord_ending = str(data.get("accord_ending", ""))
+	line_piece_seen = bool(data.get("line_piece_seen", false))
 	accord_hero = str(data.get("accord_hero", ""))
 	echoes_seen = data.get("echoes_seen", [])
 	charter_choice = str(data.get("charter_choice", ""))

@@ -939,6 +939,7 @@ const PAYDAY_SCENES := {
 	"past_hero": [["Wen", "{hero} is all over the old {guild} ledgers. Rift after rift."], ["Hesper", "{hero} carried me home from the Marches once. Don't write that down."], ["Wen", "Already have."]],
 	"past_renew": [["Wen", "Who goes down to the forty-first post now that {guild} is gone?"], ["Hesper", "We do. Once a year, on the Night of Breaking."], ["Dobbs", "I'll put it in the ledger. No charge."]],
 	"past_break": [["Dobbs", "The tides got worse after {guild} burned the Terms."], ["Hesper", "The tides got honest."], ["Dobbs", "Honest costs more."]],
+	"past_rewrite": [["Wen", "{guild} wrote the forty-second line."], ["Hesper", "In my hand. I'd have liked a better pen."], ["Dobbs", "Someone goes down next season. I've budgeted for it."]],
 	"past_retired": [["Wen", "{guild} just stopped. Do guilds do that?"], ["Hesper", "The good ones stop. The rest get stopped."], ["Wen", "Which were they?"], ["Hesper", "Look at their banner. It's still up."]],
 }
 ## How often a quiet payday turns to a past guild, once the Hall of Guilds has one.
@@ -965,10 +966,30 @@ const ACCORD_ENDING := {
 		"text": "The Hall is quiet. Up in the Vale the villagers wake to a morning without a single rift on the horizon, and do not know why. The guild knows. Every year, on the Night of Breaking, someone climbs down to the forty-first post and tells %s how the harvest went.\n\n(Riftbreaks have ended. The Endless Rift, the ladder and the quests carry on.)"},
 	"break": {"title": "The Accord broken", "subtitle": "Every post released",
 		"text": "The Terms burn green. Forty pillars go out at once, and forty people step into the dark and start walking home. Behind them, the Hollow rises to meet the sky. It will be a hard century. It will be an honest one.\n\n(Every champion of the old guilds is free. Riftbreaks come twice as often.)"},
+	"rewrite": {"title": "The Terms rewritten", "subtitle": "The forty-second line",
+		"text": "Your guild writes one more line under the forty-first, in Hesper's hand, because hers is the only one the Terms accept: the posts are held in turns. Every guild in the Hall of Guilds sends someone down for a season, and they come back. The forty in the pillars walk home, and the Hollow stays shut behind the ones who take their place. Nobody holds it alone any more.\n\n(Riftbreaks have ended, every champion of this guild is free, and the old Accord halls can be restored.)"},
 }
+## The third ending (The Vale Remembers, 5c): rewrite the Terms. Open once
+## the Hall of Guilds holds a guild that renewed the Accord and one that
+## broke it, and the forty-second line has been found (LINE_PIECES).
+const REWRITE_LAURELS := 10
+const REWRITE_HINT := "There is a third way. Hesper's forty-second line is open: rewrite the Terms, and the posts are held in turns."
+## The mystery across guilds: one piece per guild, at the end of Act III,
+## in order; the count lives in the legacy. Piece 2 names a past guild;
+## piece 3 names the guilds that kept and broke the Terms ("_wait" if not yet).
+const LINE_PIECES := [
+	{"title": "A note in the margin", "subtitle": "The Grandmaster's ledger",
+		"text": "Wen finds it while copying the last page: a line in the margin, in a smaller, neater hand than the Grandmaster's. \"If a guild ever has to choose, there is a forty-second line. Ask the clerk.\" Wen asks Hesper who the Grandmaster's clerk was. Hesper says she is tired, and goes to bed before the fire is out."},
+	{"title": "The clerk", "subtitle": "Hesper, at the pay table",
+		"text": "\"I was the clerk,\" Hesper says, as if Wen had asked a minute ago and not a guild ago. \"I wrote her letters and her contracts, and I wrote the Terms out fair: forty-one lines. The night they were signed, she sent me home with a note that said I had a fever. I kept the note.\" She puts it on the table. It is in her own hand. \"I never told %s. I'm telling you.\""},
+	{"title": "The forty-second line", "subtitle": "Hesper, at the pay table",
+		"text": "\"There was a line under the forty-first,\" Hesper says. \"She made me leave it blank. It says the Terms can be changed, once, by a guild that has both kept them and broken them, and a guild is everyone who came before it. %s kept them. %s burned them. When you stand in the Accord Hall, you won't have to choose between the two. Write the forty-second line.\"",
+		"text_wait": "\"There was a line under the forty-first,\" Hesper says. \"She made me leave it blank. It says the Terms can be changed, once, by a guild that has both kept them and broken them, and a guild is everyone who came before it. None of ours has done both yet. When one has, the line will be waiting.\""},
+]
 const CHRONICLE_ENDING := {
 	"renew": ["The forty-first post", "Your guild signed the Terms. %s took the forty-first post, and the Hollow stays below. The rifts that remain are old ones, and quiet."],
 	"break": ["The Terms burned", "Your guild burned the Terms. Every post was released, the old guilds came home, and the Hollow came up with them. The rifts are louder now, and nobody holds them shut but the guilds."],
+	"rewrite": ["The forty-second line", "Your guild rewrote the Terms. The posts are held in turns now, a season at a time, by every guild that ever kept the Vale. The champions came home, and the Hollow stayed below."],
 }
 
 

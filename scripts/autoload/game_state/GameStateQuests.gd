@@ -535,7 +535,7 @@ func _past_pick() -> Dictionary:
 	var fits: Array = ["past_paytable", "past_banner", "past_books"]
 	if not names.is_empty():
 		fits.append("past_hero")
-	fits.append({"renew": "past_renew", "break": "past_break"}.get(str(g.get("ending", "")), "past_retired"))
+	fits.append({"renew": "past_renew", "break": "past_break", "rewrite": "past_rewrite"}.get(str(g.get("ending", "")), "past_retired"))
 	return {"guild": str(g.get("name", "")), "hero": str(names[randi() % names.size()]) if not names.is_empty() else "", "scenes": fits}
 
 

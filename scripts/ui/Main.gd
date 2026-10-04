@@ -596,6 +596,12 @@ func _accord_choice(cv: VBoxContainer) -> void:
 			render())
 		burn.tooltip_text = tr("Burn the Terms. Every champion of the old guilds comes home; Riftbreaks come twice as often.")
 		row.add_child(burn)
+		if GameState.rewrite_open():
+			var rw := _icon_domain_button("violet", "", "Rewrite the Terms", func():
+				GameState.choose_accord_ending("rewrite")
+				render())
+			rw.tooltip_text = tr("Write the forty-second line: the posts are held in turns. Every champion comes home, Riftbreaks end, and the old halls can be restored.")
+			row.add_child(rw)
 	cv.add_child(row)
 
 

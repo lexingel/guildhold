@@ -171,6 +171,9 @@ func _guild(p: String, s: int) -> void:
 	GameState.tips_off = true
 	GameState.legacy = {"laurels": 0, "guilds": [], "champions": {}, "charters": GameData.FOUNDINGS.keys()}   # the sim may found under any charter
 	GameData.LEGACY_CHAMPIONS = GameState.legacy["champions"]
+	if ending == "rewrite":   # the third ending needs both others in the Hall and the whole line
+		GameState.legacy["guilds"] = [{"name": "Kept", "ending": "renew"}, {"name": "Broke", "ending": "break"}]
+		GameState.legacy["line"] = GameData.LINE_PIECES.size()
 	GameState.apply_founding(founding)
 	GameState.oaths = oaths.duplicate()
 	if year == "random":

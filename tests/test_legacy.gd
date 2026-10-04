@@ -246,6 +246,26 @@ func run() -> void:
 	check(GameState.stirred_region() == "vale" and GameState.vale_year_lines(GameState.vale_year)[0][0].find(tr(str(GameData.BIOMES["vale"]["name"]))) >= 0, "the Hollow stirs in a named region")
 	GameState.vale_year = {}
 
+	# The forty-second line: one piece per guild at Act III's end; with a
+	# renewed and a broken guild in the Hall, the Terms can be rewritten.
+	_guild("Line Seekers")
+	GameState.legacy = {"laurels": 0, "guilds": [], "champions": {}}
+	GameState._find_line_piece()
+	GameState._find_line_piece()
+	check(int(GameState.legacy["line"]) == 1 and GameState.line_piece_seen, "a guild finds one piece of the forty-second line")
+	GameState.legacy["line"] = 3
+	check(not GameState.rewrite_open(), "the Terms can't be rewritten without both endings in the Hall")
+	GameState.legacy["guilds"] = [{"name": "Keepers One", "ending": "renew"}, {"name": "Breakers Two", "ending": "break"}]
+	check(GameState.rewrite_open(), "a renewed and a broken guild, and the whole line: the third ending opens")
+	GameState.roll_champions()
+	GameState.breach = {"rank": 3, "broken": false}
+	check(GameState.choose_accord_ending("rewrite") == "" and GameState.accord_ending == "rewrite", "the Terms are rewritten")
+	check(GameState.champions.size() == GameState.champion_roll.size() and GameState.breach.is_empty() and GameState.keepers(), "rewritten: every champion home, the rifts shut")
+	GameState.coins = 50000
+	GameState.crystals = 50000
+	check(GameState.hall_lock(str(GameData.ACCORD_HALLS[0]["id"])) == "" and GameState.board_lines().any(func(l): return l["id"] == "halls"), "rewritten: the old halls can be restored")
+	GameState.legacy = {"laurels": 0, "guilds": [], "champions": {}}
+
 	# The pay table remembers past guilds.
 	_guild("Paymasters")
 	GameState.legacy["guilds"] = []
