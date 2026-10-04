@@ -162,7 +162,7 @@ func _on_rift_sealed(rank_idx: int) -> void:
 func _close_breach() -> void:
 	breach = {}
 	var wait := randi_range(GameData.BREACH_EVERY_MIN, GameData.BREACH_EVERY_MAX)
-	wait -= int(founding_rule("breach_sooner", 0))   # the Hollow knows the Last of the Accord
+	wait -= int(founding_rule("breach_sooner", 0)) + int(year_add("breach_sooner"))   # the Hollow knows the Last of the Accord; restless years
 	if sworn("long_watch"):
 		wait = maxi(2, wait / 2)
 	# The Accord broken: a tide breaks every week (it swells TIDE_WARN days
@@ -188,8 +188,8 @@ func resolve_breach(result: Dictionary) -> Dictionary:
 			(out["wounded"] as Array).append(h.name)
 	if held:
 		var keep := clampf(float(result.get("integrity", 1.0)), 0.0, 1.0)
-		out["coins"] = int(round(GameData.BREACH_HELD_GOLD * breach_scale() * (0.5 + 0.5 * keep)))
-		out["crystals"] = int(round(GameData.BREACH_HELD_ESSENCE * breach_scale() * (0.5 + 0.5 * keep)))
+		out["coins"] = int(round(GameData.BREACH_HELD_GOLD * breach_scale() * (0.5 + 0.5 * keep) * year_mult("breach_pay")))
+		out["crystals"] = int(round(GameData.BREACH_HELD_ESSENCE * breach_scale() * (0.5 + 0.5 * keep) * year_mult("breach_pay")))
 		coins += int(out["coins"])
 		crystals += int(out["crystals"])
 		if breach.has("tide"):

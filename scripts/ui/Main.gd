@@ -604,6 +604,7 @@ var _legacy_pick: Array = []     # heroes picked to be remembered
 var _pending_gifts: Array = []   # founding gifts chosen with Laurels
 var _pending_founding := "free"  # the founding charter picked
 var _pending_oaths: Array = []   # oaths to swear at founding
+var _pending_year: Dictionary = {}   # the year rolled on the founding screen
 
 
 ## The legacy moment: after the Accord's ending (or when retiring), pick up
@@ -738,6 +739,29 @@ func _founding_charters() -> Control:
 			locked.append(tr("%s: %s") % [tr(str(f["name"])), tr(" or ").join(how)])
 	if not locked.is_empty():
 		col.add_child(_wrap_label(tr("Still locked — %s") % "; ".join(locked), 11, true))
+	return col
+
+
+## The founding screen's year in the Vale (for a returning player): two
+## modifiers and the rival's temperament, rolled again for Laurels.
+func _founding_year() -> Control:
+	if _pending_year.is_empty():
+		_pending_year = GameState.roll_vale_year()
+	var col := _vbox(4)
+	var head := _label("The Vale this year", 14)
+	head.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+	col.add_child(head)
+	for ln in GameState.vale_year_lines(_pending_year):
+		col.add_child(_wrap_label(tr("%s: %s") % [ln[0], ln[1]], 12, true))
+	var have := int(GameState.legacy.get("laurels", 0))
+	var again := _button(tr("Roll again · %d Laurels") % GameData.VALE_YEAR_REROLL, func():
+		GameState.legacy["laurels"] = int(GameState.legacy["laurels"]) - GameData.VALE_YEAR_REROLL
+		GameState.save_legacy()
+		_pending_year = GameState.roll_vale_year()
+		render())
+	again.disabled = have < GameData.VALE_YEAR_REROLL
+	again.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	col.add_child(again)
 	return col
 
 
@@ -1628,6 +1652,7 @@ func _render_onboard(v: VBoxContainer) -> void:
 	v.add_child(crest_row)
 
 	if not (GameState.legacy.get("guilds", []) as Array).is_empty():
+		v.add_child(_founding_year())
 		v.add_child(_founding_charters())
 		v.add_child(_founding_oaths())
 		v.add_child(_founding_gifts())
@@ -1645,6 +1670,8 @@ func _render_onboard(v: VBoxContainer) -> void:
 		_pending_founding = "free"
 		GameState.oaths = _pending_oaths.duplicate()
 		_pending_oaths.clear()
+		GameState.vale_year = _pending_year.duplicate(true) if not (GameState.legacy.get("guilds", []) as Array).is_empty() else {}
+		_pending_year = {}
 		GameState.hire_starters()
 		GameState.refresh_recruit_pool()
 		GameState.apply_legacy_gifts(_pending_gifts)

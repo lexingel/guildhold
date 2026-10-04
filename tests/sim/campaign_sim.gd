@@ -38,6 +38,7 @@ var oaths: Array = []    # oaths sworn (oaths=by_hand,lean_purse)
 var ending := "renew"    # the Accord's ending (ending=break: the Open Hollow's tides)
 var gifts: Array = []    # founding gifts (gifts=veteran,contacts), Laurels free
 var endless_mode := "descent"   # how the sim frees champions: descent (turn-based) or survivors
+var year := ""           # "The Vale this year": year=dry,restless or year=random
 var hand_bonus := 0      # fights that paid the flawless-by-hand bonus
 var curve := {}          # power/recommended bucket -> [sealed, lost], ladder runs only
 # Per guild:
@@ -66,6 +67,8 @@ func _ready() -> void:
 			force_attr = a.substr(5)
 		elif a.begins_with("tide_growth="):
 			GameData.TIDE_GROWTH = float(a.substr(12))
+		elif a.begins_with("year="):
+			year = a.substr(5)
 		elif a.begins_with("endless="):
 			endless_mode = a.substr(8)
 		elif a.begins_with("gifts="):
@@ -170,6 +173,12 @@ func _guild(p: String, s: int) -> void:
 	GameData.LEGACY_CHAMPIONS = GameState.legacy["champions"]
 	GameState.apply_founding(founding)
 	GameState.oaths = oaths.duplicate()
+	if year == "random":
+		GameState.vale_year = GameState.roll_vale_year()
+	elif year != "":
+		GameState.vale_year = {"mods": Array(year.split(",")).map(func(y): return {"id": y, "region": "marsh"})}
+	if not GameState.vale_year.is_empty():
+		notes.append("year: " + ", ".join(GameState.vale_year_lines(GameState.vale_year).map(func(l): return l[0])))
 	GameState.hire_starters()
 	GameState.refresh_recruit_pool()
 	if not gifts.is_empty():

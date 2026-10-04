@@ -80,6 +80,7 @@ func reset() -> void:
 	tides_held = 0
 	tidewalls = 0
 	descent_best = 0
+	vale_year = {}
 	board_claimed = []
 	echoes_returned = 0
 	run = {}
@@ -295,6 +296,7 @@ func load_save() -> bool:
 	tides_held = int(data.get("tides_held", 0))
 	tidewalls = int(data.get("tidewalls", 0))
 	descent_best = int(data.get("descent_best", 0))
+	vale_year = (data.get("vale_year", {}) as Dictionary).duplicate(true)
 	board_claimed = (data.get("board_claimed", []) as Array).duplicate()
 	echoes_returned = int(data.get("echoes_returned", 0))
 	# Guilds that finished the campaign before Act IV existed start it now.

@@ -198,7 +198,7 @@ func recruit_day() -> void:
 	for h in recruit_pool.duplicate():
 		if offer_days_left(h) < 0:
 			_drop_offer(h)
-	if not recruit_pool.is_empty() and feature_unlocked("rival") and randf() < GameData.RIVAL_SIGN_CHANCE:
+	if not recruit_pool.is_empty() and feature_unlocked("rival") and randf() < GameData.RIVAL_SIGN_CHANCE * year_mult("rival_signs"):
 		var best: Hero = recruit_pool[0]
 		for h in recruit_pool:
 			if GameData.rank_index(h.rank) > GameData.rank_index(best.rank):

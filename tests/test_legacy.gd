@@ -232,6 +232,20 @@ func run() -> void:
 	check(int(GameState.legacy["laurels"]) == 100 - 18, "the two gifts cost 18 Laurels")
 	check(GameState.heroes.size() == 3 + GameData.VETERAN_RECRUITS.size() and GameState.items.filter(func(it): return it.equipped_to != "").size() >= 3, "a veteran guild has its recruits and wears its gear")
 
+	# The Vale this year: two modifiers and a temperament; each hooks in.
+	_guild("Year Test")
+	var yr := GameState.roll_vale_year()
+	check((yr["mods"] as Array).size() == GameData.VALE_YEAR_MODS and yr["mods"][0]["id"] != yr["mods"][1]["id"] and GameData.RIVAL_TEMPERS.has(yr["temper"]), "a year rolls two different modifiers and a temperament")
+	var y_hero: Hero = GameState.heroes[0]
+	var y_wage0 := GameState.wage_at(y_hero, "full")
+	var y_beds0 := GameState.medical_bed_cap()
+	var y_offers0 := GameState.recruit_offer_count()
+	GameState.vale_year = {"mods": [{"id": "dry", "region": ""}, {"id": "winter", "region": ""}, {"id": "wanderers", "region": ""}]}
+	check(GameState.wage_at(y_hero, "full") < y_wage0 and GameState.medical_bed_cap() == maxi(1, y_beds0 - 1) and GameState.recruit_offer_count() == y_offers0 + 2, "a dry year lowers wages, a hard winter takes a bed (never the last), wanderers add offers")
+	GameState.vale_year = {"mods": [{"id": "stirs", "region": "vale"}]}
+	check(GameState.stirred_region() == "vale" and GameState.vale_year_lines(GameState.vale_year)[0][0].find(tr(str(GameData.BIOMES["vale"]["name"]))) >= 0, "the Hollow stirs in a named region")
+	GameState.vale_year = {}
+
 	# The pay table remembers past guilds.
 	_guild("Paymasters")
 	GameState.legacy["guilds"] = []

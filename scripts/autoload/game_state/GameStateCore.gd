@@ -81,6 +81,7 @@ var tide_count := 0                  # tides of the Open Hollow so far
 var tides_held := 0
 var tidewalls := 0                   # tidewalls raised against the Open Hollow
 var descent_best := 0                # the deepest depth of the Descent cleared
+var vale_year: Dictionary = {}       # this guild's year: {"mods": [{"id", "region"}], "temper"} (empty: a plain year)
 var board_claimed: Array = []        # completion board lines already paid
 ## Across guilds (user://legacy.json, not a save slot): Laurels, the Hall of
 ## Guilds and the remembered heroes as champions. See write_legacy.
@@ -227,7 +228,7 @@ func knock_out(h: Hero) -> void:
 
 
 func medical_bed_cap() -> int:
-	return 1 + int(ceil(lvl("ops.infirmary") / 2.0)) + int(hall_bonus("beds"))
+	return maxi(1, 1 + int(ceil(lvl("ops.infirmary") / 2.0)) + int(hall_bonus("beds")) + int(year_add("beds")))
 
 
 func guild_mentor() -> bool:
@@ -300,7 +301,7 @@ func black_market_unlocked() -> bool:
 
 
 func merchant_price_reduction() -> float:
-	return 0.06 * lvl("log.trade") + float(founding_rule("prices", 0.0)) + hall_bonus("prices")
+	return 0.06 * lvl("log.trade") + float(founding_rule("prices", 0.0)) + hall_bonus("prices") + year_add("prices")
 
 
 func cache_chance_bonus() -> float:
@@ -326,6 +327,58 @@ func hall_bonus(kind: String) -> float:
 	return b
 
 
+## "The Vale this year": the product of the year's `key` multipliers.
+func year_mult(key: String) -> float:
+	var m := 1.0
+	for y in vale_year.get("mods", []):
+		m *= float(GameData.VALE_YEARS.get(str(y["id"]), {}).get("mult", {}).get(key, 1.0))
+	return m
+
+
+## "The Vale this year": the sum of the year's `key` additions.
+func year_add(key: String) -> float:
+	var a := 0.0
+	for y in vale_year.get("mods", []):
+		a += float(GameData.VALE_YEARS.get(str(y["id"]), {}).get("add", {}).get(key, 0.0))
+	return a
+
+
+## The region the Hollow stirs in this year, or "".
+func stirred_region() -> String:
+	for y in vale_year.get("mods", []):
+		if str(y["id"]) == "stirs":
+			return str(y.get("region", ""))
+	return ""
+
+
+## A year to found a guild in: VALE_YEAR_MODS modifiers and a rival temperament.
+static func roll_vale_year() -> Dictionary:
+	var ids: Array = GameData.VALE_YEARS.keys()
+	ids.shuffle()
+	var mods: Array = []
+	for id in ids.slice(0, GameData.VALE_YEAR_MODS):
+		mods.append({"id": id, "region": ["vale", "marsh", "ashen"][randi() % 3] if GameData.VALE_YEARS[id].get("region", false) else ""})
+	var tempers: Array = GameData.RIVAL_TEMPERS.keys()
+	return {"mods": mods, "temper": tempers[randi() % tempers.size()]}
+
+
+## The year as [name, what it does] lines, translated (founding screen, Records).
+static func vale_year_lines(year: Dictionary) -> Array:
+	var out: Array = []
+	for y in year.get("mods", []):
+		var d: Dictionary = GameData.VALE_YEARS.get(str(y["id"]), {})
+		if d.is_empty():
+			continue
+		var nm := str(TranslationServer.translate(str(d["name"])))
+		if d.get("region", false):
+			nm = nm % str(TranslationServer.translate(str(GameData.BIOMES.get(str(y["region"]), {}).get("name", ""))))
+		out.append([nm, str(TranslationServer.translate(str(d["desc"])))])
+	var t: Dictionary = GameData.RIVAL_TEMPERS.get(str(year.get("temper", "")), {})
+	if not t.is_empty():
+		out.append([str(TranslationServer.translate(str(t["name"]))), str(TranslationServer.translate(str(t["desc"])))])
+	return out
+
+
 ## A rule of this guild's founding charter, or `default` when it has none.
 func founding_rule(key: String, default: Variant) -> Variant:
 	return (GameData.FOUNDINGS.get(founding, {}) as Dictionary).get(key, default)
@@ -334,7 +387,7 @@ func founding_rule(key: String, default: Variant) -> Variant:
 func charter_pay(essence: bool) -> float:
 	var m := GameData.CHARTER_PAY if charter_result == "won" else 1.0
 	if not essence:
-		m *= float(founding_rule("contract_gold", 1.0)) * (1.0 + hall_bonus("gold"))
+		m *= float(founding_rule("contract_gold", 1.0)) * (1.0 + hall_bonus("gold")) * year_mult("contract_gold")
 	else:
 		m *= 1.0 + hall_bonus("essence")
 	if not essence and charter_choice == "quiet":
@@ -375,7 +428,7 @@ func feature_unlocked(id: String) -> bool:
 
 func recruit_offer_count() -> int:
 	var l := lvl("log.scouts")
-	return 4 + (1 if l >= 1 else 0) + (1 if l >= 4 else 0) + rival_ahead
+	return 4 + (1 if l >= 1 else 0) + (1 if l >= 4 else 0) + rival_ahead + int(year_add("offers"))
 
 
 func headhunter_guarantee() -> bool:
@@ -679,7 +732,7 @@ func save() -> void:
 		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "training_week": training_week, "trained_this_week": trained_this_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
-		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
+		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
 		"run": _run_for_save(),
 		
 		"monsters_seen": monsters_seen, "bosses_defeated": bosses_defeated, "hazards_seen": hazards_seen,

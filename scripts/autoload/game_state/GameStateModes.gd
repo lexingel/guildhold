@@ -43,6 +43,14 @@ func _diff() -> Dictionary:
 	if run.get("morrow", false):   # the Charter War: Morrow is this rift's boss
 		diff = diff.duplicate()
 		diff["boss_name"] = GameData.MORROW_BOSS
+	if year_mult("rift_gold") != 1.0 or (stirred_region() != "" and str(diff.get("biome", "")) == stirred_region()):   # the Vale this year
+		var yg := year_mult("rift_gold")
+		var stirred := stirred_region() != "" and str(diff.get("biome", "")) == stirred_region()
+		diff = diff.duplicate()
+		diff["coin"] = [int(round(float(diff["coin"][0]) * yg)), int(round(float(diff["coin"][1]) * yg))]
+		if stirred:
+			diff["monster_hp"] = float(diff["monster_hp"]) * float(GameData.VALE_STIRRED["hp"])
+			diff["crystal"] = [int(round(float(diff["crystal"][0]) * float(GameData.VALE_STIRRED["essence"]))), int(round(float(diff["crystal"][1]) * float(GameData.VALE_STIRRED["essence"])))]
 	if run.has("descent"):   # each depth harder, and better paid
 		var g := float(int(run["descent"]) - 1)
 		var pay := 1.0 + GameData.DESCENT_PAY_GROWTH * g
@@ -203,7 +211,7 @@ func maybe_find_ledger_page(finale: bool) -> void:
 ## What the Rifts Take: from Act II a sealed rift sometimes leaves an echo
 ## (GameData.ECHOES, each once), a choice card: give it back or keep it.
 func maybe_echo() -> void:
-	if campaign_act < 2 or pending_stories.any(func(c): return str(c.get("kind", "")) == "echo") or randf() >= GameData.ECHO_CHANCE:
+	if campaign_act < 2 or pending_stories.any(func(c): return str(c.get("kind", "")) == "echo") or randf() >= GameData.ECHO_CHANCE * year_mult("echo_chance"):
 		return
 	var left: Array = GameData.ECHOES.filter(func(e): return not echoes_seen.has(str(e["id"])))
 	if left.is_empty():
@@ -233,7 +241,7 @@ func answer_echo(choice: String) -> void:
 			pending_stories.push_front({"title": tr(str(e[0]["title"])), "subtitle": tr("Given back · +%d Renown") % renown, "text": str(e[0]["returned"])})
 		_news(tr("An echo was given back to the village: %s.") % tr(str(card["title"])))
 	else:
-		crystals += int(round(int(card.get("essence", echo_essence())) * float(founding_rule("echo_essence", 1.0))))
+		crystals += int(round(int(card.get("essence", echo_essence())) * float(founding_rule("echo_essence", 1.0)) * year_mult("echo_essence")))
 		_news(tr("An echo was kept: %s (+%d Essence).") % [tr(str(card["title"])), int(card.get("essence", 0))])
 		_echo_touch(str(card["echo"]))
 	if echoes_seen.size() == 3:   # the third echo brings Ezra
@@ -711,7 +719,7 @@ func write_legacy(hero_ids: Array, retired: bool = false) -> int:
 	(legacy["guilds"] as Array).append({"id": "g%d_%d" % [int(Time.get_unix_time_from_system()), randi() % 100000],
 		"name": guild_name, "crest": guild_crest, "ending": accord_ending, "retired": retired, "day": day, "act": campaign_act,
 		"rifts": rifts_sealed, "laurels": earned, "remembered": names, "fallen": fallen.size(), "charter": charter_result,
-		"quiet": charter_choice == "quiet", "founding": founding, "oaths": oaths.duplicate()})
+		"quiet": charter_choice == "quiet", "founding": founding, "oaths": oaths.duplicate(), "year": vale_year.duplicate(true)})
 	legacy_written = true
 	save_legacy()
 	save()

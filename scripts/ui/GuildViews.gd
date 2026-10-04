@@ -441,6 +441,11 @@ func _render_records(v: VBoxContainer) -> void:
 		b.button_pressed = records_tab == t[0]
 		tabs.add_child(b)
 	v.add_child(tabs)
+	if not GameState.vale_year.is_empty():
+		var yl := _wrap_label(tr("The Vale this year: %s") % ", ".join(GameState.vale_year_lines(GameState.vale_year).map(func(l): return l[0])), 13)
+		yl.tooltip_text = "\n".join(GameState.vale_year_lines(GameState.vale_year).map(func(l): return "%s: %s" % [l[0], l[1]]))
+		yl.mouse_filter = Control.MOUSE_FILTER_STOP
+		v.add_child(yl)
 	if not GameState.oaths.is_empty():
 		var sworn_l := _wrap_label(tr("Oaths sworn: %s") % ", ".join(GameState.oaths.map(func(o): return tr(str(GameData.OATHS.get(o, {}).get("name", o))))), 13)
 		sworn_l.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)

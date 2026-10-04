@@ -10,7 +10,7 @@ func add_reputation(amount: int) -> void:
 	if amount <= 0:
 		reputation = maxi(0, reputation + amount)
 		return
-	amount = maxi(1, int(round(amount * float(founding_rule("renown", 1.0)))))
+	amount = maxi(1, int(round(amount * float(founding_rule("renown", 1.0)) * year_mult("renown"))))
 	var before := reputation / 20
 	reputation += amount
 	if reputation / 20 > before:
@@ -269,7 +269,7 @@ func wage_of(h: Hero) -> int:
 
 
 func wage_at(h: Hero, rate: String) -> int:
-	return int(round(float(GameData.WAGE_BY_RANK.get(h.rank, 15)) * (1.0 + GameData.WAGE_PER_LEVEL * (h.level - 1)) * (1.0 + float(wage_raise.get(h.id, 0.0))) * float(GameData.PAY_RATES[rate][0]) * float(founding_rule("wages", 1.0)) * (1.5 if sworn("lean_purse") else 1.0) * (1.0 - hall_bonus("wages"))))
+	return int(round(float(GameData.WAGE_BY_RANK.get(h.rank, 15)) * (1.0 + GameData.WAGE_PER_LEVEL * (h.level - 1)) * (1.0 + float(wage_raise.get(h.id, 0.0))) * float(GameData.PAY_RATES[rate][0]) * float(founding_rule("wages", 1.0)) * year_mult("wages") * (1.5 if sworn("lean_purse") else 1.0) * (1.0 - hall_bonus("wages"))))
 
 
 func pay_rate_of(h: Hero) -> String:
@@ -590,8 +590,8 @@ func hold_feast() -> String:
 	guests.sort_custom(func(a, b): return a.morale < b.morale)
 	guests = guests.slice(0, feast_seats())
 	for h in guests:
-		change_morale(h, GameData.FEAST_MORALE)
-	_news(tr("A feast in the hall: +%d morale for %d hero%s%s.") % [GameData.FEAST_MORALE, guests.size(), GameData.pl(guests.size(), "es"), tr(str("" if guests.size() == heroes.size() else tr(" (no seats for %d)") % (heroes.size() - guests.size())))])
+		change_morale(h, int(round(GameData.FEAST_MORALE * year_mult("feast"))))
+	_news(tr("A feast in the hall: +%d morale for %d hero%s%s.") % [int(round(GameData.FEAST_MORALE * year_mult("feast"))), guests.size(), GameData.pl(guests.size(), "es"), tr(str("" if guests.size() == heroes.size() else tr(" (no seats for %d)") % (heroes.size() - guests.size())))])
 	save()
 	state_changed.emit()
 	return ""
@@ -601,7 +601,7 @@ func hold_feast() -> String:
 ## make a move you have to answer (maybe_rival_move).
 func rival_day() -> void:
 	var span: Array = GameData.RIVAL_DAILY_RENOWN[mini(3, campaign_act)]
-	rival_renown += int(span[0]) + randi() % (int(span[1]) - int(span[0]) + 1) + (1 if reputation - rival_renown >= GameData.RIVAL_CATCH_UP else 0)
+	rival_renown += int(round((int(span[0]) + randi() % (int(span[1]) - int(span[0]) + 1)) * year_mult("rival_renown"))) + (1 if reputation - rival_renown >= GameData.RIVAL_CATCH_UP else 0)
 	maybe_rival_move()
 	if randf() < GameData.RIVAL_TAUNT_CHANCE:
 		var taunts: Array = GameData.RIVAL_VOICE.get(rival_name, {}).get("taunts", GameData.RIVAL_TAUNTS)
@@ -634,6 +634,11 @@ func maybe_rival_move() -> void:
 	if moves.is_empty():
 		return
 	rival_event = moves[randi() % moves.size()]
+	# This year's temperament: its favourite move, when it can make it.
+	var fav := str(GameData.RIVAL_TEMPERS.get(str(vale_year.get("temper", "")), {}).get("move", ""))
+	var favs := moves.filter(func(m): return str(m["type"]) == fav)
+	if not favs.is_empty() and randf() < GameData.RIVAL_TEMPER_PULL:
+		rival_event = favs[0]
 	rival_event["day"] = day
 	_news(rival_event_title() + ".")
 
@@ -827,13 +832,15 @@ func _end_contest() -> void:
 	var c := contest_status()
 	var ours: int = c["ours"]
 	var theirs: int = c["theirs"]
+	var prize_c := int(round(int(GameData.CONTEST_PRIZE["coins"]) * year_mult("contest")))
+	var prize_r := int(round(int(GameData.CONTEST_PRIZE["reputation"]) * year_mult("contest")))
 	if ours > theirs:
-		coins += int(GameData.CONTEST_PRIZE["coins"])
-		add_reputation(int(GameData.CONTEST_PRIZE["reputation"]))
-		_news(tr("You won the month's contest, %d Renown to %d: +%d Gold, +%d Renown.") % [ours, theirs, GameData.CONTEST_PRIZE["coins"], GameData.CONTEST_PRIZE["reputation"]])
-		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("Contest won"), "text": tr("%d Renown gained to %s's %d. +%d Gold, +%d Renown.") % [ours, tr(str(rival_name)), theirs, GameData.CONTEST_PRIZE["coins"], GameData.CONTEST_PRIZE["reputation"]]})
+		coins += prize_c
+		add_reputation(prize_r)
+		_news(tr("You won the month's contest, %d Renown to %d: +%d Gold, +%d Renown.") % [ours, theirs, prize_c, prize_r])
+		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("Contest won"), "text": tr("%d Renown gained to %s's %d. +%d Gold, +%d Renown.") % [ours, tr(str(rival_name)), theirs, prize_c, prize_r]})
 	elif theirs > ours:
-		rival_renown += int(GameData.CONTEST_PRIZE["reputation"])
+		rival_renown += prize_r
 		_news(tr("%s won the month's contest, %d Renown to your %d.") % [tr(str(rival_name)), theirs, ours])
 		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("Contest lost"), "text": tr("%s gained %d Renown to your %d and takes the prize.") % [tr(str(rival_name)), theirs, ours]})
 	else:

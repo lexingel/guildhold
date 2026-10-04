@@ -629,6 +629,32 @@ const DESCENT_DEFEAT_LOSS := 0.5
 ## a lost champion's pillar as a fork (once the Endless Rift is open).
 const PILLAR_CHANCE := 0.15
 const PILLAR_MIN_RANK := "B"
+## "The Vale this year" (The Vale Remembers, 5b): a returning player's new
+## guild rolls VALE_YEAR_MODS of these at founding, each an upside and a
+## downside, and a rival temperament. "mult" values multiply a hook, "add"
+## values add to it (GameState.year_mult / year_add). The first guild a
+## player founds gets a plain year.
+const VALE_YEARS := {
+	"dry": {"name": "A dry year", "desc": "Contracts pay 15% less Gold, and heroes ask 15% lower wages.", "mult": {"contract_gold": 0.85, "wages": 0.85}},
+	"rich": {"name": "A rich year", "desc": "Rift fights pay 20% more Gold, and shop prices are 15% higher.", "mult": {"rift_gold": 1.2}, "add": {"prices": -0.15}},
+	"stirs": {"name": "The Hollow stirs in %s", "desc": "Foes there have 20% more health, and its rifts pay 25% more Essence.", "region": true},
+	"winter": {"name": "A hard winter", "desc": "One Medical Bay bed fewer (never none), and feasts lift morale twice as much.", "add": {"beds": -1}, "mult": {"feast": 2.0}},
+	"restless": {"name": "Restless rifts", "desc": "Riftbreaks come 2 days sooner, and holding one pays double.", "add": {"breach_sooner": 2}, "mult": {"breach_pay": 2.0}},
+	"wanderers": {"name": "Wandering heroes", "desc": "Two more recruits on the board, and the rival signs your best offer twice as often.", "add": {"offers": 2}, "mult": {"rival_signs": 2.0}},
+	"echoes": {"name": "A year of echoes", "desc": "Echoes turn up twice as often, and a kept echo gives half the Essence.", "mult": {"echo_chance": 2.0, "echo_essence": 0.5}},
+	# Sim (casual, 75 days): at rival +25% and a double contest alone, 0 of 4 reached Act IV (plain: 2 of 4).
+	"proud": {"name": "A proud rival", "desc": "The rival gains Renown 15% faster and you 10% faster, and the monthly contest pays double.", "mult": {"rival_renown": 1.15, "renown": 1.1, "contest": 2.0}},
+}
+const VALE_YEAR_MODS := 2
+const VALE_YEAR_REROLL := 2   # Laurels to roll the year again on the founding screen
+const VALE_STIRRED := {"hp": 1.2, "essence": 1.25}
+## The rival's temperament this year: the weekly move it favours.
+const RIVAL_TEMPERS := {
+	"poacher": {"name": "The rival is hiring", "desc": "It goes after your heroes more than anything.", "move": "poach"},
+	"braggart": {"name": "The rival is boasting", "desc": "It dares you more than anything.", "move": "challenge"},
+	"undercutter": {"name": "The rival is undercutting", "desc": "It goes after your contracts more than anything.", "move": "snatch"},
+}
+const RIVAL_TEMPER_PULL := 0.6   # the chance its favourite move is the one it makes, when it can
 ## Gold in a Rift Cache (a chance on sealing, DIFFICULTIES "cache_chance").
 const RIFT_CACHE_GOLD := {"lesser": 70, "greater": 170}
 

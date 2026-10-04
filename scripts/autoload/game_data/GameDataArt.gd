@@ -113,6 +113,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The Vale this year: after your first guild, each new one is founded in a different year. Two of eight year modifiers (a dry year, restless rifts, the Hollow stirring in one region, a hard winter...) each change the campaign one way for better and one for worse, and the rival has a temperament: hiring, boasting or undercutting. Roll the year again for 2 Laurels; Guild > Records shows it.",
 	"The Descent: a new way into the Endless Rift, turn-based, with your heroes. Go down depth after depth, each harder and better paid; every second depth ends at a pillar where a lost champion waits. Climb out any time and keep everything. Pillars also turn up on Rank B and higher rifts, and the real-time Endless Rift is still there for your champions. Act IV now asks you to free a lost champion by any of the three.",
 	"Two new founding gifts for your next guild (Laurels): Veteran start begins with Act I already done, with the heroes, gear and Gold a guild has by then; Old contacts puts two Rank C recruits on the first board.",
 	"Tidewalls: a guild that broke the Accord can raise walls against the Open Hollow (Guild > Management). Each makes every tide 6% weaker against the guild, and costs more than the last; Gold and Essence finally have somewhere to go in that postgame.",
