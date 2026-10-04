@@ -815,7 +815,7 @@ func _treasury_card() -> PanelContainer:
 		if not (rep.get("left", []) as Array).is_empty():
 			bits.append(tr("walked out: %s") % tr(str(", ".join(rep["left"]))))
 		cv.add_child(_wrap_label(tr("Last payday (day %d): %s.") % [int(rep.get("day", 0)), tr(str("; ".join(bits)))], 12, true))
-		var scene: Array = GameData.PAYDAY_SCENES.get(str(rep.get("scene", "")), [])
+		var scene: Array = GameState.payday_scene_lines(str(rep.get("scene", "")))
 		if not scene.is_empty():
 			# The Guildhold Chronicle: the cast at the pay table.
 			var talk := _vbox(2)
@@ -823,7 +823,7 @@ func _treasury_card() -> PanelContainer:
 			var names := {"guild": str(rep.get("past", "")), "hero": str(rep.get("past_hero", ""))}
 			for ln in scene:
 				talk.add_child(_rich_line("[color=#%s]%s[/color]  %s" % [Palette.EMBER_BRIGHT.to_html(false), tr(str(ln[0])), tr(str(ln[1])).format(names)], 13))
-			talk.tooltip_text = tr("Wen keeps the guild's chronicle, Dobbs keeps its books, and Old Hesper is the last of an Accord guild: she had a fever on the Night of Breaking and missed it.")
+			talk.tooltip_text = tr(GameState.hesper_alt("tooltip", "Wen keeps the guild's chronicle, Dobbs keeps its books, and Old Hesper is the last of an Accord guild: she had a fever on the Night of Breaking and missed it."))
 			talk.mouse_filter = Control.MOUSE_FILTER_STOP
 			cv.add_child(talk)
 	var acts := HFlowContainer.new()
@@ -1595,7 +1595,7 @@ func _bestiary_card(mname: String, tier: String) -> PanelContainer:
 func _compendium_tab_row(v: VBoxContainer) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	for entry in [["chronicle", "Chronicle"], ["items", "Items"], ["relics", "Relics"], ["crafting", "Crafting"], ["systems", "Systems"]]:
+	for entry in [["chronicle", "Chronicle"], ["truths", "Truths"], ["accounts", "Accounts"], ["items", "Items"], ["relics", "Relics"], ["crafting", "Crafting"], ["systems", "Systems"]]:
 		var tid: String = entry[0]
 		var tlabel: String = entry[1]
 		var btn := _icon_button("", tlabel, func(id=tid):
@@ -1613,6 +1613,8 @@ func _render_compendium(v: VBoxContainer) -> void:
 	_compendium_tab_row(v)
 	match compendium_tab:
 		"chronicle": _render_chronicle(v)
+		"truths": _render_truths(v)
+		"accounts": _render_accounts(v)
 		"items": _render_compendium_items(v)
 		"relics": _render_compendium_relics(v)
 		"crafting": _render_compendium_crafting(v)
@@ -1657,6 +1659,70 @@ func _past_guild_line(g: Dictionary) -> String:
 	oath_txt += {"both": tr(" · kept the doors open"), "ours": tr(" · closed the doors")}.get(str(g.get("sky", "")), "")
 	return tr("%s · day %d · %d rifts sealed · +%d Laurels%s") % [how, int(g.get("day", 0)), int(g.get("rifts", 0)), int(g.get("laurels", 0)),
 		((tr(" · remembered: %s") % ", ".join(names)) if not names.is_empty() else "") + oath_txt]
+
+
+## The Unwritten Accord: what the player has pieced together, across every
+## guild. Known truths, the fragments behind them, and hints for the rest.
+func _render_truths(v: VBoxContainer) -> void:
+	var known: Array = GameState.legacy.get("truths", [])
+	var found: Array = GameState.legacy.get("fragments", [])
+	v.add_child(_label(tr("Truths · %d of %d known · %d fragments found") % [known.size(), GameData.TRUTHS.size(), found.size()], 16))
+	v.add_child(_wrap_label("Fragments turn up in rifts, letters, relics and at the pay table, and they're kept for every guild after this one. Any two of a truth's fragments make it known. Some only turn up after a past guild did something.", 12, true))
+	for arc in GameData.LORE_ARCS:
+		v.add_child(_hsep())
+		var head := _label(str(arc[1]), 15)
+		head.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+		v.add_child(head)
+		for t in GameData.TRUTHS:
+			var td: Dictionary = GameData.TRUTHS[t]
+			if str(td["arc"]) != str(arc[0]):
+				continue
+			var frags: Array = GameData.FRAGMENTS.keys().filter(func(id): return str(GameData.FRAGMENTS[id]["truth"]) == t and found.has(id))
+			if known.has(t):
+				v.add_child(_label("✓ " + tr(str(td["text"])), 14))
+				if str(td.get("opens", "")) != "":
+					v.add_child(_wrap_label(tr("Opens: %s") % tr(str(td["opens"])), 12))
+			else:
+				v.add_child(_label("○ ???", 14, true))
+				v.add_child(_wrap_label(tr(str(td["hint"])) if not frags.is_empty() else tr("Nothing found yet."), 12, true))
+			for id in frags:
+				var fv := _vbox(0)
+				fv.add_child(_label("    " + tr(str(GameData.FRAGMENTS[id]["title"])), 12))
+				var ft := _wrap_label(GameState.fragment_text(str(id)), 11, true)
+				fv.add_child(ft)
+				v.add_child(fv)
+
+
+## The witnesses: each one's version of the Night of Breaking, struck
+## through or confirmed as truths come in.
+func _render_accounts(v: VBoxContainer) -> void:
+	v.add_child(_label("Accounts", 16))
+	v.add_child(_wrap_label("Everyone tells the Night of Breaking their own way. What each witness has told you, across every guild. A truth you learn strikes a claim through, or confirms it.", 12, true))
+	var unheard := 0
+	for w in GameData.WITNESSES:
+		var heard: Array = (w["claims"] as Array).filter(func(c): return GameState.claim_heard(str(c["id"])))
+		if heard.is_empty():
+			unheard += 1
+			continue
+		v.add_child(_hsep())
+		var head := _label(str(w["name"]), 14)
+		head.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+		v.add_child(head)
+		for c in heard:
+			var st := GameState.claim_status(c)
+			var line := tr(str(c["text"]))
+			match st:
+				"struck":
+					v.add_child(_rich_line("✗ [s]%s[/s]  [i]%s[/i]" % [line, tr("struck through")], 13))
+				"confirmed":
+					v.add_child(_rich_line("✓ %s  [i]%s[/i]" % [line, tr("confirmed")], 13))
+				"half":
+					v.add_child(_rich_line("≈ %s  [i]%s[/i]" % [line, tr("half true")], 13))
+				_:
+					v.add_child(_rich_line("? %s" % line, 13, true))
+	if unheard > 0:
+		v.add_child(_hsep())
+		v.add_child(_label(tr("%d empty chair%s: witnesses you haven't heard yet") % [unheard, tr(str(_pl(unheard)))], 12, true))
 
 
 func _render_chronicle(v: VBoxContainer) -> void:

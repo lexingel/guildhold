@@ -220,6 +220,8 @@ func _guild(p: String, s: int) -> void:
 		("  · " + "; ".join(notes)) if not notes.is_empty() else ""])
 	if gate_tries[0] + gate_tries[1] > 0:
 		print("     the City's gate: %d held, %d lost" % gate_tries)
+	print("     story web: %d fragments found here (%s) · %d known in all · truths %s" % [GameState.lore_found_here.size(), ", ".join(GameState.lore_found_here),
+		(GameState.legacy.get("fragments", []) as Array).size(), ", ".join(GameState.legacy.get("truths", []))])
 	var cur := GameState.current_act()
 	if not cur.is_empty():
 		var unmet: Array = (cur["objectives"] as Array).filter(func(o): return not GameState.campaign_objective_met(o)).map(func(o): return "%s (%d/%d)" % [str(o["label"]), GameState.campaign_objective_progress(o), int(o["target"])])
@@ -334,6 +336,8 @@ func _answer_stories() -> void:
 				GameState.answer_crossing("through" if randf() < 0.5 else "back")
 			"sky":
 				GameState.choose_sky_ending("both")
+			"vaelith":
+				GameState.choose_vaelith("end")
 			_:
 				GameState.choose_accord_ending(ending, GameState.heroes[0].id)
 		if not GameState.pending_stories.is_empty() and GameState.pending_stories[0] == c:

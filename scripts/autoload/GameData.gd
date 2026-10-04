@@ -1,7 +1,7 @@
-extends "res://scripts/autoload/game_data/GameDataBreach.gd"
+extends "res://scripts/autoload/game_data/GameDataLore.gd"
 ## GameData, part 7 (the autoload): lookups across all of the above.
 ## The chain, bottom up: game_data/GameDataArt.gd (paths, icons, sprites) -> Heroes -> Items
-## -> Monsters -> Skills -> Modes -> Champions -> this file; each part only uses names from below it.
+## -> Monsters -> Skills -> Modes -> Champions -> Breach -> Lore -> this file; each part only uses names from below it.
 
 
 ## Prefers a subclass-specific portrait (SUBCLASS_PORTRAIT_PATH, one of the 50

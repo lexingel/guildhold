@@ -828,6 +828,9 @@ func advance_node() -> void:
 func seal_rift() -> void:
 	_rescue_left_behind()
 	maybe_find_ledger_page(int(run.get("finale", 0)) > 0)
+	if not run.has("tower"):   # the story web: a fragment in the rift
+		var rr := str(run.get("rift_rank", ""))
+		lore_on_seal(run_biome(), GameData.rift_rank_index(rr) if rr != "" else -1)
 	if int(run.get("finale", 0)) == 0 and not run.has("tower"):
 		maybe_echo()
 	if int(run.get("finale", 0)) > 0 and int(run["finale"]) == campaign_act:
@@ -872,8 +875,9 @@ func seal_rift() -> void:
 		sealers[i].history["rifts_cleared"] = int(sealers[i].history.get("rifts_cleared", 0)) + 1
 		if int(sealers[i].history["rifts_cleared"]) == 50 and not sealers[i].is_champion:   # the Chronicle
 			var fn := tr(str(sealers[i].name.split(" the ")[0]))
+			var fifty: Array = GameData.FIFTY_RIFTS.filter(func(t): return not hesper_posted() or not str(t).contains("Hesper"))
 			pending_stories.append({"title": tr("Fifty rifts"), "subtitle": tr(str(sealers[i].name)),
-				"text": tr(str(GameData.FIFTY_RIFTS[randi() % GameData.FIFTY_RIFTS.size()])) % [fn, fn]})
+				"text": tr(str(fifty[randi() % fifty.size()])) % [fn, fn]})
 		for j in range(i + 1, sealers.size()):
 			var key := _bond_key(sealers[i].id, sealers[j].id)
 			var before := GameData.bond_level(int(bonds.get(key, 0)))
@@ -881,7 +885,8 @@ func seal_rift() -> void:
 			if GameData.bond_level(int(bonds[key])) > before:
 				if before + 1 == GameData.BOND_LEVEL_RIFTS.size():   # the last level: a scene (the Chronicle)
 					var pair := [tr(str(sealers[i].name.split(" the ")[0])), tr(str(sealers[j].name.split(" the ")[0]))]
-					var scene := tr(str(GameData.BOND_SCENES[randi() % GameData.BOND_SCENES.size()]))
+					var bond_pool: Array = GameData.BOND_SCENES.filter(func(t): return not hesper_posted() or not str(t).contains("Hesper"))
+					var scene := tr(str(bond_pool[randi() % bond_pool.size()]))
 					var args := [pair[0], pair[1], pair[1]] if scene.count("%s") == 3 else pair
 					pending_stories.append({"title": tr("%s & %s") % pair, "subtitle": tr("A bond, written down"), "text": scene % args})
 				flavor += tr(" %s and %s's bond deepens (Lv%d).") % [tr(str(sealers[i].name.split(" the ")[0])), tr(str(sealers[j].name.split(" the ")[0])), before + 1]

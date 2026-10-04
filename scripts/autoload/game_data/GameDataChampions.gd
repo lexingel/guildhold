@@ -168,10 +168,20 @@ const CHAMPIONS := {
 ## ("legacy_..."), set when the legacy record loads: CHAMPIONS' shape plus
 ## "guild", "portrait", "memory" and "post" (took the forty-first post).
 static var LEGACY_CHAMPIONS := {}
+## Champions the story web can bring into one guild (the Unwritten Accord):
+## never in the roll, unlocked by a branch.
+const LORE_CHAMPIONS := {
+	"vaelith": {"name": "Vaelith", "title": "Who Left Her Post", "role": "ranger",
+		"lore": "An Accord ranger who walked off her post on the Night of Breaking, toward the noise. She has been holding a door open ever since.",
+		"boon": {"kind": "dodge_pct", "value": 0.06, "name": "Listening"},
+		"call": {"name": "Hold the Door", "effect": "freeze_target", "value": 0.8, "desc": "she steps in front of the target: it loses its next two actions (a boss, one)"},
+		"mods": ["smokescreen", "renewal"], "portrait": "res://assets/monsters/vaelith.png",
+		"memory": "I counted the voices behind my door every night for a year. Then I stopped counting and opened it."},
+}
 
 
 static func champion_def(id: String) -> Dictionary:
-	return CHAMPIONS.get(id, LEGACY_CHAMPIONS.get(id, {}))
+	return CHAMPIONS.get(id, LEGACY_CHAMPIONS.get(id, LORE_CHAMPIONS.get(id, {})))
 
 
 ## "Brannoch the Unbroken" / "Grell Ironjaw" / "Imre of the Tides".
@@ -243,6 +253,7 @@ const LEGACY_GIFTS := [
 	{"id": "barracks", "cost": 10, "name": "The Barracks one level up"},
 	{"id": "contacts", "cost": 6, "name": "Old contacts: two Rank C recruits waiting"},
 	{"id": "veteran", "cost": 12, "name": "Veteran start: Act I already done"},
+	{"id": "clerks_copy", "cost": 6, "name": "The Clerk's Copy: two ledger pages already found", "truth": "t_blank_line"},
 ]
 ## The veteran start: Act I done, with what a guild has by then (the sim, 10
 ## guilds: ~6 heroes, the starters at level 4-5 and a Rank C-B recruit,

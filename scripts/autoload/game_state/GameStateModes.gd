@@ -123,7 +123,7 @@ func finale_recommended_power() -> int:
 	var act := current_act()
 	if act.is_empty():
 		return 0
-	var grow := 1.0 + (GameData.TERMS_PER_POST * posts_freed() if int(act["act"]) == 4 else 0.0)   # as _apply_finale
+	var grow := (1.0 + (GameData.TERMS_PER_POST * posts_freed() if int(act["act"]) == 4 else 0.0)) * _vaelith_cut(int(act["act"]))   # as _apply_finale
 	return int(round(Combat.recommended_power(str(act["tier"]), str(act.get("rank", ""))) * float(act["mult"]) * grow))
 
 
@@ -156,7 +156,7 @@ func _apply_finale(diff: Dictionary) -> Dictionary:
 	out["monster_hp"] = int(round(float(out["monster_hp"]) * float(act["mult"])))
 	out["monster_dmg"] = int(round(float(out["monster_dmg"]) * float(act["mult"])))
 	if int(act["act"]) == 4:   # the Terms grow with every empty post
-		var grow := 1.0 + GameData.TERMS_PER_POST * posts_freed()
+		var grow := (1.0 + GameData.TERMS_PER_POST * posts_freed()) * _vaelith_cut(4)
 		out["monster_hp"] = int(round(float(out["monster_hp"]) * grow))
 		out["monster_dmg"] = int(round(float(out["monster_dmg"]) * grow))
 	out["boss_name"] = str(act["boss"])
@@ -168,6 +168,7 @@ func _apply_finale(diff: Dictionary) -> Dictionary:
 func _complete_act(act_num: int) -> void:
 	var act: Dictionary = GameData.CAMPAIGN[act_num - 1]
 	var reward: Dictionary = act["reward"]
+	var first_card := pending_stories.size()
 	crystals += int(reward.get("crystals", 0))
 	var relic := Combat.gen_unique_relic()
 	relics.append(relic)
@@ -175,7 +176,11 @@ func _complete_act(act_num: int) -> void:
 	var subtitle := tr("Act %s complete — +%d Essence, %s") % [tr(str(_roman(act_num))), int(reward.get("crystals", 0)), tr(str(relic.name))]
 	if str(act["opens"]) != "":
 		subtitle += tr(" · %s unlocked") % tr(str(act["opens"]))
-	pending_stories.append({"title": tr(str(act["finale"])) + tr(" — sealed"), "subtitle": subtitle, "text": str(act["outro"])})
+	var spared_sub := tr("Act %s complete — +%d Essence") % [tr(str(_roman(act_num))), int(reward.get("crystals", 0)) - GameData.VAELITH_SPARE_ESSENCE]
+	if str(act["opens"]) != "":
+		spared_sub += tr(" · %s unlocked") % tr(str(act["opens"]))
+	pending_stories.append({"title": tr(str(act["finale"])) + tr(" — sealed"), "subtitle": subtitle, "text": str(act["outro"]), "act_outro": act_num, "subtitle_spared": spared_sub})
+	lore_event("finale", str(act_num))
 	var freed := story_champion(act_num)
 	if freed != "" and not champions.has(freed):
 		unlock_champion(freed)
@@ -198,7 +203,7 @@ func _complete_act(act_num: int) -> void:
 	elif act_num == 4:
 		var choice: Dictionary = GameData.ACCORD_CHOICE.duplicate(true)
 		if rewrite_open():   # the third ending: Hesper's forty-second line
-			choice["text"] = tr(str(choice["text"])) + "\n\n" + tr(GameData.REWRITE_HINT)
+			choice["text"] = tr(str(choice["text"])) + "\n\n" + tr(hesper_alt("rewrite_hint", GameData.REWRITE_HINT))
 			(choice["choices"] as Array).append("rewrite")
 		pending_stories.append(choice)   # the ending, then The End
 	elif campaign_done():
@@ -212,6 +217,49 @@ func _complete_act(act_num: int) -> void:
 		for c in turn:
 			pending_stories.erase(c)
 			pending_stories.append(c)
+	if act_num == 1 and not _in_veteran and vaelith_open():   # B1: before the outro
+		var vc: Dictionary = GameData.VAELITH_CHOICE.duplicate(true)
+		vc["relic"] = relic.id
+		pending_stories.insert(mini(first_card, pending_stories.size()), vc)
+
+
+## Branch B1 (the Unwritten Accord): a guild that knows why Vaelith left may
+## let her go at Act I's finale.
+func vaelith_open() -> bool:
+	return truth_known("t_why_left") and str(branches.get("vaelith", "")) == ""
+
+
+## Answers B1 on top of the story queue: "end" (as ever) or "spare": no
+## finale relic and half its Essence, Vaelith joins as a champion, Act IV's
+## finale is a little weaker, and an Iron Chorus rival makes something of it.
+func choose_vaelith(choice: String) -> void:
+	if pending_stories.is_empty() or str(pending_stories[0].get("kind", "")) != "vaelith":
+		return
+	var card: Dictionary = pending_stories.pop_front()
+	if choice == "spare":
+		branches["vaelith"] = "spared"
+		for i in relics.size():
+			if relics[i].id == str(card.get("relic", "")):
+				relics.remove_at(i)
+				break
+		crystals = maxi(0, crystals - GameData.VAELITH_SPARE_ESSENCE)
+		unlock_champion("vaelith")
+		if rival_name == "The Iron Chorus":
+			rival_renown += GameData.VAELITH_CHORUS_RENOWN
+			_news(tr("The Iron Chorus calls it harbouring a deserter (+%d Renown to them).") % GameData.VAELITH_CHORUS_RENOWN)
+		for c in pending_stories:
+			if int(c.get("act_outro", 0)) == 1:
+				c["text"] = GameData.VAELITH_SPARED_OUTRO
+				c["subtitle"] = str(c.get("subtitle_spared", c["subtitle"]))
+		pending_stories.push_front(GameData.VAELITH_SPARED.duplicate())
+		_news(tr("Vaelith was let go at the Breach, and joined the guild."))
+	save()
+	state_changed.emit()
+
+
+## Act IV's finale, a little weaker if Vaelith was let go (B1).
+func _vaelith_cut(act_num: int) -> float:
+	return 1.0 - GameData.VAELITH_FINALE_CUT if act_num == 4 and str(branches.get("vaelith", "")) == "spared" else 1.0
 
 
 ## "<Name> remembers: ..." (the Broken Accord), or "" for a champion without one.
@@ -233,6 +281,7 @@ func maybe_find_ledger_page(finale: bool) -> void:
 		return
 	ledger_dry = 0
 	accord_pages += 1
+	hear_ledger_claims()
 	pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("A page of the Grandmaster's ledger"),
 		"text": tr("Page %d of %d, found in the rift. Read it in Library > Codex > Chronicle.") % [accord_pages, GameData.LEDGER_PAGES.size()]})
 
@@ -267,7 +316,9 @@ func answer_echo(choice: String) -> void:
 		add_reputation(renown)
 		echoes_returned += 1
 		if not e.is_empty():
-			pending_stories.push_front({"title": tr(str(e[0]["title"])), "subtitle": tr("Given back · +%d Renown") % renown, "text": str(e[0]["returned"])})
+			var back := tr(hesper_alt("echo_oath", str(e[0]["returned"])) if str(card["echo"]) == "oath" else str(e[0]["returned"]))
+			var frag := lore_event("echo", str(card["echo"]))
+			pending_stories.push_front({"title": tr(str(e[0]["title"])), "subtitle": tr("Given back · +%d Renown") % renown, "text": back + ("\n\n" + tr(frag) if frag != "" else "")})
 		_news(tr("An echo was given back to the village: %s.") % tr(str(card["title"])))
 	else:
 		crystals += int(round(int(card.get("essence", echo_essence())) * float(founding_rule("echo_essence", 1.0)) * year_mult("echo_essence")))
@@ -315,7 +366,7 @@ func choose_charter(choice: String) -> void:
 	var r: Dictionary = GameData.CHARTER_RESULT[choice]
 	if not pending_stories.is_empty() and str(pending_stories[0].get("kind", "")) == "charter":
 		pending_stories.pop_front()
-	pending_stories.push_front({"title": tr(str(r["title"])), "subtitle": tr(str(r["subtitle"])), "text": tr(str(r["text"]))})
+	pending_stories.push_front({"title": tr(str(r["title"])), "subtitle": tr(str(r["subtitle"])), "text": tr(hesper_alt("charter_quiet", str(r["text"])) if choice == "quiet" else str(r["text"]))})
 	_news(tr(str(r["title"])) + ".")
 	save()
 	state_changed.emit()
@@ -359,15 +410,18 @@ func _find_line_piece() -> void:
 	legacy["line"] = n + 1
 	save_legacy()
 	var p: Dictionary = GameData.LINE_PIECES[n]
-	var text := tr(str(p["text"]))
+	var text := tr(hesper_alt("line_%d" % (n + 1), str(p["text"])))
 	var hall: Array = legacy.get("guilds", [])
 	if n == 1:
 		text = text % (str(hall[-1]["name"]) if not hall.is_empty() else tr("the guild before you"))
+		hear_claim("hesper_spared")
 	elif n == 2:
 		var kept := hall.filter(func(g): return str(g.get("ending", "")) == "renew")
 		var broke := hall.filter(func(g): return str(g.get("ending", "")) == "break")
-		text = text % [str(kept[-1]["name"]), str(broke[-1]["name"])] if not kept.is_empty() and not broke.is_empty() else tr(str(p["text_wait"]))
-	pending_stories.append({"title": tr(str(p["title"])), "subtitle": tr(str(p["subtitle"])), "text": text})
+		text = text % [str(kept[-1]["name"]), str(broke[-1]["name"])] if not kept.is_empty() and not broke.is_empty() else tr(hesper_alt("line_3_wait", str(p["text_wait"])))
+	var sub := tr("A letter from the forty-first post") if hesper_posted() and n > 0 else tr(str(p["subtitle"]))
+	pending_stories.append({"title": tr(str(p["title"])), "subtitle": sub, "text": text})
+	lore_event("line", str(n + 1))
 
 
 ## Whether this guild may rewrite the Terms: the Hall of Guilds holds a guild
@@ -388,7 +442,18 @@ func choose_accord_ending(choice: String, hero_id: String = "") -> String:
 	var card := {"title": tr(str(end["title"])), "subtitle": tr(str(end["subtitle"])), "text": tr(str(end["text"]))}
 	if choice == "rewrite" and not rewrite_open():
 		return tr("The forty-second line isn't open to this guild.")
-	if choice == "renew":
+	if choice == "renew" and hero_id == "hesper":   # B5: the clerk signs the line herself
+		if not hesper_can_sign():
+			return tr("Hesper won't sign for this guild.")
+		card["subtitle"] = card["subtitle"] % "Hesper"
+		card["text"] = card["text"] % "Hesper"
+		accord_hero = "Hesper"
+		branches["hesper"] = "signed"
+		legacy["hesper_posted"] = true
+		save_legacy()
+		breach = {}
+		breach_next_day = -1
+	elif choice == "renew":
 		var h := find_hero(hero_id)
 		if h == null or h.is_champion:
 			return tr("Choose a hero to take the post.")
@@ -408,6 +473,15 @@ func choose_accord_ending(choice: String, hero_id: String = "") -> String:
 		if choice == "rewrite":   # the posts held in turns: everyone home, and the rifts shut
 			breach = {}
 			breach_next_day = -1
+			if hesper_posted():   # and Hesper comes home
+				card["text"] = tr(hesper_alt("rewrite", str(end["text"])))
+				legacy["hesper_posted"] = false
+				(legacy["champions"] as Dictionary).erase("legacy_hesper")
+				save_legacy()
+			else:
+				var frag := lore_event("ending", "rewrite")
+				if frag != "":
+					card["text"] = str(card["text"]) + "\n\n" + tr(frag)
 	accord_ending = choice
 	if not pending_stories.is_empty() and pending_stories[0].has("choices"):
 		pending_stories.pop_front()
@@ -439,7 +513,7 @@ func _sky_beneath_card() -> Dictionary:
 	var line := tr(str(GameData.SKY_BENEATH_BY_ENDING.get(accord_ending, "")))
 	if accord_ending == "renew":
 		line = line % accord_hero
-	return {"title": tr(str(c["title"])), "subtitle": tr(str(c["subtitle"])), "text": tr(str(c["text"])) + "\n\n" + line}
+	return {"title": tr(str(c["title"])), "subtitle": tr(str(c["subtitle"])), "text": tr(hesper_alt("sky_beneath", str(c["text"]))) + "\n\n" + line}
 
 
 ## A crossing (Book II): a sealed rift in the Sky Beneath sometimes ends at a
@@ -449,8 +523,9 @@ func maybe_crossing() -> void:
 			or randf() >= GameData.CROSSING_CHANCE:
 		return
 	var c: Dictionary = GameData.CROSSINGS[crossings_answered % GameData.CROSSINGS.size()]
+	var frag := lore_event("crossing", str(c["id"]))
 	pending_stories.append({"kind": "crossing", "title": tr(str(c["title"])), "subtitle": tr("A crossing, %s") % tr(str(GameData.BIOMES[run_biome()]["name"])),
-		"text": tr(str(c["text"])), "choices": ["through", "back"]})
+		"text": tr(str(c["text"])) + ("\n\n" + tr(frag) if frag != "" else ""), "choices": ["through", "back"]})
 
 
 ## Answers the crossing on top of the story queue: let them through (Renown
@@ -839,7 +914,11 @@ func write_legacy(hero_ids: Array, retired: bool = false) -> int:
 			_legacy_champion({"name": h.name, "cls_id": h.cls_id, "pool_id": h.pool_id, "rank": h.rank,
 				"rifts": int(h.history.get("rifts_cleared", 0)), "kills": int(h.history.get("kills", 0))}, false)
 			names.append(h.name.split(" the ")[0])
-	if accord_ending == "renew":
+	if accord_ending == "renew" and str(branches.get("hesper", "")) == "signed":
+		_legacy_champion({"name": "Hesper", "cls_id": "mage"}, true, "legacy_hesper",
+			tr(GameData.HESPER_POST_LORE) % guild_name, tr(GameData.HESPER_POST_MEMORY) % guild_name)
+		names.append("Hesper")
+	elif accord_ending == "renew":
 		for f in fallen:
 			if str(f.get("name", "")).split(" the ")[0] == accord_hero:
 				_legacy_champion(f, true)
@@ -848,6 +927,7 @@ func write_legacy(hero_ids: Array, retired: bool = false) -> int:
 	# Only the most recent remembered heroes stay in the pool.
 	var keys: Array = (legacy["champions"] as Dictionary).keys()
 	keys.sort_custom(func(a, b): return int(legacy["champions"][a].get("at", 0)) > int(legacy["champions"][b].get("at", 0)))
+	keys.erase("legacy_hesper")   # she waits at her post for as long as it takes
 	for k in keys.slice(GameData.LEGACY_POOL):
 		(legacy["champions"] as Dictionary).erase(k)
 	var earned := laurels_earned()
@@ -855,7 +935,8 @@ func write_legacy(hero_ids: Array, retired: bool = false) -> int:
 	(legacy["guilds"] as Array).append({"id": "g%d_%d" % [int(Time.get_unix_time_from_system()), randi() % 100000],
 		"name": guild_name, "crest": guild_crest, "ending": accord_ending, "retired": retired, "day": day, "act": campaign_act,
 		"rifts": rifts_sealed, "laurels": earned, "remembered": names, "fallen": fallen.size(), "charter": charter_result,
-		"quiet": charter_choice == "quiet", "founding": founding, "oaths": oaths.duplicate(), "year": vale_year.duplicate(true)})
+		"quiet": charter_choice == "quiet", "founding": founding, "oaths": oaths.duplicate(), "year": vale_year.duplicate(true),
+		"branches": branches.duplicate(), "fragments": lore_found_here.size()})
 	legacy_written = true
 	save_legacy()
 	save()
@@ -866,7 +947,7 @@ func write_legacy(hero_ids: Array, retired: bool = false) -> int:
 ## A remembered hero as a champion: their name, class and portrait, a Boon,
 ## Call and mods borrowed from a champion of the same role, and a lore and
 ## memory line from their history.
-func _legacy_champion(src: Dictionary, post: bool) -> String:
+func _legacy_champion(src: Dictionary, post: bool, fixed_id: String = "", lore: String = "", memory_line: String = "") -> String:
 	var role := str(src.get("cls_id", "warrior"))
 	var same: Array = GameData.CHAMPIONS.keys().filter(func(k): return str(GameData.CHAMPIONS[k]["role"]) == role)
 	if same.is_empty():
@@ -875,15 +956,17 @@ func _legacy_champion(src: Dictionary, post: bool) -> String:
 	var first := str(src.get("name", "")).split(" the ")[0]
 	var tpl: Dictionary = GameData.CHAMPIONS[same[absi(hash(first + guild_name)) % same.size()]]
 	var rifts := int(src.get("rifts", 0))
-	var id := "legacy_%d_%d" % [int(Time.get_unix_time_from_system()), randi() % 100000]
+	var id := fixed_id if fixed_id != "" else "legacy_%d_%d" % [int(Time.get_unix_time_from_system()), randi() % 100000]
 	var memory := tr(GameData.LEGACY_POST_MEMORY) % guild_name if post else ""
 	if not post:
 		var m := str(GameData.LEGACY_MEMORY[absi(hash(first)) % GameData.LEGACY_MEMORY.size()])
 		memory = tr(m) % ([guild_name, rifts] if m.find("%s") < m.find("%d") else [rifts, guild_name])
+	if memory_line != "":
+		memory = memory_line
 	legacy["champions"][id] = {"name": first, "guild": guild_name, "role": role, "post": post, "at": int(Time.get_unix_time_from_system()),
 		"boon": (tpl["boon"] as Dictionary).duplicate(), "call": (tpl["call"] as Dictionary).duplicate(), "mods": (tpl["mods"] as Array).duplicate(),
 		"portrait": GameData.portrait_for_hero(role, str(src.get("pool_id", ""))),
-		"lore": tr(GameData.LEGACY_POST_LORE) % guild_name if post else tr(GameData.LEGACY_LORE) % [tr(str(src.get("rank", "F"))), guild_name, rifts, int(src.get("kills", 0))],
+		"lore": lore if lore != "" else tr(GameData.LEGACY_POST_LORE) % guild_name if post else tr(GameData.LEGACY_LORE) % [tr(str(src.get("rank", "F"))), guild_name, rifts, int(src.get("kills", 0))],
 		"memory": memory}
 	return id
 
@@ -893,7 +976,7 @@ func _legacy_champion(src: Dictionary, post: bool) -> String:
 func apply_legacy_gifts(ids: Array) -> Array:
 	var applied: Array = []
 	for g in GameData.LEGACY_GIFTS:
-		if not ids.has(g["id"]) or int(legacy.get("laurels", 0)) < int(g["cost"]):
+		if not ids.has(g["id"]) or int(legacy.get("laurels", 0)) < int(g["cost"]) or not gift_open(g):
 			continue
 		legacy["laurels"] = int(legacy["laurels"]) - int(g["cost"])
 		match str(g["id"]):
@@ -915,6 +998,9 @@ func apply_legacy_gifts(ids: Array) -> Array:
 					_post_offer(c, int(GameData.RECRUIT_STAY[1]), 0)
 			"veteran":
 				_veteran_start()
+			"clerks_copy":
+				accord_pages = maxi(accord_pages, 2)
+				hear_ledger_claims()
 		applied.append(g["id"])
 	if not applied.is_empty():
 		save_legacy()
@@ -922,11 +1008,22 @@ func apply_legacy_gifts(ids: Array) -> Array:
 	return applied
 
 
+## A founding gift is open: some need a truth (the Unwritten Accord).
+func gift_open(g: Dictionary) -> bool:
+	return not g.has("truth") or truth_known(str(g["truth"]))
+
+
+## B5: Hesper can sign the forty-first line in this guild's Renew ending.
+func hesper_can_sign() -> bool:
+	return truth_known("t_blank_line") and not hesper_posted()
+
+
 ## The veteran start (a Laurels gift): Act I done, the way a quick guild
 ## finishes it. Act I's own completion runs (its reward, relic and cards).
 func _veteran_start() -> void:
 	if campaign_act >= 2:
 		return
+	_in_veteran = true
 	for h in heroes:
 		while h.level < GameData.VETERAN_LEVEL:
 			Combat.gain_xp(h, Combat.xp_to_next(h.level))
@@ -952,6 +1049,7 @@ func _veteran_start() -> void:
 	var intro := str(_act_intro_card(1)["title"])
 	pending_stories = pending_stories.filter(func(c): return str(c.get("title", "")) != intro)
 	_complete_act(1)   # feature unlocks follow on the next render (Main)
+	_in_veteran = false
 
 
 ## The playtest shortcut on the founding screen: Act I done, the way the
@@ -969,7 +1067,7 @@ func skip_act_one() -> void:
 ## Laurels, or by a deed a guild in the Hall of Guilds did.
 func founding_unlocked(id: String) -> bool:
 	var f: Dictionary = GameData.FOUNDINGS.get(id, {})
-	if f.is_empty():
+	if f.is_empty() or (id == "accord" and hesper_posted()):   # Hesper's own guild, and she's at the post
 		return false
 	if not f.has("laurels") and not f.has("deed"):
 		return true
@@ -1048,7 +1146,9 @@ func restore_hall(id: String) -> String:
 	crystals -= int(c[1])
 	halls_restored.append(id)
 	var hall: Dictionary = GameData.ACCORD_HALLS.filter(func(h): return h["id"] == id)[0]
-	pending_stories.append({"title": tr(str(hall["name"])), "subtitle": tr("Keepers of the Vale"), "text": tr(str(hall["text"]))})
+	var htext := tr(hesper_alt("iron_oath", str(hall["text"])) if id == "iron_oath" else str(hall["text"]))
+	var frag := lore_event("hall", id)
+	pending_stories.append({"title": tr(str(hall["name"])), "subtitle": tr("Keepers of the Vale"), "text": htext + ("\n\n" + tr(frag) if frag != "" else "")})
 	_news(tr("%s is restored.") % tr(str(hall["name"])))
 	if id == "grandmaster":
 		_add_postgame_laurels(GameData.GRANDMASTER_LAURELS, {"title": "Keepers of the Vale"})

@@ -504,6 +504,8 @@ func run_payday() -> void:
 ## week's biggest news first, else a quiet one that isn't last week's.
 func _payday_scene(prev: Dictionary, left: Array, unpaid: Array, was_ahead: int, past: Dictionary = {}) -> String:
 	if prev.is_empty():
+		if not hesper_posted():
+			hear_claim("hesper_fever")
 		return "first"
 	if not left.is_empty():
 		return "walkout"
@@ -518,12 +520,21 @@ func _payday_scene(prev: Dictionary, left: Array, unpaid: Array, was_ahead: int,
 		return "we_lead" if rival_ahead > 0 else "they_lead"
 	if coins > 3 * maxi(1, weekly_wages() + upkeep()) and last != "rich":
 		return "rich"
-	if not past.is_empty() and not last.begins_with("past") and randf() < GameData.PAST_SCENE_CHANCE:
-		return str(past["scenes"][randi() % (past["scenes"] as Array).size()])
-	if accord_pages > 0 and last != "accord" and randf() < 0.3:
+	var lore := lore_payday_scene(last)   # the story web
+	if lore != "":
+		return lore
+	var fits: Array = (past.get("scenes", []) as Array).filter(func(s): return _scene_ok(str(s)))
+	if not fits.is_empty() and not last.begins_with("past") and randf() < GameData.PAST_SCENE_CHANCE:
+		return str(fits[randi() % fits.size()])
+	if accord_pages > 0 and last != "accord" and _scene_ok("accord") and randf() < 0.3:
 		return "accord"
-	var quiet: Array = ["quiet1", "quiet2", "quiet3", "quiet4", "quiet5", "quiet6"].filter(func(q): return q != last)
+	var quiet: Array = ["quiet1", "quiet2", "quiet3", "quiet4", "quiet5", "quiet6"].filter(func(q): return q != last and _scene_ok(q))
 	return str(quiet[randi() % quiet.size()])
+
+
+## A scene that can play: while Hesper holds the post, none she leads.
+func _scene_ok(id: String) -> bool:
+	return not hesper_posted() or not (GameData.PAYDAY_SCENES.get(id, []) as Array).any(func(l): return str(l[0]) == "Hesper")
 
 
 ## A past guild from the Hall of Guilds for a pay-table scene: its name, a
@@ -642,6 +653,7 @@ func maybe_rival_move() -> void:
 	if not favs.is_empty() and randf() < GameData.RIVAL_TEMPER_PULL:
 		rival_event = favs[0]
 	rival_event["day"] = day
+	rival_event["ps"] = lore_letter_ps()   # the story web: a postscript
 	_news(rival_event_title() + ".")
 
 
@@ -708,10 +720,11 @@ func rival_letter() -> String:
 	match t:
 		"poach":
 			var h := find_hero(str(rival_event["hero"]))
-			return note % tr(str(h.name.split(" the ")[0])) if h else ""
+			note = note % tr(str(h.name.split(" the ")[0])) if h else ""
 		"challenge":
-			return note % tr(str(rival_event["rank"]))
-	return note
+			note = note % tr(str(rival_event["rank"]))
+	var ps := str(rival_event.get("ps", ""))
+	return note + ("\n\n" + tr(ps) if ps != "" and note != "" else "")
 
 
 ## The two answers: [[yes text, why it can't be done or ""], [no text, ""]],

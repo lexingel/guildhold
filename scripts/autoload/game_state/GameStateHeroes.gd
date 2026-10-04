@@ -1,4 +1,4 @@
-extends "res://scripts/autoload/game_state/GameStateCore.gd"
+extends "res://scripts/autoload/game_state/GameStateLore.gd"
 ## GameState, part 2: heroes — recruiting, the Champion, bonds, skills, traits, attributes.
 
 
@@ -545,6 +545,8 @@ func evolve_hero(hero_id: String, target_pool_id: String) -> String:
 	push_toast(h, tr("Evolved — Rank %s") % tr(str(h.rank)), tr("%s · new passive: %s") % [tr(str(h.name)), tr(str(passive.get("name", "none")))])
 	if h.rank == "B":   # the Path's first fork into a calling: a scene (the Guildhold Chronicle)
 		var scene := str(GameData.CALLING_SCENES.get(GameData.hero_voice(h), GameData.CALLING_SCENES["stoic"]))
+		if hesper_posted() and scene.contains("Hesper"):   # she's at the forty-first post
+			scene = str(GameData.CALLING_SCENES["stoic"])
 		pending_stories.append({"title": tr("A calling: %s") % tr(str(next["name"])), "subtitle": tr(str(h.name)),
 			"text": tr(scene) % [tr(str(h.name.split(" the ")[0])), tr(str(next["name"]))]})
 	save()

@@ -537,6 +537,9 @@ func _story_overlay(card_data: Dictionary) -> void:
 		elif str(card_data.get("kind", "")) == "crossing":
 			_two_way_choice(cv, "Let them through", tr("-%d Renown: the villages are frightened") % GameData.CROSSING_RENOWN, func(): GameState.answer_crossing("through"),
 				"Turn them back", tr("+%d Gold: the Crown's bounty") % GameData.CROSSING_BOUNTY, func(): GameState.answer_crossing("back"))
+		elif str(card_data.get("kind", "")) == "vaelith":   # B1 (the Unwritten Accord)
+			_two_way_choice(cv, "Drive her back", tr("As the story goes: she falls back through the Breach"), func(): GameState.choose_vaelith("end"),
+				"Let her go", tr("No relic from this finale and half its Essence. She joins as a champion; Act IV's finale is %d%% weaker") % int(round(GameData.VAELITH_FINALE_CUT * 100)), func(): GameState.choose_vaelith("spare"))
 		elif str(card_data.get("kind", "")) == "sky":
 			_two_way_choice(cv, "Keep the doors open", tr("Both worlds: Hollow-born heroes join your recruit board, in later guilds too"), func(): GameState.choose_sky_ending("both"),
 				"Close every door", tr("Ours: +%d Laurels, and the Hollow's foes leave the ladder") % GameData.SKY_OURS_LAURELS, func(): GameState.choose_sky_ending("ours"))
@@ -637,6 +640,15 @@ func _accord_choice(cv: VBoxContainer) -> void:
 				render())
 			b.tooltip_text = tr("They leave the guild forever and go on the Memorial. Riftbreaks end.")
 			row.add_child(b)
+		if GameState.hesper_can_sign():   # B5: the clerk signs the line herself
+			var hb := _icon_domain_button("violet", "", "Hesper", func():
+				var err := GameState.choose_accord_ending("renew", "hesper")
+				if err != "":
+					_flavor_toast = err
+				_accord_pick = false
+				render())
+			hb.tooltip_text = tr("Hesper signs the forty-first line herself. You keep every hero; she leaves the pay table, in every later guild too, until a guild rewrites the Terms.")
+			row.add_child(hb)
 		row.add_child(_button("Back", func():
 			_accord_pick = false
 			render()))
@@ -878,6 +890,10 @@ func _founding_gifts() -> Control:
 		b.button_pressed = _pending_gifts.has(g["id"])
 		b.text = tr("%s · %d") % [tr(str(g["name"])), int(g["cost"])]
 		b.disabled = not b.button_pressed and int(g["cost"]) > have - spent
+		if not GameState.gift_open(g):   # opened by a truth (the Unwritten Accord)
+			b.text = tr("%s · needs a truth") % tr(str(g["name"]))
+			b.disabled = true
+			b.tooltip_text = tr("Learn more of the Vale's story, in this guild or another, to open this gift.")
 		b.pressed.connect(func(id=g["id"]):
 			if _pending_gifts.has(id):
 				_pending_gifts.erase(id)

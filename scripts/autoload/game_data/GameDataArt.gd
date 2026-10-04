@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The Unwritten Accord, part one: the Vale's story now spreads across your guilds. Fragments turn up in rifts, on relics, in rival letters and at the pay table, and every later guild keeps them. Any two of a truth's fragments make it known (Library > Codex > Truths), and witnesses' claims are struck through or confirmed as you learn. Some truths open choices a first guild never gets.",
 	"Text that matches the game: the Mercenary and Temple charters say how much more or less Gold they start with, the Break ending describes its weekly tides, the Warded boss and some Awakened Abilities say what they really do, and the Laurels count lists every source.",
 	"The Accord Hall's finale grows less with every lost champion you free (2% each, was 5%), and when a finale is beyond your best party, the Act panel says how far, and what raises your power.",
 	"The Sky Beneath, continued: the real-time Endless Rift can now be run on the Glass Coast and in the Inverted City once you reach them, Hollow-born heroes look like they came from the far side, and the Hall of Guilds remembers whether a guild kept the doors open.",

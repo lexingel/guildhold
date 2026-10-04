@@ -98,6 +98,21 @@ func run() -> void:
 		await _frames()
 	check(main.term_tab == "compendium" and main.compendium_tab == "chronicle", "a banner opens the Hall of Guilds")
 	GameState.legacy["guilds"] = []
+	# The story web's tabs: a known truth with its fragments, a struck claim.
+	GameState.legacy["fragments"] = ["f_corin", "f_face", "f_orla_deserter"]
+	GameState.legacy["truths"] = ["t_squad"]
+	GameState.legacy["claims"] = ["orla_deserter", "orla_attack"]
+	main.compendium_tab = "truths"
+	await _show(main, "camp", "compendium")
+	var tlabels: Array = main.root.find_children("*", "Label", true, false).map(func(l): return l.text)
+	check(tlabels.any(func(t): return t.contains("four posts in a row")) and tlabels.any(func(t): return t.contains("Corin")), "the Truths tab shows a known truth and its fragments")
+	main.compendium_tab = "accounts"
+	await _show(main, "camp", "compendium")
+	var rich: Array = main.root.find_children("*", "RichTextLabel", true, false).map(func(l): return l.text)
+	check(rich.any(func(t): return t.contains("[s]") or t.contains("deserter")), "the Accounts tab lists Orla Venn's claims")
+	for key in ["fragments", "truths", "claims"]:
+		GameState.legacy.erase(key)
+	main.compendium_tab = "chronicle"
 	await _show(main, "camp", "roster")
 	check(main._scene_ui.get_child_count() == 0 and main._ambient_layer.get_child_count() > 0 and main.root.mouse_filter != Control.MOUSE_FILTER_IGNORE, "a camp tab gets a drifting backdrop and a normal UI")
 	main._feedback_open = true

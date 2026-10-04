@@ -100,6 +100,10 @@ var crossings_through := 0       # ... of which let through
 var gates_held := 0              # Book II: the Inverted City's gate held (Act VI objective)
 var sky_ending: String = ""      # Book II's ending: "", "both" or "ours"
 var book2_started := false       # Book II's opening cards have been queued
+var branches: Dictionary = {}    # the story web's branches this guild took ("vaelith": "spared", "hesper": "signed")
+var lore_dry := 0                # seals since a fragment could have turned up and didn't (LORE_PITY)
+var lore_found_here: Array = []  # fragments this guild found (the Hall of Guilds record)
+var _in_veteran := false         # the veteran start is completing Act I (no story choices)
 var accord_pages: int = 0     # pages of the Grandmaster's ledger found (GameData.LEDGER_PAGES, in order)
 var relics_found: Array = []   # every Legendary relic id this guild has held (the Compendium's record)
 
@@ -759,7 +763,7 @@ func save() -> void:
 		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "training_week": training_week, "trained_this_week": trained_this_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
-		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
+		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
 		"run": _run_for_save(),
 		
 		"monsters_seen": monsters_seen, "bosses_defeated": bosses_defeated, "hazards_seen": hazards_seen,
@@ -836,6 +840,12 @@ func merge_legacy(other: Dictionary) -> void:
 		if not have.has(str(g["id"])):
 			(legacy["guilds"] as Array).append(g)
 	(legacy["champions"] as Dictionary).merge(other.get("champions", {}))
+	for key in ["fragments", "truths", "claims"]:
+		for x in other.get(key, []):
+			if not (legacy.get(key, []) as Array).has(x):
+				legacy[key] = (legacy.get(key, []) as Array) + [x]
+	if other.has("hesper_posted") and int(other.get("guilds", []).size()) >= int((legacy["guilds"] as Array).size()):
+		legacy["hesper_posted"] = bool(other["hesper_posted"])   # the longer history knows where she is
 	for c in other.get("charters", []):
 		if not (legacy.get("charters", []) as Array).has(c):
 			legacy["charters"] = (legacy.get("charters", []) as Array) + [c]

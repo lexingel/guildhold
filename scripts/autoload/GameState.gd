@@ -1,6 +1,6 @@
 extends "res://scripts/autoload/game_state/GameStateBreach.gd"
 ## GameState, part 7 (the autoload): starting special runs, Guild Orders, and loading/resetting a guild.
-## The chain, bottom up: game_state/GameStateCore.gd (state, formulas, saving)
+## The chain, bottom up: game_state/GameStateCore.gd (state, formulas, saving) -> Lore (the story web)
 ## -> Heroes -> Items -> Quests -> Modes -> Runs -> this file. Each part only calls
 ## down the chain; every var/const/signal lives in Core.
 
@@ -75,6 +75,9 @@ func reset() -> void:
 	gates_held = 0
 	sky_ending = ""
 	book2_started = false
+	branches = {}
+	lore_dry = 0
+	lore_found_here = []
 	accord_hero = ""
 	echoes_seen = []
 	charter_choice = ""
@@ -299,6 +302,9 @@ func load_save() -> bool:
 	gates_held = int(data.get("gates_held", 0))
 	sky_ending = str(data.get("sky_ending", ""))
 	book2_started = bool(data.get("book2_started", false))
+	branches = data.get("branches", {})
+	lore_dry = int(data.get("lore_dry", 0))
+	lore_found_here = data.get("lore_found_here", [])
 	if accord_ending != "" and not book2_started:   # a guild that ended the Accord before Book II existed
 		book2_started = true
 		pending_stories.append(_sky_beneath_card())

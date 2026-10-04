@@ -1414,6 +1414,8 @@ func _relic_modal(r: Relic) -> void:
 	tcol.add_child(nm)
 	tcol.add_child(_label(tr("%s %s relic · Lv%d/%d%s") % [tr(str(r.rarity.capitalize())), tr(str(r.type)), r.level, GameState.RELIC_MAX_LEVEL, tr(str(tr(" · Awakened") if r.awakened else ""))], 12, true))
 	tcol.add_child(_label(tr("+%d party damage · +%d rift shield") % [r.dmg, r.hp], 13))
+	if r.lore != "":   # a fragment of the Vale's story rides on it
+		tcol.add_child(_wrap_label(GameState.fragment_text(r.lore), 12, true))
 	top.add_child(tcol)
 	cv.add_child(top)
 	var rcost := GameState.relic_reroll_cost(r)

@@ -22,7 +22,8 @@ var unique_id: String = ""       # "" = normal generated relic; else a GameData.
 var drawback_kind: String = ""   # "" = no drawback; must be a kind relics already aggregate
 var drawback_value: float = 0.0  # stored negative
 var drawback_label: String = ""
-var combo_with: String = ""      # another unique_id that doubles this relic's effect when both are equipped
+var combo_with: String = ""
+var lore: String = ""            # a story-web fragment it carries (GameData.FRAGMENTS id), or ""      # another unique_id that doubles this relic's effect when both are equipped
 
 
 func has_special() -> bool:
@@ -46,7 +47,7 @@ func to_dict() -> Dictionary:
 		"specials": specials, "trigger": trigger, "awakened": awakened, "rerolls": rerolls,
 		"level": level, "equipped": equipped,
 		"unique_id": unique_id, "drawback_kind": drawback_kind, "drawback_value": drawback_value,
-		"drawback_label": drawback_label, "combo_with": combo_with,
+		"drawback_label": drawback_label, "combo_with": combo_with, "lore": lore,
 	}
 
 
@@ -65,6 +66,7 @@ static func from_dict(d: Dictionary) -> Relic:
 	r.drawback_value = d.get("drawback_value", 0.0)
 	r.drawback_label = d.get("drawback_label", "")
 	r.combo_with = d.get("combo_with", "")
+	r.lore = str(d.get("lore", ""))
 	r.awakened = bool(d.get("awakened", false))
 	r.rerolls = int(d.get("rerolls", 0))
 	r.trigger = d.get("trigger", {})
