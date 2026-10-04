@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The Sky Beneath, continued: the real-time Endless Rift can now be run on the Glass Coast and in the Inverted City once you reach them, Hollow-born heroes look like they came from the far side, and the Hall of Guilds remembers whether a guild kept the doors open.",
 	"Book II, the Sky Beneath: after the Accord's ending (any of the three), a reply turns up on the ledger's last page, and two more acts open under the Accord Hall. Act V, the Glass Coast; Act VI, the Inverted City. 30 new foes, crossings to answer, a gate to hold, and one more choice at the end. (The new regions use recoloured art for now; their own art is coming.)",
 	"New systems now arrive more gradually: the rival's moves at the third sealed rift, Crafting at the fifth, and the Daily twist at the seventh, after Act I's finale.",
 	"The Grandmaster's ledger no longer hides behind bad luck: after three sealed rifts without a page (while one is waiting in the current act), the next one finds it.",
