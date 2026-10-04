@@ -284,7 +284,12 @@ func respec_fee_reduction() -> float:
 
 
 func crystal_yield_bonus() -> float:
-	return (1.0 + 0.08 * lvl("infra.amplifiers")) * float(founding_rule("essence_gain", 1.0))
+	return (1.0 + 0.08 * lvl("infra.amplifiers")) * float(founding_rule("essence_gain", 1.0)) * _epilogue_essence()
+
+
+## The first page read aloud: the Vale harvests its Essence more gently.
+func _epilogue_essence() -> float:
+	return GameData.EPILOGUE_READ_ESSENCE if str(legacy.get("epilogue", "")) == "read" else 1.0
 
 
 func energy_extract_chance() -> float:
@@ -308,7 +313,7 @@ func hazards_nonlethal() -> bool:
 
 
 func seal_bonus_mult() -> float:
-	return (1.0 + 0.10 * lvl("infra.wardstones")) * float(founding_rule("essence_gain", 1.0))
+	return (1.0 + 0.10 * lvl("infra.wardstones")) * float(founding_rule("essence_gain", 1.0)) * _epilogue_essence()
 
 
 func broker_fee_reduction() -> float:
@@ -349,7 +354,7 @@ func hall_bonus(kind: String) -> float:
 ## Whether Hollow-born heroes come to the recruit board (the Sky Beneath's
 ## both-worlds ending, in this guild or any guild before it).
 func hollowborn_open() -> bool:
-	return sky_ending == "both" or bool(legacy.get("hollowborn", false))
+	return sky_ending == "both" or bool(legacy.get("hollowborn", false)) or str(legacy.get("epilogue", "")) == "read"
 
 
 ## Whether the Accord is held shut (renewed, or rewritten): no Riftbreaks,
@@ -383,8 +388,15 @@ func stirred_region() -> String:
 
 
 ## A year to found a guild in: VALE_YEAR_MODS modifiers and a rival temperament.
+## A year modifier can be rolled: some need a truth first (the story web).
+static func _year_open(id: String) -> bool:
+	var need: Array = GameData.VALE_YEARS[id].get("truth_any", [])
+	var known: Array = GameState.legacy.get("truths", [])
+	return need.is_empty() or need.any(func(t): return known.has(t))
+
+
 static func roll_vale_year() -> Dictionary:
-	var ids: Array = GameData.VALE_YEARS.keys()
+	var ids: Array = GameData.VALE_YEARS.keys().filter(func(id): return _year_open(str(id)))
 	ids.shuffle()
 	var mods: Array = []
 	for id in ids.slice(0, GameData.VALE_YEAR_MODS):
@@ -416,9 +428,10 @@ func founding_rule(key: String, default: Variant) -> Variant:
 
 
 func charter_pay(essence: bool) -> float:
-	var m := (GameData.HEARING_BUY_PAY if str(branches.get("hearing", "")) == "bought" else GameData.CHARTER_PAY) if charter_result == "won" else 1.0
+	var m := (GameData.HEARING_BUY_PAY if str(branches.get("hearing", "")) == "bought" else GameData.CHARTER_PAY) if charter_result == "won" and str(legacy.get("epilogue", "")) != "read" else 1.0
 	if not essence:
 		m *= float(founding_rule("contract_gold", 1.0)) * (1.0 + hall_bonus("gold")) * year_mult("contract_gold")
+		m *= {"read": GameData.EPILOGUE_READ_GOLD, "burn": GameData.EPILOGUE_BURN_GOLD}.get(str(legacy.get("epilogue", "")), 1.0)   # the epilogue's Vale
 	else:
 		m *= 1.0 + hall_bonus("essence") + (GameData.LANTERN_ESSENCE if str(branches.get("lantern", "")) == "poured" else 0.0)
 	if not essence and charter_choice == "quiet":

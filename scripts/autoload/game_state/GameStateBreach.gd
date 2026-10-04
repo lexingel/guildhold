@@ -142,11 +142,11 @@ func _on_day_passed() -> void:
 ## Act VI's gate defense: due until held.
 func gate_due() -> bool:
 	var act := current_act()
-	return not act.is_empty() and int(act["act"]) == 6 and gates_held == 0
+	return not act.is_empty() and int(act["act"]) == 6 and gates_held == 0 and not pending_stories.any(func(c): return str(c.get("kind", "")) == "brannoch")
 
 
 func _swell_gate() -> void:
-	breach = {"rank": GameData.rift_rank_index("S"), "region": "city", "started": day, "breaks_on": day + GameData.GATE_WARN, "broken": false, "gate": true}
+	breach = {"rank": GameData.rift_rank_index("SS" if str(branches.get("brannoch", "")) == "freed" else "S"), "region": "city", "started": day, "breaks_on": day + GameData.GATE_WARN, "broken": false, "gate": true}
 	pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("The City's gate"),
 		"text": tr("Something is climbing the cords to close the Inverted City's gate. It reaches the gate in %d days: hold it.") % GameData.GATE_WARN})
 
@@ -221,6 +221,7 @@ func resolve_breach(result: Dictionary) -> Dictionary:
 		if breach.has("gate"):
 			gates_held += 1
 			_news(tr("The Inverted City's gate held."))
+			lore_event("gate", "held")   # the story web: relief coming
 		if breach.has("tide"):
 			tides_held += 1
 			_add_postgame_laurels(GameData.TIDE_LAURELS, {"best_tide": tides_held})

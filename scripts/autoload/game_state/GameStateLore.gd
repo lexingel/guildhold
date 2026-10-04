@@ -66,6 +66,14 @@ func lore_gate(f: Dictionary, ctx: Dictionary = {}) -> bool:
 		var u := str(g["upgrade"]).split(":")
 		if lvl(u[0]) < int(u[1]):
 			return false
+	if g.has("book2") and not book2_started:
+		return false
+	if g.has("song") and not bool(legacy.get("song_given", false)):
+		return false
+	if g.has("fragment") and not fragment_known(str(g["fragment"])):
+		return false
+	if g.has("year") and not (vale_year.get("mods", []) as Array).any(func(y): return str(y["id"]) == str(g["year"])):
+		return false
 	if hesper_posted() and (f.get("lines", []) as Array).any(func(l): return str(l[0]) == "Hesper"):
 		return false   # she isn't at the pay table
 	return true
@@ -83,6 +91,12 @@ func _hall_has(what: String) -> bool:
 			return hall.any(func(g): return str(g.get("vale", "")) == "kept")
 		"tides5":
 			return hall.any(func(g): return str(g.get("ending", "")) == "break" and int(g.get("best_tide", 0)) >= 5)
+		"broke":
+			return hall.any(func(g): return str(g.get("ending", "")) == "break")
+		"rewrite":
+			return hall.any(func(g): return str(g.get("ending", "")) == "rewrite")
+		"both":   # kept both worlds open (Book II)
+			return hall.any(func(g): return str(g.get("sky", "")) == "both")
 	return false
 
 
@@ -132,7 +146,7 @@ func _check_truths() -> void:
 		for id in GameData.FRAGMENTS:
 			if str(GameData.FRAGMENTS[id]["truth"]) == t and fragment_known(id):
 				have += 1
-		if have >= GameData.TRUTH_NEEDS:
+		if have >= int(GameData.TRUTHS[t].get("needs", GameData.TRUTH_NEEDS)):
 			_lore_list("truths").append(t)
 			var opens := str(GameData.TRUTHS[t].get("opens", ""))
 			pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("A truth"),
@@ -150,6 +164,8 @@ func hear_claim(id: String) -> void:
 func claim_status(c: Dictionary) -> String:
 	if not claim_heard(str(c["id"])):
 		return "unheard"
+	if epilogue() == "burn" and str(c["verdict"]) == "struck":   # the first page burned: the Crown's version stands
+		return "open"
 	return str(c["verdict"]) if truth_known(str(c.get("truth", ""))) else "open"
 
 
@@ -271,3 +287,29 @@ func _maybe_audit() -> void:
 		coins -= take
 		pending_stories.append(GameData.HEARING_AUDIT.duplicate())
 		_news(tr("The Crown's auditors took %d Gold.") % take)
+
+
+
+## The epilogue's choice ("read" or "burn"), made once per player; every
+## guild after it lives in that Vale. "" until then.
+func epilogue() -> String:
+	if legacy.is_empty():
+		load_legacy()
+	return str(legacy.get("epilogue", ""))
+
+
+## The Vale's Moot replaced the Crown's hearing (the first page read aloud).
+func moot() -> bool:
+	return epilogue() == "read"
+
+
+## The Crown's tithe on later guilds (burned) and this guild's pension, every
+## CONTEST_DAYS.
+func _epilogue_month() -> void:
+	if epilogue() == "burn" and str(branches.get("epilogue", "")) != "burn":
+		var take := int(round(coins * GameData.EPILOGUE_TITHE))
+		coins -= take
+		_news(tr("The Crown takes its tithe: %d Gold.") % take)
+	if str(branches.get("epilogue", "")) == "burn":
+		coins += GameData.EPILOGUE_PENSION
+		_news(tr("The Crown's pension arrives: %d Gold.") % GameData.EPILOGUE_PENSION)

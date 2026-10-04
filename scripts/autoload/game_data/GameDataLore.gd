@@ -5,7 +5,7 @@ extends "res://scripts/autoload/game_data/GameDataBreach.gd"
 ## branch (a choice with a price) in this guild or a later one. Witnesses'
 ## claims are struck through or confirmed as truths come in.
 ## Design doc: "The Unwritten Accord". Phase 1: the Ranger Who Left, the Clerk.
-## Phase 2: the Key, the Lantern.
+## Phase 2: the Key, the Lantern. Phase 3: the Far Side, the Witnesses, the epilogue.
 
 ## A seal that could turn up a fragment does so this often; after LORE_PITY
 ## dry seals the next one does (like the ledger).
@@ -22,6 +22,8 @@ const LORE_ARCS := [
 	["clerk", "The Clerk"],
 	["key", "The Key"],
 	["lantern", "The Lantern"],
+	["far", "The Far Side"],
+	["witnesses", "The Witnesses"],
 ]
 
 const TRUTHS := {
@@ -59,7 +61,28 @@ const TRUTHS := {
 		"opens": "The Ninth Lamp joins the founding charters."},
 	"t_sister": {"arc": "lantern", "text": "The Last Lantern is the Ninth Lamp's sister hall. Mother Ilse has known all along.",
 		"hint": "Mother Ilse signs her letters with more than her name."},
+	"t_terms_hers": {"arc": "far", "text": "The Terms were the Grandmaster's own. The ledger's \"voice that offered terms\" was a lie.",
+		"hint": "Read the ledger's third day beside the reply on its last page.",
+		"opens": "With the right guild in the Hall, a sixth crossing comes to the door."},
+	"t_knock": {"arc": "far", "text": "The Night of Breaking was the far side knocking on every door at once.",
+		"hint": "Ask the ones who came through what they remember of that night.",
+		"opens": "When the Choir crosses, a guild can let them sing."},
+	"t_brannoch": {"arc": "far", "text": "Brannoch holds the door under the Inverted City, and promised a child he'd come back.",
+		"hint": "Somebody once measured a child's height on a deep pillar.",
+		"opens": "At Act VI's start, a guild can leave Brannoch holding, or free him."},
+	"t_turns": {"arc": "far", "text": "A rewrite reaches both sides: the far side holds its doors in turns too.",
+		"hint": "A guild that rewrote the Terms, or kept both worlds, would know."},
+	"t_chorus": {"arc": "witnesses", "text": "The Iron Chorus marched for the Crown on the Night of Breaking, not for the Vale.",
+		"hint": "The Iron Chorus is proud of an old order.",
+		"opens": "A year of witnesses can come round."},
+	"t_wolves": {"arc": "witnesses", "text": "The Ashen Wolves served the Ashen Crown, and fed it.",
+		"hint": "Ask what the wolves did after the Night.",
+		"opens": "A year of witnesses can come round."},
+	"t_first_seal": {"arc": "witnesses", "text": "The first signature on the Terms is the Crown's seal.",
+		"hint": "Someone on the far side kept the first page.", "needs": 3},
 }
+## Knowing all of these after Book II's ending opens the epilogue.
+const EPILOGUE_TRUTHS := ["t_paymaster", "t_sky", "t_terms_hers", "t_knock", "t_first_seal"]
 
 ## channel: where it's found.
 ##   relic   a sealed rift's relic carries it (gate: region, rank_min)
@@ -158,6 +181,50 @@ const FRAGMENTS := {
 		"lines": [["Dobbs", "The smugglers' crates came in. I was promised Essence."], ["Wen", "And?"], ["Dobbs", "Lamp oil. Nine casks. Mother Ilse's compliments, and \"keep the Lamp lit\"."]]},
 	"f_ilse_table": {"truth": "t_sister", "channel": "hearing", "on": "won", "gate": {"rival": "The Last Lantern"}, "title": "Left on the table",
 		"text": "Mother Ilse is gone before the herald finishes, but she has left something on your table: a brass key to the Ninth Lamp's hall, and a note. \"You'll need this one day. I kept it warm.\""},
+	# V · The Far Side
+	"f_reply": {"truth": "t_terms_hers", "channel": "book2", "on": "start", "title": "We accept your Terms",
+		"text": "Wen reads the reply's first words again. \"We accept your Terms.\" Yours. Not theirs. The Grandmaster's ledger says a voice from the deep offered them. Someone is lying, and it isn't the far side."},
+	"f_side_by_side": {"truth": "t_terms_hers", "channel": "payday", "gate": {"book2": true, "pages": 2}, "title": "Side by side",
+		"lines": [["Wen", "Day three: \"A voice offered terms.\""], ["Wen", "The last page: \"We accept your Terms.\""], ["Dobbs", "Read them both again. Slower."], ["Wen", "I have. Nobody wants the last biscuit."]]},
+	"f_wrote_first": {"truth": "t_terms_hers", "channel": "through", "on": "through", "title": "A polite letter", "claim": "hollow_answered",
+		"text": "Safe on our side, the eldest asks which of you wrote to them first. \"Your Grandmaster's letter. It was very polite. It said: stay where you are.\""},
+	"f_every_door": {"truth": "t_knock", "channel": "crossing", "on": "child", "title": "Every door rang", "claim": "hollow_knocked",
+		"text": "She remembers the night every door rang. \"We all knocked,\" she says. \"Everyone at once, on every door there was. Somebody told us someone would come.\""},
+	"f_running": {"truth": "t_knock", "channel": "seal", "gate": {"region": "glass", "hall": "broke"}, "title": "Running, not hunting",
+		"text": "A tide-wrack journal on the Glass Coast, from a guild that burned the Terms: \"Most of what came up with the tides wasn't hunting. It was running, and looking back.\""},
+	"f_choir_oath": {"truth": "t_knock", "channel": "crossing", "on": "choir", "gate": {"song": true}, "title": "The Choir's song",
+		"text": "The Choir's song is the Accord's oath, word for word, learned from a guild that came down twenty years ago. They sing it the way the village does now, a little off-key."},
+	"f_day10": {"truth": "t_brannoch", "channel": "ledger", "gate": {"truth": "t_fever", "pages": 4}, "title": "Day 10, the clerk's copy",
+		"text": "Day 10, in the clerk's hand: \"B. asked for the deepest post, under the city. A child watched from the other side. He told her: wait there, I'll come back for you. G. let him go first.\""},
+	"f_height_marks": {"truth": "t_brannoch", "channel": "descent", "on": "6", "title": "Height marks",
+		"text": "Knife-marks on a deep pillar's base, a hand's width apart, climbing: a child's height, measured every year. They stop at about the height of a girl of twelve."},
+	"f_knock_signal": {"truth": "t_brannoch", "channel": "gate", "on": "held", "title": "Relief coming", "claim": "hollow_promised",
+		"text": "After the gate holds, someone knocks from below. Three times, then twice, then three times: the Accord's old signal for relief coming."},
+	"f_turns_wall": {"truth": "t_turns", "channel": "book2", "on": "start", "gate": {"hall": "rewrite"}, "title": "A list on the wall",
+		"text": "On the far side of the first door, someone has painted a list on the wall: names and seasons, in turns. Some of the names are ours."},
+	"f_our_keepers": {"truth": "t_turns", "channel": "payday", "gate": {"hall": "both"}, "title": "Our keepers",
+		"lines": [["Dobbs", "The new recruit asked when \"our keepers\" get paid."], ["Wen", "Which keepers?"], ["Dobbs", "The ones holding their side of the doors. She says they take turns, like ours."]]},
+	"f_signatory": {"truth": "t_turns", "channel": "crossing", "on": "signatory", "title": "The First Signatory",
+		"text": "She is older than the Accord's last guild, and she has walked a long way. \"Your guilds took turns,\" she says. \"So did we. I held our side of the first door.\""},
+	# VI · The Witnesses
+	"f_marching_order": {"truth": "t_chorus", "channel": "contest", "on": "won", "gate": {"rival": "The Iron Chorus"}, "title": "The marching order",
+		"text": "Orla Venn sends the contest prize with a copy of her proudest possession: the Chorus's marching order from the Night of Breaking. It is addressed to the Crown's garrison, not to the Vale."},
+	"f_blue_stones": {"truth": "t_chorus", "channel": "hall", "on": "iron_oath", "title": "Blue stones",
+		"text": "In the Iron Oath's drill yard one row of stones is painted royal blue. The old drillmaster's note: \"Chorus recruits stand here. They take their orders from further up.\""},
+	"f_no_collars": {"truth": "t_wolves", "channel": "finale", "on": "3", "title": "No collars",
+		"text": "Wen's note for the Bestiary: Sythrane's wolves wore no collars, and never once turned on her. Wolves don't do that for a crown. They do it for whoever feeds them."},
+	"f_kael_job": {"truth": "t_wolves", "channel": "hearing", "on": "won", "gate": {"rival": "The Ashen Wolves"}, "title": "Kael asks for work",
+		"text": "Kael Ashborn asks for a job, and for once says why. \"My wolves fed the Ashen Crown for ten years. Somebody has to feed them now, and it shouldn't be that.\""},
+	"f_first_page": {"truth": "t_first_seal", "channel": "signatory", "on": "through", "title": "The first page",
+		"text": "The First Signatory unfolds a page she has carried for twenty years: the Terms' first line. Above forty signatures, in red wax, is a seal: a crowned door."},
+	"f_ring_match": {"truth": "t_first_seal", "channel": "payday", "gate": {"fragment": "f_warden_ring", "truth": "t_terms_hers"}, "title": "The same seal",
+		"lines": [["Wen", "The Warden's ring. I've seen this seal before."], ["Dobbs", "Where?"], ["Wen", "On the Terms. Above every signature."]]},
+	"f_stipend": {"truth": "t_first_seal", "channel": "hall", "on": "quiet_coin", "gate": {"truth": "t_paymaster"}, "title": "A royal stipend",
+		"text": "Quiet Coin's last ledger: a royal stipend, paid to the Grandmaster every year since the Night of Breaking, \"for keeping the doors\". It stops the year she fell."},
+	"f_stranger": {"truth": "t_first_seal", "channel": "seal", "gate": {"year": "wanderers", "truth": "t_terms_hers"}, "title": "Copies for a copper",
+		"text": "A wanderer at the rift's mouth sells copies of a page for a copper each: the Terms' first line, and above it, a crowned seal. Nobody buys one. Dobbs buys three."},
+	"f_recalled": {"truth": "t_first_seal", "channel": "letter", "gate": {"rival": "The Gilded Lance", "truth": "t_warden"}, "title": "Recalled",
+		"text": "P.S. My cousin has been recalled to the capital. Something about a seal, a ring, and questions he would rather not answer. The Lance is, of course, above such things."},
 }
 
 ## The witnesses (the Chronicle's Accounts). Each claim is heard once and
@@ -187,6 +254,14 @@ const WITNESSES := [
 		{"id": "aldric_sold", "text": "The guilds sold too much Essence, and the Hollow came to collect.", "truth": "t_sky", "verdict": "half"},
 		{"id": "aldric_cousin", "text": "His cousin, the Warden of Rifts, keeps the Vale safe.", "truth": "t_warden", "verdict": "struck"},
 		{"id": "aldric_myth", "text": "The key that opens rifts is a myth.", "truth": "t_key", "verdict": "struck"}]},
+	{"id": "kael", "name": "Kael Ashborn, the Ashen Wolves", "claims": [
+		{"id": "kael_hunger", "text": "The Hollow is hunger: you feed it or you burn it.", "truth": "t_sky", "verdict": "struck"},
+		{"id": "kael_crown", "text": "The Ashen Crown kept the Vale alive.", "truth": "t_wolves", "verdict": "half"},
+		{"id": "kael_owe", "text": "His wolves owe nobody.", "truth": "t_wolves", "verdict": "struck"}]},
+	{"id": "hollow", "name": "The Hollow's people", "claims": [
+		{"id": "hollow_knocked", "text": "They knocked, everyone at once, on every door.", "truth": "t_knock", "verdict": "confirmed"},
+		{"id": "hollow_answered", "text": "Someone on this side wrote to them first.", "truth": "t_terms_hers", "verdict": "confirmed"},
+		{"id": "hollow_promised", "text": "They were promised someone would come back.", "truth": "t_brannoch", "verdict": "confirmed"}]},
 ]
 ## When each claim is heard: the ledger's by page count, Hesper's by moment.
 const CLAIM_PAGES := {"ledger_voice": 2, "ledger_hold": 3, "ledger_time": 7}
@@ -207,7 +282,11 @@ const RIVAL_CLAIM_LETTERS := {"The Iron Chorus": [
 	"The Gilded Lance": [
 	["aldric_sold", "P.S. My grandfather said the old guilds sold too much Essence to too many buyers, and the Hollow came to collect. Grandfather was rarely wrong."],
 	["aldric_cousin", ""],
-	["aldric_myth", "P.S. And no, there is no key that opens rifts. That's a story for children and smugglers."]]}
+	["aldric_myth", "P.S. And no, there is no key that opens rifts. That's a story for children and smugglers."]],
+	"The Ashen Wolves": [
+	["kael_hunger", "P.S. The Hollow is a mouth. You feed it or you burn it. My wolves know which."],
+	["kael_crown", "P.S. Say what you like about the Ashen Crown. For ten years nobody in the ash starved. Count that."],
+	["kael_owe", "P.S. And my wolves owe nobody. Not the Crown, not the old guilds, not you."]]}
 ## Hesper's last claim, told at the pay table once the ledger has 3 pages.
 const HESPER_UNREAD_SCENE := [["Wen", "Did you read the Terms, back then?"], ["Hesper", "I copied them. A clerk copies. Reading is for the people who sign."]]
 
@@ -291,3 +370,58 @@ const LEDGER_OATH_FRAGMENTS := 2.0
 ## Founding options a truth opens (charters in FOUNDINGS, the gift in
 ## LEGACY_GIFTS, the oath in OATHS carry "truth" / "truths").
 const PIPS_KEY_UNTIL_ACT := 3       # the gift: choose rift regions while campaign_act <= this
+
+
+## B7 · Brannoch's door (Act VI's start, once t_brannoch is known): leave
+## him holding (the City's gate never breaks) or free him (a champion, and
+## the gate comes at Rank SS).
+const BRANNOCH_LEVEL := 3
+const BRANNOCH_CHOICE := {"kind": "brannoch", "title": "Brannoch's door", "subtitle": "The Inverted City",
+	"text": "Under the City, at the deepest door, a knight in chains is still holding. Brannoch. He promised a child on the other side he would come back for her, and he never left the door to do it.",
+	"choices": ["leave", "free"]}
+const BRANNOCH_LEFT := {"title": "Still holding", "subtitle": "The Inverted City",
+	"text": "You tell him she's grown, and safe, and waiting on our side. He laughs, once, and sets his shoulder against the door again. \"Then it can wait for me a little longer.\"\n\n(The City's gate holds: Act VI's gate objective is met. Brannoch stays at his post.)"}
+const BRANNOCH_FREED := {"title": "Relieved", "subtitle": "The Inverted City",
+	"text": "Your heroes take the door's weight together, and Brannoch steps out of the light for the first time in twenty years. The door shudders. Something on the other side has noticed.\n\n(Brannoch joins as a champion. The City's gate will come at Rank SS.)"}
+
+## B8 · Let the Choir sing (their crossing, once t_knock is known).
+const CHOIR_SING_RENOWN := 5
+const CHOIR_SING_MORALE := 15
+const CHOIR_SANG := {"title": "The Choir sings", "subtitle": "A crossing",
+	"text": "They sing the Accord's oath in the square, badly and beautifully, and the whole village joins in the second verse. The song carries. Far below, something hears it.\n\n(+5 Renown and +15 morale for every hero. A Riftbreak swells in two days.)"}
+
+## B9 · The First Signatory: a hidden sixth crossing, once the Hall holds a
+## guild that kept both worlds open and t_terms_hers is known.
+const SIGNATORY_BOUNTY := 300
+const SIGNATORY := {"id": "signatory", "title": "The First Signatory",
+	"text": "An old woman at the door, with a satchel she won't let go of. She says she signed for her side, once, and has come to see who signed for ours."}
+const SIGNATORY_TIPS := ["She joins as a Hollow-born Rank A cleric, and opens her satchel", "+300 Gold: the Crown pays three times the usual for this one"]
+
+## The epilogue: the first signature (after Book II's ending, once every
+## EPILOGUE_TRUTHS is known; once per player). Read the first page aloud,
+## or burn it: either way, every later guild lives in the Vale you made.
+const EPILOGUE_LAURELS := 30
+const EPILOGUE_PENSION := 1000      # burn: this guild, every CONTEST_DAYS
+const EPILOGUE_TITHE := 0.10        # burn: later guilds, every CONTEST_DAYS
+const EPILOGUE_READ_GOLD := 0.9     # read: contracts' Gold (no Treasury)
+const EPILOGUE_READ_ESSENCE := 0.9  # read: Essence gains
+const EPILOGUE_READ_LAURELS := 1.1  # read: each guild's Laurels
+const EPILOGUE_MOOT_WAGES := 0.9    # read: winning the Vale's Moot lowers wages
+const EPILOGUE_BURN_GOLD := 1.15    # burn: contracts' Gold (royal patronage)
+const EPILOGUE_CHOICE := {"kind": "epilogue", "title": "The first signature", "subtitle": "Epilogue",
+	"text": "The Crown's herald has come to the Vale to read the new Royal Charter in the square. Wen has the Terms' first page in her satchel, with the Crown's seal above every name. The square is full. Everyone is waiting for someone to speak.",
+	"choices": ["read", "burn"]}
+const EPILOGUE_ENDING := {
+	"read": {"title": "Read aloud", "subtitle": "Epilogue",
+		"text": "Wen reads the first page in the square, slowly, so the back rows can hear. The herald leaves before she finishes. By winter the Charter is gone from every wall, and the villages choose their own guilds at a moot.\n\n(+30 Laurels. In every later guild: the Crown's hearing is the Vale's Moot, contracts pay 10% less Gold, rifts 10% less Essence, guilds earn 10% more Laurels, and Hollow-born heroes come from the start.)"},
+	"burn": {"title": "Burned", "subtitle": "Epilogue",
+		"text": "The page burns green, like the Terms did. The herald reads the Charter to a quiet square and leaves your guild a letter of thanks with a pension in it. Nobody mentions the smell of smoke.\n\n(+30 Laurels, and 1,000 Gold every 28 days for this guild. In every later guild: royal patronage, contracts pay 15% more Gold, the Crown takes a tenth of the vault every 28 days, and the Iron Chorus is always the rival.)"},
+}
+const MOOT_HEARING := {
+	"won": {"title": "The Vale's Moot", "subtitle": "The villages choose your guild",
+		"text": "Every village sends someone to the moot, and the show of hands isn't close. No herald, no seal: the Vale's own say-so hangs in your hall.\n\n(Wages are 10% lower: heroes want to work for the Vale's guild.)"},
+	"lost": {"title": "The Vale's Moot", "subtitle": "The villages choose %s",
+		"text": "The moot is long, and loud, and %s takes it. The villages will bring their troubles to another door for a while. The rifts don't care whose name the villages call."},
+}
+const MOOT_NOTICE := {"title": "The Vale's Moot", "subtitle": "A notice on every guild door in the Vale",
+	"text": "At the end of the year the villages will hold a moot and choose the guild they trust most. Until then, every guild works for its Renown.\n\nThe loudest of them, %s, led by %s, has noticed your guild."}

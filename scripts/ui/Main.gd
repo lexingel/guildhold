@@ -535,8 +535,25 @@ func _story_overlay(card_data: Dictionary) -> void:
 		elif str(card_data.get("kind", "")) == "charter":
 			_charter_choice(cv)
 		elif str(card_data.get("kind", "")) == "crossing":
-			_two_way_choice(cv, "Let them through", tr("-%d Renown: the villages are frightened") % GameData.CROSSING_RENOWN, func(): GameState.answer_crossing("through"),
-				"Turn them back", tr("+%d Gold: the Crown's bounty") % GameData.CROSSING_BOUNTY, func(): GameState.answer_crossing("back"))
+			if str(card_data.get("id", "")) == "signatory":   # B9
+				_two_way_choice(cv, "Let her through", tr(str(GameData.SIGNATORY_TIPS[0])), func(): GameState.answer_crossing("through"),
+					"Turn her back", tr(str(GameData.SIGNATORY_TIPS[1])), func(): GameState.answer_crossing("back"))
+			else:
+				_two_way_choice(cv, "Let them through", tr("-%d Renown: the villages are frightened") % GameData.CROSSING_RENOWN, func(): GameState.answer_crossing("through"),
+					"Turn them back", tr("+%d Gold: the Crown's bounty") % GameData.CROSSING_BOUNTY, func(): GameState.answer_crossing("back"))
+			if (card_data["choices"] as Array).has("sing"):   # B8
+				var sing := _icon_domain_button("violet", "", "Let them sing in the square", func():
+					GameState.answer_crossing("sing")
+					render())
+				sing.tooltip_text = tr("+%d Renown and +%d morale for every hero; the song carries down, and a Riftbreak swells in two days") % [GameData.CHOIR_SING_RENOWN, GameData.CHOIR_SING_MORALE]
+				sing.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+				cv.add_child(sing)
+		elif str(card_data.get("kind", "")) == "brannoch":   # B7
+			_two_way_choice(cv, "Leave him holding", tr("The City's gate holds: Act VI's gate objective is met"), func(): GameState.choose_brannoch("leave"),
+				"Free him", tr("Brannoch joins as a champion; the City's gate comes at Rank SS"), func(): GameState.choose_brannoch("free"))
+		elif str(card_data.get("kind", "")) == "epilogue":
+			_two_way_choice(cv, "Read it aloud", tr("Every later guild: the Vale's Moot instead of the Crown, less Gold and Essence, more Laurels, Hollow-born heroes from the start"), func(): GameState.choose_epilogue("read"),
+				"Burn the first page", tr("A royal pension for this guild. Every later guild: royal patronage, richer contracts, the Crown's tithe, the Iron Chorus as rival"), func(): GameState.choose_epilogue("burn"))
 		elif str(card_data.get("kind", "")) == "vaelith":   # B1 (the Unwritten Accord)
 			_two_way_choice(cv, "Drive her back", tr("As the story goes: she falls back through the Breach"), func(): GameState.choose_vaelith("end"),
 				"Let her go", tr("No relic from this finale and half its Essence. She joins as a champion; Act IV's finale is %d%% weaker") % int(round(GameData.VAELITH_FINALE_CUT * 100)), func(): GameState.choose_vaelith("spare"))

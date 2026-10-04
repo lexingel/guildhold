@@ -233,6 +233,8 @@ func _complete_act(act_num: int) -> void:
 		for c in turn:
 			pending_stories.erase(c)
 			pending_stories.append(c)
+	if act_num == 5 and truth_known("t_brannoch") and str(branches.get("brannoch", "")) == "" and not champion_unlocked("brannoch"):   # B7
+		pending_stories.append(GameData.BRANNOCH_CHOICE.duplicate(true))
 	if act_num == 1 and not _in_veteran and vaelith_open():   # B1: before the outro
 		var vc: Dictionary = GameData.VAELITH_CHOICE.duplicate(true)
 		vc["relic"] = relic.id
@@ -331,6 +333,9 @@ func answer_echo(choice: String) -> void:
 		var renown := int(round(GameData.ECHO_RENOWN * float(founding_rule("echo_renown", 1.0))))
 		add_reputation(renown)
 		echoes_returned += 1
+		if str(card["echo"]) == "song":   # the story web: the Choir learned it from us
+			legacy["song_given"] = true
+			save_legacy()
 		if not e.is_empty():
 			var back := tr(hesper_alt("echo_oath", str(e[0]["returned"])) if str(card["echo"]) == "oath" else str(e[0]["returned"]))
 			var frag := lore_event("echo", str(card["echo"]))
@@ -411,10 +416,10 @@ func _charter_hearing(accepted: bool = false) -> Dictionary:
 	if charter_choice == "turn" and not accepted and not branches.has("turn_hearing"):   # B2: the Crown remembers Morrow
 		branches["turn_hearing"] = "done"
 		rival_renown += GameData.MORROW_TURN_HEARING
-	if not accepted and reputation < rival_renown and truth_known("t_warden"):   # B3: the Charter has a price
+	if not accepted and reputation < rival_renown and truth_known("t_warden") and not moot():   # B3: the Charter has a price
 		return GameData.HEARING_CHOICE.duplicate(true)
 	charter_result = "won" if reputation >= rival_renown else "lost"
-	var h: Dictionary = GameData.CHARTER_HEARING[charter_result]
+	var h: Dictionary = (GameData.MOOT_HEARING if moot() else GameData.CHARTER_HEARING)[charter_result]
 	var rn := tr(str(rival_name))
 	var card := {"title": tr(str(h["title"])), "subtitle": tr(str(h["subtitle"])), "text": tr(str(h["text"]))}
 	if charter_result == "lost":
@@ -520,6 +525,47 @@ func choose_lantern(choice: String) -> void:
 	state_changed.emit()
 
 
+## B7: Brannoch's door, at Act VI's start.
+func choose_brannoch(choice: String) -> void:
+	if pending_stories.is_empty() or str(pending_stories[0].get("kind", "")) != "brannoch":
+		return
+	pending_stories.pop_front()
+	if choice == "leave":
+		branches["brannoch"] = "left"
+		gates_held = maxi(gates_held, 1)   # the City's gate holds
+		if breach.has("gate"):
+			breach = {}
+		pending_stories.push_front(GameData.BRANNOCH_LEFT.duplicate())
+	else:
+		branches["brannoch"] = "freed"
+		unlock_champion("brannoch")
+		champions["brannoch"] = maxi(int(champions.get("brannoch", 1)), GameData.BRANNOCH_LEVEL)
+		pending_stories.push_front(GameData.BRANNOCH_FREED.duplicate())
+	save()
+	state_changed.emit()
+
+
+## The epilogue opens after Book II's ending, once per player, when the
+## guild knows the five truths behind the first signature.
+func epilogue_open() -> bool:
+	return epilogue() == "" and GameData.EPILOGUE_TRUTHS.all(func(t): return truth_known(t))
+
+
+func choose_epilogue(choice: String) -> void:
+	if pending_stories.is_empty() or str(pending_stories[0].get("kind", "")) != "epilogue" or epilogue() != "":
+		return
+	pending_stories.pop_front()
+	legacy["epilogue"] = choice
+	branches["epilogue"] = choice
+	_add_postgame_laurels(GameData.EPILOGUE_LAURELS, {"epilogue": choice})   # saves the legacy too
+	save_legacy()
+	var e: Dictionary = GameData.EPILOGUE_ENDING[choice]
+	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": tr(str(e["text"]))})
+	_news(tr(str(e["title"])) + ".")
+	save()
+	state_changed.emit()
+
+
 ## Wen's line for the Memorial (by voice, a steady pick per name).
 func memorial_line(h: Hero) -> String:
 	var lines: Array = GameData.MEMORIAL_LINES.get(GameData.hero_voice(h), GameData.MEMORIAL_LINES["stoic"])
@@ -621,7 +667,11 @@ func choose_accord_ending(choice: String, hero_id: String = "") -> String:
 	if not pending_stories.is_empty() and pending_stories[0].has("choices"):
 		pending_stories.pop_front()
 	pending_stories.push_front(_act_intro_card(5))   # Book II opens
-	pending_stories.push_front(_sky_beneath_card())
+	var sky := _sky_beneath_card()
+	var reply := lore_event("book2", "start")   # the story web: whose Terms
+	if reply != "":
+		sky["text"] = str(sky["text"]) + "\n\n" + reply
+	pending_stories.push_front(sky)
 	book2_started = true
 	if echoes_seen.size() >= 3:
 		pending_stories.push_front(_vale_remembers())
@@ -657,10 +707,19 @@ func maybe_crossing() -> void:
 	if book2_regions().is_empty() or not (run_biome() in ["glass", "city"]) or pending_stories.any(func(c): return str(c.get("kind", "")) == "crossing") \
 			or randf() >= GameData.CROSSING_CHANCE:
 		return
-	var c: Dictionary = GameData.CROSSINGS[crossings_answered % GameData.CROSSINGS.size()]
+	var c: Dictionary = GameData.SIGNATORY if signatory_open() else GameData.CROSSINGS[crossings_answered % GameData.CROSSINGS.size()]
 	var frag := lore_event("crossing", str(c["id"]))
-	pending_stories.append({"kind": "crossing", "title": tr(str(c["title"])), "subtitle": tr("A crossing, %s") % tr(str(GameData.BIOMES[run_biome()]["name"])),
-		"text": tr(str(c["text"])) + ("\n\n" + tr(frag) if frag != "" else ""), "choices": ["through", "back"]})
+	var choices := ["through", "back"]
+	if str(c["id"]) == "choir" and truth_known("t_knock"):   # B8
+		choices.append("sing")
+	pending_stories.append({"kind": "crossing", "id": str(c["id"]), "title": tr(str(c["title"])), "subtitle": tr("A crossing, %s") % tr(str(GameData.BIOMES[run_biome()]["name"])),
+		"text": tr(str(c["text"])) + ("\n\n" + tr(frag) if frag != "" else ""), "choices": choices})
+
+
+## B9: the First Signatory comes once the Hall holds a guild that kept both
+## worlds open and the guild knows whose Terms they were.
+func signatory_open() -> bool:
+	return crossings_answered >= 1 and _hall_has("both") and truth_known("t_terms_hers") and str(branches.get("signatory", "")) == ""
 
 
 ## Answers the crossing on top of the story queue: let them through (Renown
@@ -670,13 +729,38 @@ func answer_crossing(choice: String) -> void:
 		return
 	var card: Dictionary = pending_stories.pop_front()
 	crossings_answered += 1
-	if choice == "through":
+	var signatory := str(card.get("id", "")) == "signatory"
+	if signatory:
+		branches["signatory"] = choice
+	if choice == "sing":   # B8: the Choir sings the oath in the square
+		crossings_through += 1
+		add_reputation(GameData.CHOIR_SING_RENOWN)
+		for h in heroes:
+			change_morale(h, GameData.CHOIR_SING_MORALE)
+		if not keepers() and breach.is_empty() and campaign_act >= GameData.BREACH_UNLOCK_ACT:
+			breach_next_day = day + 2   # the song carries down
+		pending_stories.push_front(GameData.CHOIR_SANG.duplicate())
+		_news(tr("%s: they sang the oath in the square.") % str(card["title"]))
+	elif choice == "through":
 		crossings_through += 1
 		reputation = maxi(0, reputation - GameData.CROSSING_RENOWN)
 		_news(tr("%s: let through. The villages are frightened (-%d Renown).") % [str(card["title"]), GameData.CROSSING_RENOWN])
+		lore_event("through", "through")
+		if signatory:   # B9: she joins, and opens her satchel
+			var s: Hero = null
+			for i in 40:
+				s = Combat.gen_hero("A", 5)
+				if s.cls_id == "cleric":
+					break
+			s.quirks = s.quirks.filter(func(q): return GameData.QUIRKS.get(q, {}).get("origin", "") != "born")
+			s.quirks.append("Hollow-born")
+			heroes.append(s)
+			var page := lore_event("signatory", "through")
+			pending_stories.push_front({"title": tr("The First Signatory"), "subtitle": tr("She joins the guild"), "text": page if page != "" else tr(str(GameData.FRAGMENTS["f_first_page"]["text"]))})
 	else:
-		coins += GameData.CROSSING_BOUNTY
-		_news(tr("%s: turned back. The Crown pays its bounty (+%d Gold).") % [str(card["title"]), GameData.CROSSING_BOUNTY])
+		var bounty: int = GameData.SIGNATORY_BOUNTY if signatory else GameData.CROSSING_BOUNTY
+		coins += bounty
+		_news(tr("%s: turned back. The Crown pays its bounty (+%d Gold).") % [str(card["title"]), bounty])
 	save()
 	state_changed.emit()
 
@@ -701,6 +785,8 @@ func choose_sky_ending(choice: String) -> void:
 		_add_postgame_laurels(GameData.SKY_OURS_LAURELS)   # saves the legacy too
 	var e: Dictionary = GameData.SKY_ENDING[choice]
 	pending_stories.push_front(_the_end_card())
+	if epilogue_open():   # the first signature
+		pending_stories.push_front(GameData.EPILOGUE_CHOICE.duplicate(true))
 	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": tr(str(e["text"]))})
 	_news(tr(str(e["title"])) + ".")
 	save()
@@ -1005,7 +1091,7 @@ func laurels_earned() -> int:
 	n += int(L["charter"]) if charter_result == "won" and str(branches.get("hearing", "")) != "bought" else 0
 	n += int(L["morrow"]) if morrow_defeated else 0
 	n += echoes_returned * int(L["echo"])
-	return int(round(n * (1.0 + oath_bonus())))
+	return int(round(n * (1.0 + oath_bonus()) * (GameData.EPILOGUE_READ_LAURELS if moot() else 1.0)))
 
 
 ## The Laurels bonus for the oaths sworn (GameData.OATHS, capped).
@@ -1244,6 +1330,8 @@ func apply_founding(id: String) -> void:
 		id = "free"
 	founding = id
 	coins += int(founding_rule("gold", 0))
+	if epilogue() == "burn" and str(founding_rule("no_rival", "")) != "The Iron Chorus":   # royal patronage: the Crown's own company
+		rival_name = "The Iron Chorus"
 	var shunned := "The Last Lantern" if id == "smugglers" else str(founding_rule("no_rival", ""))
 	if shunned != "" and rival_name == shunned:
 		var others: Array = GameData.RIVAL_NAMES.filter(func(n): return n != shunned)

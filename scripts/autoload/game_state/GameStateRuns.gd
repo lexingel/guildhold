@@ -76,7 +76,7 @@ func check_feature_unlocks() -> Array:
 			features_seen.append(f)
 			fresh.append(f)
 	if fresh.has("rival"):   # the Charter War begins
-		var card: Dictionary = GameData.ROYAL_CHARTER.duplicate()
+		var card: Dictionary = (GameData.MOOT_NOTICE if moot() else GameData.ROYAL_CHARTER).duplicate()   # the epilogue's Vale
 		card["text"] = tr(str(card["text"])) % [tr(str(rival_name)), tr(str(rival_leader()["leader"]))]
 		pending_stories.append(card)
 	if fresh.size() == 1:
@@ -822,6 +822,8 @@ func advance_node() -> void:
 		descent_best = maxi(descent_best, int(run["descent"]))
 		run["descent"] = int(run["descent"]) + 1
 		(run["layers"] as Array).append_array(_descent_layers(int(run["descent"])))
+		if int(run["descent"]) >= 6:   # the story web: a deep pillar's height marks
+			lore_event("descent", "6")
 	run["pos"] = int(run["pos"]) + 1
 	run["node_state"] = {}
 	auto_resolve_single_option()

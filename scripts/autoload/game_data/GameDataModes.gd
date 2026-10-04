@@ -641,6 +641,7 @@ const VALE_YEARS := {
 	"wanderers": {"name": "Wandering heroes", "desc": "Two more recruits on the board, and the rival signs your best offer twice as often.", "add": {"offers": 2}, "mult": {"rival_signs": 2.0}},
 	"echoes": {"name": "A year of echoes", "desc": "Echoes turn up twice as often, and a kept echo gives half the Essence.", "mult": {"echo_chance": 2.0, "echo_essence": 0.5}},
 	# Sim (casual, 75 days): at rival +25% and a double contest alone, 0 of 4 reached Act IV (plain: 2 of 4).
+	"witnesses": {"name": "A year of witnesses", "desc": "The rival writes every week, and every letter tells its version of the Night of Breaking; its Renown comes 10% faster.", "mult": {"rival_moves": 1.5, "rival_renown": 1.1}, "truth_any": ["t_chorus", "t_wolves"]},
 	"proud": {"name": "A proud rival", "desc": "The rival gains Renown 15% faster and you 10% faster, and the monthly contest pays double.", "mult": {"rival_renown": 1.15, "renown": 1.1, "contest": 2.0}},
 }
 const VALE_YEAR_MODS := 2

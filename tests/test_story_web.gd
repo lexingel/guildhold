@@ -28,8 +28,13 @@ func run() -> void:
 		if GameState.fragment_text(id).split(" ", false).size() > GameData.FRAGMENT_MAX_WORDS:
 			long.append(id)
 	check(long.is_empty(), "no fragment is over %d words %s" % [GameData.FRAGMENT_MAX_WORDS, long])
-	var thin: Array = GameData.TRUTHS.keys().filter(func(t): return GameData.FRAGMENTS.values().filter(func(f): return str(f["truth"]) == t).size() < GameData.TRUTH_NEEDS + 1)
-	check(thin.is_empty(), "every truth has more fragments than it needs %s" % [thin])
+	var thin: Array = GameData.TRUTHS.keys().filter(func(t): return GameData.FRAGMENTS.values().filter(func(f): return str(f["truth"]) == t).size() < int(GameData.TRUTHS[t].get("needs", GameData.TRUTH_NEEDS)))
+	check(thin.is_empty(), "every truth has the fragments it needs %s" % [thin])
+	var claims_ok := true
+	for w in GameData.WITNESSES:
+		for c in w["claims"]:
+			claims_ok = claims_ok and GameData.TRUTHS.has(str(c["truth"]))
+	check(claims_ok, "every witness claim is settled by a truth that exists")
 	check(GameData.FRAGMENTS.values().all(func(f): return GameData.TRUTHS.has(str(f["truth"]))), "every fragment belongs to a truth")
 
 	# Gates: region and rank.

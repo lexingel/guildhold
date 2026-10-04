@@ -271,7 +271,8 @@ func wage_of(h: Hero) -> int:
 
 
 func wage_at(h: Hero, rate: String) -> int:
-	return int(round(float(GameData.WAGE_BY_RANK.get(h.rank, 15)) * (1.0 + GameData.WAGE_PER_LEVEL * (h.level - 1)) * (1.0 + float(wage_raise.get(h.id, 0.0))) * float(GameData.PAY_RATES[rate][0]) * float(founding_rule("wages", 1.0)) * year_mult("wages") * (1.5 if sworn("lean_purse") else 1.0) * (1.0 - hall_bonus("wages"))))
+	return int(round(float(GameData.WAGE_BY_RANK.get(h.rank, 15)) * (1.0 + GameData.WAGE_PER_LEVEL * (h.level - 1)) * (1.0 + float(wage_raise.get(h.id, 0.0))) * float(GameData.PAY_RATES[rate][0]) * float(founding_rule("wages", 1.0)) * year_mult("wages") * (1.5 if sworn("lean_purse") else 1.0) * (1.0 - hall_bonus("wages"))
+		* (GameData.EPILOGUE_MOOT_WAGES if moot() and charter_result == "won" else 1.0)))
 
 
 func pay_rate_of(h: Hero) -> String:
@@ -634,7 +635,7 @@ func rival_day() -> void:
 ## strongest hero, dare you to seal a rift by payday, or go for a posted
 ## contract. Each waits in rival_event for an answer.
 func maybe_rival_move() -> void:
-	if not feature_unlocked("rival") or not rival_event.is_empty() or day % GameData.PAYDAY_DAYS != GameData.RIVAL_MOVE_DAY or randf() >= GameData.RIVAL_MOVE_CHANCE:
+	if not feature_unlocked("rival") or not rival_event.is_empty() or day % GameData.PAYDAY_DAYS != GameData.RIVAL_MOVE_DAY or randf() >= GameData.RIVAL_MOVE_CHANCE * year_mult("rival_moves"):
 		return
 	var moves: Array = []
 	var target := _poach_target()
@@ -861,6 +862,9 @@ func _end_contest() -> void:
 		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("Contest lost"), "text": tr("%s gained %d Renown to your %d and takes the prize.") % [tr(str(rival_name)), theirs, ours]})
 	else:
 		_news(tr("The month's contest ends level at %d Renown each.") % ours)
+	if ours > theirs:
+		lore_event("contest", "won")   # the story web: Orla Venn's marching order
+	_epilogue_month()
 	contest_start = {"ours": reputation, "theirs": rival_renown}
 
 
