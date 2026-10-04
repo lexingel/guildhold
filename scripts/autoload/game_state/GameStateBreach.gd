@@ -112,7 +112,18 @@ var _resolving := false
 
 func _on_day_passed() -> void:
 	check_completion_board()
-	if not breach_unlocked() or _resolving or keepers():   # the Accord renewed or rewritten: the rifts stay shut
+	if _resolving:
+		return
+	if breach.is_empty() and gate_due():   # Act VI: the Inverted City's gate, whatever the ending
+		_swell_gate()
+		return
+	if breach.has("gate"):
+		if not breach_broken() and day >= int(breach["breaks_on"]):
+			breach["broken"] = true
+			pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("The gate is under attack!"),
+				"text": tr("Something has climbed the cords to the Inverted City's gate. Defend it before your next rift run.")})
+		return
+	if not breach_unlocked() or keepers():   # the Accord renewed or rewritten: the rifts stay shut
 		return
 	if breach.is_empty():
 		if breach_next_day < 0:
@@ -125,6 +136,18 @@ func _on_day_passed() -> void:
 		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("The rift has broken!"),
 			"text": tr("Monsters pour out near %s. Defend before your next rift run.") % breach_place()})
 		_news(tr("A Rank %s rift broke near %s.") % [tr(breach_rank_id()), breach_place()])
+
+
+## Act VI's gate defense: due until held.
+func gate_due() -> bool:
+	var act := current_act()
+	return not act.is_empty() and int(act["act"]) == 6 and gates_held == 0
+
+
+func _swell_gate() -> void:
+	breach = {"rank": GameData.rift_rank_index("S"), "region": "city", "started": day, "breaks_on": day + GameData.GATE_WARN, "broken": false, "gate": true}
+	pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("The City's gate"),
+		"text": tr("Something is climbing the cords to close the Inverted City's gate. It reaches the gate in %d days: hold it.") % GameData.GATE_WARN})
 
 
 ## A new breach: your best sealed rank, sometimes one above if it's open.
@@ -149,7 +172,7 @@ func _swell_breach() -> void:
 
 ## Sealing a ladder rift at or above the breach's rank closes it in time.
 func _on_rift_sealed(rank_idx: int) -> void:
-	if not breach_active() or breach_broken() or rank_idx < int(breach["rank"]) or breach.has("tide"):
+	if not breach_active() or breach_broken() or rank_idx < int(breach["rank"]) or breach.has("tide") or breach.has("gate"):
 		return
 	var ess := int(round(GameData.BREACH_PREVENT_ESSENCE * breach_scale()))
 	crystals += ess
@@ -192,6 +215,9 @@ func resolve_breach(result: Dictionary) -> Dictionary:
 		out["crystals"] = int(round(GameData.BREACH_HELD_ESSENCE * breach_scale() * (0.5 + 0.5 * keep) * year_mult("breach_pay")))
 		coins += int(out["coins"])
 		crystals += int(out["crystals"])
+		if breach.has("gate"):
+			gates_held += 1
+			_news(tr("The Inverted City's gate held."))
 		if breach.has("tide"):
 			tides_held += 1
 			_add_postgame_laurels(GameData.TIDE_LAURELS, {"best_tide": tides_held})

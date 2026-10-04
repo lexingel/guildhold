@@ -138,7 +138,11 @@ func load_party_preset(i: int, cap: int) -> Dictionary:
 
 
 func gen_recruit_offer(force_rank: String = "") -> Hero:
-	return Combat.gen_hero(force_rank if force_rank != "" else Combat.weighted_rank(), 1)
+	var h := Combat.gen_hero(force_rank if force_rank != "" else Combat.weighted_rank(), 1)
+	if hollowborn_open() and randf() < GameData.HOLLOWBORN_CHANCE:   # the Sky Beneath: the doors are open
+		h.quirks = h.quirks.filter(func(q): return GameData.QUIRKS.get(q, {}).get("origin", "") != "born")
+		h.quirks.append("Hollow-born")
+	return h
 
 
 ## Flags pending_s_rank_reveal whenever a blind roll (recruit offer, Champion

@@ -505,6 +505,12 @@ func _story_overlay(card_data: Dictionary) -> void:
 			_echo_choice(cv, card_data)
 		elif str(card_data.get("kind", "")) == "charter":
 			_charter_choice(cv)
+		elif str(card_data.get("kind", "")) == "crossing":
+			_two_way_choice(cv, "Let them through", tr("-%d Renown: the villages are frightened") % GameData.CROSSING_RENOWN, func(): GameState.answer_crossing("through"),
+				"Turn them back", tr("+%d Gold: the Crown's bounty") % GameData.CROSSING_BOUNTY, func(): GameState.answer_crossing("back"))
+		elif str(card_data.get("kind", "")) == "sky":
+			_two_way_choice(cv, "Keep the doors open", tr("Both worlds: Hollow-born heroes join your recruit board, in later guilds too"), func(): GameState.choose_sky_ending("both"),
+				"Close every door", tr("Ours: +%d Laurels, and the Hollow's foes leave the ladder") % GameData.SKY_OURS_LAURELS, func(): GameState.choose_sky_ending("ours"))
 		else:
 			_accord_choice(cv)   # the Broken Accord's ending: no Continue, a decision
 		card.add_child(cv)
@@ -525,6 +531,26 @@ func _story_overlay(card_data: Dictionary) -> void:
 
 
 var _accord_pick := false   # the ending card is asking which hero takes the post
+
+
+## A story choice with two buttons (crossings, the Sky Beneath's ending).
+func _two_way_choice(cv: VBoxContainer, a_text: String, a_tip: String, a_cb: Callable, b_text: String, b_tip: String, b_cb: Callable) -> void:
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 10)
+	row.alignment = FlowContainer.ALIGNMENT_CENTER
+	var a := _icon_domain_button("violet", "", a_text, func():
+		a_cb.call()
+		render())
+	a.tooltip_text = a_tip
+	row.add_child(a)
+	var b := _icon_domain_button("ember", "", b_text, func():
+		b_cb.call()
+		render())
+	b.tooltip_text = b_tip
+	row.add_child(b)
+	cv.add_child(row)
+	cv.add_child(_wrap_label("%s  ·  %s" % [a_tip, b_tip], 12, true))
+	_combat_hotkeys = {}
 
 
 ## The Charter War's turn: expose the Hollow Crown Company, or keep quiet.

@@ -70,6 +70,11 @@ func reset() -> void:
 	line_piece_seen = false
 	skipped_act1 = false
 	ledger_dry = 0
+	crossings_answered = 0
+	crossings_through = 0
+	gates_held = 0
+	sky_ending = ""
+	book2_started = false
 	accord_hero = ""
 	echoes_seen = []
 	charter_choice = ""
@@ -289,6 +294,15 @@ func load_save() -> bool:
 	line_piece_seen = bool(data.get("line_piece_seen", false))
 	skipped_act1 = bool(data.get("skipped_act1", false))
 	ledger_dry = int(data.get("ledger_dry", 0))
+	crossings_answered = int(data.get("crossings_answered", 0))
+	crossings_through = int(data.get("crossings_through", 0))
+	gates_held = int(data.get("gates_held", 0))
+	sky_ending = str(data.get("sky_ending", ""))
+	book2_started = bool(data.get("book2_started", false))
+	if accord_ending != "" and not book2_started:   # a guild that ended the Accord before Book II existed
+		book2_started = true
+		pending_stories.append(_sky_beneath_card())
+		pending_stories.append(_act_intro_card(5))
 	accord_hero = str(data.get("accord_hero", ""))
 	echoes_seen = data.get("echoes_seen", [])
 	charter_choice = str(data.get("charter_choice", ""))

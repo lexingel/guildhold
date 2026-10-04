@@ -852,6 +852,9 @@ func seal_rift() -> void:
 	# Guild Board tallies (see _quest_current).
 	if mapped_rank != "":
 		_bump("rank_seals:%d" % GameData.rift_rank_index(mapped_rank))
+	if not run.has("tower"):
+		_bump("biome_seals:" + run_biome())   # Book II's region objectives
+		maybe_crossing()
 	if str(diff.get("id", "")) == "greater":
 		_bump("greater_seals")
 	if not bool(run.get("any_ko", false)):

@@ -687,7 +687,54 @@ const CAMPAIGN := [
 	 "outro": "The Terms come apart into forty-one lines of old ink, and the Hall goes quiet. The posts are listening. The bargain needs a last signature, or a fire. Your guild has to choose.",
 	 "objectives": [{"type": "map_rank", "target": 5, "label": "Seal a Rank A rift"}, {"type": "posts_freed", "target": 1, "label": "Free a lost champion from a pillar"}, {"type": "ledger_pages", "target": 7, "label": "Find every page of the Grandmaster's ledger"}],
 	 "reward": {"crystals": 400}},
+	# Book II, the Sky Beneath: after the Accord's ending (any of the three).
+	{"act": 5, "name": "The Glass Coast", "foe": "The Tidewarden", "boss": "The Tidewarden",
+	 "finale": "The Glass Breakwater", "tier": "greater", "rank": "S", "mult": 1.25, "opens": "",
+	 "intro": "Under the Accord Hall the Endless Rift has a floor now, and the floor is glass. Below it is a shore the sky comes down to meet: sea-glass sand, tides that fall upward, and the villages of the Hollow's people, who were never only monsters. Their sky is falling. The Tidewarden has kept this shore since the Terms were signed. Find out what the Grandmaster promised them.",
+	 "outro": "The Tidewarden kneels in the glass and lays down a key shaped like a wave. The bargain, it says, was simple: the Vale would hold its doors shut, and the Hollow would not knock. It has kept its side for twenty years while its sky came down. Beyond the shore, the last city of the Hollow hangs upside down from the falling sky.",
+	 "objectives": [{"type": "region_seals:glass", "target": 3, "label": "Seal 3 rifts on the Glass Coast"}, {"type": "crossings", "target": 3, "label": "Answer 3 crossings"}, {"type": "map_rank", "target": 6, "label": "Seal a Rank S rift"}],
+	 "reward": {"crystals": 500}},
+	{"act": 6, "name": "The Inverted City", "foe": "The Falling Sky", "boss": "The Falling Sky",
+	 "finale": "The Inverted Throne", "tier": "greater", "rank": "SS", "mult": 1.25, "opens": "",
+	 "intro": "The Inverted City hangs over nothing by cords as thick as towers, and they are fraying one by one. If it falls, both worlds crack along the same line. Its gate is the only door the Hollow's people have left, and something comes up the cords at night to close it. Hold the gate, and climb to the Falling Sky.",
+	 "outro": "The Falling Sky is not a creature. It is what the city's sky became when it stopped believing it could stay up, and when it breaks, it breaks into light. The cords hold, for now. Every door between the worlds is in your guild's hands.",
+	 "objectives": [{"type": "region_seals:city", "target": 3, "label": "Seal 3 rifts in the Inverted City"}, {"type": "gate_held", "target": 1, "label": "Hold the City's gate"}, {"type": "map_rank", "target": 7, "label": "Seal a Rank SS rift"}],
+	 "reward": {"crystals": 650}},
 ]
+## Book II opens after the Accord's ending: the reply on the ledger's last page.
+const SKY_BENEATH := {"title": "The Sky Beneath", "subtitle": "Book II",
+	"text": "Wen finds the last page of the Grandmaster's ledger stuck to the back cover, in a hand neither of them knows. It is a reply. \"We accept your Terms. Hold your doors, and we will not come through them. Our sky is falling. We will not ask again.\" Hesper reads it twice and puts on her coat."}
+const SKY_BENEATH_BY_ENDING := {
+	"renew": "Far below, the forty-first post hears knocking from underneath. %s asks the guild to answer it.",
+	"break": "Not everything that came up with the tides was hunting. Some of it was running.",
+	"rewrite": "The posts are held in turns now. Your guild is the first that can go down, and come back.",
+}
+## Crossings (Act V on): a sealed rift on the Glass Coast or in the City
+## sometimes ends at a door with people behind it.
+const CROSSING_CHANCE := 0.6   # sim: at 0.35 a guild sat at 1 of 3 crossings for 50 days
+const CROSSING_BOUNTY := 80       # Gold from the Crown for turning them back
+const CROSSING_RENOWN := 2        # Renown lost letting them through (the villages are frightened)
+const CROSSINGS := [
+	{"id": "family", "title": "A Family at the Door", "text": "Five of them, holding hands in a line, the smallest at the back. In this air their edges have already started to go wrong: too many joints, a shine to the skin. The eldest says the only word of ours she knows. It is please."},
+	{"id": "glassblower", "title": "The Glassblower", "text": "A man with glass where his fingers should be. He was a glassblower, he says, and the air on this side is turning his hands into his work. He would like to come through before it finishes."},
+	{"id": "choir", "title": "The Choir", "text": "Nine voices on the other side of the door, singing in our language, badly. They learned the song from a guild that came down twenty years ago and never went home. They would like to sing it for you in the Vale."},
+	{"id": "child", "title": "A Lost Child, Grown", "text": "You have heard of her: the small one who waited behind a rock for someone to come through the rift for her. Nobody came. She is grown now, and she is done waiting."},
+]
+## The gate (Act VI): a defense at the Inverted City, whatever the ending.
+const GATE_WARN := 3
+## Book II's ending, after Act VI.
+const SKY_CHOICE := {"kind": "sky", "title": "The doors", "subtitle": "The Inverted City",
+	"text": "Every door between the worlds is in your guild's hands. Prop the city and keep the doors open, with keepers on both sides, and the Hollow's people can choose where to live. Or close them all, and let the far side fall quietly, the way it has been falling for twenty years.",
+	"choices": ["both", "ours"]}
+const SKY_ENDING := {
+	"both": {"title": "Both worlds", "subtitle": "The doors stay open",
+		"text": "The city holds, barely, on new cords your guild helped tie. The rifts become doors with keepers on both sides, and the first of the Hollow's people come up through them carrying everything they own. Some of them ask for work.\n\n(Hollow-born heroes now join the recruit board, in this guild and every guild after it.)"},
+	"ours": {"title": "Ours", "subtitle": "Every door closed",
+		"text": "Your guild closes the doors one by one, from the glass shore to the city's gate. The far side falls quietly. The rifts heal over in a season. Some nights the new stars show low on the horizon, for a moment, and then not.\n\n(+10 Laurels for this guild's legacy. The Hollow's foes no longer appear on the ladder.)"},
+}
+const SKY_OURS_LAURELS := 10
+const BOOK2_ACT_LAURELS := 5
+const HOLLOWBORN_CHANCE := 0.2    # of a new recruit, once the doors are open
 const TRAINING_RIFT := {"floors": 4, "monster_hp_mult": 0.8, "monster_dmg_mult": 0.85}
 const QUEST_POSTED := 6
 const QUEST_BOARD_BG := "res://assets/screens/quest_board.png"

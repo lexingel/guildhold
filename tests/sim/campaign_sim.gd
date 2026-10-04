@@ -109,7 +109,7 @@ func _ready() -> void:
 		var all_runs := {}
 		var all_rounds := {}
 		var ratios: Array = []
-		var acts := {2: [], 3: [], 4: [], 5: []}
+		var acts := {2: [], 3: [], 4: [], 5: [], 6: [], 7: []}
 		for s in seeds:
 			_guild(p, seed0 + s)
 			for r in fights:
@@ -127,7 +127,7 @@ func _ready() -> void:
 			for a in acts:
 				acts[a].append(int(act_day.get(a, -1)))
 		print("== %s%s%s%s%s%s, %d guilds x %d days" % [p, " (bold)" if bold else "", " (by hand)" if hand else " (Quick fight)", (" all points in " + force_attr) if force_attr != "" else "", (" charter=" + charter) if charter != "" else "", (" founding=" + founding) if founding != "free" else "", seeds, days])
-		print("   Act I done on days %s · Act II %s · Act III %s · Act IV %s   (-1 = not reached)" % [acts[2], acts[3], acts[4], acts[5]])
+		print("   Act I done on days %s · Act II %s · Act III %s · Act IV %s · Act V %s · Act VI %s   (-1 = not reached)" % [acts[2], acts[3], acts[4], acts[5], acts[6], acts[7]])
 		ratios.sort()
 		if not ratios.is_empty():
 			print("   wages+upkeep / Gold income, weeks 2-6: median %d%% (min %d%%, max %d%%)" % [int(ratios[ratios.size() / 2] * 100), int(ratios[0] * 100), int(ratios[-1] * 100)])
@@ -161,6 +161,7 @@ func _guild(p: String, s: int) -> void:
 	ambush = [0, 0]
 	endless_runs = 0
 	descent_deepest = 0
+	gate_tries = [0, 0]
 	freed_day = -1
 	morrow_day = -1
 	morrow_lost = 0
@@ -217,8 +218,10 @@ func _guild(p: String, s: int) -> void:
 		endless_runs, (("freed day %d" % freed_day) if freed_day >= 0 else "none freed") + ((", Descent depth %d" % descent_deepest) if descent_deepest > 0 else ""),
 		("beaten day %d after %d loss%s" % [morrow_day, morrow_lost, "" if morrow_lost == 1 else "es"]) if GameState.morrow_defeated else ("lost %d" % morrow_lost if morrow_lost > 0 else "-"),
 		("  · " + "; ".join(notes)) if not notes.is_empty() else ""])
+	if gate_tries[0] + gate_tries[1] > 0:
+		print("     the City's gate: %d held, %d lost" % gate_tries)
 	var cur := GameState.current_act()
-	if not cur.is_empty() and GameState.campaign_act < 5:
+	if not cur.is_empty():
 		var unmet: Array = (cur["objectives"] as Array).filter(func(o): return not GameState.campaign_objective_met(o)).map(func(o): return "%s (%d/%d)" % [str(o["label"]), GameState.campaign_objective_progress(o), int(o["target"])])
 		print("     stuck in Act %d since day %d: %s%s" % [GameState.campaign_act, int(act_day.get(GameState.campaign_act, 0)), ", ".join(unmet) if not unmet.is_empty() else "objectives met, finale not won", (" · finale tries %d/%d won · posts freed %d · best party %d vs finale %d" % [runs.get("finale", [0, 0])[0], runs.get("finale", [0, 0])[0] + runs.get("finale", [0, 0])[1], GameState.posts_freed(), Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id))), GameState.finale_recommended_power()])])
 	if ending_day >= 0:
@@ -250,6 +253,7 @@ var ending_day := -1       # the day the Accord's ending was chosen
 var ending_laurels := 0    # Laurels the legacy paid at the ending
 var hall_days: Array = []  # the day each Accord hall was restored
 var descent_deepest := 0   # the deepest Descent depth cleared
+var gate_tries := [0, 0]   # the Inverted City's gate defenses [held, lost]
 var tides: Array = []      # [tide, held] for each tide of the Open Hollow
 
 
@@ -326,6 +330,10 @@ func _answer_stories() -> void:
 				if charter == "":
 					return
 				GameState.choose_charter(charter)
+			"crossing":
+				GameState.answer_crossing("through" if randf() < 0.5 else "back")
+			"sky":
+				GameState.choose_sky_ending("both")
 			_:
 				GameState.choose_accord_ending(ending, GameState.heroes[0].id)
 		if not GameState.pending_stories.is_empty() and GameState.pending_stories[0] == c:
@@ -678,7 +686,10 @@ func _defend() -> void:
 	var r := DefenseRun.new(str(GameState.breach["region"]), int(GameState.breach["rank"]), posted, null, 7, GameState.defense_opts())
 	_run_defense(r)
 	var tide := int(GameState.breach.get("tide", 0))
+	var gate := bool(GameState.breach.get("gate", false))
 	var out := GameState.resolve_breach(r.result())
+	if gate:
+		gate_tries[0 if bool(out["held"]) else 1] += 1
 	if tide > 0:
 		tides.append([tide, bool(out["held"])])
 

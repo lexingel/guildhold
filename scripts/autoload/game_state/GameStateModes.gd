@@ -78,13 +78,17 @@ func campaign_done() -> bool:
 
 
 func current_act() -> Dictionary:
-	return {} if campaign_done() else GameData.CAMPAIGN[campaign_act - 1]
+	if campaign_done() or (campaign_act >= 5 and accord_ending == ""):   # Book II waits for the Accord's ending
+		return {}
+	return GameData.CAMPAIGN[campaign_act - 1]
 
 
 func campaign_objective_progress(o: Dictionary) -> int:
 	var t := str(o["type"])
 	if t.begins_with("boss:"):
 		return int(quest_tally.get(t, 0))
+	if t.begins_with("region_seals:"):
+		return int(quest_tally.get("biome_seals:" + t.trim_prefix("region_seals:"), 0))
 	match t:
 		"rifts_sealed": return rifts_sealed
 		"heroes": return heroes.size()
@@ -94,6 +98,8 @@ func campaign_objective_progress(o: Dictionary) -> int:
 		"quests_done": return int(quest_tally.get("quests_done", 0))
 		"ledger_pages": return accord_pages
 		"posts_freed": return posts_freed()
+		"crossings": return crossings_answered
+		"gate_held": return gates_held
 	return 0
 
 
@@ -125,7 +131,15 @@ func finale_recommended_power() -> int:
 ## II, any of the three after that.
 func pick_biome() -> String:
 	var open := ["vale"] if campaign_act <= 1 else (["vale", "marsh", "marsh"] if campaign_act == 2 else ["vale", "marsh", "ashen"])
+	open.append_array(book2_regions())
 	return str(open[randi() % open.size()])
+
+
+## The Sky Beneath's regions this guild has reached (none after closing the doors).
+func book2_regions() -> Array:
+	if accord_ending == "" or campaign_act < 5 or sky_ending == "ours":
+		return []
+	return ["glass", "glass", "glass"] if campaign_act == 5 else ["glass", "city", "city", "city"] if campaign_act == 6 else ["glass", "city"]
 
 
 ## The run's biome.
@@ -177,7 +191,11 @@ func _complete_act(act_num: int) -> void:
 		pending_stories.append(turn_card)   # after Act III's intro (below)
 	if act_num == 3:
 		_find_line_piece()
-	if act_num == 4:
+	if act_num >= 5:
+		_add_postgame_laurels(GameData.BOOK2_ACT_LAURELS)
+	if act_num == 6:
+		pending_stories.append(GameData.SKY_CHOICE.duplicate(true))   # both worlds, or ours
+	elif act_num == 4:
 		var choice: Dictionary = GameData.ACCORD_CHOICE.duplicate(true)
 		if rewrite_open():   # the third ending: Hesper's forty-second line
 			choice["text"] = tr(str(choice["text"])) + "\n\n" + tr(GameData.REWRITE_HINT)
@@ -393,7 +411,9 @@ func choose_accord_ending(choice: String, hero_id: String = "") -> String:
 	accord_ending = choice
 	if not pending_stories.is_empty() and pending_stories[0].has("choices"):
 		pending_stories.pop_front()
-	pending_stories.push_front(_the_end_card())
+	pending_stories.push_front(_act_intro_card(5))   # Book II opens
+	pending_stories.push_front(_sky_beneath_card())
+	book2_started = true
 	if echoes_seen.size() >= 3:
 		pending_stories.push_front(_vale_remembers())
 	pending_stories.push_front(card)
@@ -409,7 +429,70 @@ func _act_intro_card(act_num: int) -> Dictionary:
 
 
 static func _roman(n: int) -> String:
-	return ["I", String(TranslationServer.translate("II")), String(TranslationServer.translate("III")), "IV"][clampi(n - 1, 0, 3)]
+	return ["I", String(TranslationServer.translate("II")), String(TranslationServer.translate("III")), "IV", "V", "VI"][clampi(n - 1, 0, 5)]
+
+
+## Book II's first card: the reply on the ledger's last page, and a line for
+## how this guild ended the Accord.
+func _sky_beneath_card() -> Dictionary:
+	var c: Dictionary = GameData.SKY_BENEATH
+	var line := tr(str(GameData.SKY_BENEATH_BY_ENDING.get(accord_ending, "")))
+	if accord_ending == "renew":
+		line = line % accord_hero
+	return {"title": tr(str(c["title"])), "subtitle": tr(str(c["subtitle"])), "text": tr(str(c["text"])) + "\n\n" + line}
+
+
+## A crossing (Book II): a sealed rift in the Sky Beneath sometimes ends at a
+## door with people behind it. One card at a time.
+func maybe_crossing() -> void:
+	if book2_regions().is_empty() or not (run_biome() in ["glass", "city"]) or pending_stories.any(func(c): return str(c.get("kind", "")) == "crossing") \
+			or randf() >= GameData.CROSSING_CHANCE:
+		return
+	var c: Dictionary = GameData.CROSSINGS[crossings_answered % GameData.CROSSINGS.size()]
+	pending_stories.append({"kind": "crossing", "title": tr(str(c["title"])), "subtitle": tr("A crossing, %s") % tr(str(GameData.BIOMES[run_biome()]["name"])),
+		"text": tr(str(c["text"])), "choices": ["through", "back"]})
+
+
+## Answers the crossing on top of the story queue: let them through (Renown
+## falls a little) or turn them back (the Crown's bounty).
+func answer_crossing(choice: String) -> void:
+	if pending_stories.is_empty() or str(pending_stories[0].get("kind", "")) != "crossing":
+		return
+	var card: Dictionary = pending_stories.pop_front()
+	crossings_answered += 1
+	if choice == "through":
+		crossings_through += 1
+		reputation = maxi(0, reputation - GameData.CROSSING_RENOWN)
+		_news(tr("%s: let through. The villages are frightened (-%d Renown).") % [str(card["title"]), GameData.CROSSING_RENOWN])
+	else:
+		coins += GameData.CROSSING_BOUNTY
+		_news(tr("%s: turned back. The Crown pays its bounty (+%d Gold).") % [str(card["title"]), GameData.CROSSING_BOUNTY])
+	save()
+	state_changed.emit()
+
+
+## Book II's ending, after Act VI: both worlds (Hollow-born recruits from now
+## on, in later guilds too) or ours (Laurels; the Hollow's foes leave the ladder).
+func choose_sky_ending(choice: String) -> void:
+	if sky_ending != "" or not GameData.SKY_ENDING.has(choice):
+		return
+	sky_ending = choice
+	if not pending_stories.is_empty() and str(pending_stories[0].get("kind", "")) == "sky":
+		pending_stories.pop_front()
+	if choice == "both":
+		if legacy.is_empty():
+			load_legacy()
+		legacy["hollowborn"] = true
+		save_legacy()
+	else:
+		_add_postgame_laurels(GameData.SKY_OURS_LAURELS)
+	var e: Dictionary = GameData.SKY_ENDING[choice]
+	pending_stories.push_front(_the_end_card())
+	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": tr(str(e["text"]))})
+	_news(tr(str(e["title"])) + ".")
+	save()
+	state_changed.emit()
+
 
 
 # ---------------- The daily twist on the ladder ----------------

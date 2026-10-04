@@ -62,6 +62,22 @@ const MONSTER_ABILITIES := {
 	"Mudscale Brute": {"kind": "drain", "name": "Mire Grip", "value": 0.3},
 	"Cinder Hound": {"kind": "frenzy", "name": "Pack Fury", "value": 0.4},
 	"Obsidian Sentinel": {"kind": "reflect", "name": "Glass Facets", "value": 0.25},
+	"Shell Wretch": {"kind": "drain", "name": "Leeching Mire", "value": 0.35},
+	"Pearl Wisp": {"kind": "healer", "name": "Mending Pulse", "value": 0.10},
+	"Coral Brute": {"kind": "drain", "name": "Mire Grip", "value": 0.3},
+	"Mirror Crab": {"kind": "drain", "name": "Leeching Mire", "value": 0.35},
+	"Undertow Priest": {"kind": "healer", "name": "Leech Blessing", "value": 0.12},
+	"Falling Watchman": {"kind": "shielded", "name": "Thorn Bulwark", "value": 0.25},
+	"Lamp Wight": {"kind": "healer", "name": "Grave Light", "value": 0.10},
+	"Rooftop Harrier": {"kind": "frenzy", "name": "Cornered Fury", "value": 0.4},
+	"Upside Hound": {"kind": "frenzy", "name": "Pack Fury", "value": 0.4},
+	"Cord Reaver": {"kind": "shielded", "name": "Bone Ward", "value": 0.3},
+	"Salt Hound": {"kind": "poison", "name": "Festering Bite", "value": 0.06},
+	"Pearl Thrall": {"kind": "drain", "name": "Root Grasp", "value": 0.25},
+	"Tideglass Moth": {"kind": "frenzy", "name": "Death Frenzy", "value": 0.4},
+	"Cord Stalker": {"kind": "poison", "name": "Venomous Bite", "value": 0.06},
+	"Spire Oracle": {"kind": "shielded", "name": "Ash Veil", "value": 0.2},
+	"Gate Sentinel": {"kind": "reflect", "name": "Glass Facets", "value": 0.25},
 }
 
 ## Badge icons for MONSTER_ABILITIES — reuses BOSS_MECHANIC_ICON's picks where
@@ -96,7 +112,8 @@ const HAZARD_BG := {
 const FIRST_NAMES := ["Aldric", "Bryn", "Coren", "Dessa", "Elowen", "Fenwick", "Gara", "Hollis", "Ianthe", "Joric", "Kestrel", "Liora", "Maren", "Nyx", "Oren", "Petra", "Quill", "Roth", "Sable", "Tavin", "Ysolde", "Zeph"]
 const MONSTER_NAMES := ["Gloom Stalker", "Rift Wisp", "Husk Brute", "Sable Fang", "Ember Whelp", "Marrow Crawler", "Hollow Reaver", "Cinder Moth", "Bog Wretch", "Silt Crawler", "Glass Wisp", "Mirror Fiend", "Frost Stalker", "Ashclad Ghoul", "Deep Anchorite", "Voidling Sprite",
 	"Hedge Warden", "Carrion Crier", "Rootbound Thrall", "Leech Priest", "Mire Sniper", "Drowned Bellringer", "Slag Golem", "Ember Oracle", "Ash Harrier",
-	"Blight Hound", "Lantern Wight", "Tide Caller", "Mudscale Brute", "Cinder Hound", "Obsidian Sentinel"]
+	"Blight Hound", "Lantern Wight", "Tide Caller", "Mudscale Brute", "Cinder Hound", "Obsidian Sentinel",
+	"Shell Wretch", "Pearl Wisp", "Tidewalker", "Brine Sniper", "Coral Brute", "Mirror Crab", "Undertow Priest", "Shore Crier", "Salt Hound", "Pearl Thrall", "Tideglass Moth", "Falling Watchman", "Lamp Wight", "Rooftop Harrier", "Cord Bellringer", "Upside Hound", "Stair Golem", "Choir Sprite", "Cord Reaver", "Cord Stalker", "Spire Oracle", "Gate Sentinel"]
 const ELITE_NAMES := ["Warbound Elite", "Blightfang Elite", "Rift-Touched Colossus", "Iron Revenant", "Storm-Called Elite", "Ashen Broodlord"]
 const BOSS_NAMES := ["Vaelith", "Korrath", "Nyxara", "Drevok", "Sythrane"]
 
@@ -110,15 +127,29 @@ const BIOMES := {
 		"elites": ["Blightfang Elite", "Storm-Called Elite"], "bosses": ["Nyxara", "Korrath"], "retinue": ["Leech Priest", "Mire Sniper", "Drowned Bellringer"], "backgrounds": [5, 6, 2]},
 	"ashen": {"name": "The Ashen Wastes", "monsters": ["Ember Whelp", "Cinder Moth", "Ashclad Ghoul", "Voidling Sprite", "Hollow Reaver", "Mirror Fiend", "Slag Golem", "Ember Oracle", "Ash Harrier", "Cinder Hound", "Obsidian Sentinel"],
 		"elites": ["Ashen Broodlord", "Rift-Touched Colossus"], "bosses": ["Drevok", "Sythrane"], "retinue": ["Ember Oracle", "Ash Harrier", "Cinder Moth"], "backgrounds": [4, 8, 7, 9]},
+	# Book II, the Sky Beneath (stand-in art recoloured from the Vale's foes until their own exists).
+	"glass": {"name": "The Glass Coast", "monsters": ["Shell Wretch", "Pearl Wisp", "Tidewalker", "Brine Sniper", "Coral Brute", "Mirror Crab", "Undertow Priest", "Shore Crier", "Salt Hound", "Pearl Thrall", "Tideglass Moth"],
+		"elites": ["Pearl Colossus", "Glassback Elite"], "bosses": ["The Tidewarden", "Saltmother"], "retinue": ["Undertow Priest", "Brine Sniper", "Pearl Wisp"], "backgrounds": [10, 11, 12]},
+	"city": {"name": "The Inverted City", "monsters": ["Falling Watchman", "Lamp Wight", "Rooftop Harrier", "Cord Bellringer", "Upside Hound", "Stair Golem", "Choir Sprite", "Cord Reaver", "Cord Stalker", "Spire Oracle", "Gate Sentinel"],
+		"elites": ["Skyfallen Sentinel", "Broodwarden"], "bosses": ["The Falling Sky", "The Queen's Herald"], "retinue": ["Cord Bellringer", "Lamp Wight", "Choir Sprite"], "backgrounds": [13, 14, 15]},
 }
-const ACT_BIOME := {1: "vale", 2: "marsh", 3: "ashen", 4: "ashen"}
+const ACT_BIOME := {1: "vale", 2: "marsh", 3: "ashen", 4: "ashen", 5: "glass", 6: "city"}
 
 ## Armor: the share of every basic attack an armored foe shrugs off. Each hit
 ## that lands chips it by ARMOR_SUNDER; abilities, relic strikes and counters
 ## ignore it.
 const MONSTER_ARMOR := {"Hedge Warden": 0.3, "Slag Golem": 0.4, "Husk Brute": 0.35, "Hollow Reaver": 0.3, "Deep Anchorite": 0.35, "Iron Revenant": 0.4,
 	"Warbound Elite": 0.3, "Rift-Touched Colossus": 0.35, "Korrath": 0.3, "Drevok": 0.25,
-	"Mudscale Brute": 0.35, "Obsidian Sentinel": 0.45}
+	"Mudscale Brute": 0.35, "Obsidian Sentinel": 0.45,
+	"Coral Brute": 0.35,
+	"Pearl Colossus": 0.35,
+	"Saltmother": 0.35,
+	"Falling Watchman": 0.3,
+	"Stair Golem": 0.4,
+	"Cord Reaver": 0.3,
+	"The Queen's Herald": 0.25,
+	"Gate Sentinel": 0.45,
+}
 const ARMOR_SUNDER := 0.05
 
 ## Statuses foes inflict on a hit (chance per hit): burn deals `value` of max
@@ -126,13 +157,25 @@ const ARMOR_SUNDER := 0.05
 ## heavy blow stuns (the hero loses their next turn) unless they Defended.
 const MONSTER_STATUS := {"Ember Oracle": "burn", "Slag Golem": "burn", "Ash Harrier": "burn", "Drowned Bellringer": "chill", "Ember Whelp": "burn", "Cinder Moth": "burn", "Ashclad Ghoul": "burn", "Ashen Broodlord": "burn",
 	"Frost Stalker": "chill", "Glass Wisp": "chill", "Storm-Called Elite": "chill", "Nyxara": "chill", "Sythrane": "burn",
-	"Tide Caller": "chill", "Cinder Hound": "burn"}
+	"Tide Caller": "chill", "Cinder Hound": "burn",
+	"Tidewalker": "chill",
+	"The Tidewarden": "chill",
+	"Rooftop Harrier": "burn",
+	"Cord Bellringer": "chill",
+	"Upside Hound": "burn",
+	"Stair Golem": "burn",
+	"Skyfallen Sentinel": "chill",
+	"Broodwarden": "burn",
+	"The Falling Sky": "burn",
+	"Tideglass Moth": "burn",
+	"Spire Oracle": "burn",
+}
 const STATUS_INFO := {"burn": {"chance": 0.5, "rounds": 3, "value": 0.05}, "chill": {"chance": 0.5, "rounds": 1}}
 
 ## Wind-ups: some foes spend a turn gathering strength, then land a heavy
 ## blow (HEAVY_BLOW_MULT damage + stun). The intent tag warns a turn ahead.
 const WINDUP_CHANCE := {"boss": 0.35, "elite": 0.3, "brute": 0.25}
-const WINDUP_BRUTES := ["Husk Brute", "Deep Anchorite", "Hollow Reaver", "Rootbound Thrall", "Slag Golem", "Mudscale Brute", "Obsidian Sentinel"]
+const WINDUP_BRUTES := ["Husk Brute", "Deep Anchorite", "Hollow Reaver", "Rootbound Thrall", "Slag Golem", "Mudscale Brute", "Obsidian Sentinel", "Coral Brute", "Saltmother", "Stair Golem", "Cord Reaver", "Pearl Thrall", "Gate Sentinel"]
 const HEAVY_BLOW_MULT := 3.0
 
 ## ---------------- Hero voices ----------------
@@ -252,6 +295,20 @@ const MONSTER_KIT := {
 	"Slag Golem": ["sweep"], "Ember Oracle": ["ward", "curse"], "Ash Harrier": ["snipe"],
 	"Blight Hound": ["snipe"], "Lantern Wight": ["ward", "mend"], "Tide Caller": ["sweep"],
 	"Mudscale Brute": ["sweep"], "Cinder Hound": ["roar"], "Obsidian Sentinel": ["ward"],
+	"Brine Sniper": ["snipe"],
+	"Coral Brute": ["sweep"],
+	"Undertow Priest": ["mend"],
+	"Shore Crier": ["curse", "roar"],
+	"Falling Watchman": ["ward"],
+	"Lamp Wight": ["ward", "mend"],
+	"Rooftop Harrier": ["snipe"],
+	"Cord Bellringer": ["curse"],
+	"Upside Hound": ["roar"],
+	"Stair Golem": ["sweep"],
+	"Salt Hound": ["snipe"],
+	"Pearl Thrall": ["sweep"],
+	"Spire Oracle": ["ward", "curse"],
+	"Gate Sentinel": ["ward"],
 }
 
 ## Hand-designed fights per region: a named group whose members play off each
@@ -308,6 +365,38 @@ const ENCOUNTERS := {
 		{"name": "Glass Bastion", "min_floor": 2, "hint": "The Sentinel reflects basic hits and wards the Harriers. Skills go around the glass; drop the Harriers first.",
 			"members": [["Obsidian Sentinel", 0.5, 0.3], ["Ash Harrier", 0.25, 0.35], ["Ash Harrier", 0.25, 0.35]]},
 	],
+	"glass": [
+		{"name": "The Tideline", "min_floor": 0, "hint": "The Priest mends the Brute while the Wisp heals. Take the healers first.",
+			"members": [["Coral Brute", 0.45, 0.45], ["Undertow Priest", 0.3, 0.25], ["Pearl Wisp", 0.25, 0.3]]},
+		{"name": "Snipers on the Breakwater", "min_floor": 1, "hint": "Two Snipers aim at your back row. Close in, or guard it.",
+			"members": [["Brine Sniper", 0.3, 0.4], ["Brine Sniper", 0.3, 0.4], ["Shell Wretch", 0.4, 0.2]]},
+		{"name": "Crab Wall", "min_floor": 0, "hint": "The Crabs drain what they hit. Burst one down at a time.",
+			"members": [["Mirror Crab", 0.34, 0.34], ["Mirror Crab", 0.33, 0.33], ["Mirror Crab", 0.33, 0.33]]},
+		{"name": "The Undertow", "min_floor": 2, "hint": "The Tidewalker chills and the Crier curses. Cleanse, then strike.",
+			"members": [["Tidewalker", 0.4, 0.4], ["Shore Crier", 0.3, 0.3], ["Undertow Priest", 0.3, 0.3]]},
+		{"name": "Salt Pack", "min_floor": 0, "hint": "The Hounds get wilder as they bleed. Finish each one quickly.",
+			"members": [["Salt Hound", 0.34, 0.34], ["Salt Hound", 0.33, 0.33], ["Shore Crier", 0.33, 0.33]]},
+		{"name": "Moths on the Glass", "min_floor": 1, "hint": "The Moths shoot from the back while the Thrall sweeps. Stun its wind-up.",
+			"members": [["Pearl Thrall", 0.5, 0.45], ["Tideglass Moth", 0.25, 0.28], ["Tideglass Moth", 0.25, 0.27]]},
+		{"name": "The Wreck", "min_floor": 2, "hint": "A Brute and a Thrall wind up heavy blows together. Answer one, guard the other.",
+			"members": [["Coral Brute", 0.4, 0.4], ["Pearl Thrall", 0.4, 0.4], ["Pearl Wisp", 0.2, 0.2]]},
+	],
+	"city": [
+		{"name": "The Night Watch", "min_floor": 0, "hint": "The Watchman wards its friends. Strip the wards, or go around them.",
+			"members": [["Falling Watchman", 0.45, 0.3], ["Cord Stalker", 0.3, 0.35], ["Lamp Wight", 0.25, 0.35]]},
+		{"name": "Bells Over the Gate", "min_floor": 1, "hint": "The Bellringers chill and curse from the back. Silence them first.",
+			"members": [["Cord Bellringer", 0.3, 0.3], ["Cord Bellringer", 0.3, 0.3], ["Cord Reaver", 0.4, 0.4]]},
+		{"name": "Rooftop Run", "min_floor": 0, "hint": "The Harriers snipe your back row. Guard it, or kill them fast.",
+			"members": [["Rooftop Harrier", 0.33, 0.35], ["Rooftop Harrier", 0.33, 0.35], ["Upside Hound", 0.34, 0.3]]},
+		{"name": "The Choir Loft", "min_floor": 2, "hint": "The Sprite and the Oracle burn you from behind a Golem. Burst the back row.",
+			"members": [["Stair Golem", 0.5, 0.4], ["Choir Sprite", 0.25, 0.3], ["Spire Oracle", 0.25, 0.3]]},
+		{"name": "Hounds on the Stairs", "min_floor": 0, "hint": "The Hounds roar each other into a frenzy. Take them one at a time.",
+			"members": [["Upside Hound", 0.34, 0.34], ["Upside Hound", 0.33, 0.33], ["Cord Stalker", 0.33, 0.33]]},
+		{"name": "Lamplighters", "min_floor": 1, "hint": "The Wights mend and ward each other. Kill one before the other can help.",
+			"members": [["Lamp Wight", 0.35, 0.35], ["Lamp Wight", 0.35, 0.35], ["Gate Sentinel", 0.3, 0.3]]},
+		{"name": "The Gate Guard", "min_floor": 2, "hint": "The Sentinel wards and the Reaver hits hard. Strip the ward and stun the wind-up.",
+			"members": [["Gate Sentinel", 0.45, 0.35], ["Cord Reaver", 0.4, 0.45], ["Choir Sprite", 0.15, 0.2]]},
+	],
 }
 const ENCOUNTER_CHANCE := 0.6
 
@@ -334,6 +423,12 @@ const BOSS_PROFILES := {
 		"hint": "The bargain fights with every move it ever bought: Harvest, the Drowning Tide, Brand and Immolate. At half health it calls up what it has claimed. Cleanse, guard the branded, and keep the pressure on."},
 	"Sythrane": {"mechanics": ["enrage", "regen"], "phase": "barrier", "summons": [], "kit": ["immolate", "roar", "sweep"],
 		"hint": "Immolate sets the whole party burning while she regenerates and grows angrier. Cleanse the burns and never let up."},
+	"The Tidewarden": {"mechanics": ["warded"], "phase": "barrier", "summons": [], "kit": ["drown", "snipe"],
+		"hint": "The Drowning Tide chills and weakens the whole party, and her ward shrugs off early defence. Cleanse the curse; save your burst for after her barrier rises."},
+	"The Falling Sky": {"mechanics": ["enrage", "regen"], "phase": "barrier", "summons": [], "kit": ["immolate", "roar", "sweep"],
+		"hint": "The Falling Sky sets the whole party burning while it mends itself and grows angrier. Cleanse the burns and never let up."},
+	"The Queen's Herald": {"mechanics": ["frenzied"], "phase": "summon", "summons": ["Choir Sprite", "Rooftop Harrier"], "kit": ["brand", "roar"],
+		"hint": "Brand marks a hero to take 50% more damage. At half health he calls the City's choir down from the rooftops. Guard the branded hero."},
 }
 const HARVEST_MULT := 0.45       # of her hit, on every hero; she heals half of it
 const DROWN_MULT := 0.3

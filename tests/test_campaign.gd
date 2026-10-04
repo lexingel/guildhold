@@ -92,7 +92,7 @@ func run() -> void:
 	GameState.pending_stories.clear()
 	GameState.seal_rift()
 	GameState.finish_run()
-	check(GameState.campaign_done(), "campaign complete")
+	check(not GameState.campaign_done() and GameState.current_act().is_empty(), "Act IV done: Book II waits for the Accord's ending")
 	check(GameState.pending_stories.any(func(c): return c.has("choices")), "the ending is a choice")
 	check(not GameState.pending_stories.any(func(c): return str(c["title"]) == "The End"), "The End waits for it")
 	var keeper: Hero = GameState.heroes.filter(func(h): return not h.is_champion)[0]
@@ -100,7 +100,8 @@ func run() -> void:
 	var n_heroes := GameState.heroes.size()
 	check(GameState.choose_accord_ending("renew", keeper.id) == "", "Renew the Accord")
 	check(GameState.accord_ending == "renew" and GameState.heroes.size() == n_heroes - 1 and GameState.fallen[0]["name"] == keeper.name, "the keeper leaves for the post and goes on the Memorial")
-	check(str(GameState.pending_stories[0]["subtitle"]).contains(keeper_name) and str(GameState.pending_stories[1]["title"]) == "The End", "the ending card names them, then The End")
+	check(str(GameState.pending_stories[0]["subtitle"]).contains(keeper_name) and str(GameState.pending_stories[1]["title"]) == "The Sky Beneath", "the ending card names them, then Book II opens")
+	check(int(GameState.current_act().get("act", 0)) == 5 and str(GameState.pending_stories[1]["text"]).contains(keeper_name), "Act V, and the forty-first post hears knocking")
 	GameState.breach_next_day = GameState.day
 	GameState._on_day_passed()
 	check(GameState.breach.is_empty(), "no more Riftbreaks once the Accord is renewed")
