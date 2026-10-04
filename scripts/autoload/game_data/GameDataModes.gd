@@ -1001,7 +1001,10 @@ const EMPTY_POST := {"title": "An empty post", "subtitle": "The Endless Rift",
 
 ## Act IV's finale grows with every post the guild has emptied (lost
 ## champions freed in the Endless Rift).
-const TERMS_PER_POST := 0.05
+## Was 0.05: since pillars on the ladder and the Descent (0.37) guilds free
+## 5-9 champions in passing, and the finale grew 25-45% (sim: 5 of 8 casual
+## guilds stuck there at 55-75% of its strength).
+const TERMS_PER_POST := 0.02
 ## The Broken Accord's ending, chosen after Act IV. Renew: a hero takes the
 ## forty-first post and Riftbreaks end. Break: every post is released (every
 ## champion of this guild freed) and the Hollow rises: Riftbreaks come twice
