@@ -18,6 +18,9 @@ const BREACH_PREVENT_ESSENCE := 15
 const BREACH_HELD_GOLD := 80
 const BREACH_HELD_ESSENCE := 30
 const BREACH_LOSS_SHARE := 0.2     # of stored Essence, and Gold above the coming payday's bill, when a defense is lost
+## A lost tide (the Open Hollow) costs less: one breaks every week, and a
+## Break guild at its wall lost 20% a week until it had nothing (0.35 sim).
+const TIDE_LOSS_SHARE := 0.1
 const BREACH_REPAIR_BASE := 40     # Gold to repair a damaged building: base + step x its level
 const BREACH_REPAIR_STEP := 30
 

@@ -129,7 +129,7 @@ const HAND_BONUS := 0.3
 ## Feats: elites, bosses, pillars and finales each set one optional objective
 ## that suits the fight. Done by hand (no Auto) in a won fight, it pays
 ## FEAT_BONUS more Gold and Essence, and an elite offers one more boon.
-const FEAT_BONUS := 0.4
+var FEAT_BONUS := 0.4   # a var so campaign_sim can try feat_bonus=
 const FEAT_MOMENTUM := 8
 const FEAT_ROUNDS := {"elite": 4, "boss": 6}
 const FEATS := {

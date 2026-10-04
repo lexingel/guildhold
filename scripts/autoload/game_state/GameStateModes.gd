@@ -1091,6 +1091,7 @@ func laurels_earned() -> int:
 	n += int(L["charter"]) if charter_result == "won" and str(branches.get("hearing", "")) != "bought" else 0
 	n += int(L["morrow"]) if morrow_defeated else 0
 	n += echoes_returned * int(L["echo"])
+	n += GameData.GRUDGE_LAURELS if grudge != "" and charter_result == "won" and str(branches.get("hearing", "")) != "bought" else 0   # an old score settled
 	return int(round(n * (1.0 + oath_bonus()) * (GameData.EPILOGUE_READ_LAURELS if moot() else 1.0)))
 
 
@@ -1157,7 +1158,14 @@ func write_legacy(hero_ids: Array, retired: bool = false) -> int:
 		"name": guild_name, "crest": guild_crest, "ending": accord_ending, "retired": retired, "day": day, "act": campaign_act,
 		"rifts": rifts_sealed, "laurels": earned, "remembered": names, "fallen": fallen.size(), "charter": charter_result,
 		"quiet": charter_choice == "quiet", "founding": founding, "oaths": oaths.duplicate(), "year": vale_year.duplicate(true),
-		"branches": branches.duplicate(), "fragments": lore_found_here.size(), "vale": vale_verdict() if echoes_seen.size() >= 3 else ""})
+		"branches": branches.duplicate(), "fragments": lore_found_here.size(), "vale": vale_verdict() if echoes_seen.size() >= 3 else "",
+		"rival": rival_name, "beat_rival": charter_result == "won", "colour": banner_colour})
+	for key in [["bestiary", monsters_seen], ["beaten", bosses_defeated]]:   # one Bestiary across every guild
+		var have: Array = legacy.get(key[0], [])
+		for m in key[1]:
+			if not have.has(m):
+				have.append(m)
+		legacy[key[0]] = have
 	legacy_written = true
 	save_legacy()
 	save()
@@ -1338,6 +1346,10 @@ func apply_founding(id: String) -> void:
 		rival_name = str(others[randi() % others.size()])
 	if int(founding_rule("start_lab", 0)) > 0:
 		upgrades["res.lab"] = maxi(int(founding_rule("start_lab", 0)), int(upgrades.get("res.lab", 0)))
+	grudge = ""
+	for g in legacy.get("guilds", []):   # a rival a past guild beat comes back with a grudge
+		if str(g.get("rival", "")) == rival_name and bool(g.get("beat_rival", false)):
+			grudge = str(g.get("name", ""))
 	if id == "accord":
 		for i in pending_stories.size():
 			if str(pending_stories[i].get("title", "")) == str(GameData.PROLOGUE["title"]):
@@ -1383,6 +1395,91 @@ func restore_hall(id: String) -> String:
 	_news(tr("%s is restored.") % tr(str(hall["name"])))
 	if id == "grandmaster":
 		_add_postgame_laurels(GameData.GRANDMASTER_LAURELS, {"title": "Keepers of the Vale"})
+	save()
+	state_changed.emit()
+	return ""
+
+
+## What would raise the guild's power right now, with what it costs: the
+## Act panel's advice when a finale is out of reach (casual guilds in the sim
+## sat at 70-85% of a finale with 10-34k Gold and 5-15k Essence unspent).
+## [{"kind", "text", "id", "choice"}], most useful first, at most three.
+func power_advice() -> Array:
+	var out: Array = []
+	var bill := weekly_wages() + upkeep()
+	for h in heroes:   # evolutions
+		if h.is_champion or h.level < 10:
+			continue
+		var cls := GameData.find_class(h.pool_id)
+		var choices: Array = GameData.evolution_choices(cls) if not cls.is_empty() else []
+		if choices.is_empty():
+			continue
+		var nr := str(choices[0]["rank"])
+		var cost := int(GameData.find_rank(nr)["cost"])
+		if crystals >= cost and evolve_rank_gate(nr) == "":
+			out.append({"kind": "evolve", "id": h.id, "choice": str(choices[0]["id"]),
+				"text": tr("Evolve %s to Rank %s: %d Essence (you have %d).") % [tr(str(h.name.split(" the ")[0])), tr(nr), cost, crystals]})
+			break
+	var weakest := 99
+	for h in heroes:
+		if not h.is_champion:
+			weakest = mini(weakest, GameData.rank_index(h.rank))
+	var best_offer: Hero = null
+	for o in recruit_pool:
+		if GameData.rank_index(o.rank) > weakest and coins - int(GameData.find_rank(o.rank)["cost"]) > bill and (best_offer == null or GameData.rank_index(o.rank) > GameData.rank_index(best_offer.rank)):
+			best_offer = o
+	if best_offer:
+		out.append({"kind": "recruit", "id": best_offer.id,
+			"text": tr("Hire %s from the recruit board: Rank %s, %d Gold. Your weakest hero is Rank %s.") % [tr(str(best_offer.name.split(" the ")[0])), tr(best_offer.rank), int(GameData.find_rank(best_offer.rank)["cost"]), tr(str(GameData.RANKS[weakest]["id"])) if weakest < GameData.RANKS.size() else "?"]})
+	var drill := GameData.find_branch_node("ops.drill")
+	if feature_unlocked("management") and not drill.is_empty() and int(upgrades.get("ops.drill", 0)) < int(drill["max"]):
+		var dcost := int(drill["cost_base"]) + int(drill["cost_step"]) * int(upgrades.get("ops.drill", 0))
+		if crystals >= dcost:
+			out.append({"kind": "drill", "id": "ops.drill",
+				"text": tr("Build the Drill Yard to level %d: +4%% damage and health for every hero, %d Essence.") % [int(upgrades.get("ops.drill", 0)) + 1, dcost]})
+	if overseer != "" and champion_level_cost(overseer) > 0 and crystals >= champion_level_cost(overseer):
+		out.append({"kind": "champion", "id": overseer,
+			"text": tr("Level %s to %d: a stronger Boon, %d Essence.") % [GameData.champion_full_name(overseer), champion_level(overseer) + 1, champion_level_cost(overseer)]})
+	return out.slice(0, 3)
+
+
+## Takes one piece of power_advice (the sims; the panel's own buttons are
+## the screens it names). Returns "" or why not.
+func follow_advice(a: Dictionary) -> String:
+	match str(a.get("kind", "")):
+		"evolve":
+			return evolve_hero(str(a["id"]), str(a["choice"]))
+		"recruit":
+			if heroes.size() >= hero_slot_cap():   # make room: the weakest hero goes
+				var weakest: Hero = null
+				for h in heroes:
+					if not h.is_champion and (weakest == null or GameData.rank_index(h.rank) < GameData.rank_index(weakest.rank)):
+						weakest = h
+				if weakest:
+					dismiss_hero(weakest.id)
+			return recruit_hero(str(a["id"]))
+		"drill":
+			return upgrade_node("ops.drill")
+		"champion":
+			return level_champion(str(a["id"]))
+	return ""
+
+
+## The endowment: Gold for the next guild, a Laurel at a time.
+func endow_cost() -> int:
+	return GameData.ENDOW_COST + GameData.ENDOW_STEP * endowments
+
+
+## Returns "" or why not.
+func endow() -> String:
+	if not legacy_written:
+		return tr("Endowments open once the guild's legacy is written.")
+	if coins < endow_cost():
+		return tr("Not enough Gold.")
+	coins -= endow_cost()
+	endowments += 1
+	_add_postgame_laurels(1, {"endowed": endowments})
+	_news(tr("Gold set aside for the next guild: +1 Laurel."))
 	save()
 	state_changed.emit()
 	return ""

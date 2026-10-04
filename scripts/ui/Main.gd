@@ -711,6 +711,7 @@ func _accord_choice(cv: VBoxContainer) -> void:
 var _retire_open := false
 var _legacy_pick: Array = []     # heroes picked to be remembered
 var _pending_gifts: Array = []   # founding gifts chosen with Laurels
+var _pending_colour := "crest"   # the banner colour picked at founding (BANNER_COLOURS)
 var _pending_founding := "free"  # the founding charter picked
 var _pending_oaths: Array = []   # oaths to swear at founding
 var _pending_year: Dictionary = {}   # the year rolled on the founding screen
@@ -1779,6 +1780,27 @@ func _render_onboard(v: VBoxContainer) -> void:
 		render()
 	))
 	v.add_child(crest_row)
+	var open_colours: Array = GameData.BANNER_COLOURS.keys().filter(func(c): return GameState.banner_colour_open(str(c)))
+	if open_colours.size() > 1:   # banner colours earned by the guilds in the Hall
+		v.add_child(_label("Banner colour", 14))
+		var colour_row := HFlowContainer.new()
+		colour_row.add_theme_constant_override("h_separation", 8)
+		for c in open_colours:
+			var sw := ColorRect.new()
+			sw.custom_minimum_size = Vector2(16, 16)
+			sw.color = GameState.banner_cloth(str(c), pending_crest)
+			colour_row.add_child(sw)
+			var cb := Button.new()
+			cb.toggle_mode = true
+			cb.button_pressed = _pending_colour == str(c)
+			cb.text = tr(str(GameData.BANNER_COLOURS[c]["name"]))
+			if str(GameData.BANNER_COLOURS[c]["how"]) != "":
+				cb.tooltip_text = tr("Earned: %s") % tr(str(GameData.BANNER_COLOURS[c]["how"]))
+			cb.pressed.connect(func(k=str(c)):
+				_pending_colour = k
+				render())
+			colour_row.add_child(cb)
+		v.add_child(colour_row)
 
 	if not (GameState.legacy.get("guilds", []) as Array).is_empty():
 		v.add_child(_founding_year())
@@ -1801,6 +1823,8 @@ func _render_onboard(v: VBoxContainer) -> void:
 			return
 		GameState.guild_name = n
 		GameState.guild_crest = pending_crest
+		GameState.banner_colour = _pending_colour if GameState.banner_colour_open(_pending_colour) else "crest"
+		_pending_colour = "crest"
 		GameState.apply_founding(_pending_founding)
 		_pending_founding = "free"
 		GameState.oaths = _pending_oaths.duplicate()
@@ -1883,9 +1907,15 @@ func _render_campaign_panel(v: Container) -> void:
 		var rec := GameState.finale_recommended_power()
 		cv.add_child(_power_readout(best, rec, "Your best"))
 		if best < rec * 0.8:   # Deadly: say what raises power, not just that it's short
-			var tip := _wrap_label(tr("Your best party is at %d%% of what the finale expects. Seal more rifts at your top rank for gear, evolve heroes at level 10, level your champion, and build the Drill Yard.") % int(round(100.0 * best / maxf(1.0, rec))), 12, true)
+			var advice: Array = GameState.power_advice()
+			var tip := _wrap_label((tr("Your best party is at %d%% of what the finale expects. What would help now:") % int(round(100.0 * best / maxf(1.0, rec)))) if not advice.is_empty() else
+				(tr("Your best party is at %d%% of what the finale expects. Seal more rifts at your top rank for gear, evolve heroes at level 10, level your champion, and build the Drill Yard.") % int(round(100.0 * best / maxf(1.0, rec)))), 12, true)
 			tip.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
 			cv.add_child(tip)
+			for a in advice:
+				var al := _wrap_label("• " + str(a["text"]), 12)
+				al.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+				cv.add_child(al)
 	panel.add_child(cv)
 	v.add_child(panel)
 

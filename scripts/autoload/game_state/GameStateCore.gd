@@ -128,6 +128,9 @@ var monster_kill_counts: Dictionary = {}   # monster/elite/boss name -> all-time
 var crafts_performed: int = 0
 var flawless_wins: int = 0   # wins where no hero was ever knocked out
 var feats_done: int = 0      # Feats completed by hand (FEATS)
+var endowments: int = 0      # Laurels bought with Gold after the legacy (ENDOW_COST)
+var banner_colour := "crest"  # this guild's banner (BANNER_COLOURS)
+var grudge := ""              # a past guild that beat this guild's rival to the Royal Charter
 var feat_tally := {}         # (not saved) id -> [done, tried] by hand, for the sims
 var elites_won: int = 0      # every Elite win, unlike bosses_defeated/monsters_seen which only track distinct names
 var bosses_won: int = 0      # every Boss win, same distinction
@@ -789,7 +792,7 @@ func save() -> void:
 		
 		"monsters_seen": monsters_seen, "bosses_defeated": bosses_defeated, "hazards_seen": hazards_seen,
 		"reputation": reputation, "monster_kill_counts": monster_kill_counts,
-		"crafts_performed": crafts_performed, "flawless_wins": flawless_wins, "feats_done": feats_done,
+		"crafts_performed": crafts_performed, "flawless_wins": flawless_wins, "feats_done": feats_done, "endowments": endowments, "banner_colour": banner_colour, "grudge": grudge,
 		"elites_won": elites_won, "bosses_won": bosses_won,
 		"guild_board": guild_board, "day": day, "runs_started": runs_started, "campaign_act": campaign_act, "features_seen": features_seen, "hints_seen": hints_seen, "last_export_day": last_export_day, "tips_off": tips_off, "board_refresh_day": board_refresh_day, "quest_tally": quest_tally, "milestones_claimed": milestones_claimed,
 		"bonds": bonds,

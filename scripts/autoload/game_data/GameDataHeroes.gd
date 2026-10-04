@@ -62,6 +62,10 @@ const QUIRKS := {
 	"Echo-Touched": {"origin": "earned", "id": "echo_touched", "stat": "echoes", "need": 1, "arch": "sustain", "stats": {"ability_power": 0.06}},
 	# The Sky Beneath: a recruit from the far side (only once the doors are open).
 	"Hollow-born": {"origin": "hollow", "stats": {"hazard_guard_pct": 0.25, "ability_power": 0.06}, "voice": "arcane"},
+	# The Vale remembers (legacy, 5d): recruits shaped by past guilds' endings, and heirs.
+	"Accord-Sworn": {"origin": "accord", "stats": {"hp_pct": 0.08, "dmg_pct": 0.04}, "voice": "devout"},
+	"Tide-Hardened": {"origin": "tide", "stats": {"hazard_guard_pct": 0.2, "hp_pct": 0.06}, "voice": "stoic"},
+	"Heir": {"origin": "heir", "stats": {"dmg_pct": 0.05, "hp_pct": 0.05}},
 }
 const SCARS_MAX := 2
 const QUIRK_TREAT_COST := 30

@@ -212,7 +212,7 @@ func _hang_banners(bg: Control, scene: Control, sc: Vector2) -> void:
 		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bg.add_child(bar)
 		var cloth := Polygon2D.new()
-		cloth.color = GameData.BANNER_CLOTH[(crest - 1) % GameData.BANNER_CLOTH.size()]
+		cloth.color = GameState.banner_cloth(str(g.get("colour", "crest")), crest)
 		var pts := PackedVector2Array()
 		for p in [Vector2(-5, 2), Vector2(6, 2), Vector2(6, 19), Vector2(0.5, 15), Vector2(-5, 19)]:
 			pts.append(top + p * sc)
@@ -1528,7 +1528,7 @@ func _render_bestiary(v: VBoxContainer) -> void:
 	]
 	for g in groups:
 		var names: Array = g[1]
-		var seen_n: int = names.filter(func(n): return GameState.monsters_seen.has(n)).size()
+		var seen_n: int = names.filter(func(n): return GameState.bestiary_seen(n)).size()
 		v.add_child(_label(tr("%s — %d/%d met") % [tr(str(g[0])), seen_n, names.size()], 15))
 		var flow := HFlowContainer.new()
 		flow.add_theme_constant_override("h_separation", 8)
@@ -1563,7 +1563,7 @@ func _render_bestiary(v: VBoxContainer) -> void:
 
 
 func _bestiary_card(mname: String, tier: String) -> PanelContainer:
-	var seen: bool = GameState.monsters_seen.has(mname)
+	var seen: bool = GameState.bestiary_seen(mname)   # this guild, or any before it
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(180, 0)
 	var cv := _vbox(3)
@@ -1576,6 +1576,8 @@ func _bestiary_card(mname: String, tier: String) -> PanelContainer:
 	cv.add_child(art_row)
 	var nl := _label(mname if seen else "???", 13)
 	cv.add_child(nl)
+	if seen and not GameState.monsters_seen.has(mname):
+		cv.add_child(_label("Met by a past guild", 11, true))
 	var tl := _label(tier, 12, true)
 	tl.add_theme_color_override("font_color", Palette.ELITE if tier != "Monster" else Palette.MUTED)
 	cv.add_child(tl)
@@ -1587,7 +1589,7 @@ func _bestiary_card(mname: String, tier: String) -> PanelContainer:
 		if not kit.is_empty():
 			cv.add_child(_wrap_label(tr("Telegraphs: %s") % tr(str(", ".join(kit.map(func(k): return str(GameData.INTENT_INFO[k]["name"]))))), 12, true))
 		elif tier == "Boss":
-			var beaten: bool = GameState.bosses_defeated.has(mname)
+			var beaten: bool = GameState.bosses_defeated.has(mname) or (GameState.legacy.get("beaten", []) as Array).has(mname)
 			cv.add_child(_wrap_label(tr("Brings a random warden mechanic each fight. %s") % tr(str((tr("Defeated.") if beaten else tr("Not yet defeated.")))), 12, true))
 	card.add_child(cv)
 	return card
@@ -1631,6 +1633,23 @@ func _render_hall_of_guilds(v: VBoxContainer) -> void:
 	if hall.is_empty():
 		return
 	v.add_child(_label(tr("Hall of Guilds · %d Laurels") % int(GameState.legacy.get("laurels", 0)), 16))
+	var recs: Array[String] = []   # the Hall's records
+	var most_l: Dictionary = hall[0]
+	var most_o: Dictionary = hall[0]
+	var best_t: Dictionary = hall[0]
+	for g in hall:
+		if int(g.get("laurels", 0)) > int(most_l.get("laurels", 0)):
+			most_l = g
+		if (g.get("oaths", []) as Array).size() > (most_o.get("oaths", []) as Array).size():
+			most_o = g
+		if int(g.get("best_tide", 0)) > int(best_t.get("best_tide", 0)):
+			best_t = g
+	recs.append(tr("most Laurels: %d, %s") % [int(most_l.get("laurels", 0)), str(most_l["name"])])
+	if not (most_o.get("oaths", []) as Array).is_empty():
+		recs.append(tr("most oaths kept: %d, %s") % [(most_o["oaths"] as Array).size(), str(most_o["name"])])
+	if int(best_t.get("best_tide", 0)) > 0:
+		recs.append(tr("most tides held: %d, %s") % [int(best_t["best_tide"]), str(best_t["name"])])
+	v.add_child(_wrap_label(tr("Records — %s") % "; ".join(recs), 12, true))
 	for g in hall:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
@@ -2244,7 +2263,27 @@ func _render_open_hollow(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 
 
+## The endowment: spare Gold set aside for the next guild, as Laurels.
+func _render_endowment(v: VBoxContainer) -> void:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	var col := _vbox(0)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.add_child(_label(tr("Endow the next guild · %d so far") % GameState.endowments, 14))
+	col.add_child(_wrap_label("Dobbs sets coin aside for whoever founds the next guild. Each Laurel costs more than the last.", 12, true))
+	row.add_child(col)
+	var b := _button(tr("+1 Laurel · %d Gold") % GameState.endow_cost(), func():
+		_flavor_toast = GameState.endow()
+		render())
+	b.disabled = GameState.coins < GameState.endow_cost()
+	row.add_child(b)
+	v.add_child(row)
+	v.add_child(_hsep())
+
+
 func _render_management(v: VBoxContainer) -> void:
+	if GameState.legacy_written:
+		_render_endowment(v)
 	if GameState.keepers():
 		_render_accord_halls(v)
 	elif GameState.accord_ending == "break":

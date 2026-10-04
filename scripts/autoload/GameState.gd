@@ -104,6 +104,9 @@ func reset() -> void:
 	crafts_performed = 0
 	flawless_wins = 0
 	feats_done = 0
+	endowments = 0
+	banner_colour = "crest"
+	grudge = ""
 	feat_tally = {}
 	elites_won = 0
 	bosses_won = 0
@@ -207,6 +210,9 @@ func load_save() -> bool:
 	crafts_performed = data.get("crafts_performed", 0)
 	flawless_wins = data.get("flawless_wins", 0)
 	feats_done = int(data.get("feats_done", 0))
+	endowments = int(data.get("endowments", 0))
+	banner_colour = str(data.get("banner_colour", "crest"))
+	grudge = str(data.get("grudge", ""))
 	elites_won = data.get("elites_won", 0)
 	bosses_won = data.get("bosses_won", 0)
 	guild_board.assign(data.get("guild_board", []))

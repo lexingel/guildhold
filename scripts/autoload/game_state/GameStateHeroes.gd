@@ -144,7 +144,30 @@ func gen_recruit_offer(force_rank: String = "") -> Hero:
 	if hollowborn_open() and randf() < GameData.HOLLOWBORN_CHANCE:   # the Sky Beneath: the doors are open
 		h.quirks = h.quirks.filter(func(q): return GameData.QUIRKS.get(q, {}).get("origin", "") != "born")
 		h.quirks.append("Hollow-born")
+	elif _hall_has("kept") and randf() < GameData.ACCORD_SWORN_CHANCE:   # a past guild kept the Accord
+		h.quirks = h.quirks.filter(func(q): return GameData.QUIRKS.get(q, {}).get("origin", "") != "born")
+		h.quirks.append("Accord-Sworn")
+	elif _hall_has("broke") and randf() < GameData.TIDE_HARDENED_CHANCE:   # ... or broke it
+		h.quirks = h.quirks.filter(func(q): return GameData.QUIRKS.get(q, {}).get("origin", "") != "born")
+		h.quirks.append("Tide-Hardened")
+	_maybe_heir(h)
 	return h
+
+
+## A remembered hero's child, now and then: a family trait (the Heir quirk)
+## and their parent's name in their history. One heir on the board at a time.
+func _maybe_heir(h: Hero) -> void:
+	if recruit_pool.any(func(x): return x.history.has("heir_of")) or randf() >= GameData.HEIR_CHANCE:
+		return
+	var parents: Array = []
+	for g in legacy.get("guilds", []):
+		for n in g.get("remembered", []):
+			if str(n) != "Hesper":
+				parents.append("%s of %s" % [str(n), str(g.get("name", ""))])
+	if parents.is_empty():
+		return
+	h.history["heir_of"] = str(parents[randi() % parents.size()])
+	h.quirks.append("Heir")
 
 
 ## Flags pending_s_rank_reveal whenever a blind roll (recruit offer, Champion

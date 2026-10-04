@@ -246,6 +246,41 @@ const LEGACY_MIN_RANK := "C"      # ...or LEGACY_MIN_RIFTS sealed
 const LEGACY_MIN_RIFTS := 25
 const LEGACY_SHALLOW := 5         # a remembered hero waits at one of the first lost pillars
 ## One-guild starting gifts bought with Laurels at founding.
+## The Vale remembers (5d). A past guild that renewed (or rewrote) the
+## Accord sends Accord-Sworn recruits; one that broke it, Tide-Hardened ones.
+const ACCORD_SWORN_CHANCE := 0.15
+const TIDE_HARDENED_CHANCE := 0.15
+## A remembered hero's child turns up on the recruit board now and then.
+const HEIR_CHANCE := 0.08
+## A rival a past guild beat to the Royal Charter comes back with a grudge:
+## its Renown comes faster, and beating it again is worth Laurels.
+const GRUDGE_RENOWN := 1.1
+const GRUDGE_LAURELS := 5
+const GRUDGE_TAUNT_CHANCE := 0.35
+const GRUDGE_TAUNTS := [
+	"%s beat us once. They're gone. You're not.",
+	"We remember %s. We'll remember you too, for a shorter while.",
+	"The Royal Charter hung in %s's hall. It'll hang in ours this time.",
+]
+const GRUDGE_NOTICE := "%s haven't forgotten %s, who beat them to the Royal Charter. They'll race you harder, and beating them again is worth %d Laurels."
+## Banner colours: earned by what the guilds in the Hall did, picked at
+## founding; the camp's banners wear them. "crest" is the crest's own colour.
+const BANNER_COLOURS := {
+	"crest": {"name": "The crest's own", "how": ""},
+	"keeper": {"color": "c9a227", "name": "Keepers' gold", "how": "Renew the Accord"},
+	"hollow": {"color": "3f8a5a", "name": "Hollow green", "how": "Break the Accord"},
+	"turns": {"color": "d8d4c8", "name": "Turns white", "how": "Rewrite the Terms"},
+	"seaglass": {"color": "4fb3a9", "name": "Sea-glass", "how": "Keep both worlds open"},
+	"oath": {"color": "9e1b32", "name": "Oath crimson", "how": "Keep three oaths in one guild"},
+	"royal": {"color": "4b2a7b", "name": "Grandmaster violet", "how": "Restore the Grandmaster's Hall"},
+	"tide": {"color": "1f5f7a", "name": "Tide blue", "how": "Hold five tides"},
+	"lamp": {"color": "e0a03a", "name": "Lamplight", "how": "Learn ten truths"},
+}
+## The endowment (after the legacy is written): Gold set aside for the next
+## guild, as Laurels. Each costs more than the last. Renew guilds sat on
+## 18-29k idle Gold after the halls (0.35 sim): about four Laurels' worth.
+const ENDOW_COST := 3000
+const ENDOW_STEP := 1500
 const LEGACY_GIFTS := [
 	{"id": "gold", "cost": 5, "name": "300 more Gold"},
 	{"id": "hero", "cost": 8, "name": "A fourth hero, Rank D"},

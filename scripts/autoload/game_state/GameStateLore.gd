@@ -98,6 +98,8 @@ func _hall_has(what: String) -> bool:
 			return hall.any(func(g): return str(g.get("ending", "")) == "rewrite")
 		"both":   # kept both worlds open (Book II)
 			return hall.any(func(g): return str(g.get("sky", "")) == "both")
+		"kept":   # renewed or rewrote the Accord
+			return hall.any(func(g): return str(g.get("ending", "")) in ["renew", "rewrite"])
 	return false
 
 
@@ -314,3 +316,34 @@ func _epilogue_month() -> void:
 	if str(branches.get("epilogue", "")) == "burn":
 		coins += GameData.EPILOGUE_PENSION
 		_news(tr("The Crown's pension arrives: %d Gold.") % GameData.EPILOGUE_PENSION)
+
+
+
+## A banner colour is open: what a guild in the Hall did (its own record
+## counts too: the colour is the guild's to wear).
+func banner_colour_open(id: String) -> bool:
+	if legacy.is_empty():
+		load_legacy()
+	var hall: Array = legacy.get("guilds", [])
+	match id:
+		"crest": return true
+		"keeper": return hall.any(func(g): return str(g.get("ending", "")) == "renew")
+		"hollow": return hall.any(func(g): return str(g.get("ending", "")) == "break")
+		"turns": return hall.any(func(g): return str(g.get("ending", "")) == "rewrite")
+		"seaglass": return hall.any(func(g): return str(g.get("sky", "")) == "both")
+		"oath": return hall.any(func(g): return (g.get("oaths", []) as Array).size() >= 3)
+		"royal": return hall.any(func(g): return str(g.get("title", "")) != "")
+		"tide": return hall.any(func(g): return int(g.get("best_tide", 0)) >= 5)
+		"lamp": return _lore_list("truths").size() >= 10
+	return false
+
+
+## A banner's cloth colour: its chosen colour, or the crest's own.
+static func banner_cloth(colour: String, crest: int) -> Color:
+	var d: Dictionary = GameData.BANNER_COLOURS.get(colour, {})
+	return Color(str(d["color"])) if d.has("color") else GameData.BANNER_CLOTH[(clampi(crest, 1, 99) - 1) % GameData.BANNER_CLOTH.size()]
+
+
+## A monster met (or a warden beaten) by this guild or any before it.
+func bestiary_seen(mname: String) -> bool:
+	return monsters_seen.has(mname) or (legacy.get("bestiary", []) as Array).has(mname)

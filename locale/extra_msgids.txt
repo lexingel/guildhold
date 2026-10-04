@@ -95,3 +95,28 @@ of the Hollow Moon
 Quickfingers
 the Red
 Ashwhisper
+# quirk names (dict keys the extractor skips)
+Battle-Hardened
+Frail
+Reckless
+Slothful
+Deadeye
+Overtuned
+Zealous Mercy
+Glass Dagger
+Shell-Shocked
+Trembling Hands
+Battle Fatigue
+Haunted
+Flinching
+Bosskiller
+Elite Hunter
+Seasoned
+Survivor
+Veteran
+Old Guard
+Echo-Touched
+Hollow-born
+Accord-Sworn
+Tide-Hardened
+Heir

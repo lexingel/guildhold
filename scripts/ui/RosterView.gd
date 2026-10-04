@@ -368,7 +368,10 @@ func _quirk_row(h: Hero) -> Control:
 		var bad: bool = t.get("treatable", false)
 		var chip := _label(q, 12)
 		chip.add_theme_color_override("font_color", Palette.HAZARD if bad else Palette.good())
-		chip.tooltip_text = "%s (%s) — %s" % [tr(str(q)), tr(str({"born": "born with it", "scar": "a scar", "earned": "earned", "hollow": "from the far side"}.get(str(t.get("origin", "")), ""))), tr(str(GameState.quirk_text(q)))]
+		var origin := tr(str({"born": "born with it", "scar": "a scar", "earned": "earned", "hollow": "from the far side", "accord": "sworn to the Accord a past guild kept", "tide": "hardened by the tides a past guild let in"}.get(str(t.get("origin", "")), "")))
+		if str(t.get("origin", "")) == "heir":
+			origin = tr("child of %s") % str(h.history.get("heir_of", "?"))
+		chip.tooltip_text = "%s (%s) — %s" % [tr(str(q)), origin, tr(str(GameState.quirk_text(q)))]
 		chip.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(chip)
 		if bad and GameState.lvl("res.lab") >= 1:

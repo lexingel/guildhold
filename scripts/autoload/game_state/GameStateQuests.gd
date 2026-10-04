@@ -616,12 +616,16 @@ func hold_feast() -> String:
 ## make a move you have to answer (maybe_rival_move).
 func rival_day() -> void:
 	var span: Array = GameData.RIVAL_DAILY_RENOWN[mini(3, campaign_act)]
-	rival_renown += int(round((int(span[0]) + randi() % (int(span[1]) - int(span[0]) + 1)) * year_mult("rival_renown"))) + (1 if reputation - rival_renown >= GameData.RIVAL_CATCH_UP else 0)
+	rival_renown += int(round((int(span[0]) + randi() % (int(span[1]) - int(span[0]) + 1)) * year_mult("rival_renown") * (GameData.GRUDGE_RENOWN if grudge != "" else 1.0))) + (1 if reputation - rival_renown >= GameData.RIVAL_CATCH_UP else 0)
 	maybe_rival_move()
 	if randf() < GameData.RIVAL_TAUNT_CHANCE:
 		var taunts: Array = GameData.RIVAL_VOICE.get(rival_name, {}).get("taunts", GameData.RIVAL_TAUNTS)
 		var taunt := tr(str(taunts[randi() % taunts.size()]))
-		_news(tr("%s of %s: \"%s\"") % [tr(str(rival_leader()["leader"])), tr(str(rival_name)), taunt % guild_name if taunt.contains("%s") else taunt])
+		var held := guild_name
+		if grudge != "" and randf() < GameData.GRUDGE_TAUNT_CHANCE:   # an old score
+			taunt = tr(str(GameData.GRUDGE_TAUNTS[randi() % GameData.GRUDGE_TAUNTS.size()]))
+			held = grudge
+		_news(tr("%s of %s: \"%s\"") % [tr(str(rival_leader()["leader"])), tr(str(rival_name)), taunt % held if taunt.contains("%s") else taunt])
 	# This month's contest.
 	if contest_start.is_empty():
 		contest_start = {"ours": reputation, "theirs": rival_renown}

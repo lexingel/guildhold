@@ -229,8 +229,9 @@ func resolve_breach(result: Dictionary) -> Dictionary:
 		_news(tr("The guild held against a Rank %s Riftbreak.") % tr(breach_rank_id()))
 	else:
 		# Never the coming payday's wages: the loss comes out of what's above the bill.
-		out["lost_coins"] = int(maxi(0, coins - int(payday_forecast()["bill"])) * GameData.BREACH_LOSS_SHARE)
-		out["lost_crystals"] = int(crystals * GameData.BREACH_LOSS_SHARE)
+		var share: float = GameData.TIDE_LOSS_SHARE if breach.has("tide") else GameData.BREACH_LOSS_SHARE
+		out["lost_coins"] = int(maxi(0, coins - int(payday_forecast()["bill"])) * share)
+		out["lost_crystals"] = int(crystals * share)
 		coins -= int(out["lost_coins"])
 		crystals -= int(out["lost_crystals"])
 		for k in (2 if str(breach.get("region", "")) == "camp" else 1):

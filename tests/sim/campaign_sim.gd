@@ -12,6 +12,7 @@ extends Node
 ##   ... -- attr=agility          every attribute point into one attribute
 ##   ... -- hand                  fight like a careful player (see _hand_action)
 ##                                instead of Quick fight
+##   ... -- advice               casual guilds follow the Act panel's power advice when stuck
 ##   ... -- chain                one player's guilds in a row: the legacy carries, endings
 ##                                cycle renew/break/rewrite (the story web's pacing)
 ##   ... -- charter=expose|quiet  the Charter War's turn (default: never
@@ -33,6 +34,7 @@ var seed0 := 7000   # the first seed (seed0=7100 for a second batch)
 var profile := ""
 var log_days := false
 var chain := false         # chain: one player's guilds in a row, sharing a legacy (the story web)
+var advice := false        # advice: the casual player takes the Act panel's advice when a finale is out of reach
 var chain_guild := 0
 var bold := false
 var hand := false
@@ -96,6 +98,10 @@ func _ready() -> void:
 			log_days = true
 		elif a == "chain":
 			chain = true
+		elif a == "advice":
+			advice = true
+		elif a.begins_with("feat_bonus="):
+			GameData.FEAT_BONUS = float(a.get_slice("=", 1))
 	# The legacy file is shared by every guild on this machine: keep the
 	# player's, and give each simulated guild an empty one.
 	# A copy waits on disk too, in case a run is stopped before the end.
@@ -239,6 +245,7 @@ func _guild(p: String, s: int) -> void:
 	print("     story web: %d fragments found here (%s) · %d of %d known in all · %d of %d truths · ending %s · epilogue %s" % [GameState.lore_found_here.size(), ", ".join(GameState.lore_found_here),
 		(GameState.legacy.get("fragments", []) as Array).size(), GameData.FRAGMENTS.size(), (GameState.legacy.get("truths", []) as Array).size(), GameData.TRUTHS.size(),
 		GameState.accord_ending, str(GameState.legacy.get("epilogue", "-"))])
+	print("     endowments: %d" % GameState.endowments)
 	print("     feats done by hand: %d of %d elite/boss wins · flawless wins: %d" % [GameState.feats_done, GameState.elites_won + GameState.bosses_won, GameState.flawless_wins])
 	if not GameState.feat_tally.is_empty():
 		print("     feats by kind: %s" % "  ".join(GameState.feat_tally.keys().map(func(k): return "%s %d/%d" % [k, GameState.feat_tally[k][0], GameState.feat_tally[k][1]])))
@@ -398,6 +405,14 @@ func _idle_spend() -> void:
 			GameState.recruit_hero(offer.id)
 	if GameState.feast_ready() and GameState.heroes.any(func(h): return h.morale < 45) and GameState.coins > bill + GameState.feast_cost():
 		GameState.hold_feast()
+	if advice and GameState.finale_ready():   # a casual player who reads the Act panel's advice when stuck
+		var act := GameState.current_act()
+		var rec := GameState.finale_recommended_power()
+		if Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id))) < rec * 0.8:
+			for i in 3:
+				var tips: Array = GameState.power_advice()
+				if tips.is_empty() or GameState.follow_advice(tips[0]) != "":
+					break
 
 
 func _quests() -> void:
@@ -459,6 +474,9 @@ func _invest() -> void:
 				hall_days.append(GameState.day)
 	while GameState.accord_ending == "break" and GameState.coins - int(GameState.tidewall_cost()[0]) > bill + 300 and GameState.raise_tidewall() == "":   # the Open Hollow
 		pass
+	if GameState.legacy_written and (GameState.halls_restored.size() >= GameData.ACCORD_HALLS.size() or GameState.accord_ending == "break"):
+		while GameState.coins - GameState.endow_cost() > bill + 2000 and GameState.endow() == "":   # the endowment, once nothing else wants the Gold
+			pass
 	for id in GameState.champions:
 		var c := GameState.champion_level_cost(str(id))
 		if c > 0 and GameState.crystals > c + 200:

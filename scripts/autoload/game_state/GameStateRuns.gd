@@ -78,6 +78,8 @@ func check_feature_unlocks() -> Array:
 	if fresh.has("rival"):   # the Charter War begins
 		var card: Dictionary = (GameData.MOOT_NOTICE if moot() else GameData.ROYAL_CHARTER).duplicate()   # the epilogue's Vale
 		card["text"] = tr(str(card["text"])) % [tr(str(rival_name)), tr(str(rival_leader()["leader"]))]
+		if grudge != "":   # the Vale remembers: an old score
+			card["text"] = str(card["text"]) + "\n\n" + tr(GameData.GRUDGE_NOTICE) % [tr(str(rival_name)), grudge, GameData.GRUDGE_LAURELS]
 		pending_stories.append(card)
 	if fresh.size() == 1:
 		var def: Dictionary = GameData.FEATURE_UNLOCKS[fresh[0]]
