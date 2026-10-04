@@ -123,7 +123,7 @@ func finale_recommended_power() -> int:
 	var act := current_act()
 	if act.is_empty():
 		return 0
-	var grow := (1.0 + (GameData.TERMS_PER_POST * posts_freed() if int(act["act"]) == 4 else 0.0)) * _vaelith_cut(int(act["act"]))   # as _apply_finale
+	var grow := (1.0 + (GameData.TERMS_PER_POST * posts_freed() if int(act["act"]) == 4 else 0.0)) * _terms_cut(int(act["act"]))   # as _apply_finale
 	return int(round(Combat.recommended_power(str(act["tier"]), str(act.get("rank", ""))) * float(act["mult"]) * grow))
 
 
@@ -165,7 +165,7 @@ func _apply_finale(diff: Dictionary) -> Dictionary:
 	out["monster_hp"] = int(round(float(out["monster_hp"]) * float(act["mult"])))
 	out["monster_dmg"] = int(round(float(out["monster_dmg"]) * float(act["mult"])))
 	if int(act["act"]) == 4:   # the Terms grow with every empty post
-		var grow := (1.0 + GameData.TERMS_PER_POST * posts_freed()) * _vaelith_cut(4)
+		var grow := (1.0 + GameData.TERMS_PER_POST * posts_freed()) * _terms_cut(4)
 		out["monster_hp"] = int(round(float(out["monster_hp"]) * grow))
 		out["monster_dmg"] = int(round(float(out["monster_dmg"]) * grow))
 	out["boss_name"] = str(act["boss"])
@@ -235,6 +235,8 @@ func _complete_act(act_num: int) -> void:
 			pending_stories.append(c)
 	if act_num == 5 and truth_known("t_brannoch") and str(branches.get("brannoch", "")) == "" and not champion_unlocked("brannoch"):   # B7
 		pending_stories.append(GameData.BRANNOCH_CHOICE.duplicate(true))
+	if act_num == 2 and str(branches.get("spire", "")) == "":   # B10: before the outro
+		pending_stories.insert(mini(first_card, pending_stories.size()), GameData.SPIRE_CHOICE.duplicate(true))
 	if act_num == 1 and not _in_veteran and vaelith_open():   # B1: before the outro
 		var vc: Dictionary = GameData.VAELITH_CHOICE.duplicate(true)
 		vc["relic"] = relic.id
@@ -275,9 +277,58 @@ func choose_vaelith(choice: String) -> void:
 	state_changed.emit()
 
 
-## Act IV's finale, a little weaker if Vaelith was let go (B1).
-func _vaelith_cut(act_num: int) -> float:
-	return 1.0 - GameData.VAELITH_FINALE_CUT if act_num == 4 and str(branches.get("vaelith", "")) == "spared" else 1.0
+## Act IV's finale, a little weaker if Vaelith was let go (B1) and again if
+## the archive was carried out of the Spire (B10).
+func _terms_cut(act_num: int) -> float:
+	if act_num != 4:
+		return 1.0
+	return 1.0 - (GameData.VAELITH_FINALE_CUT if str(branches.get("vaelith", "")) == "spared" else 0.0) \
+		- (GameData.SPIRE_TERMS_CUT if str(branches.get("spire", "")) == "archive" else 0.0)
+
+
+## B10 (needs no truth): at Act II's finale, carry out the Accord's archive
+## or save Hollin.
+func choose_spire(choice: String) -> void:
+	if pending_stories.is_empty() or str(pending_stories[0].get("kind", "")) != "spire":
+		return
+	pending_stories.pop_front()
+	var archive := choice == "archive"
+	branches["spire"] = "archive" if archive else "hollin"
+	if archive:
+		reputation = maxi(0, reputation - GameData.SPIRE_ARCHIVE_RENOWN)
+		for c in pending_stories:
+			if int(c.get("act_outro", 0)) == 2:
+				c["text"] = GameData.SPIRE_ARCHIVE_OUTRO
+	else:
+		add_reputation(GameData.SPIRE_HOLLIN_RENOWN)
+	var r: Dictionary = (GameData.SPIRE_ARCHIVE if archive else GameData.SPIRE_HOLLIN).duplicate()
+	var frag := lore_event("spire", str(branches["spire"]))
+	if frag != "":
+		r["text"] = tr(str(r["text"])) + "\n\n" + frag
+	pending_stories.push_front(r)
+	_news(tr("The archive was carried out of the Spire, and Hollin flooded.") if archive else tr("Hollin was saved from the flood, and the Spire's archive drowned."))
+	save()
+	state_changed.emit()
+
+
+## Crossings (Book II): letting one through costs no Renown if Hollin was
+## saved (B10); turning one back pays double while this guild holds the
+## Royal Charter.
+func crossing_renown() -> int:
+	return 0 if str(branches.get("spire", "")) == "hollin" else GameData.CROSSING_RENOWN
+
+
+func crossing_bounty() -> int:
+	return GameData.CROSSING_BOUNTY * (GameData.CHARTER_BOUNTY_MULT if charter_result == "won" and not moot() else 1)
+
+
+## `text` with `lines` added before its closing "(...)" note, if it has one.
+static func _with_lines(text: String, lines: Array) -> String:
+	if lines.is_empty():
+		return text
+	var add := "\n\n".join(lines)
+	var at := text.rfind("\n\n(")
+	return text + "\n\n" + add if at < 0 else text.substr(0, at) + "\n\n" + add + text.substr(at)
 
 
 ## "<Name> remembers: ..." (the Broken Accord), or "" for a champion without one.
@@ -294,7 +345,7 @@ func maybe_find_ledger_page(finale: bool) -> void:
 	var page: Dictionary = GameData.LEDGER_PAGES[accord_pages]
 	if campaign_act < int(page["act"]):
 		return
-	if not finale and ledger_dry < GameData.LEDGER_PITY and randf() >= GameData.LEDGER_PAGE_CHANCE * float(founding_rule("ledger", 1.0)):
+	if not finale and ledger_dry < GameData.LEDGER_PITY and randf() >= GameData.LEDGER_PAGE_CHANCE * float(founding_rule("ledger", 1.0)) * spire_finds():
 		ledger_dry += 1
 		return
 	ledger_dry = 0
@@ -684,7 +735,15 @@ func choose_accord_ending(choice: String, hero_id: String = "") -> String:
 
 func _act_intro_card(act_num: int) -> Dictionary:
 	var act: Dictionary = GameData.CAMPAIGN[act_num - 1]
-	return {"title": tr("Act %s — %s") % [tr(str(_roman(act_num))), tr(str(act["name"]))], "subtitle": tr("Foe: %s") % tr(str(act["foe"])), "text": str(act["intro"])}
+	var lines: Array = []   # payoffs of choices this guild made
+	if act_num == 4 and str(branches.get("spire", "")) == "archive":
+		lines.append(tr(GameData.SPIRE_ARCHIVE_ACT4))
+	if act_num == 5 and not moot() and charter_result == "won":
+		lines.append(tr(GameData.PAYOFF_CHARTER_WON))
+	elif act_num == 5 and not moot() and charter_result == "lost":
+		lines.append(tr(GameData.PAYOFF_CHARTER_LOST) % tr(str(rival_name)))
+	var text := str(act["intro"]) if lines.is_empty() else tr(str(act["intro"])) + "\n\n" + "\n\n".join(lines)
+	return {"title": tr("Act %s — %s") % [tr(str(_roman(act_num))), tr(str(act["name"]))], "subtitle": tr("Foe: %s") % tr(str(act["foe"])), "text": text}
 
 
 static func _roman(n: int) -> String:
@@ -698,6 +757,8 @@ func _sky_beneath_card() -> Dictionary:
 	var line := tr(str(GameData.SKY_BENEATH_BY_ENDING.get(accord_ending, "")))
 	if accord_ending == "renew":
 		line = line % accord_hero
+	if charter_choice == "quiet":   # a payoff: Morrow's money pays for the climb down
+		line += "\n\n" + tr(hesper_alt("payoff_quiet", GameData.PAYOFF_QUIET))
 	return {"title": tr(str(c["title"])), "subtitle": tr(str(c["subtitle"])), "text": tr(hesper_alt("sky_beneath", str(c["text"]))) + "\n\n" + line}
 
 
@@ -709,11 +770,20 @@ func maybe_crossing() -> void:
 		return
 	var c: Dictionary = GameData.SIGNATORY if signatory_open() else GameData.CROSSINGS[crossings_answered % GameData.CROSSINGS.size()]
 	var frag := lore_event("crossing", str(c["id"]))
+	var lines: Array = []   # payoffs of choices this guild made
+	if crossings_answered == 0 and str(branches.get("spire", "")) == "hollin":
+		lines.append(tr(GameData.SPIRE_HOLLIN_CROSSING))
+	if str(c["id"]) == "family" and str(branches.get("vaelith", "")) == "spared" and champion_unlocked("vaelith"):
+		lines.append(tr(GameData.PAYOFF_VAELITH_FAMILY))
+	if str(c["id"]) == "choir" and str(branches.get("lantern", "")) == "poured":
+		lines.append(tr(GameData.PAYOFF_LANTERN_CHOIR))
+	if frag != "":
+		lines.append(tr(frag))
 	var choices := ["through", "back"]
 	if str(c["id"]) == "choir" and truth_known("t_knock"):   # B8
 		choices.append("sing")
 	pending_stories.append({"kind": "crossing", "id": str(c["id"]), "title": tr(str(c["title"])), "subtitle": tr("A crossing, %s") % tr(str(GameData.BIOMES[run_biome()]["name"])),
-		"text": tr(str(c["text"])) + ("\n\n" + tr(frag) if frag != "" else ""), "choices": choices})
+		"text": "\n\n".join([tr(str(c["text"]))] + lines), "choices": choices})
 
 
 ## B9: the First Signatory comes once the Hall holds a guild that kept both
@@ -743,8 +813,12 @@ func answer_crossing(choice: String) -> void:
 		_news(tr("%s: they sang the oath in the square.") % str(card["title"]))
 	elif choice == "through":
 		crossings_through += 1
-		reputation = maxi(0, reputation - GameData.CROSSING_RENOWN)
-		_news(tr("%s: let through. The villages are frightened (-%d Renown).") % [str(card["title"]), GameData.CROSSING_RENOWN])
+		var lost := crossing_renown()
+		reputation = maxi(0, reputation - lost)
+		if lost > 0:
+			_news(tr("%s: let through. The villages are frightened (-%d Renown).") % [str(card["title"]), lost])
+		else:
+			_news(tr("%s: let through. Hollin takes them in.") % str(card["title"]))
 		lore_event("through", "through")
 		if signatory:   # B9: she joins, and opens her satchel
 			var s: Hero = null
@@ -758,11 +832,28 @@ func answer_crossing(choice: String) -> void:
 			var page := lore_event("signatory", "through")
 			pending_stories.push_front({"title": tr("The First Signatory"), "subtitle": tr("She joins the guild"), "text": page if page != "" else tr(str(GameData.FRAGMENTS["f_first_page"]["text"]))})
 	else:
-		var bounty: int = GameData.SIGNATORY_BOUNTY if signatory else GameData.CROSSING_BOUNTY
+		var bounty: int = GameData.SIGNATORY_BOUNTY if signatory else crossing_bounty()
 		coins += bounty
 		_news(tr("%s: turned back. The Crown pays its bounty (+%d Gold).") % [str(card["title"]), bounty])
 	save()
 	state_changed.emit()
+
+
+## Book II's ending, by what this guild did on the way: the crossings it let
+## through, and Brannoch's door (B7).
+func _sky_payoffs(choice: String) -> Array:
+	var p: Dictionary = GameData.PAYOFF_SKY
+	var lines: Array = []
+	if choice == "both":
+		lines.append(tr(str(p["both_some" if crossings_through > 0 else "both_none"])))
+	elif crossings_through > 0:
+		lines.append(tr(str(p["ours_some"])))
+	match str(branches.get("brannoch", "")):
+		"left":
+			lines.append(tr(str(p["brannoch_left_" + choice])))
+		"freed":
+			lines.append(tr(str(p["brannoch_freed"])))
+	return lines
 
 
 ## Book II's ending, after Act VI: both worlds (Hollow-born recruits from now
@@ -786,8 +877,16 @@ func choose_sky_ending(choice: String) -> void:
 	var e: Dictionary = GameData.SKY_ENDING[choice]
 	pending_stories.push_front(_the_end_card())
 	if epilogue_open():   # the first signature
-		pending_stories.push_front(GameData.EPILOGUE_CHOICE.duplicate(true))
-	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": tr(str(e["text"]))})
+		var ep: Dictionary = GameData.EPILOGUE_CHOICE.duplicate(true)
+		var seen: Array = []   # payoffs: who is in the square
+		if charter_choice == "expose":
+			seen.append(tr(GameData.PAYOFF_EXPOSED))
+		if heroes.any(func(h): return h.history.has("morrow")):
+			seen.append(tr(GameData.PAYOFF_MORROW))
+		if not seen.is_empty():
+			ep["text"] = tr(str(ep["text"])) + "\n\n" + "\n\n".join(seen)
+		pending_stories.push_front(ep)
+	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": _with_lines(tr(str(e["text"])), _sky_payoffs(choice))})
 	_news(tr(str(e["title"])) + ".")
 	save()
 	state_changed.emit()

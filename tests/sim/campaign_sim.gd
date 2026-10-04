@@ -46,6 +46,7 @@ var ending := "renew"    # the Accord's ending (ending=break: the Open Hollow's 
 var gifts: Array = []    # founding gifts (gifts=veteran,contacts), Laurels free
 var endless_mode := "descent"   # how the sim frees champions: descent (turn-based) or survivors
 var year := ""           # "The Vale this year": year=dry,restless or year=random
+var spire := ""          # the Spire's fall: spire=archive or spire=hollin ("" = either, at random)
 var hand_bonus := 0      # fights that paid the flawless-by-hand bonus
 var curve := {}          # power/recommended bucket -> [sealed, lost], ladder runs only
 # Per guild:
@@ -88,6 +89,8 @@ func _ready() -> void:
 			oaths = Array(a.substr(6).split(","))
 		elif a.begins_with("founding="):
 			founding = a.substr(9)
+		elif a.begins_with("spire="):
+			spire = a.substr(6)
 		elif a.begins_with("charter="):
 			charter = a.substr(8)
 		elif a == "hand":
@@ -365,6 +368,8 @@ func _answer_stories() -> void:
 				GameState.choose_sky_ending("both")
 			"vaelith":
 				GameState.choose_vaelith("end")
+			"spire":
+				GameState.choose_spire(spire if spire != "" else ("archive" if randf() < 0.5 else "hollin"))
 			"hearing":
 				GameState.choose_hearing("accept")
 			"key":

@@ -197,7 +197,7 @@ func lore_on_seal(region: String, rank: int) -> String:
 	var open: Array = _lore_open("relic", "", ctx) + _lore_open("seal", "", ctx) + _lore_open("ledger", "", ctx)
 	if open.is_empty():
 		return ""
-	if lore_dry < GameData.LORE_PITY and randf() >= GameData.LORE_SEAL_CHANCE * (GameData.LEDGER_OATH_FRAGMENTS if sworn("ledger") else 1.0):
+	if lore_dry < GameData.LORE_PITY and randf() >= GameData.LORE_SEAL_CHANCE * (GameData.LEDGER_OATH_FRAGMENTS if sworn("ledger") else 1.0) * spire_finds():
 		lore_dry += 1
 		return ""
 	lore_dry = 0
@@ -264,6 +264,12 @@ func lore_letter_ps() -> String:
 		return str(entry[1])
 	var open := _lore_open("letter")
 	return find_fragment(str(open[0])) if not open.is_empty() else ""
+
+
+## B10: with the Accord's archive carried out of the Spire, ledger pages and
+## fragments from sealed rifts turn up more often for the rest of the guild.
+func spire_finds() -> float:
+	return GameData.SPIRE_ARCHIVE_FINDS if str(branches.get("spire", "")) == "archive" else 1.0
 
 
 ## A story branch's price, half again under the Sworn to the Ledger oath.

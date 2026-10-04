@@ -522,6 +522,10 @@ func _payday_scene(prev: Dictionary, left: Array, unpaid: Array, was_ahead: int,
 		return "we_lead" if rival_ahead > 0 else "they_lead"
 	if coins > 3 * maxi(1, weekly_wages() + upkeep()) and last != "rich":
 		return "rich"
+	var spire := "spire_" + str(branches.get("spire", ""))   # B10, once: what came of the Spire
+	if spire != "spire_" and not branches.has("spire_scene") and _scene_ok(spire):
+		branches["spire_scene"] = "told"
+		return spire
 	var lore := lore_payday_scene(last)   # the story web
 	if lore != "":
 		return lore
@@ -551,6 +555,13 @@ func _past_pick() -> Dictionary:
 	if not names.is_empty():
 		fits.append("past_hero")
 	fits.append({"renew": "past_renew", "break": "past_break", "rewrite": "past_rewrite"}.get(str(g.get("ending", "")), "past_retired"))
+	var b: Dictionary = g.get("branches", {})   # what it chose on the way
+	if b.has("spire"):
+		fits.append("past_" + str(b["spire"]))
+	if bool(g.get("quiet", false)):
+		fits.append("past_quiet")
+	if str(b.get("vaelith", "")) == "spared":
+		fits.append("past_vaelith")
 	return {"guild": str(g.get("name", "")), "hero": str(names[randi() % names.size()]) if not names.is_empty() else "", "scenes": fits}
 
 

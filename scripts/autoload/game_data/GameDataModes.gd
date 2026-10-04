@@ -1006,6 +1006,14 @@ const PAYDAY_SCENES := {
 	"past_renew": [["Wen", "Who goes down to the forty-first post now that {guild} is gone?"], ["Hesper", "We do. Once a year, on the Night of Breaking."], ["Dobbs", "I'll put it in the ledger. No charge."]],
 	"past_break": [["Dobbs", "The tides got worse after {guild} burned the Terms."], ["Hesper", "The tides got honest."], ["Dobbs", "Honest costs more."]],
 	"past_rewrite": [["Wen", "{guild} wrote the forty-second line."], ["Hesper", "In my hand. I'd have liked a better pen."], ["Dobbs", "Someone goes down next season. I've budgeted for it."]],
+	# The Spire's fall (B10), once, at this guild's next payday.
+	"spire_archive": [["Wen", "I found our village in the archive. A contract from ninety years ago: three rifts closed, paid in cheese."], ["Dobbs", "At what rate?"], ["Wen", "Better than ours."]],
+	"spire_hollin": [["Dobbs", "Hollin sent a sack of flour. And a bill for the doors."], ["Hesper", "Pay the bill. Keep the flour."], ["Wen", "I'm writing down that they sent both."]],
+	# What a past guild chose (0.46). Those with Hesper in them wait while she holds the post.
+	"past_archive": [["Wen", "{guild} carried the Accord's archive out of the Spire. I've been reading it for a month."], ["Hesper", "Find anything?"], ["Wen", "Your handwriting. On most of it."]],
+	"past_hollin": [["Dobbs", "Hollin sent flour again, for {guild}."], ["Wen", "{guild} is gone."], ["Dobbs", "Hollin doesn't seem to mind."]],
+	"past_quiet": [["Dobbs", "{guild} took Morrow's money, back in the Charter War."], ["Hesper", "Everyone took somebody's money."], ["Dobbs", "They took a lot of it."]],
+	"past_vaelith": [["Wen", "There's a ranger in the {guild} ledgers who never signed for her pay. Just a V."], ["Hesper", "She never did like paperwork."], ["Dobbs", "She never did like being paid, by the look of it."]],
 	"past_retired": [["Wen", "{guild} just stopped. Do guilds do that?"], ["Hesper", "The good ones stop. The rest get stopped."], ["Wen", "Which were they?"], ["Hesper", "Look at their banner. It's still up."]],
 }
 ## How often a quiet payday turns to a past guild, once the Hall of Guilds has one.

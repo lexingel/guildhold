@@ -92,6 +92,7 @@ const EPILOGUE_TRUTHS := ["t_paymaster", "t_sky", "t_terms_hers", "t_knock", "t_
 ##   letter  a postscript to the rival's weekly letter (gate: rival)
 ##   echo / finale / crossing / line / hall / ending: at that event ("on")
 ##   morrow / bestiary / mercenary / charter / ezra / echo_kept / hearing: Phase 2's events
+##   spire: the Spire's fall (B10), "archive" or "hollin"
 ## gate keys: region, rank_min, truth, rival, charter, branch ("id:value"), hall, pages,
 ## morrow (beaten or turned), upgrade ("node:level").
 const FRAGMENTS := {
@@ -131,6 +132,8 @@ const FRAGMENTS := {
 		"text": "The Green Hand wrote down everyone they nursed. The week of the Night of Breaking has eleven names: burns, a broken arm, a midwife's twins. No fevers. Wen closes it gently."},
 	"f_day11": {"truth": "t_blank_line", "channel": "ledger", "gate": {"truth": "t_fever", "pages": 5}, "title": "Day 11, the clerk's copy",
 		"text": "Day 11, in a clerk's neat hand: \"V. asked who holds the last post. G. said the ledger. After, G. told me to go home with a fever. I said I wasn't ill. She said: you will be, and you'll come back.\""},
+	"f_copyists": {"truth": "t_clerk", "channel": "spire", "on": "archive", "title": "The copyists' index",
+		"text": "The archive's index lists every copyist by year. For the year of the Terms there is one name, and it has been scratched out so hard the pen went through. The initial is still there: H."},
 	"f_dusted_stool": {"truth": "t_blank_line", "channel": "hall", "on": "grandmaster", "title": "The clerk's stool",
 		"text": "Forty-one chairs at the long table, thick with dust. At the end, the clerk's stool is clean, and the inkwell beside it is full. Someone kept it ready for twenty years."},
 	"f_her_hand": {"truth": "t_blank_line", "channel": "ending", "on": "rewrite", "gate": {"truth": "t_fever"}, "title": "Her hand",
@@ -194,6 +197,8 @@ const FRAGMENTS := {
 		"text": "A tide-wrack journal on the Glass Coast, from a guild that burned the Terms: \"Most of what came up with the tides wasn't hunting. It was running, and looking back.\""},
 	"f_choir_oath": {"truth": "t_knock", "channel": "crossing", "on": "choir", "gate": {"song": true}, "title": "The Choir's song",
 		"text": "The Choir's song is the Accord's oath, word for word, learned from a guild that came down twenty years ago. They sing it the way the village does now, a little off-key."},
+	"f_mill_wheel": {"truth": "t_knock", "channel": "spire", "on": "hollin", "title": "The mill wheel",
+		"text": "Hollin's miller remembers the Night of Breaking. Every door in the village knocked at once, from inside the frame, three times. Then the mill wheel turned backwards until morning."},
 	"f_day10": {"truth": "t_brannoch", "channel": "ledger", "gate": {"truth": "t_fever", "pages": 4}, "title": "Day 10, the clerk's copy",
 		"text": "Day 10, in the clerk's hand: \"B. asked for the deepest post, under the city. A child watched from the other side. He told her: wait there, I'll come back for you. G. let him go first.\""},
 	"f_height_marks": {"truth": "t_brannoch", "channel": "descent", "on": "6", "title": "Height marks",
@@ -318,6 +323,7 @@ const HESPER_POSTED_ALT := {
 	"charter_quiet": "Morrow's contracts start arriving on your board, generous ones. Wen reads the first, folds it, and doesn't write anything down. She doesn't have to.\n\n(Contracts pay 25% more Gold for the rest of the campaign.)",
 	"echo_oath": "Wen holds it a long time, then sends it down to the forty-first post. It comes back with a note in green ink: \"That was the Grandmaster, before. Give it to the village.\" They give it to the village.",
 	"iron_oath": "The Iron Oath trained shield-walls. Their drill yard is still marked out in white stones, and Dobbs walks it once, end to end, counting, before he lets the recruits in.",
+	"payoff_quiet": "Dobbs pays for the climb down out of Morrow's old contracts, and doesn't say where the money came from. Wen writes it down anyway.",
 	"tooltip": "Wen keeps the guild's chronicle and Dobbs keeps its books. Old Hesper, the last of an Accord guild, holds the forty-first post; her letters come up in green ink.",
 }
 ## The pay table while Hesper holds the post: one quiet scene of its own.
@@ -426,3 +432,42 @@ const MOOT_HEARING := {
 }
 const MOOT_NOTICE := {"title": "The Vale's Moot", "subtitle": "A notice on every guild door in the Vale",
 	"text": "At the end of the year the villages will hold a moot and choose the guild they trust most. Until then, every guild works for its Renown.\n\nThe loudest of them, %s, led by %s, has noticed your guild."}
+
+
+## B10 · The Spire, falling (Act II's finale; needs no truth, so a first
+## guild meets it): carry out the Accord's archive, or save Hollin. Each side
+## pays off later: the archive in Act IV, Hollin in Book II's crossings.
+const SPIRE_ARCHIVE_RENOWN := 6
+const SPIRE_HOLLIN_RENOWN := 8
+const SPIRE_ARCHIVE_FINDS := 1.5    # ledger pages and fragments from seals, the rest of this guild
+const SPIRE_TERMS_CUT := 0.05       # Act IV's finale is this much weaker (with the archive)
+const SPIRE_CHOICE := {"kind": "spire", "title": "The Spire, falling", "subtitle": "The Drowned Spire",
+	"text": "Nyxara is gone, and the Spire is going after her. The Accord's archive is still on its shelves: every contract, every name, every oath, three hundred years of them. Down the hill the same water is heading for Hollin, and Hollin has a mill, a mill race and forty houses. Your heroes can carry one of them out.",
+	"choices": ["archive", "hollin"]}
+const SPIRE_ARCHIVE := {"title": "The archive, carried out", "subtitle": "The Drowned Spire",
+	"text": "Your heroes come down the Spire with the shelves on their backs and the water at their heels. Wen spends a week drying pages on every line in the camp. Hollin floods to the eaves. Nobody died, the miller says, which is not the same as nobody being hurt.\n\n(-6 Renown. Ledger pages and the Vale's story turn up half again as often for the rest of this guild.)"}
+const SPIRE_HOLLIN := {"title": "Hollin, kept dry", "subtitle": "The Drowned Spire",
+	"text": "Your heroes spend the night on the mill race with spades and doors torn off their hinges, and by morning the water goes round Hollin instead of through it. Behind them the Spire folds into the marsh with everything the Accord ever wrote down. Wen watches it go and doesn't say anything for a long time.\n\n(+8 Renown. Hollin will remember.)"}
+const SPIRE_ARCHIVE_OUTRO := "The Spire crumbles into the black water, and Nyxara with it, but not before your guild has carried out its shelves. Most of it is contracts. One book is in the Grandmaster's hand, and it says the guilds did not fall that night. They made a bargain. Beneath the Spire, something vast stirs: a rift with no bottom, lit by pillars of light. The Endless Rift is open to your guild."
+## Added to Act IV's intro (the archive) and to the first crossing (Hollin).
+const SPIRE_ARCHIVE_ACT4 := "Wen has read the archive's copies of the Terms, clause by clause. She knows what they are made of now, and so do your heroes.\n\n(Act IV's finale is 5% weaker.)"
+const SPIRE_HOLLIN_CROSSING := "Word comes down from Hollin before you open the door: whoever comes through, Hollin will take them in.\n\n(Letting a crossing through costs no Renown.)"
+
+## Payoffs (0.46): choices a guild made come back later in the story.
+const CHARTER_BOUNTY_MULT := 2      # a crossing turned back, while this guild holds the Royal Charter
+const PAYOFF_QUIET := "Dobbs pays for the climb down out of Morrow's old contracts, and doesn't say where the money came from. Hesper does."
+const PAYOFF_EXPOSED := "At the back of the square stands Mother Ilse, who brought you the first page of all this. She catches Wen's eye and nods, once."
+const PAYOFF_MORROW := "Morrow reads the seal over Wen's shoulder and laughs, the way he did when you bought him. \"Told you. Someone always pays.\""
+const PAYOFF_CHARTER_WON := "A letter under the Crown's seal follows you down: the Charter's holder will turn every crossing back. The bounty is doubled while you hold it.\n\n(Turning a crossing back pays double.)"
+const PAYOFF_CHARTER_LOST := "%s holds the Charter, so the Crown has sent them down as well. Their banners are on the Glass Coast before yours, and the doors near their camp are already shut."
+const PAYOFF_VAELITH_FAMILY := "Vaelith comes to the door before anyone calls her. The smallest of the five lets go of the line and runs to her."
+const PAYOFF_LANTERN_CHOIR := "They ask after a pale man with a lantern. Wen tells them what you poured into it. The eldest closes her eyes, listens to something none of you can hear, and says some of theirs are home."
+## Book II's ending, by how many crossings came through and Brannoch's door.
+const PAYOFF_SKY := {
+	"both_none": "The first winter nobody comes up. The doors stand open on an empty shore, and your guild learns how to wait.",
+	"both_some": "The first of them to come up are met at the doors by the ones you let through before, holding lamps and calling down in their own language.",
+	"ours_some": "The ones you let through watch from the cliff as the last door closes. Nobody asks them to leave. Nobody asks them anything.",
+	"brannoch_left_both": "Under the city, a knight sets down a door he held for twenty years, because nobody needs it held any more.",
+	"brannoch_left_ours": "Brannoch is still holding when the last door closes. Nobody can say which side he is on.",
+	"brannoch_freed": "Brannoch climbs to the top of the cords himself, to see the last door with his own eyes.",
+}

@@ -539,8 +539,9 @@ func _story_overlay(card_data: Dictionary) -> void:
 				_two_way_choice(cv, "Let her through", tr(str(GameData.SIGNATORY_TIPS[0])), func(): GameState.answer_crossing("through"),
 					"Turn her back", tr(str(GameData.SIGNATORY_TIPS[1])), func(): GameState.answer_crossing("back"))
 			else:
-				_two_way_choice(cv, "Let them through", tr("-%d Renown: the villages are frightened") % GameData.CROSSING_RENOWN, func(): GameState.answer_crossing("through"),
-					"Turn them back", tr("+%d Gold: the Crown's bounty") % GameData.CROSSING_BOUNTY, func(): GameState.answer_crossing("back"))
+				var through_tip := tr("-%d Renown: the villages are frightened") % GameState.crossing_renown() if GameState.crossing_renown() > 0 else tr("No Renown lost: Hollin takes them in")
+				_two_way_choice(cv, "Let them through", through_tip, func(): GameState.answer_crossing("through"),
+					"Turn them back", tr("+%d Gold: the Crown's bounty") % GameState.crossing_bounty(), func(): GameState.answer_crossing("back"))
 			if (card_data["choices"] as Array).has("sing"):   # B8
 				var sing := _icon_domain_button("violet", "", "Let them sing in the square", func():
 					GameState.answer_crossing("sing")
@@ -554,6 +555,9 @@ func _story_overlay(card_data: Dictionary) -> void:
 		elif str(card_data.get("kind", "")) == "epilogue":
 			_two_way_choice(cv, "Read it aloud", tr("Every later guild: the Vale's Moot instead of the Crown, less Gold and Essence, more Laurels, Hollow-born heroes from the start"), func(): GameState.choose_epilogue("read"),
 				"Burn the first page", tr("A royal pension for this guild. Every later guild: royal patronage, richer contracts, the Crown's tithe, the Iron Chorus as rival"), func(): GameState.choose_epilogue("burn"))
+		elif str(card_data.get("kind", "")) == "spire":   # B10
+			_two_way_choice(cv, "Carry out the archive", tr("-%d Renown. Ledger pages and the Vale's story turn up half again as often, and Act IV's finale is %d%% weaker") % [GameData.SPIRE_ARCHIVE_RENOWN, int(round(GameData.SPIRE_TERMS_CUT * 100))], func(): GameState.choose_spire("archive"),
+				"Save Hollin", tr("+%d Renown, and Hollin will remember") % GameData.SPIRE_HOLLIN_RENOWN, func(): GameState.choose_spire("hollin"))
 		elif str(card_data.get("kind", "")) == "vaelith":   # B1 (the Unwritten Accord)
 			_two_way_choice(cv, "Drive her back", tr("As the story goes: she falls back through the Breach"), func(): GameState.choose_vaelith("end"),
 				"Let her go", tr("No relic from this finale and half its Essence. She joins as a champion; Act IV's finale is %d%% weaker") % int(round(GameData.VAELITH_FINALE_CUT * 100)), func(): GameState.choose_vaelith("spare"))
