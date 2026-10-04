@@ -161,8 +161,9 @@ func engage_node() -> void:
 	seed(hash([int(run.get("seed", 0)), int(run["pos"])]))
 	var floor_i := int(run["pos"]) % GameData.DESCENT_FLOORS if run.has("descent") else int(run["pos"])
 	var state := Combat.start_combat(party, "boss" if kind == "pillar" else kind, diff, floor_i)
-	if (kind in ["elite", "boss", "pillar"] or int(run.get("finale", 0)) > 0) and not run.has("tower") and not run.get("training", false):
-		state["feat"] = Combat.roll_feat(state, kind)   # an optional objective, by hand
+	var feat_pre := coming_feat()
+	if feat_pre != "":
+		state["feat"] = Combat.roll_feat(state, kind, feat_pre)   # an optional objective, by hand
 	randomize()
 	var prior_bg_idx := int(run["node_state"].get("bg_idx", -1))
 	if prior_bg_idx >= 0:
@@ -175,9 +176,24 @@ func engage_node() -> void:
 			monsters_seen.append(mname)
 	# bg_idx stays alongside so a reload mid-fight (which drops combat_state)
 	# brings back the same arena.
-	run["node_state"] = {"type": "combat", "combat_state": state, "reward_chosen": false, "bg_idx": int(state.get("background_idx", prior_bg_idx))}
+	run["node_state"] = {"type": "combat", "combat_state": state, "reward_chosen": false, "bg_idx": int(state.get("background_idx", prior_bg_idx)), "feat_pre": feat_pre}
 	save()
 	state_changed.emit()
+
+
+## The Feat this node's fight will set, chosen when the party reaches it (so
+## the encounter screen can show it before Engage), or "" for none.
+func coming_feat() -> String:
+	var kind := current_node_kind()
+	if not (kind in ["elite", "boss", "pillar"] or int(run.get("finale", 0)) > 0) or run.has("tower") or run.get("training", false):
+		return ""
+	var ns: Dictionary = run.get("node_state", {})
+	if not ns.has("feat_pre"):
+		var ids: Array = GameData.FEATS.keys()
+		ids.sort()
+		ns["feat_pre"] = str(ids[absi(hash([int(run.get("seed", 0)), int(run.get("pos", 0)), "feat"])) % ids.size()])
+		run["node_state"] = ns
+	return str(ns["feat_pre"])
 
 
 ## A Feat done by hand (no Auto) in a won fight pays out.

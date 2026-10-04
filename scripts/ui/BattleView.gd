@@ -1063,6 +1063,12 @@ func _render_combat_node(v: VBoxContainer) -> void:
 		v.add_child(_banner(GameData.BATTLE_BACKGROUNDS[pre_bg_idx], bw, 120.0 if _compact() else minf(_battle_height(bw), 190.0)))   # scenery only: Engage stays high on the screen
 		var kind_label := tr("Boss") if is_boss else (tr("Elite") if kind == "elite" else (tr("Pillar") if kind == "pillar" else tr("Combat")))
 		v.add_child(_label(tr("A %s encounter awaits.") % tr(str(kind_label)), 16))
+		var coming := GameState.coming_feat()
+		if coming != "":   # the Feat, before Engage
+			var ft: Array = Combat.feat_preview_text(coming, kind)
+			var fl := _wrap_label(tr("Feat: %s. %s By hand: +%d%% Gold and Essence, and an elite offers one more boon.") % [str(ft[0]), str(ft[1]), int(GameData.FEAT_BONUS * 100)], 13)
+			fl.add_theme_color_override("font_color", Palette.COINS)
+			v.add_child(fl)
 		if kind == "pillar" and GameState.next_lost_champion() != "":
 			var pl := _wrap_label(tr("%s is held in this pillar of light. Beat its keeper to free them.") % GameData.champion_full_name(GameState.next_lost_champion()), 13)
 			pl.add_theme_color_override("font_color", Palette.RANK_S)

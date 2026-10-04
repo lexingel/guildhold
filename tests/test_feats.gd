@@ -44,6 +44,14 @@ func run() -> void:
 	check(str(txt[0]) != "" and not str(txt[0]).contains("%"), "with a name that reads: %s" % str(txt[0]))
 	var plain := _engage("combat")
 	check(not plain.has("feat"), "a regular fight doesn't")
+	# The Feat is chosen before Engage, and the fight keeps it.
+	GameState.run["node_state"] = {}
+	GameState.choose_node_type("elite")
+	var pre := GameState.coming_feat()
+	check(GameData.FEATS.has(pre) and str(Combat.feat_preview_text(pre, "elite")[0]) != "", "the encounter screen shows the coming Feat (%s)" % pre)
+	GameState.engage_node()
+	var fid := str(GameState.run["node_state"]["combat_state"]["feat"]["id"])
+	check(fid == pre or pre in ["first", "double"], "and the fight sets that Feat (%s)" % fid)
 
 	# Each kind of Feat settles from the fight's own record.
 	var s := {"feat": {"id": "break"}, "round_num": 3, "_stats": {}, "monsters": [], "party": GameState.heroes}

@@ -431,7 +431,7 @@ msgstr "%s zehirlendi!"
 msgid "%s drains %d HP from the blow."
 msgstr "%s darbeden %d can emiyor."
 
-#: scripts/autoload/Combat.gd:1436 scripts/autoload/Combat.gd:1643 scripts/autoload/Combat.gd:1664
+#: scripts/autoload/Combat.gd:1436 scripts/autoload/Combat.gd:1654 scripts/autoload/Combat.gd:1675
 msgid "%s is knocked out!"
 msgstr "%s bayıldı!"
 
@@ -439,83 +439,95 @@ msgstr "%s bayıldı!"
 msgid "%s ripostes, striking %s for %d!"
 msgstr "%s karşılık veriyor, %s hedefine %d vuruyor!"
 
-#: scripts/autoload/Combat.gd:1565
+#: scripts/autoload/Combat.gd:1485
+msgid "Down one of its company first"
+msgstr "Önce yanındakilerden birini devir"
+
+#: scripts/autoload/Combat.gd:1485
+msgid "The fight names which one when it starts."
+msgstr "Hangisi olduğunu dövüş başlarken söyler."
+
+#: scripts/autoload/Combat.gd:1487
+msgid "If it fights alone, another Feat takes its place."
+msgstr "Tek başına dövüşürse yerine başka bir Başarı gelir."
+
+#: scripts/autoload/Combat.gd:1576
 msgid "Underpowered: party power %d vs %d recommended"
 msgstr "Güç yetersiz: ekip gücü %d, önerilen %d"
 
-#: scripts/autoload/Combat.gd:1569
+#: scripts/autoload/Combat.gd:1580
 msgid "%d heavy blow%s landed undefended (%d damage)"
 msgstr "%d ağır darbe%s savunmasız yere indi (%d hasar)"
 
-#: scripts/autoload/Combat.gd:1574
+#: scripts/autoload/Combat.gd:1585
 msgid "Burn and poison did %d damage (%d%% of the total)"
 msgstr "Yanma ve zehir %d hasar verdi (toplamda %%%d)"
 
-#: scripts/autoload/Combat.gd:1581
+#: scripts/autoload/Combat.gd:1592
 msgid "Your foes healed %d HP"
 msgstr "Düşmanların %d can iyileşti"
 
-#: scripts/autoload/Combat.gd:1585
+#: scripts/autoload/Combat.gd:1596
 msgid "The party started the fight at %d%% HP"
 msgstr "Ekip dövüşe %%%d canla başladı"
 
-#: scripts/autoload/Combat.gd:1588
+#: scripts/autoload/Combat.gd:1599
 msgid "No Abilities were used"
 msgstr "Hiç Yetenek kullanılmadı"
 
-#: scripts/autoload/Combat.gd:1592
+#: scripts/autoload/Combat.gd:1603
 msgid "%s fell in the front row"
 msgstr "%s ön sırada düştü"
 
-#: scripts/autoload/Combat.gd:1595
+#: scripts/autoload/Combat.gd:1606
 msgid "No healer in a long fight"
 msgstr "Uzun bir dövüşte şifacı yoktu"
 
-#: scripts/autoload/Combat.gd:1617
+#: scripts/autoload/Combat.gd:1628
 msgid "%s regenerates %d HP."
 msgstr "%s %d can yeniliyor."
 
-#: scripts/autoload/Combat.gd:1627 scripts/autoload/Combat.gd:1639
+#: scripts/autoload/Combat.gd:1638 scripts/autoload/Combat.gd:1650
 msgid "%s burns for %d."
 msgstr "%s %d hasarla yanıyor."
 
-#: scripts/autoload/Combat.gd:1660
+#: scripts/autoload/Combat.gd:1671
 msgid "%s suffers %d poison damage."
 msgstr "%s %d zehir hasarı alıyor."
 
-#: scripts/autoload/Combat.gd:1681
+#: scripts/autoload/Combat.gd:1692
 msgid "The party mends its wounds."
 msgstr "Ekip yaralarını iyileştiriyor."
 
-#: scripts/autoload/Combat.gd:1693
+#: scripts/autoload/Combat.gd:1704
 msgid "The %s falls!"
 msgstr "%s düşüyor!"
 
-#: scripts/autoload/Combat.gd:1693
+#: scripts/autoload/Combat.gd:1704
 msgid "All foes defeated!"
 msgstr "Tüm düşmanlar yenildi!"
 
-#: scripts/autoload/Combat.gd:1705
+#: scripts/autoload/Combat.gd:1716
 msgid "The Phoenix Feather flares — the party rises from the ashes!"
 msgstr "Anka Tüyü parlıyor — ekip küllerinden doğuyor!"
 
-#: scripts/autoload/Combat.gd:1729
+#: scripts/autoload/Combat.gd:1740
 msgid "Rally! The guild's order rings out: the party moves first and hits 30% harder this round."
 msgstr "Toparlan! Loncanın emri yankılanıyor: ekip bu tur önce davranır ve %30 daha sert vurur."
 
-#: scripts/autoload/Combat.gd:1760
+#: scripts/autoload/Combat.gd:1771
 msgid "%s is stunned and loses the turn."
 msgstr "%s sersemledi ve sırasını kaybediyor."
 
-#: scripts/autoload/Combat.gd:1812
+#: scripts/autoload/Combat.gd:1823
 msgid "The party withdraws from the fight."
 msgstr "Ekip dövüşten çekiliyor."
 
-#: scripts/autoload/Combat.gd:1821
+#: scripts/autoload/Combat.gd:1832
 msgid "Your party is overwhelmed..."
 msgstr "Ekibin ezildi..."
 
-#: scripts/autoload/Combat.gd:1836
+#: scripts/autoload/Combat.gd:1847
 msgid "%s is left with a lasting scar: %s."
 msgstr "%s kalıcı bir yara izi aldı: %s."
 
@@ -1047,7 +1059,7 @@ msgstr "Rakip lonca haftada bir kahramanlarından birine göz dikebilir, sana me
 msgid "Tower of Trials"
 msgstr "Sınav Kulesi"
 
-#: scripts/autoload/game_data/GameDataArt.gd:77 scripts/autoload/game_state/GameStateRuns.gd:1310 scripts/ui/Main.gd:2144
+#: scripts/autoload/game_data/GameDataArt.gd:77 scripts/autoload/game_state/GameStateRuns.gd:1326 scripts/ui/Main.gd:2144
 msgid "Opens when you complete Act I"
 msgstr "I. Perde'yi bitirince açılır"
 
@@ -2643,7 +2655,7 @@ msgstr "Ne inşa ediyorsan, insanlar fark etti."
 msgid "Growth like this doesn't go unnoticed for long."
 msgstr "Böyle bir büyüme uzun süre fark edilmeden kalmaz."
 
-#: scripts/autoload/game_data/GameDataHeroes.gd:221 scripts/ui/BattleView.gd:1440 scripts/ui/RosterView.gd:808
+#: scripts/autoload/game_data/GameDataHeroes.gd:221 scripts/ui/BattleView.gd:1446 scripts/ui/RosterView.gd:808
 msgid "Weapon"
 msgstr "Silah"
 
@@ -2691,7 +2703,7 @@ msgstr "Değnek"
 msgid "Plate"
 msgstr "Levha Zırh"
 
-#: scripts/autoload/game_data/GameDataHeroes.gd:232 scripts/ui/BattleView.gd:2713
+#: scripts/autoload/game_data/GameDataHeroes.gd:232 scripts/ui/BattleView.gd:2719
 msgid "Guard"
 msgstr "Koru"
 
@@ -4687,7 +4699,7 @@ msgstr "Bizim sesimiz değil"
 msgid "Kept, the Oath echo plays in the vault at night. The words are the Accord's, but the voice isn't human. When Ezra hears of it, he only says: \"Theirs took ours, too.\""
 msgstr "Saklanan Yemin yankısı geceleri kasada çalıyor. Sözler Ahit'in, ama ses insan sesi değil. Ezra duyunca yalnızca şunu söylüyor: \"Onlarınkini de bizimkiler aldı.\""
 
-#: scripts/autoload/game_data/GameDataLore.gd:168 scripts/autoload/game_data/GameDataLore.gd:364
+#: scripts/autoload/game_data/GameDataLore.gd:168 scripts/autoload/game_data/GameDataLore.gd:365
 msgid "The lantern, full"
 msgstr "Fener, dolu"
 
@@ -4875,7 +4887,7 @@ msgstr "Hangi bekçiler?"
 msgid "The ones holding their side of the doors. She says they take turns, like ours."
 msgstr "Kapıların onların tarafını tutanlar. Bizimkiler gibi sırayla tuttuklarını söylüyor."
 
-#: scripts/autoload/game_data/GameDataLore.gd:207 scripts/autoload/game_data/GameDataLore.gd:396 scripts/autoload/game_state/GameStateModes.gd:759
+#: scripts/autoload/game_data/GameDataLore.gd:207 scripts/autoload/game_data/GameDataLore.gd:397 scripts/autoload/game_state/GameStateModes.gd:759
 msgid "The First Signatory"
 msgstr "İlk İmzacı"
 
@@ -5196,238 +5208,242 @@ msgid "Your guild climbs down to the forty-first post with the Terms, and Hesper
 msgstr "Loncan Şartlarla birlikte kırk birinci nöbete iniyor ve Hesper kırk ikinci satırı orada, kendi eliyle yazıyor; çünkü Şartların kabul ettiği tek el onunki: nöbetler sırayla tutulur. Sonra seninle birlikte yukarı tırmanıyor. Sütunlardaki kırk kişi eve yürüyor ve artık kimse Oyuk'u tek başına tutmuyor.\n\n(Yarık Taşmaları sona erdi, bu loncanın bütün şampiyonları özgür, Hesper evde ve eski Ahit salonları yeniden açılabilir.)"
 
 #: scripts/autoload/game_data/GameDataLore.gd:314
+msgid "Wen finds it while copying the last page: a line in the margin, in a smaller, neater hand than the Grandmaster's. \"If a guild ever has to choose, there is a forty-second line. Ask the clerk.\" Wen asks Dobbs who the Grandmaster's clerk was. Dobbs looks at the empty fourth chair at the pay table, and doesn't answer."
+msgstr "Wen son sayfayı kopyalarken buluyor: kenar boşluğunda, Büyük Üstat'ınkinden daha küçük, daha düzgün bir elle yazılmış bir satır. \"Bir lonca bir gün seçmek zorunda kalırsa, kırk ikinci bir satır var. Kâtibe sor.\" Wen, Dobbs'a Büyük Üstat'ın kâtibinin kim olduğunu soruyor. Dobbs maaş masasındaki boş dördüncü sandalyeye bakıyor ve cevap vermiyor."
+
+#: scripts/autoload/game_data/GameDataLore.gd:315
 msgid "A letter comes up from the forty-first post, in green ink. \"I was the clerk. I wrote her letters and her contracts, and I wrote the Terms out fair: forty-one lines. The night they were signed, she sent me home with a note that said I had a fever. I kept the note. I never told %s. I'm telling you. H.\""
 msgstr "Kırk birinci nöbetten yeşil mürekkeple bir mektup geliyor. \"Kâtip bendim. Onun mektuplarını ve sözleşmelerini yazdım, Şartları da temize ben çektim: kırk bir satır. İmzalandıkları gece beni ateşim olduğunu söyleyen bir notla eve gönderdi. Notu sakladım. %s loncasına hiç söylemedim. Sana söylüyorum. H.\""
 
-#: scripts/autoload/game_data/GameDataLore.gd:315
+#: scripts/autoload/game_data/GameDataLore.gd:316
 msgid "Another letter from the post, in green ink. \"There was a line under the forty-first. She made me leave it blank. It says the Terms can be changed, once, by a guild that has both kept them and broken them, and a guild is everyone who came before it. %s kept them. %s burned them. Write the forty-second line, and come and fetch me. H.\""
 msgstr "Nöbetten yeşil mürekkeple bir mektup daha. \"Kırk birincinin altında bir satır vardı. Boş bırakmamı istedi. Şartların bir kez, onları hem tutmuş hem bozmuş bir lonca tarafından değiştirilebileceğini söyler; lonca da kendinden önce gelen herkestir. %s onları tuttu. %s onları yaktı. Kırk ikinci satırı yaz, sonra gel beni al. H.\""
 
-#: scripts/autoload/game_data/GameDataLore.gd:316
+#: scripts/autoload/game_data/GameDataLore.gd:317
 msgid "Another letter from the post, in green ink. \"There was a line under the forty-first. She made me leave it blank. It says the Terms can be changed, once, by a guild that has both kept them and broken them, and a guild is everyone who came before it. None of ours has done both yet. H.\""
 msgstr "Nöbetten yeşil mürekkeple bir mektup daha. \"Kırk birincinin altında bir satır vardı. Boş bırakmamı istedi. Şartların bir kez, onları hem tutmuş hem bozmuş bir lonca tarafından değiştirilebileceğini söyler; lonca da kendinden önce gelen herkestir. Bizimkilerden hiçbiri henüz ikisini de yapmadı. H.\""
 
-#: scripts/autoload/game_data/GameDataLore.gd:317
+#: scripts/autoload/game_data/GameDataLore.gd:318
 msgid "Morrow's contracts start arriving on your board, generous ones. Wen reads the first, folds it, and doesn't write anything down. She doesn't have to.\n\n(Contracts pay 25% more Gold for the rest of the campaign.)"
 msgstr "Morrow'un sözleşmeleri panona gelmeye başlıyor, cömert sözleşmeler. Wen ilkini okuyor, katlıyor ve hiçbir şey yazmıyor. Yazmasına gerek yok.\n\n(Sözleşmeler seferin geri kalanında %25 daha fazla Altın öder.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:318
+#: scripts/autoload/game_data/GameDataLore.gd:319
 msgid "Wen holds it a long time, then sends it down to the forty-first post. It comes back with a note in green ink: \"That was the Grandmaster, before. Give it to the village.\" They give it to the village."
 msgstr "Wen onu uzun süre tutuyor, sonra kırk birinci nöbete gönderiyor. Yeşil mürekkeple bir notla geri geliyor: \"Bu, Büyük Üstat'tı, eskiden. Köye verin.\" Köye veriyorlar."
 
-#: scripts/autoload/game_data/GameDataLore.gd:319
+#: scripts/autoload/game_data/GameDataLore.gd:320
 msgid "The Iron Oath trained shield-walls. Their drill yard is still marked out in white stones, and Dobbs walks it once, end to end, counting, before he lets the recruits in."
 msgstr "Demir Yemin kalkan duvarları yetiştirirdi. Talim alanları hâlâ beyaz taşlarla çizili; Dobbs acemileri içeri almadan önce alanı baştan sona sayarak bir kez yürüyor."
 
-#: scripts/autoload/game_data/GameDataLore.gd:320
+#: scripts/autoload/game_data/GameDataLore.gd:321
 msgid "Wen keeps the guild's chronicle and Dobbs keeps its books. Old Hesper, the last of an Accord guild, holds the forty-first post; her letters come up in green ink."
 msgstr "Loncanın tarihçesini Wen, defterlerini Dobbs tutar. Bir Ahit loncasının sonuncusu Yaşlı Hesper kırk birinci nöbeti tutuyor; mektupları yeşil mürekkeple gelir."
 
-#: scripts/autoload/game_data/GameDataLore.gd:323
+#: scripts/autoload/game_data/GameDataLore.gd:324
 msgid "I keep setting four cups."
 msgstr "Hep dört fincan koyuyorum."
 
-#: scripts/autoload/game_data/GameDataLore.gd:323
+#: scripts/autoload/game_data/GameDataLore.gd:324
 msgid "Send one down to the post."
 msgstr "Birini nöbete gönder."
 
-#: scripts/autoload/game_data/GameDataLore.gd:323
+#: scripts/autoload/game_data/GameDataLore.gd:324
 msgid "It'd be cold by the time it got there."
 msgstr "Oraya varana kadar soğur."
 
-#: scripts/autoload/game_data/GameDataLore.gd:323
+#: scripts/autoload/game_data/GameDataLore.gd:324
 msgid "She'd drink it anyway."
 msgstr "Yine de içer."
 
-#: scripts/autoload/game_data/GameDataLore.gd:332
+#: scripts/autoload/game_data/GameDataLore.gd:333
 msgid "Morrow, turned"
 msgstr "Morrow, satın alındı"
 
-#: scripts/autoload/game_data/GameDataLore.gd:332 scripts/autoload/game_data/GameDataLore.gd:351 scripts/autoload/game_data/GameDataLore.gd:354
+#: scripts/autoload/game_data/GameDataLore.gd:333 scripts/autoload/game_data/GameDataLore.gd:352 scripts/autoload/game_data/GameDataLore.gd:355
 msgid "The Charter War"
 msgstr "Berat Savaşı"
 
-#: scripts/autoload/game_data/GameDataLore.gd:333
+#: scripts/autoload/game_data/GameDataLore.gd:334
 msgid "You don't take the page to the herald. You take it to Morrow, with the second column showing, and the coin. He reads it, counts the coin, and laughs for a long time. \"The Treasury's man, bought by a guild. Fine. I was tired of their calendar.\"\n\n(Morrow joins your guild as a Rank S rogue on double wages, and the Company stops hunting. Miss his pay once and he's gone. The Crown will remember at its hearing.)"
 msgstr "Sayfayı münadiye götürmüyorsun. Morrow'a götürüyorsun; ikinci sütun görünür halde, yanında da parayla. Okuyor, parayı sayıyor ve uzun uzun gülüyor. \"Hazine'nin adamı, bir lonca tarafından satın alındı. Peki. Onların takviminden bıkmıştım zaten.\"\n\n(Morrow loncana çift maaşla S Rütbe bir haydut olarak katılır ve Bölük peşini bırakır. Maaşını bir kez ödemezsen gider. Taç bunu duruşmasında hatırlayacak.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:340 scripts/autoload/game_data/GameDataLore.gd:343 scripts/autoload/game_data/GameDataModes.gd:1117
+#: scripts/autoload/game_data/GameDataLore.gd:341 scripts/autoload/game_data/GameDataLore.gd:344 scripts/autoload/game_data/GameDataModes.gd:1117
 msgid "By Royal Hand"
 msgstr "Kraliyet Eliyle"
 
-#: scripts/autoload/game_data/GameDataLore.gd:340
+#: scripts/autoload/game_data/GameDataLore.gd:341
 msgid "The Crown's hearing"
 msgstr "Taç'ın duruşması"
 
-#: scripts/autoload/game_data/GameDataLore.gd:341
+#: scripts/autoload/game_data/GameDataLore.gd:342
 msgid "The herald's list has another guild's name at the top. The Warden of Rifts' office, you happen to know, has a price, and a cousin who once mislaid a key."
 msgstr "Münadinin listesinin başında başka bir loncanın adı var. Yarıklar Muhafızı'nın makamının, bildiğin üzere, bir fiyatı var; bir de bir zamanlar bir anahtarı kaybetmiş bir kuzeni."
 
-#: scripts/autoload/game_data/GameDataLore.gd:343
+#: scripts/autoload/game_data/GameDataLore.gd:344
 msgid "The Royal Charter is yours, at a price"
 msgstr "Kraliyet Beratı senin, bir bedel karşılığında"
 
-#: scripts/autoload/game_data/GameDataLore.gd:344
+#: scripts/autoload/game_data/GameDataLore.gd:345
 msgid "The herald clears his throat, turns his list over, and reads your name off the back of it. Nobody shakes your hand.\n\n(Contracts pay 10% more Gold and Essence. A bought Charter earns no Laurels, and the Crown's auditors will come in Act IV.)"
 msgstr "Münadi boğazını temizliyor, listesini çeviriyor ve adını arka yüzünden okuyor. Kimse elini sıkmıyor.\n\n(Sözleşmeler %10 daha fazla Altın ve Öz öder. Satın alınmış bir Berat Defne kazandırmaz ve Taç'ın denetçileri IV. Perde'de gelecek.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:345
+#: scripts/autoload/game_data/GameDataLore.gd:346
 msgid "The Crown's auditors"
 msgstr "Taç'ın denetçileri"
 
-#: scripts/autoload/game_data/GameDataLore.gd:345
+#: scripts/autoload/game_data/GameDataLore.gd:346
 msgid "Act IV"
 msgstr "IV. Perde"
 
-#: scripts/autoload/game_data/GameDataLore.gd:346
+#: scripts/autoload/game_data/GameDataLore.gd:347
 msgid "Two clerks in grey arrive with the Warden's seal and go through Dobbs's books for three days. They leave with a fifth of the vault and a receipt.\n\n(-20% of your Gold.)"
 msgstr "Gri giysili iki kâtip Muhafız'ın mührüyle geliyor ve üç gün boyunca Dobbs'un defterlerini didikliyor. Kasanın beşte biri ve bir makbuzla ayrılıyorlar.\n\n(Altınının %20'si gider.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:351
+#: scripts/autoload/game_data/GameDataLore.gd:352
 msgid "The key"
 msgstr "Anahtar"
 
-#: scripts/autoload/game_data/GameDataLore.gd:352
+#: scripts/autoload/game_data/GameDataLore.gd:353
 msgid "Morrow's key is on the table: old iron with the Accord's sigil, warm in a way iron shouldn't be. It opens any rift's door, from either side. Pip wants it back. Wen wants it in the river."
 msgstr "Morrow'un anahtarı masada: Ahit mühürlü eski demir, demirin olmaması gereken bir şekilde sıcak. Her yarığın kapısını açar, iki taraftan da. Pip onu geri istiyor. Wen nehre atılmasını."
 
-#: scripts/autoload/game_data/GameDataLore.gd:354
+#: scripts/autoload/game_data/GameDataLore.gd:355
 msgid "The key, kept"
 msgstr "Anahtar, saklandı"
 
-#: scripts/autoload/game_data/GameDataLore.gd:355
+#: scripts/autoload/game_data/GameDataLore.gd:356
 msgid "The key goes on a cord round the quartermaster's neck. Dobbs says it hums when a rift is near, and it does.\n\n(Choose each rift's region in the Rift Hall. Every Riftbreak comes a rank higher: the doors know who has the key.)"
 msgstr "Anahtar bir iple levazımcının boynuna asılıyor. Dobbs bir yarık yakındayken mırıldandığını söylüyor; gerçekten de mırıldanıyor.\n\n(Yarık Salonu'nda her yarığın bölgesini seç. Her Yarık Taşması bir rütbe yüksek gelir: kapılar anahtarın kimde olduğunu biliyor.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:356
+#: scripts/autoload/game_data/GameDataLore.gd:357
 msgid "The key, broken"
 msgstr "Anahtar, kırıldı"
 
-#: scripts/autoload/game_data/GameDataLore.gd:357
+#: scripts/autoload/game_data/GameDataLore.gd:358
 msgid "It takes the smith, two hammers and most of a morning. When the key breaks, every dog in the Vale barks at once, then stops.\n\n(+5 Renown. Riftbreaks warn you a day earlier. The Grandmaster's Hall will have to be forced open, at a quarter more.)"
 msgstr "Demirci, iki çekiç ve bir sabahın çoğu gerekiyor. Anahtar kırıldığında Vadi'deki bütün köpekler aynı anda havlıyor, sonra susuyor.\n\n(+5 Ün. Yarık Taşmaları seni bir gün erken uyarır. Büyük Üstat'ın Salonu zorla açılmak zorunda kalacak, dörtte bir daha pahalıya.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:358
+#: scripts/autoload/game_data/GameDataLore.gd:359
 msgid "The last hall is the one the Accord was sworn in. Its doors open for no key now; the guild forces them with bars and patience. Inside is a long table, forty-one chairs, and one that someone has dusted every year. The Vale has its keepers again."
 msgstr "Son salon, Ahit'in yeminin edildiği salon. Kapıları artık hiçbir anahtara açılmıyor; lonca onları manivelalar ve sabırla zorluyor. İçeride uzun bir masa, kırk bir sandalye ve birinin her yıl tozunu aldığı bir tanesi. Vadi'nin yeniden bekçileri var."
 
-#: scripts/autoload/game_data/GameDataLore.gd:363
+#: scripts/autoload/game_data/GameDataLore.gd:364
 msgid "\n\nHe holds the lantern out to you, open. You know now what's in it, and that the echoes in your vault would fit."
 msgstr "\n\nFeneri sana uzatıyor, açık. Artık içinde ne olduğunu ve kasandaki yankıların içine sığacağını biliyorsun."
 
-#: scripts/autoload/game_data/GameDataLore.gd:364 scripts/autoload/game_data/GameDataModes.gd:1169 scripts/autoload/game_data/GameDataModes.gd:1171
+#: scripts/autoload/game_data/GameDataLore.gd:365 scripts/autoload/game_data/GameDataModes.gd:1169 scripts/autoload/game_data/GameDataModes.gd:1171
 msgid "What the Rifts Take"
 msgstr "Yarıkların Aldıkları"
 
-#: scripts/autoload/game_data/GameDataLore.gd:365
+#: scripts/autoload/game_data/GameDataLore.gd:366
 msgid "You pour the vault's kept echoes into Ezra's lantern, one crystal at a time. The heroes they touched sit down, suddenly tired, and look lighter. Ezra bows, which nobody in the Vale has seen him do, and gives you the Ninth Lamp's own reckoning of what Essence is worth.\n\n(Contracts pay 10% more Essence for the rest of the campaign. The Vale will remember what you gave.)"
 msgstr "Kasadaki saklı yankıları Ezra'nın fenerine tek tek, kristal kristal döküyorsun. Dokundukları kahramanlar birden yorgun düşüp oturuyor ve hafiflemiş görünüyor. Ezra eğiliyor, Vadi'de kimsenin görmediği bir şey, ve sana Dokuzuncu Lamba'nın Öz'ün değerine dair kendi hesabını veriyor.\n\n(Sözleşmeler seferin geri kalanında %10 daha fazla Öz öder. Vadi verdiklerini hatırlayacak.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:379
+#: scripts/autoload/game_data/GameDataLore.gd:380
 msgid "Brannoch's door"
 msgstr "Brannoch'un kapısı"
 
-#: scripts/autoload/game_data/GameDataLore.gd:379 scripts/autoload/game_data/GameDataLore.gd:382 scripts/autoload/game_data/GameDataLore.gd:384
+#: scripts/autoload/game_data/GameDataLore.gd:380 scripts/autoload/game_data/GameDataLore.gd:383 scripts/autoload/game_data/GameDataLore.gd:385
 msgid "The Inverted City"
 msgstr "Ters Şehir"
 
-#: scripts/autoload/game_data/GameDataLore.gd:380
+#: scripts/autoload/game_data/GameDataLore.gd:381
 msgid "Under the City, at the deepest door, a knight in chains is still holding. Brannoch. He promised a child on the other side he would come back for her, and he never left the door to do it."
 msgstr "Şehrin altında, en derin kapıda zincirli bir şövalye hâlâ dayanıyor. Brannoch. Öbür taraftaki bir çocuğa onun için geri döneceğine söz verdi ve bunu yapmak için kapıdan hiç ayrılmadı."
 
-#: scripts/autoload/game_data/GameDataLore.gd:382
+#: scripts/autoload/game_data/GameDataLore.gd:383
 msgid "Still holding"
 msgstr "Hâlâ dayanıyor"
 
-#: scripts/autoload/game_data/GameDataLore.gd:383
+#: scripts/autoload/game_data/GameDataLore.gd:384
 msgid "You tell him she's grown, and safe, and waiting on our side. He laughs, once, and sets his shoulder against the door again. \"Then it can wait for me a little longer.\"\n\n(The City's gate holds: Act VI's gate objective is met. Brannoch stays at his post.)"
 msgstr "Ona kızın büyüdüğünü, güvende olduğunu ve bizim tarafta beklediğini söylüyorsun. Bir kez gülüyor ve omzunu yeniden kapıya dayıyor. \"O zaman biraz daha bekleyebilir.\"\n\n(Şehrin kapısı dayanıyor: VI. Perde'nin kapı hedefi tamamlandı. Brannoch nöbetinde kalıyor.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:384
+#: scripts/autoload/game_data/GameDataLore.gd:385
 msgid "Relieved"
 msgstr "Nöbetten alındı"
 
-#: scripts/autoload/game_data/GameDataLore.gd:385
+#: scripts/autoload/game_data/GameDataLore.gd:386
 msgid "Your heroes take the door's weight together, and Brannoch steps out of the light for the first time in twenty years. The door shudders. Something on the other side has noticed.\n\n(Brannoch joins as a champion. The City's gate will come at Rank SS.)"
 msgstr "Kahramanların kapının ağırlığını birlikte omuzluyor ve Brannoch yirmi yıl sonra ilk kez ışıktan dışarı adım atıyor. Kapı titriyor. Öbür taraftaki bir şey fark etti.\n\n(Brannoch şampiyon olarak katılır. Şehrin kapısı SS Rütbe gelecek.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:390
+#: scripts/autoload/game_data/GameDataLore.gd:391
 msgid "The Choir sings"
 msgstr "Koro şarkı söylüyor"
 
-#: scripts/autoload/game_data/GameDataLore.gd:390
+#: scripts/autoload/game_data/GameDataLore.gd:391
 msgid "A crossing"
 msgstr "Bir geçiş"
 
-#: scripts/autoload/game_data/GameDataLore.gd:391
+#: scripts/autoload/game_data/GameDataLore.gd:392
 msgid "They sing the Accord's oath in the square, badly and beautifully, and the whole village joins in the second verse. The song carries. Far below, something hears it.\n\n(+5 Renown and +15 morale for every hero. A Riftbreak swells in two days.)"
 msgstr "Meydanda Ahit yeminini söylüyorlar; kötü ve güzel. İkinci kıtada bütün köy onlara katılıyor. Şarkı uzaklara taşıyor. Çok aşağıda bir şey duyuyor.\n\n(+5 Ün ve her kahramana +15 moral. İki gün içinde bir Yarık Taşması kabarır.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:397
+#: scripts/autoload/game_data/GameDataLore.gd:398
 msgid "An old woman at the door, with a satchel she won't let go of. She says she signed for her side, once, and has come to see who signed for ours."
 msgstr "Kapıda, elinden bırakmadığı bir çantayla yaşlı bir kadın. Bir zamanlar kendi tarafı için imza attığını ve bizim taraf için kimin imzaladığını görmeye geldiğini söylüyor."
 
-#: scripts/autoload/game_data/GameDataLore.gd:398
+#: scripts/autoload/game_data/GameDataLore.gd:399
 msgid "She joins as a Hollow-born Rank A cleric, and opens her satchel"
 msgstr "Oyuk doğumlu A Rütbe bir rahip olarak katılır ve çantasını açar"
 
-#: scripts/autoload/game_data/GameDataLore.gd:398
+#: scripts/autoload/game_data/GameDataLore.gd:399
 msgid "+300 Gold: the Crown pays three times the usual for this one"
 msgstr "+300 Altın: Taç bunun için olağanın üç katını öder"
 
-#: scripts/autoload/game_data/GameDataLore.gd:411
+#: scripts/autoload/game_data/GameDataLore.gd:412
 msgid "The first signature"
 msgstr "İlk imza"
 
-#: scripts/autoload/game_data/GameDataLore.gd:411 scripts/autoload/game_data/GameDataLore.gd:415 scripts/autoload/game_data/GameDataLore.gd:417
+#: scripts/autoload/game_data/GameDataLore.gd:412 scripts/autoload/game_data/GameDataLore.gd:416 scripts/autoload/game_data/GameDataLore.gd:418
 msgid "Epilogue"
 msgstr "Son Söz"
 
-#: scripts/autoload/game_data/GameDataLore.gd:412
+#: scripts/autoload/game_data/GameDataLore.gd:413
 msgid "The Crown's herald has come to the Vale to read the new Royal Charter in the square. Wen has the Terms' first page in her satchel, with the Crown's seal above every name. The square is full. Everyone is waiting for someone to speak."
 msgstr "Taç'ın tellalı yeni Kraliyet Beratı'nı meydanda okumak için Vadi'ye geldi. Wen'in çantasında Şartların ilk sayfası var; her ismin üstünde Taç'ın mührüyle. Meydan dolu. Herkes birinin konuşmasını bekliyor."
 
-#: scripts/autoload/game_data/GameDataLore.gd:415
+#: scripts/autoload/game_data/GameDataLore.gd:416
 msgid "Read aloud"
 msgstr "Yüksek sesle okundu"
 
-#: scripts/autoload/game_data/GameDataLore.gd:416
+#: scripts/autoload/game_data/GameDataLore.gd:417
 msgid "Wen reads the first page in the square, slowly, so the back rows can hear. The herald leaves before she finishes. By winter the Charter is gone from every wall, and the villages choose their own guilds at a moot.\n\n(+30 Laurels. In every later guild: the Crown's hearing is the Vale's Moot, contracts pay 10% less Gold, rifts 10% less Essence, guilds earn 10% more Laurels, and Hollow-born heroes come from the start.)"
 msgstr "Wen ilk sayfayı meydanda, arka sıralar duyabilsin diye yavaşça okuyor. Tellal o bitirmeden gidiyor. Kış geldiğinde Berat her duvardan inmiş oluyor ve köyler kendi loncalarını bir mecliste seçiyor.\n\n(+30 Defne. Sonraki her loncada: Taç'ın duruşması Vadi Meclisi olur, sözleşmeler %10 daha az Altın, yarıklar %10 daha az Öz öder, loncalar %10 daha fazla Defne kazanır ve Oyuk doğumlu kahramanlar baştan gelir.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:417
+#: scripts/autoload/game_data/GameDataLore.gd:418
 msgid "Burned"
 msgstr "Yakıldı"
 
-#: scripts/autoload/game_data/GameDataLore.gd:418
+#: scripts/autoload/game_data/GameDataLore.gd:419
 msgid "The page burns green, like the Terms did. The herald reads the Charter to a quiet square and leaves your guild a letter of thanks with a pension in it. Nobody mentions the smell of smoke.\n\n(+30 Laurels, and 1,000 Gold every 28 days for this guild. In every later guild: royal patronage, contracts pay 15% more Gold, the Crown takes a tenth of the vault every 28 days, and the Iron Chorus is always the rival.)"
 msgstr "Sayfa, Şartlar gibi yeşil yanıyor. Tellal Berat'ı sessiz bir meydana okuyor ve loncana içinde bir maaş olan bir teşekkür mektubu bırakıyor. Kimse duman kokusundan söz etmiyor.\n\n(+30 Defne ve bu lonca için her 28 günde 1.000 Altın. Sonraki her loncada: kraliyet himayesi, sözleşmeler %15 daha fazla Altın öder, Taç her 28 günde kasanın onda birini alır ve rakip her zaman Demir Koro olur.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:421 scripts/autoload/game_data/GameDataLore.gd:423 scripts/autoload/game_data/GameDataLore.gd:426
+#: scripts/autoload/game_data/GameDataLore.gd:422 scripts/autoload/game_data/GameDataLore.gd:424 scripts/autoload/game_data/GameDataLore.gd:427
 msgid "The Vale's Moot"
 msgstr "Vadi Meclisi"
 
-#: scripts/autoload/game_data/GameDataLore.gd:421
+#: scripts/autoload/game_data/GameDataLore.gd:422
 msgid "The villages choose your guild"
 msgstr "Köyler senin loncanı seçiyor"
 
-#: scripts/autoload/game_data/GameDataLore.gd:422
+#: scripts/autoload/game_data/GameDataLore.gd:423
 msgid "Every village sends someone to the moot, and the show of hands isn't close. No herald, no seal: the Vale's own say-so hangs in your hall.\n\n(Wages are 10% lower: heroes want to work for the Vale's guild.)"
 msgstr "Her köy meclise birini gönderiyor ve el kaldırma hiç de çekişmeli değil. Ne tellal ne mühür: salonunda Vadi'nin kendi sözü asılı.\n\n(Maaşlar %10 daha düşük: kahramanlar Vadi'nin loncası için çalışmak istiyor.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:423
+#: scripts/autoload/game_data/GameDataLore.gd:424
 msgid "The villages choose %s"
 msgstr "Köyler %s loncasını seçiyor"
 
-#: scripts/autoload/game_data/GameDataLore.gd:424
+#: scripts/autoload/game_data/GameDataLore.gd:425
 msgid "The moot is long, and loud, and %s takes it. The villages will bring their troubles to another door for a while. The rifts don't care whose name the villages call."
 msgstr "Meclis uzun ve gürültülü geçiyor ve %s kazanıyor. Köyler bir süre dertlerini başka bir kapıya götürecek. Yarıklar köylerin kimin adını seslendiğini umursamaz."
 
-#: scripts/autoload/game_data/GameDataLore.gd:426 scripts/autoload/game_data/GameDataModes.gd:947
+#: scripts/autoload/game_data/GameDataLore.gd:427 scripts/autoload/game_data/GameDataModes.gd:947
 msgid "A notice on every guild door in the Vale"
 msgstr "Vadi'deki her lonca kapısına asılmış bir duyuru"
 
-#: scripts/autoload/game_data/GameDataLore.gd:427
+#: scripts/autoload/game_data/GameDataLore.gd:428
 msgid "At the end of the year the villages will hold a moot and choose the guild they trust most. Until then, every guild works for its Renown.\n\nThe loudest of them, %s, led by %s, has noticed your guild."
 msgstr "Yılın sonunda köyler bir meclis toplayıp en çok güvendikleri loncayı seçecek. O zamana kadar her lonca kendi Ünü için çalışıyor.\n\nAralarında en gürültücüsü olan %s, %s önderliğinde, loncanı fark etti."
 
@@ -8119,7 +8135,7 @@ msgstr "Oyuk"
 msgid "The world sits on a thin crust. Under it is the Hollow, where things that never got to happen pile up: unfinished storms, roads never built, beasts that almost were. A rift is a crack in the crust, and what comes through is the Hollow trying on a shape. It copies what it finds, which is why each region's monsters look like that region."
 msgstr "Dünya ince bir kabuğun üstünde durur. Altında Oyuk vardır; hiç gerçekleşemeyen şeylerin biriktiği yer: yarım kalmış fırtınalar, hiç yapılmamış yollar, neredeyse var olacak canavarlar. Yarık kabuktaki bir çatlaktır ve içinden gelen, bir biçime bürünmeye çalışan Oyuk'tur. Bulduğunu taklit eder; her bölgenin canavarları bu yüzden o bölgeye benzer."
 
-#: scripts/autoload/game_data/GameDataModes.gd:916 scripts/ui/BattleView.gd:1599 scripts/ui/GuildViews.gd:1557
+#: scripts/autoload/game_data/GameDataModes.gd:916 scripts/ui/BattleView.gd:1605 scripts/ui/GuildViews.gd:1557
 msgid "Essence"
 msgstr "Öz"
 
@@ -12043,7 +12059,7 @@ msgstr "%s · yeni pasif: %s"
 msgid "A calling: %s"
 msgstr "Bir uzmanlık: %s"
 
-#: scripts/autoload/game_state/GameStateHeroes.gd:569 scripts/autoload/game_state/GameStateRuns.gd:1312
+#: scripts/autoload/game_state/GameStateHeroes.gd:569 scripts/autoload/game_state/GameStateRuns.gd:1328
 msgid "Seal a Rank %s rift first"
 msgstr "Önce bir Rütbe %s yarığı mühürle"
 
@@ -12195,7 +12211,7 @@ msgstr "%s. Perde tamamlandı — +%d Öz"
 msgid " — sealed"
 msgstr " — mühürlendi"
 
-#: scripts/autoload/game_state/GameStateModes.gd:197 scripts/autoload/game_state/GameStateRuns.gd:994
+#: scripts/autoload/game_state/GameStateModes.gd:197 scripts/autoload/game_state/GameStateRuns.gd:1010
 msgid "A champion is freed"
 msgstr "Bir şampiyon kurtarıldı"
 
@@ -12755,203 +12771,203 @@ msgstr "Kampta yeni"
 msgid " — check the tabs above."
 msgstr " — yukarıdaki sekmelere bak."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:216
+#: scripts/autoload/game_state/GameStateRuns.gd:232
 msgid "Sworn to fight By Hand: no Quick fight"
 msgstr "Elle dövüşmeye yeminli: Hızlı dövüş yok"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:218
+#: scripts/autoload/game_state/GameStateRuns.gd:234
 msgid "A finale is fought in full"
 msgstr "Final baştan sona dövüşülür"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:222
+#: scripts/autoload/game_state/GameStateRuns.gd:238
 msgid "Quick fight opens once you seal a Rank %s rift, or with a party at %d%% of Recommended power"
 msgstr "Hızlı dövüş bir Rütbe %s yarığı mühürleyince ya da Önerilen gücün %%%d düzeyindeki bir ekiple açılır"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:314
+#: scripts/autoload/game_state/GameStateRuns.gd:330
 msgid "Captain Morrow is beaten; the Hollow Crown Company is finished."
 msgstr "Yüzbaşı Morrow yenildi; Oyuk Taç Bölüğü'nün işi bitti."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:439
+#: scripts/autoload/game_state/GameStateRuns.gd:455
 msgid "The party rests by the fire and recovers %d%% HP."
 msgstr "Ekip ateşin başında dinleniyor ve canının %%%d kadarını geri kazanıyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:443
+#: scripts/autoload/game_state/GameStateRuns.gd:459
 msgid "The party drills together: +%d XP each."
 msgstr "Ekip birlikte talim yapıyor: her birine +%d TP."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:446
+#: scripts/autoload/game_state/GameStateRuns.gd:462
 msgid "Weapons sharpened, focus restored — the next fight starts with +4 Momentum."
 msgstr "Silahlar bilendi, odak yerine geldi — sonraki dövüş +4 İvme ile başlıyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:495
+#: scripts/autoload/game_state/GameStateRuns.gd:511
 msgid "%s check (%s, %d vs %d): %s."
 msgstr "%s sınaması (%s, %d / %d): %s."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:500
+#: scripts/autoload/game_state/GameStateRuns.gd:516
 msgid "Luck is with you."
 msgstr "Şans senden yana."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:500
+#: scripts/autoload/game_state/GameStateRuns.gd:516
 msgid "Luck is not with you."
 msgstr "Şans senden yana değil."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:505
+#: scripts/autoload/game_state/GameStateRuns.gd:521
 msgid "You move on."
 msgstr "Yoluna devam ediyorsun."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:542
+#: scripts/autoload/game_state/GameStateRuns.gd:558
 msgid "+%d Gold."
 msgstr "+%d Altın."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:546
+#: scripts/autoload/game_state/GameStateRuns.gd:562
 msgid "+%d Essence."
 msgstr "+%d Öz."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:550
+#: scripts/autoload/game_state/GameStateRuns.gd:566
 msgid "%+d Renown."
 msgstr "%+d Ün."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:554
+#: scripts/autoload/game_state/GameStateRuns.gd:570
 msgid "Every hero gains %d XP."
 msgstr "Her kahraman %d TP kazanıyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:558
+#: scripts/autoload/game_state/GameStateRuns.gd:574
 msgid "The party heals %d%% HP."
 msgstr "Ekip canının %%%d kadarını iyileştiriyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:562
+#: scripts/autoload/game_state/GameStateRuns.gd:578
 msgid "Everyone loses %d%% HP."
 msgstr "Herkes canının %%%d kadarını kaybediyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:565
+#: scripts/autoload/game_state/GameStateRuns.gd:581
 msgid "The next fight starts with +3 Momentum."
 msgstr "Sonraki dövüş +3 İvme ile başlıyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:568
+#: scripts/autoload/game_state/GameStateRuns.gd:584
 msgid "+%d Healing Tonic."
 msgstr "+%d Şifa Toniği."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:568
+#: scripts/autoload/game_state/GameStateRuns.gd:584
 msgid "You can't carry another tonic."
 msgstr "Bir tonik daha taşıyamazsın."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:571
+#: scripts/autoload/game_state/GameStateRuns.gd:587
 msgid "A %d-point shield against hazards."
 msgstr "Tehlikelere karşı %d puanlık kalkan."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:579 scripts/autoload/game_state/GameStateRuns.gd:586
+#: scripts/autoload/game_state/GameStateRuns.gd:595 scripts/autoload/game_state/GameStateRuns.gd:602
 msgid "You receive: %s (%s)."
 msgstr "Aldın: %s (%s)."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:693
+#: scripts/autoload/game_state/GameStateRuns.gd:709
 msgid "The Anchor Artifact snuffs the hazard before it strikes."
 msgstr "Çapa Eseri tehlikeyi vurmadan söndürüyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:698
+#: scripts/autoload/game_state/GameStateRuns.gd:714
 msgid "Relic wards absorb %d of the hazard."
 msgstr "Kalıntı korumaları tehlikenin %d kadarını emiyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:706
+#: scripts/autoload/game_state/GameStateRuns.gd:722
 msgid "The hazard deals %d damage across the party."
 msgstr "Tehlike ekibe toplam %d hasar veriyor."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:715
+#: scripts/autoload/game_state/GameStateRuns.gd:731
 msgid "You scavenge %d Gold on the way through."
 msgstr "Geçerken %d Altın topluyorsun."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:718
+#: scripts/autoload/game_state/GameStateRuns.gd:734
 msgid "Essence found in the rubble: +%d."
 msgstr "Molozların arasında Öz bulundu: +%d."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:758
+#: scripts/autoload/game_state/GameStateRuns.gd:774
 msgid "You pay %d Essence and bypass the hazard entirely."
 msgstr "%d Öz ödüyor ve tehlikeyi tamamen atlatıyorsun."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:901
+#: scripts/autoload/game_state/GameStateRuns.gd:917
 msgid "Fifty rifts"
 msgstr "Elli yarık"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:913
+#: scripts/autoload/game_state/GameStateRuns.gd:929
 msgid "%s & %s"
 msgstr "%s ve %s"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:913
+#: scripts/autoload/game_state/GameStateRuns.gd:929
 msgid "A bond, written down"
 msgstr "Yazıya geçen bir bağ"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:914
+#: scripts/autoload/game_state/GameStateRuns.gd:930
 msgid " %s and %s's bond deepens (Lv%d)."
 msgstr " %s ile %s arasındaki bağ derinleşiyor (Sv%d)."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:915
+#: scripts/autoload/game_state/GameStateRuns.gd:931
 msgid "Bond deepened — Lv%d"
 msgstr "Bağ derinleşti — Sv%d"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:915
+#: scripts/autoload/game_state/GameStateRuns.gd:931
 msgid "%s & %s: +%d%% party damage while both stand"
 msgstr "%s & %s: ikisi de ayaktayken +%%%d ekip hasarı"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:964
+#: scripts/autoload/game_state/GameStateRuns.gd:980
 msgid "%s: %s+%d essence"
 msgstr "%s: %s+%d öz"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:964
+#: scripts/autoload/game_state/GameStateRuns.gd:980
 msgid "+%d gold, "
 msgstr "+%d altın, "
 
-#: scripts/autoload/game_state/GameStateRuns.gd:969
+#: scripts/autoload/game_state/GameStateRuns.gd:985
 msgid ", the relic %s"
 msgstr ", %s kalıntısı"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:971
+#: scripts/autoload/game_state/GameStateRuns.gd:987
 msgid ", the title \"%s\""
 msgstr ", \"%s\" unvanı"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:995
+#: scripts/autoload/game_state/GameStateRuns.gd:1011
 msgid "The pillar of light gives way, and %s steps out of it. %s\n\n%s"
 msgstr "Işık sütunu çöküyor ve %s içinden dışarı adım atıyor. %s\n\n%s"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1047
+#: scripts/autoload/game_state/GameStateRuns.gd:1063
 msgid "The party fell at depth %d of the Descent and lost %d Gold and %d Essence on the way out."
 msgstr "Ekip İniş'in %d. derinliğinde düştü ve çıkarken %d Altın ile %d Öz kaybetti."
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1125
+#: scripts/autoload/game_state/GameStateRuns.gd:1141
 msgid "Field Triage"
 msgstr "Sahada Triyaj"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1149
+#: scripts/autoload/game_state/GameStateRuns.gd:1165
 msgid "Needs %d idle hero%s at camp"
 msgstr "Kampta %d boşta kahraman%s gerekir"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1162
+#: scripts/autoload/game_state/GameStateRuns.gd:1178
 msgid "No healer can do it"
 msgstr "Bunu yapabilecek şifacı yok"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1178
+#: scripts/autoload/game_state/GameStateRuns.gd:1194
 msgid "A new guild can't leave anyone behind"
 msgstr "Yeni bir lonca kimseyi geride bırakamaz"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1193
+#: scripts/autoload/game_state/GameStateRuns.gd:1209
 msgid "Found alive"
 msgstr "Sağ bulundu"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1193
+#: scripts/autoload/game_state/GameStateRuns.gd:1209
 msgid "%s is carried home from the sealed rift"
 msgstr "%s mühürlenen yarıktan eve taşınıyor"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1208
+#: scripts/autoload/game_state/GameStateRuns.gd:1224
 msgid "Lost in the rift"
 msgstr "Yarıkta kayboldu"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1208
+#: scripts/autoload/game_state/GameStateRuns.gd:1224
 msgid "%s was left behind and never came back"
 msgstr "%s geride bırakıldı ve bir daha dönmedi"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1209
+#: scripts/autoload/game_state/GameStateRuns.gd:1225
 msgid "Left behind in a %s"
 msgstr "Bir %s içinde geride bırakıldı"
 
-#: scripts/autoload/game_state/GameStateRuns.gd:1342
+#: scripts/autoload/game_state/GameStateRuns.gd:1358
 msgid "The party climbed out of the Descent at depth %d."
 msgstr "Ekip İniş'ten %d. derinlikte tırmanıp çıktı."
 
@@ -13475,7 +13491,7 @@ msgstr "Her 20 sn'de ekip 3 sn boyunca yarı hasar alır"
 msgid "Warden"
 msgstr "Bekçi"
 
-#: scripts/survivors/SurvivorsRun.gd:444 scripts/ui/BattleView.gd:2860
+#: scripts/survivors/SurvivorsRun.gd:444 scripts/ui/BattleView.gd:2866
 msgid "Rift Warden"
 msgstr "Yarık Bekçisi"
 
@@ -13715,7 +13731,7 @@ msgstr "Oto durdu: %s düşmek üzere. Savun, Koru ya da iyileştir, sonra Oto'y
 msgid "Boss"
 msgstr "Boss"
 
-#: scripts/ui/BattleView.gd:1064 scripts/ui/BattleView.gd:2860 scripts/ui/GuildViews.gd:1526
+#: scripts/ui/BattleView.gd:1064 scripts/ui/BattleView.gd:2866 scripts/ui/GuildViews.gd:1526
 msgid "Elite"
 msgstr "Seçkin"
 
@@ -13731,735 +13747,739 @@ msgstr "Dövüş"
 msgid "A %s encounter awaits."
 msgstr "Seni bir karşılaşma bekliyor: %s."
 
-#: scripts/ui/BattleView.gd:1067
+#: scripts/ui/BattleView.gd:1069
+msgid "Feat: %s. %s By hand: +%d%% Gold and Essence, and an elite offers one more boon."
+msgstr "Başarı: %s. %s Elle: %%%d daha fazla Altın ve Öz, bir seçkin de bir lütuf seçeneği daha sunar."
+
+#: scripts/ui/BattleView.gd:1073
 msgid "%s is held in this pillar of light. Beat its keeper to free them."
 msgstr "%s bu ışık sütununda tutuluyor. Onu kurtarmak için sütunun bekçisini yen."
 
-#: scripts/ui/BattleView.gd:1072
+#: scripts/ui/BattleView.gd:1078
 msgid "+%d%% damage and HP"
 msgstr "+%%%d hasar ve can"
 
-#: scripts/ui/BattleView.gd:1074
+#: scripts/ui/BattleView.gd:1080
 msgid "Vanguard first strike"
 msgstr "Öncü ilk vuruşu"
 
-#: scripts/ui/BattleView.gd:1076
+#: scripts/ui/BattleView.gd:1082
 msgid "+3 starting Momentum"
 msgstr "+3 başlangıç İvmesi"
 
-#: scripts/ui/BattleView.gd:1078
+#: scripts/ui/BattleView.gd:1084
 msgid "Drill Yard: "
 msgstr "Talim Alanı: "
 
-#: scripts/ui/BattleView.gd:1082
+#: scripts/ui/BattleView.gd:1088
 msgid "Win by hand with no one down: +%d%% Gold and Essence."
 msgstr "Kimse düşmeden elle kazan: +%%%d Altın ve Öz."
 
-#: scripts/ui/BattleView.gd:1087
+#: scripts/ui/BattleView.gd:1093
 msgid "Elites and bosses are fought in full: no Quick fight."
 msgstr "Seçkinler ve bosslar baştan sona dövüşülür: Hızlı dövüş yok."
 
-#: scripts/ui/BattleView.gd:1090
+#: scripts/ui/BattleView.gd:1096
 msgid "Quick fight  (Q)"
 msgstr "Hızlı dövüş  (Q)"
 
-#: scripts/ui/BattleView.gd:1093
+#: scripts/ui/BattleView.gd:1099
 msgid "Play the whole fight out instantly on Auto and jump to the result"
 msgstr "Tüm dövüşü Oto ile anında oyna ve sonuca geç"
 
-#: scripts/ui/BattleView.gd:1109
+#: scripts/ui/BattleView.gd:1115
 msgid "Engage  (Space)"
 msgstr "Çatış  (Boşluk)"
 
-#: scripts/ui/BattleView.gd:1135
+#: scripts/ui/BattleView.gd:1141
 msgid "%s · %d round%s"
 msgstr "%s · %d tur%s"
 
-#: scripts/ui/BattleView.gd:1136
+#: scripts/ui/BattleView.gd:1142
 msgid "Hide log"
 msgstr "Kaydı gizle"
 
-#: scripts/ui/BattleView.gd:1136
+#: scripts/ui/BattleView.gd:1142
 msgid "Fight log"
 msgstr "Dövüş kaydı"
 
-#: scripts/ui/BattleView.gd:1136
+#: scripts/ui/BattleView.gd:1142
 msgid "Show or hide the full fight log"
 msgstr "Tam dövüş kaydını göster ya da gizle"
 
-#: scripts/ui/BattleView.gd:1180
+#: scripts/ui/BattleView.gd:1186
 msgid "Victory!"
 msgstr "Zafer!"
 
-#: scripts/ui/BattleView.gd:1191
+#: scripts/ui/BattleView.gd:1197
 msgid " (%d from Amplifiers)"
 msgstr " (%d Güçlendiricilerden)"
 
-#: scripts/ui/BattleView.gd:1193
+#: scripts/ui/BattleView.gd:1199
 msgid "  +%d Essence cache (Resonance)"
 msgstr "  +%d Öz zulası (Rezonans)"
 
-#: scripts/ui/BattleView.gd:1196
+#: scripts/ui/BattleView.gd:1202
 msgid "  +%d extracted"
 msgstr "  +%d çıkarıldı"
 
-#: scripts/ui/BattleView.gd:1202
+#: scripts/ui/BattleView.gd:1208
 msgid "Feat done: +%d Gold, +%d Essence."
 msgstr "Başarı tamam: +%d Altın, +%d Öz."
 
-#: scripts/ui/BattleView.gd:1206
+#: scripts/ui/BattleView.gd:1212
 msgid "Flawless, by hand: +%d Gold, +%d Essence (no one went down and you played every turn)."
 msgstr "Kusursuz, elle: +%d Altın, +%d Öz (kimse düşmedi ve her turu sen oynadın)."
 
-#: scripts/ui/BattleView.gd:1210
+#: scripts/ui/BattleView.gd:1216
 msgid "The pillar gives way: %s is free."
 msgstr "Sütun çöküyor: %s özgür."
 
-#: scripts/ui/BattleView.gd:1214
+#: scripts/ui/BattleView.gd:1220
 msgid "%s made it through safely — +2 Renown, +1 Token."
 msgstr "%s sağ salim çıktı — +2 Ün, +1 Nişan."
 
-#: scripts/ui/BattleView.gd:1225 scripts/ui/Main.gd:3847 scripts/ui/Main.gd:580
+#: scripts/ui/BattleView.gd:1231 scripts/ui/Main.gd:3847 scripts/ui/Main.gd:580
 msgid "Continue"
 msgstr "Devam"
 
-#: scripts/ui/BattleView.gd:1234
+#: scripts/ui/BattleView.gd:1240
 msgid "Decide what happens to the downed hero first (above)"
 msgstr "Önce düşen kahramana ne olacağına karar ver (yukarıda)"
 
-#: scripts/ui/BattleView.gd:1238
+#: scripts/ui/BattleView.gd:1244
 msgid "You withdraw from the fight."
 msgstr "Dövüşten çekiliyorsun."
 
-#: scripts/ui/BattleView.gd:1238
+#: scripts/ui/BattleView.gd:1244
 msgid "Defeat — the party is downed and recovering."
 msgstr "Yenilgi — ekip düştü ve toparlanıyor."
 
-#: scripts/ui/BattleView.gd:1240
+#: scripts/ui/BattleView.gd:1246
 msgid "The trial ends. Your heroes step out of the tower unharmed — this floor will be waiting, exactly as it was."
 msgstr "Sınav bitti. Kahramanların kuleden yara almadan çıkıyor — bu kat seni aynen bıraktığın gibi bekleyecek."
 
-#: scripts/ui/BattleView.gd:1242
+#: scripts/ui/BattleView.gd:1248
 msgid "The party falls at depth %d of the Descent. Half of what it earned down here is lost on the way out."
 msgstr "Ekip İniş'in %d. derinliğinde düşüyor. Aşağıda kazandığının yarısı çıkarken kayboluyor."
 
-#: scripts/ui/BattleView.gd:1256 scripts/ui/BattleView.gd:1568
+#: scripts/ui/BattleView.gd:1262 scripts/ui/BattleView.gd:1574
 msgid "Back to the Tower"
 msgstr "Kuleye dön"
 
-#: scripts/ui/BattleView.gd:1256 scripts/ui/RiftRunView.gd:467
+#: scripts/ui/BattleView.gd:1262 scripts/ui/RiftRunView.gd:467
 msgid "Return to camp"
 msgstr "Kampa dön"
 
-#: scripts/ui/BattleView.gd:1275
+#: scripts/ui/BattleView.gd:1281
 msgid "Choose your reward"
 msgstr "Ödülünü seç"
 
-#: scripts/ui/BattleView.gd:1275
+#: scripts/ui/BattleView.gd:1281
 msgid "Take one. The others stay in the rift."
 msgstr "Birini al. Diğerleri yarıkta kalır."
 
-#: scripts/ui/BattleView.gd:1289
+#: scripts/ui/BattleView.gd:1295
 msgid "Skip the boon"
 msgstr "Lütfu atla"
 
-#: scripts/ui/BattleView.gd:1293
+#: scripts/ui/BattleView.gd:1299
 msgid "Choose a boon"
 msgstr "Bir lütuf seç"
 
-#: scripts/ui/BattleView.gd:1293
+#: scripts/ui/BattleView.gd:1299
 msgid "It lasts the rest of this rift."
 msgstr "Bu yarığın sonuna kadar sürer."
 
-#: scripts/ui/BattleView.gd:1380
+#: scripts/ui/BattleView.gd:1386
 msgid "%s · you have %d"
 msgstr "%s · sende %d var"
 
-#: scripts/ui/BattleView.gd:1388
+#: scripts/ui/BattleView.gd:1394
 msgid "Completes %s: %s"
 msgstr "Tamamlar: %s: %s"
 
-#: scripts/ui/BattleView.gd:1395 scripts/ui/BattleView.gd:1458
+#: scripts/ui/BattleView.gd:1401 scripts/ui/BattleView.gd:1464
 msgid "Take  (%d)"
 msgstr "Al  (%d)"
 
-#: scripts/ui/BattleView.gd:1440
+#: scripts/ui/BattleView.gd:1446
 msgid "Relic"
 msgstr "Kalıntı"
 
-#: scripts/ui/BattleView.gd:1440 scripts/ui/RosterView.gd:808 scripts/ui/UiKit.gd:1186
+#: scripts/ui/BattleView.gd:1446 scripts/ui/RosterView.gd:808 scripts/ui/UiKit.gd:1186
 msgid "Gear"
 msgstr "Teçhizat"
 
-#: scripts/ui/BattleView.gd:1441
+#: scripts/ui/BattleView.gd:1447
 msgid "%s · %s"
 msgstr "%s · %s"
 
-#: scripts/ui/BattleView.gd:1490
+#: scripts/ui/BattleView.gd:1496
 msgid "Why you lost"
 msgstr "Neden kaybettin"
 
-#: scripts/ui/BattleView.gd:1530
+#: scripts/ui/BattleView.gd:1536
 msgid "%s %d-piece %s — %s"
 msgstr "%s %d parça %s — %s"
 
-#: scripts/ui/BattleView.gd:1544
+#: scripts/ui/BattleView.gd:1550
 msgid "Floor %d cleared!"
 msgstr "%d. kat temizlendi!"
 
-#: scripts/ui/BattleView.gd:1555
+#: scripts/ui/BattleView.gd:1561
 msgid "A weekly re-clear pays half."
 msgstr "Haftalık tekrar temizleme yarısını öder."
 
-#: scripts/ui/BattleView.gd:1557
+#: scripts/ui/BattleView.gd:1563
 msgid "Guardian's relic: %s"
 msgstr "Muhafızın kalıntısı: %s"
 
-#: scripts/ui/BattleView.gd:1560
+#: scripts/ui/BattleView.gd:1566
 msgid " It's on the Relic Altar."
 msgstr " Kalıntı Sunağı'nda."
 
-#: scripts/ui/BattleView.gd:1562
+#: scripts/ui/BattleView.gd:1568
 msgid "New guild title: %s"
 msgstr "Yeni lonca unvanı: %s"
 
-#: scripts/ui/BattleView.gd:1568
+#: scripts/ui/BattleView.gd:1574
 msgid " — floor %d next"
 msgstr " — sıradaki kat %d"
 
-#: scripts/ui/BattleView.gd:1594
+#: scripts/ui/BattleView.gd:1600
 msgid "Floor %d/%d"
 msgstr "Kat %d/%d"
 
-#: scripts/ui/BattleView.gd:1599 scripts/ui/GuildViews.gd:1557 scripts/ui/GuildViews.gd:487
+#: scripts/ui/BattleView.gd:1605 scripts/ui/GuildViews.gd:1557 scripts/ui/GuildViews.gd:487
 msgid "Gold"
 msgstr "Altın"
 
-#: scripts/ui/BattleView.gd:1620
+#: scripts/ui/BattleView.gd:1626
 msgid "Lv%d → Lv%d"
 msgstr "Sv%d → Sv%d"
 
-#: scripts/ui/BattleView.gd:1620
+#: scripts/ui/BattleView.gd:1626
 msgid "Lv%d"
 msgstr "Sv%d"
 
-#: scripts/ui/BattleView.gd:1624
+#: scripts/ui/BattleView.gd:1630
 msgid "Down"
 msgstr "Düştü"
 
-#: scripts/ui/BattleView.gd:1624 scripts/ui/RosterView.gd:83
+#: scripts/ui/BattleView.gd:1630 scripts/ui/RosterView.gd:83
 msgid "%d/%d HP"
 msgstr "%d/%d Can"
 
-#: scripts/ui/BattleView.gd:1639
+#: scripts/ui/BattleView.gd:1645
 msgid "Found: "
 msgstr "Bulunanlar: "
 
-#: scripts/ui/BattleView.gd:1639
+#: scripts/ui/BattleView.gd:1645
 msgid "Found: nothing this time"
 msgstr "Bulunanlar: bu sefer hiçbir şey"
 
-#: scripts/ui/BattleView.gd:1642 scripts/ui/BattleView.gd:1659
+#: scripts/ui/BattleView.gd:1648 scripts/ui/BattleView.gd:1665
 msgid "%d hero%s lost"
 msgstr "%d kahraman%s kaybedildi"
 
-#: scripts/ui/BattleView.gd:1653
+#: scripts/ui/BattleView.gd:1659
 msgid "Floor %d/%d reached"
 msgstr "Ulaşılan kat: %d/%d"
 
-#: scripts/ui/BattleView.gd:1656
+#: scripts/ui/BattleView.gd:1662
 msgid "%+d Gold, %+d Essence this run"
 msgstr "Bu koşuda %+d Altın, %+d Öz"
 
-#: scripts/ui/BattleView.gd:1724
+#: scripts/ui/BattleView.gd:1730
 msgid "Shield: absorbs the next %d damage"
 msgstr "Kalkan: sonraki %d hasarı emer"
 
-#: scripts/ui/BattleView.gd:1813
+#: scripts/ui/BattleView.gd:1819
 msgid "Defending — takes reduced damage this round"
 msgstr "Savunuyor — bu tur daha az hasar alır"
 
-#: scripts/ui/BattleView.gd:1816
+#: scripts/ui/BattleView.gd:1822
 msgid "Shield — absorbs the next %d damage"
 msgstr "Kalkan — sonraki %d hasarı emer"
 
-#: scripts/ui/BattleView.gd:1819
+#: scripts/ui/BattleView.gd:1825
 msgid "Burning — %d damage a round for %d more round(s). A Healing Tonic puts it out."
 msgstr "Yanıyor — her tur %d hasar, %d tur daha. Şifa Toniği söndürür."
 
-#: scripts/ui/BattleView.gd:1821
+#: scripts/ui/BattleView.gd:1827
 msgid "Chilled — acts late next round"
 msgstr "Üşümüş — sonraki tur geç davranır"
 
-#: scripts/ui/BattleView.gd:1823
+#: scripts/ui/BattleView.gd:1829
 msgid "Stunned — loses their next turn"
 msgstr "Sersemlemiş — sonraki sırasını kaybeder"
 
-#: scripts/ui/BattleView.gd:1826
+#: scripts/ui/BattleView.gd:1832
 msgid "Poisoned — %d damage a round for %d more round(s)"
 msgstr "Zehirli — her tur %d hasar, %d tur daha"
 
-#: scripts/ui/BattleView.gd:1831
+#: scripts/ui/BattleView.gd:1837
 msgid "Guarded by %s this round"
 msgstr "Bu tur koruyan: %s"
 
-#: scripts/ui/BattleView.gd:1833
+#: scripts/ui/BattleView.gd:1839
 msgid "Guarding an ally this round (takes their hits, 25% weaker)"
 msgstr "Bu tur bir müttefiki koruyor (darbelerini %25 daha zayıf alır)"
 
-#: scripts/ui/BattleView.gd:1835
+#: scripts/ui/BattleView.gd:1841
 msgid "Cursed — deals %d%% less damage for %d more round(s). Sanctuary cleanses it."
 msgstr "Lanetli — %%%d daha az hasar verir, %d tur daha. Sığınak arındırır."
 
-#: scripts/ui/BattleView.gd:1837
+#: scripts/ui/BattleView.gd:1843
 msgid "Riposte — answers the next %d hit(s) with a counter-strike"
 msgstr "Karşılık — sonraki %d darbeye karşı saldırıyla cevap verir"
 
-#: scripts/ui/BattleView.gd:1839
+#: scripts/ui/BattleView.gd:1845
 msgid "Undying — half damage and can't fall this round"
 msgstr "Ölümsüz — bu tur yarı hasar alır ve düşemez"
 
-#: scripts/ui/BattleView.gd:1841
+#: scripts/ui/BattleView.gd:1847
 msgid "Will dodge the next hit aimed at them"
 msgstr "Kendisine gelen sonraki darbeden kaçacak"
 
-#: scripts/ui/BattleView.gd:1843
+#: scripts/ui/BattleView.gd:1849
 msgid "Branded — takes %d%% more damage for %d more round(s). Guard them."
 msgstr "Damgalı — %%%d daha fazla hasar alır, %d tur daha. Onu koru."
 
-#: scripts/ui/BattleView.gd:1845
+#: scripts/ui/BattleView.gd:1851
 msgid "Taunting — every foe's attacks come here this round, %d%% weaker"
 msgstr "Kışkırtıyor — bu tur tüm düşman saldırıları buraya gelir, %%%d daha zayıf"
 
-#: scripts/ui/BattleView.gd:1847
+#: scripts/ui/BattleView.gd:1853
 msgid "Enough Momentum for their Ability"
 msgstr "Yeteneği için yeterli İvme var"
 
-#: scripts/ui/BattleView.gd:1863
+#: scripts/ui/BattleView.gd:1869
 msgid " (active)"
 msgstr " (etkin)"
 
-#: scripts/ui/BattleView.gd:1874
+#: scripts/ui/BattleView.gd:1880
 msgid "Armored — shrugs off %d%% of basic attacks (each hit chips it). Abilities ignore armor."
 msgstr "Zırhlı — temel saldırıların %%%d kadarını savuşturur (her darbe zırhı aşındırır). Yetenekler zırhı yok sayar."
 
-#: scripts/ui/BattleView.gd:1876
+#: scripts/ui/BattleView.gd:1882
 msgid "Its hits can set a hero ablaze (damage over time)"
 msgstr "Darbeleri bir kahramanı tutuşturabilir (zamanla hasar)"
 
-#: scripts/ui/BattleView.gd:1877
+#: scripts/ui/BattleView.gd:1883
 msgid "Its hits can chill a hero (acts late next round)"
 msgstr "Darbeleri bir kahramanı üşütebilir (sonraki tur geç davranır)"
 
-#: scripts/ui/BattleView.gd:1879
+#: scripts/ui/BattleView.gd:1885
 msgid "Winding up a heavy blow. Shield Bash, Frost Nova or Backstab can punish it."
 msgstr "Ağır bir darbe için güç topluyor. Kalkan Darbesi, Buz Novası ya da Sırttan Bıçak bunu cezalandırabilir."
 
-#: scripts/ui/BattleView.gd:1881
+#: scripts/ui/BattleView.gd:1887
 msgid "Stunned — loses its next %s"
 msgstr "Sersemlemiş — sonraki %s kaybeder"
 
-#: scripts/ui/BattleView.gd:1881
+#: scripts/ui/BattleView.gd:1887
 msgid "%d actions"
 msgstr "%d hamlesini"
 
-#: scripts/ui/BattleView.gd:1884
+#: scripts/ui/BattleView.gd:1890
 msgid "Burning — %d damage a round for %d more round(s)"
 msgstr "Yanıyor — her tur %d hasar, %d tur daha"
 
-#: scripts/ui/BattleView.gd:1886
+#: scripts/ui/BattleView.gd:1892
 msgid "Marked — takes %d%% more damage from heroes"
 msgstr "İşaretli — kahramanlardan %%%d daha fazla hasar alır"
 
-#: scripts/ui/BattleView.gd:1890
+#: scripts/ui/BattleView.gd:1896
 msgid "Can also: %s (telegraphed a round ahead)"
 msgstr "Ayrıca yapabilir: %s (bir tur önceden belli olur)"
 
-#: scripts/ui/BattleView.gd:1893
+#: scripts/ui/BattleView.gd:1899
 msgid "Ward — absorbs the next %d damage"
 msgstr "Koruma — sonraki %d hasarı emer"
 
-#: scripts/ui/BattleView.gd:1957
+#: scripts/ui/BattleView.gd:1963
 msgid "winding up a heavy blow"
 msgstr "ağır darbe için güç topluyor"
 
-#: scripts/ui/BattleView.gd:2013
+#: scripts/ui/BattleView.gd:2019
 msgid "Next round!"
 msgstr "Sonraki tur!"
 
-#: scripts/ui/BattleView.gd:2013
+#: scripts/ui/BattleView.gd:2019
 msgid "Incoming this round: %s"
 msgstr "Bu tur gelenler: %s"
 
-#: scripts/ui/BattleView.gd:2086
+#: scripts/ui/BattleView.gd:2092
 msgid "Winding up"
 msgstr "Güç topluyor"
 
-#: scripts/ui/BattleView.gd:2086
+#: scripts/ui/BattleView.gd:2092
 msgid "Gathering strength this round. Next round it lands a heavy blow (×%s damage) that stuns its target unless they Defend. Defend, Guard, or move the likely target to the back row."
 msgstr "Bu tur güç topluyor. Sonraki tur ağır bir darbe (×%s hasar) indirir; hedef Savunmazsa sersemler. Savun, Koru ya da muhtemel hedefi arka sıraya al."
 
-#: scripts/ui/BattleView.gd:2089
+#: scripts/ui/BattleView.gd:2095
 msgid "HEAVY BLOW on %s for about %d — it stuns unless they Defend. Defend (5) halves it; Guard (6) takes it for them; Shield Bash breaks it."
 msgstr "AĞIR DARBE: %s, yaklaşık %d — Savunmazsa sersemler. Savun (5) yarıya indirir; Koru (6) darbeyi onun yerine alır; Kalkan Darbesi bozar."
 
-#: scripts/ui/BattleView.gd:2092
+#: scripts/ui/BattleView.gd:2098
 msgid "Attacks %s this round for about %d%s"
 msgstr "Bu tur %s hedefine yaklaşık %d vuracak%s"
 
-#: scripts/ui/BattleView.gd:2092
+#: scripts/ui/BattleView.gd:2098
 msgid " — a heavy hit, consider Defending"
 msgstr " — ağır bir darbe, Savunmayı düşün"
 
-#: scripts/ui/BattleView.gd:2102
+#: scripts/ui/BattleView.gd:2108
 msgid "Round %d%s"
 msgstr "Tur %d%s"
 
-#: scripts/ui/BattleView.gd:2115
+#: scripts/ui/BattleView.gd:2121
 msgid "Feat: %s"
 msgstr "Başarı: %s"
 
-#: scripts/ui/BattleView.gd:2115
+#: scripts/ui/BattleView.gd:2121
 msgid " (by hand only)"
 msgstr " (yalnızca elle)"
 
-#: scripts/ui/BattleView.gd:2117
+#: scripts/ui/BattleView.gd:2123
 msgid "%s Won by hand (no Auto), it pays +%d%% Gold and Essence, and an elite offers one more boon."
 msgstr "%s Elle (Oto olmadan) kazanılırsa %%%d daha fazla Altın ve Öz öder ve bir seçkin bir lütuf seçeneği daha sunar."
 
-#: scripts/ui/BattleView.gd:2127 scripts/ui/GuildViews.gd:1287 scripts/ui/RiftRunView.gd:290
+#: scripts/ui/BattleView.gd:2133 scripts/ui/GuildViews.gd:1287 scripts/ui/RiftRunView.gd:290
 msgid "Rank %s"
 msgstr "Rütbe %s"
 
-#: scripts/ui/BattleView.gd:2127
+#: scripts/ui/BattleView.gd:2133
 msgid "This rift is Rank %s on the rift ladder."
 msgstr "Bu yarık, yarık merdiveninde Rütbe %s."
 
-#: scripts/ui/BattleView.gd:2176
+#: scripts/ui/BattleView.gd:2182
 msgid "Attack %s"
 msgstr "Saldır: %s"
 
-#: scripts/ui/BattleView.gd:2176
+#: scripts/ui/BattleView.gd:2182
 msgid "Target %s (click again to attack)"
 msgstr "Hedef: %s (saldırmak için yeniden tıkla)"
 
-#: scripts/ui/BattleView.gd:2183
+#: scripts/ui/BattleView.gd:2189
 msgid "%s on %s"
 msgstr "%s → %s"
 
-#: scripts/ui/BattleView.gd:2250
+#: scripts/ui/BattleView.gd:2256
 msgid "That's the core of every fight: read the tags above the foes, build Momentum with attacks and defence, and spend it on skills. Auto (A) plays turns for you whenever you like."
 msgstr "Her dövüşün özü bu: düşmanların üstündeki etiketleri oku, saldırı ve savunmayla İvme biriktir, becerilere harca. Oto (A) istediğin an turları senin yerine oynar."
 
-#: scripts/ui/BattleView.gd:2263
+#: scripts/ui/BattleView.gd:2269
 msgid "Wind-ups. %s has wound up a heavy blow (the red tag above it). Next round it lands on one hero and stuns them unless they Defend. Press Defend (5) to take half and earn Momentum, or Guard (6) a hurt ally."
 msgstr "Güç toplama. %s ağır bir darbe için güç topladı (üstündeki kırmızı etiket). Sonraki tur bir kahramana iner ve Savunmazsa onu sersemletir. Hasarın yarısını almak ve İvme kazanmak için Savun (5), ya da yaralı bir müttefiki Koru (6)."
 
-#: scripts/ui/BattleView.gd:2266
+#: scripts/ui/BattleView.gd:2272
 msgid "Wind-ups. %s is winding up a heavy blow at %s: see the red tag above it. It lands next round and stuns unless the target Defends. %s"
 msgstr "Güç toplama. %s, %s hedefine ağır bir darbe için güç topluyor: üstündeki kırmızı etikete bak. Sonraki tur iner ve hedef Savunmazsa sersemletir. %s"
 
-#: scripts/ui/BattleView.gd:2267
+#: scripts/ui/BattleView.gd:2273
 msgid "Press Defend (5) — %s takes half and earns Momentum."
 msgstr "Savun'a (5) bas — %s yarı hasar alır ve İvme kazanır."
 
-#: scripts/ui/BattleView.gd:2267
+#: scripts/ui/BattleView.gd:2273
 msgid "Press Guard (6) and pick %s — %s takes the blow instead, 25%% weaker."
 msgstr "Koru'ya (6) bas ve %s seç — darbeyi %s alır, %%25 daha zayıf."
 
-#: scripts/ui/BattleView.gd:2269
+#: scripts/ui/BattleView.gd:2275
 msgid "Attack. It's %s's turn: press Attack (1) or click a foe. Every attack adds 1 Momentum — the pips under %s's name."
 msgstr "Saldırı. Sıra: %s. Saldır'a (1) bas ya da bir düşmana tıkla. Her saldırı 1 İvme ekler — %s adının altındaki noktalar."
 
-#: scripts/ui/BattleView.gd:2273
+#: scripts/ui/BattleView.gd:2279
 msgid "Skills. You have %d Momentum. %s's skill %s (2) spends %d of it for a stronger move — hover it to read it, then use it."
 msgstr "Beceriler. %d İvmen var. %s becerisi %s (2), daha güçlü bir hamle için %d harcar — üstüne gelip oku, sonra kullan."
 
-#: scripts/ui/BattleView.gd:2274
+#: scripts/ui/BattleView.gd:2280
 msgid "Skills cost Momentum. Keep attacking until a skill (2-4) lights up, then use it."
 msgstr "Beceriler İvme harcar. Bir beceri (2-4) yanana kadar saldırmaya devam et, sonra kullan."
 
-#: scripts/ui/BattleView.gd:2289
+#: scripts/ui/BattleView.gd:2295
 msgid "Step %d of 3"
 msgstr "Adım %d / 3"
 
-#: scripts/ui/BattleView.gd:2289
+#: scripts/ui/BattleView.gd:2295
 msgid "Well fought"
 msgstr "İyi dövüştün"
 
-#: scripts/ui/BattleView.gd:2297 scripts/ui/UiKit.gd:1598
+#: scripts/ui/BattleView.gd:2303 scripts/ui/UiKit.gd:1598
 msgid "Got it"
 msgstr "Anladım"
 
-#: scripts/ui/BattleView.gd:2297
+#: scripts/ui/BattleView.gd:2303
 msgid "Skip tutorial"
 msgstr "Eğitimi atla"
 
-#: scripts/ui/BattleView.gd:2407
+#: scripts/ui/BattleView.gd:2413
 msgid "Momentum %d/%d — the party's shared pool for skills and Abilities. Attacks, kills, and hits taken while Defending or Guarding build it."
 msgstr "İvme %d/%d — ekibin beceri ve Yetenekler için ortak havuzu. Saldırılar, öldürmeler ve Savunurken ya da Korurken alınan darbeler doldurur."
 
-#: scripts/ui/BattleView.gd:2409
+#: scripts/ui/BattleView.gd:2415
 msgid "Momentum"
 msgstr "İvme"
 
-#: scripts/ui/BattleView.gd:2467
+#: scripts/ui/BattleView.gd:2473
 msgid "Which tonic?"
 msgstr "Hangi tonik?"
 
-#: scripts/ui/BattleView.gd:2486
+#: scripts/ui/BattleView.gd:2492
 msgid "%s (key %d)"
 msgstr "%s (tuş %d)"
 
-#: scripts/ui/BattleView.gd:2495 scripts/ui/BattleView.gd:2534 scripts/ui/BattleView.gd:2580
+#: scripts/ui/BattleView.gd:2501 scripts/ui/BattleView.gd:2540 scripts/ui/BattleView.gd:2586
 msgid "Cancel"
 msgstr "İptal"
 
-#: scripts/ui/BattleView.gd:2498
+#: scripts/ui/BattleView.gd:2504
 msgid "Guard whom?"
 msgstr "Kimi koruyacak?"
 
-#: scripts/ui/BattleView.gd:2498
+#: scripts/ui/BattleView.gd:2504
 msgid "%s for whom?"
 msgstr "%s kimin için?"
 
-#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2498 scripts/ui/BattleView.gd:2829
+#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2504 scripts/ui/BattleView.gd:2835
 msgid "Tonic"
 msgstr "Tonik"
 
-#: scripts/ui/BattleView.gd:2520
+#: scripts/ui/BattleView.gd:2526
 msgid "  (%d dmg incoming)"
 msgstr "  (%d hasar geliyor)"
 
-#: scripts/ui/BattleView.gd:2523 scripts/ui/BattleView.gd:2566
+#: scripts/ui/BattleView.gd:2529 scripts/ui/BattleView.gd:2572
 msgid "Key %d"
 msgstr "Tuş %d"
 
-#: scripts/ui/BattleView.gd:2528
+#: scripts/ui/BattleView.gd:2534
 msgid "Already at full HP"
 msgstr "Canı zaten tam"
 
-#: scripts/ui/BattleView.gd:2543
+#: scripts/ui/BattleView.gd:2549
 msgid "%s: tap a foe"
 msgstr "%s: bir düşmana dokun"
 
-#: scripts/ui/BattleView.gd:2543
+#: scripts/ui/BattleView.gd:2549
 msgid "%s: click a foe"
 msgstr "%s: bir düşmana tıkla"
 
-#: scripts/ui/BattleView.gd:2619
+#: scripts/ui/BattleView.gd:2625
 msgid "%s's turn"
 msgstr "Sıra: %s"
 
-#: scripts/ui/BattleView.gd:2623 scripts/ui/Main.gd:2714
+#: scripts/ui/BattleView.gd:2629 scripts/ui/Main.gd:2714
 msgid "Lv%d %s · %d/%d HP"
 msgstr "Sv%d %s · %d/%d Can"
 
-#: scripts/ui/BattleView.gd:2637
+#: scripts/ui/BattleView.gd:2643
 msgid "Attack %s (1): +%d Momentum%s. Click a foe to pick another, Tab to cycle."
 msgstr "Saldır: %s (1): +%d İvme%s. Başkasını seçmek için bir düşmana tıkla, sırayla geçmek için Tab."
 
-#: scripts/ui/BattleView.gd:2637
+#: scripts/ui/BattleView.gd:2643
 msgid " (+1 for the kill: this hit should finish it)"
 msgstr " (öldürme için +1: bu darbe onu bitirmeli)"
 
-#: scripts/ui/BattleView.gd:2639
+#: scripts/ui/BattleView.gd:2645
 msgid "\nFrom the back row a %s hits at half strength."
 msgstr "\nArka sıradan bir %s yarı güçle vurur."
 
-#: scripts/ui/BattleView.gd:2643
+#: scripts/ui/BattleView.gd:2649
 msgid "Attack"
 msgstr "Saldır"
 
-#: scripts/ui/BattleView.gd:2643
+#: scripts/ui/BattleView.gd:2649
 msgid "Attack ½"
 msgstr "Saldır ½"
 
-#: scripts/ui/BattleView.gd:2653
+#: scripts/ui/BattleView.gd:2659
 msgid "\n%s row."
 msgstr "\n%s sıra."
 
-#: scripts/ui/BattleView.gd:2653
+#: scripts/ui/BattleView.gd:2659
 msgid "\n%s twist: %s."
 msgstr "\n%s dokunuşu: %s."
 
-#: scripts/ui/BattleView.gd:2656
+#: scripts/ui/BattleView.gd:2662
 msgid "%s\nLearned at level %d."
 msgstr "%s\n%d. seviyede öğrenilir."
 
-#: scripts/ui/BattleView.gd:2659
+#: scripts/ui/BattleView.gd:2665
 msgid "Ability"
 msgstr "Yetenek"
 
-#: scripts/ui/BattleView.gd:2677
+#: scripts/ui/BattleView.gd:2683
 msgid "%s (%s) — %d Momentum. %s%s"
 msgstr "%s (%s) — %d İvme. %s%s"
 
-#: scripts/ui/BattleView.gd:2687 scripts/ui/Main.gd:3224 scripts/ui/Main.gd:3306
+#: scripts/ui/BattleView.gd:2693 scripts/ui/Main.gd:3224 scripts/ui/Main.gd:3306
 msgid "Defend"
 msgstr "Savun"
 
-#: scripts/ui/BattleView.gd:2687
+#: scripts/ui/BattleView.gd:2693
 msgid "Defend (5) — take half damage from hits this round. Each hit taken while Defending gives +1 Momentum (+2 for a heavy blow)."
 msgstr "Savun (5) — bu tur darbelerden yarı hasar al. Savunurken alınan her darbe +1 İvme verir (ağır darbe için +2)."
 
-#: scripts/ui/BattleView.gd:2695
+#: scripts/ui/BattleView.gd:2701
 msgid "More (M, or Start on a gamepad) — Guard (6), Move (7), Tonics (8)%s"
 msgstr "Diğer (M ya da oyun kolunda Start) — Koru (6), Yer Değiştir (7), Tonikler (8)%s"
 
-#: scripts/ui/BattleView.gd:2695
+#: scripts/ui/BattleView.gd:2701
 msgid ", Champion's Call (9)"
 msgstr ", Şampiyon Çağrısı (9)"
 
-#: scripts/ui/BattleView.gd:2699
+#: scripts/ui/BattleView.gd:2705
 msgid "Less"
 msgstr "Daha az"
 
-#: scripts/ui/BattleView.gd:2699
+#: scripts/ui/BattleView.gd:2705
 msgid "More ★"
 msgstr "Diğer ★"
 
-#: scripts/ui/BattleView.gd:2699
+#: scripts/ui/BattleView.gd:2705
 msgid "More"
 msgstr "Diğer"
 
-#: scripts/ui/BattleView.gd:2713
+#: scripts/ui/BattleView.gd:2719
 msgid "Guard (6) — pick an ally: attacks aimed at them this round hit you instead, 25% weaker, for +1 Momentum each."
 msgstr "Koru (6) — bir müttefik seç: bu tur ona yönelen saldırılar %25 daha zayıf olarak sana gelir, her biri +1 İvme."
 
-#: scripts/ui/BattleView.gd:2719
+#: scripts/ui/BattleView.gd:2725
 msgid "%s's Call (9) — %s. Uses this hero's turn; %d left this rift."
 msgstr "%s Çağrısı (9) — %s. Bu kahramanın sırasını harcar; bu yarıkta %d kaldı."
 
-#: scripts/ui/BattleView.gd:2725
+#: scripts/ui/BattleView.gd:2731
 msgid "To %s"
 msgstr "%s sıraya"
 
-#: scripts/ui/BattleView.gd:2726
+#: scripts/ui/BattleView.gd:2732
 msgid "Move (7) — step to the %s row. The front row draws most attacks; melee heroes hit at half strength from the back; some skills need a row."
 msgstr "Yer Değiştir (7) — %s sıraya geç. Ön sıra saldırıların çoğunu çeker; yakın dövüş kahramanları arkadan yarı güçle vurur; bazı beceriler belli bir sıra ister."
 
-#: scripts/ui/BattleView.gd:2734
+#: scripts/ui/BattleView.gd:2740
 msgid "Tonics ×%d"
 msgstr "Tonikler ×%d"
 
-#: scripts/ui/BattleView.gd:2734
+#: scripts/ui/BattleView.gd:2740
 msgid "Tonics (8) — Healing, Iron or Focus. Uses this hero's turn."
 msgstr "Tonikler (8) — Şifa, Demir ya da Odak. Bu kahramanın sırasını harcar."
 
-#: scripts/ui/BattleView.gd:2759
+#: scripts/ui/BattleView.gd:2765
 msgid "Target: %s\nSpace repeats your last action"
 msgstr "Hedef: %s\nBoşluk son hamleni tekrarlar"
 
-#: scripts/ui/BattleView.gd:2765
+#: scripts/ui/BattleView.gd:2771
 msgid "The party is down."
 msgstr "Ekip düştü."
 
-#: scripts/ui/BattleView.gd:2765
+#: scripts/ui/BattleView.gd:2771
 msgid "Enemy turn…"
 msgstr "Düşman sırası…"
 
-#: scripts/ui/BattleView.gd:2783
+#: scripts/ui/BattleView.gd:2789
 msgid "Battle speed: ×1, ×2, ×3 or Instant (click to change; also in Settings)"
 msgstr "Savaş hızı: ×1, ×2, ×3 ya da Anında (değiştirmek için tıkla; Ayarlar'da da var)"
 
-#: scripts/ui/BattleView.gd:2790 scripts/ui/RosterView.gd:413
+#: scripts/ui/BattleView.gd:2796 scripts/ui/RosterView.gd:413
 msgid "Auto"
 msgstr "Oto"
 
-#: scripts/ui/BattleView.gd:2790
+#: scripts/ui/BattleView.gd:2796
 msgid "Auto ✓"
 msgstr "Oto ✓"
 
-#: scripts/ui/BattleView.gd:2790
+#: scripts/ui/BattleView.gd:2796
 msgid "Auto (A), for this fight — heroes act on their own: Defend against heavy blows, use Abilities when ready, focus the weakest foe. It pauses when a hero is about to fall. An elite, a boss or any fight on a rank you haven't sealed, won by hand with no one down, pays +%d%% Gold and Essence."
 msgstr "Oto (A), bu dövüş için — kahramanlar kendi başına davranır: ağır darbelere karşı Savunur, hazır olunca Yetenek kullanır, en zayıf düşmana odaklanır. Bir kahraman düşmek üzereyken duraklar. Kimse düşmeden elle kazanılan bir seçkin, boss ya da henüz mühürlemediğin bir rütbedeki her dövüş +%%%d Altın ve Öz öder."
 
-#: scripts/ui/BattleView.gd:2799
+#: scripts/ui/BattleView.gd:2805
 msgid "Log"
 msgstr "Kayıt"
 
-#: scripts/ui/BattleView.gd:2799
+#: scripts/ui/BattleView.gd:2805
 msgid "Show or hide the fight log"
 msgstr "Dövüş kaydını göster ya da gizle"
 
-#: scripts/ui/BattleView.gd:2804
+#: scripts/ui/BattleView.gd:2810
 msgid "Retreat — leave the fight (the run ends)"
 msgstr "Geri çekil — dövüşten ayrıl (koşu biter)"
 
-#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2827
+#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2833
 msgid "gathers its strength"
 msgstr "güç topluyor"
 
-#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2828
+#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2834
 msgid "strikes every foe"
 msgstr "tüm düşmanlara vuruyor"
 
-#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2828
+#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2834
 msgid "Phoenix"
 msgstr "Anka"
 
-#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2828
+#: locale/extra_msgids.txt scripts/ui/BattleView.gd:2834
 msgid "uses "
 msgstr "kullanıyor"
 
-#: scripts/ui/BattleView.gd:2833
+#: scripts/ui/BattleView.gd:2839
 msgid "[A foe gathers its strength]"
 msgstr "[Bir düşman güç topluyor]"
 
-#: scripts/ui/BattleView.gd:2842
+#: scripts/ui/BattleView.gd:2848
 msgid "[%s roars: a second phase]"
 msgstr "[%s kükrüyor: ikinci evre]"
 
-#: scripts/ui/BattleView.gd:2843
+#: scripts/ui/BattleView.gd:2849
 msgid "%s enters its second phase"
 msgstr "%s ikinci evresine giriyor"
 
-#: scripts/ui/BattleView.gd:2847
+#: scripts/ui/BattleView.gd:2853
 msgid "[A boss roars]"
 msgstr "[Bir boss kükrüyor]"
 
-#: scripts/ui/BattleView.gd:2847
+#: scripts/ui/BattleView.gd:2853
 msgid "[An elite snarls]"
 msgstr "[Bir seçkin hırlıyor]"
 
-#: scripts/ui/BattleView.gd:2860
+#: scripts/ui/BattleView.gd:2866
 msgid "Tower Guardian"
 msgstr "Kule Muhafızı"
 
-#: scripts/ui/BattleView.gd:2867
+#: scripts/ui/BattleView.gd:2873
 msgid "Round %d"
 msgstr "Tur %d"
 
-#: scripts/ui/BattleView.gd:2943
+#: scripts/ui/BattleView.gd:2949
 msgid "+%d XP each"
 msgstr "Her birine +%d TP"
 
-#: scripts/ui/BattleView.gd:2956
+#: scripts/ui/BattleView.gd:2962
 msgid "%s  Lv%d"
 msgstr "%s  Sv%d"
 
-#: scripts/ui/BattleView.gd:2959
+#: scripts/ui/BattleView.gd:2965
 msgid "LEVEL UP!"
 msgstr "SEVİYE ATLADI!"
 
-#: scripts/ui/BattleView.gd:2967
+#: scripts/ui/BattleView.gd:2973
 msgid "MVP"
 msgstr "En İyi"
 
-#: scripts/ui/BattleView.gd:2970
+#: scripts/ui/BattleView.gd:2976
 msgid "Most damage dealt this fight"
 msgstr "Bu dövüşte en çok hasar veren"
 
-#: scripts/ui/BattleView.gd:2978
+#: scripts/ui/BattleView.gd:2984
 msgid "Max level"
 msgstr "En üst seviye"
 
-#: scripts/ui/BattleView.gd:2978
+#: scripts/ui/BattleView.gd:2984
 msgid "%d / %d XP to Lv%d"
 msgstr "%d / %d TP (Sv%d için)"
 
-#: scripts/ui/BattleView.gd:2983
+#: scripts/ui/BattleView.gd:2989
 msgid "%d dmg · %d kill%s"
 msgstr "%d hasar · %d öldürme%s"
 

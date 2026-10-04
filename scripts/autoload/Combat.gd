@@ -1449,7 +1449,7 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 ## Fight tallies for the "why you lost" card (state["_stats"]).
 ## A Feat for this fight (GameData.FEATS): one that suits it, picked from the
 ## fight's own seed. `kind` is "elite", "boss" or "pillar".
-func roll_feat(state: Dictionary, kind: String) -> Dictionary:
+func roll_feat(state: Dictionary, kind: String, want: String = "") -> Dictionary:
 	var monsters: Array = state["monsters"]
 	var ids: Array = ["break", "swift", "unbloodied", "momentum"]
 	var adds: Array = range(monsters.size()).filter(func(i): return not monsters[i].get("is_main", false))
@@ -1457,7 +1457,7 @@ func roll_feat(state: Dictionary, kind: String) -> Dictionary:
 		ids.append("first")
 	if monsters.size() >= 2:
 		ids.append("double")
-	var id := str(ids[randi() % ids.size()])
+	var id := want if ids.has(want) else str(ids[randi() % ids.size()])   # the one shown before Engage, if it fits
 	var feat := {"id": id}
 	var start := {}
 	for h in state["party"]:
@@ -1475,6 +1475,17 @@ func roll_feat(state: Dictionary, kind: String) -> Dictionary:
 		"momentum":
 			feat["momentum"] = GameData.FEAT_MOMENTUM
 	return feat
+
+
+## The Feat shown before Engage (the foes aren't known yet): its name and
+## what it asks, with "first" naming no one until the fight starts.
+func feat_preview_text(id: String, kind: String) -> Array:
+	match id:
+		"first":
+			return [tr("Down one of its company first"), tr("The fight names which one when it starts.")]
+		"double":
+			return [tr(str(GameData.FEATS["double"]["name"])), tr(str(GameData.FEATS["double"]["desc"])) + " " + tr("If it fights alone, another Feat takes its place.")]
+	return feat_text({"id": id, "rounds": int(GameData.FEAT_ROUNDS.get("elite" if kind == "elite" else "boss", 6)), "momentum": GameData.FEAT_MOMENTUM})
 
 
 ## The Feat's name and what it asks, for the battle screen.
