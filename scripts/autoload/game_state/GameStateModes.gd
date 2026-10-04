@@ -479,13 +479,16 @@ func choose_sky_ending(choice: String) -> void:
 	sky_ending = choice
 	if not pending_stories.is_empty() and str(pending_stories[0].get("kind", "")) == "sky":
 		pending_stories.pop_front()
+	if legacy.is_empty():
+		load_legacy()
+	for g in legacy.get("guilds", []):   # the Hall of Guilds remembers how Book II ended
+		if str(g.get("name", "")) == guild_name and not g.get("retired", false):
+			g["sky"] = choice
 	if choice == "both":
-		if legacy.is_empty():
-			load_legacy()
 		legacy["hollowborn"] = true
 		save_legacy()
 	else:
-		_add_postgame_laurels(GameData.SKY_OURS_LAURELS)
+		_add_postgame_laurels(GameData.SKY_OURS_LAURELS)   # saves the legacy too
 	var e: Dictionary = GameData.SKY_ENDING[choice]
 	pending_stories.push_front(_the_end_card())
 	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": tr(str(e["text"]))})

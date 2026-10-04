@@ -1673,6 +1673,7 @@ func _past_guild_line(g: Dictionary) -> String:
 	var names: Array = g.get("remembered", [])
 	var kept: Array = g.get("oaths", [])
 	var oath_txt := (tr(" · oaths kept: %d") % kept.size()) if not kept.is_empty() else ""
+	oath_txt += {"both": tr(" · kept the doors open"), "ours": tr(" · closed the doors")}.get(str(g.get("sky", "")), "")
 	return tr("%s · day %d · %d rifts sealed · +%d Laurels%s") % [how, int(g.get("day", 0)), int(g.get("rifts", 0)), int(g.get("laurels", 0)),
 		((tr(" · remembered: %s") % ", ".join(names)) if not names.is_empty() else "") + oath_txt]
 

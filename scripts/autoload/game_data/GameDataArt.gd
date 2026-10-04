@@ -274,6 +274,9 @@ const HERO_DETAIL_BG := "res://assets/screens/hero_detail_bg.png"
 ## Hue turns for hero colour variants (look 0 keeps the art as drawn); the
 ## most different first. A 6th hero sharing one portrait wraps round to 1.
 const HERO_LOOK_HUES := [0.0, 0.5, 0.3, 0.7, 0.15]
+## Hollow-born heroes (the Sky Beneath) wear a sea-glass variant of their own.
+const HOLLOW_LOOK := 99
+const HOLLOW_LOOK_HUE := 0.45
 const HERO_PORTRAIT_PATH := {
 	"warrior": "res://assets/heroes/warrior.png",
 	"ranger": "res://assets/heroes/ranger.png",

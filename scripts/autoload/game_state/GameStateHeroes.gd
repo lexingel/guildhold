@@ -80,6 +80,8 @@ func refresh_looks() -> void:
 
 ## The variant a hero would wear on joining (a recruit offer's preview).
 func look_for(h: Hero) -> int:
+	if h.quirks.has("Hollow-born"):   # the Sky Beneath: the far side shows
+		return GameData.HOLLOW_LOOK
 	if heroes.has(h):
 		return h.look
 	var art := GameData.portrait_for_hero(h.cls_id, h.pool_id)

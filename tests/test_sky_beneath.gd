@@ -57,6 +57,10 @@ func run() -> void:
 		if GameState.gen_recruit_offer().quirks.has("Hollow-born"):
 			hb += 1
 	check(hb > 10 and hb < 80, "some recruits come from the far side (%d of 200)" % hb)
+	var hollow := Combat.gen_hero("C", 1)
+	hollow.quirks.append("Hollow-born")
+	check(GameState.look_for(hollow) == GameData.HOLLOW_LOOK and UiKit.look_material(GameData.HOLLOW_LOOK) != null, "a Hollow-born hero wears the sea-glass look")
+	check(SurvivorsRun.FINAL_WARDEN.has("glass") and SurvivorsRun.FINAL_WARDEN.has("city"), "the real-time Endless Rift has wardens for both new regions")
 
 	# Ours: Laurels, and the Hollow's foes leave the ladder.
 	GameState.reset()
@@ -67,6 +71,7 @@ func run() -> void:
 	GameState.write_legacy([])
 	var l0 := int(GameState.legacy["laurels"])
 	GameState.choose_sky_ending("ours")
+	check(str(GameState.legacy["guilds"][-1].get("sky", "")) == "ours", "the Hall of Guilds remembers the doors closed")
 	check(int(GameState.legacy["laurels"]) == l0 + GameData.SKY_OURS_LAURELS and GameState.book2_regions().is_empty() and not GameState.hollowborn_open(), "ours: Laurels, and the far side's rifts close")
 	GameState.legacy = {"laurels": 0, "guilds": [], "champions": {}}
 	GameState.delete_slot(9)

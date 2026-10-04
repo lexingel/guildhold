@@ -3029,7 +3029,11 @@ func _endless_region_picker() -> Control:
 	row.add_child(_label("Region:", 12, true))
 	if _endless_biome == "":
 		_endless_biome = "vale"
-	for b in ["vale", "marsh", "ashen"]:
+	var regions := ["vale", "marsh", "ashen"]
+	for b2 in GameState.book2_regions():   # the Sky Beneath, once reached
+		if not regions.has(b2):
+			regions.append(b2)
+	for b in regions:
 		var best := int(GameState.endless_best.get(b, 0))
 		var btn := Button.new()
 		btn.text = "%s  %s" % [tr(str(GameData.BIOMES[b]["name"]).trim_prefix("The ")), tr(str("%d:%02d" % [best / 60, best % 60] if best > 0 else "—"))]

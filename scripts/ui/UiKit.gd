@@ -448,6 +448,13 @@ static var _look_mats := {}
 static func look_material(look: int) -> ShaderMaterial:
 	if look <= 0:
 		return null
+	if look == GameData.HOLLOW_LOOK:
+		if not _look_mats.has(look):
+			var hm := ShaderMaterial.new()
+			hm.shader = preload("res://theme/hero_look.gdshader")
+			hm.set_shader_parameter("hue_shift", GameData.HOLLOW_LOOK_HUE)
+			_look_mats[look] = hm
+		return _look_mats[look]
 	var hues: Array = GameData.HERO_LOOK_HUES
 	var idx := 1 + (look - 1) % (hues.size() - 1)
 	if not _look_mats.has(idx):

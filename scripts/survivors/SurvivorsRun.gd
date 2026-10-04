@@ -18,7 +18,7 @@ const ELITE_EVERY := 60.0         # a lone elite at :30 of every minute (not in 
 const RING_EVERY := 45.0          # a closing ring of foes surrounds the party
 const BOSS_EVERY := 300.0
 const FINAL_AT := 1200.0          # the Rift Warden: beat it and the rift is sealed (a win)
-const FINAL_WARDEN := {"vale": "Vaelith", "marsh": "Nyxara", "ashen": "Sythrane"}
+const FINAL_WARDEN := {"vale": "Vaelith", "marsh": "Nyxara", "ashen": "Sythrane", "glass": "The Tidewarden", "city": "The Falling Sky"}
 ## How many foes may be out at once (elites count as ELITE_WEIGHT), before a
 ## wave's own budget multiplier. The rest of the difficulty is foe strength.
 const BUDGET0 := 40.0
@@ -45,7 +45,7 @@ const CHEST_R := 34.0
 ## region's features (made from the run's seed, so they stay put) and maybe a
 ## brazier. Pillars block, pools slow, lava burns heroes and foes alike.
 const CHUNK := 640.0
-const TERRAIN_KIND := {"vale": "pillar", "marsh": "pool", "ashen": "lava"}
+const TERRAIN_KIND := {"vale": "pillar", "marsh": "pool", "ashen": "lava", "glass": "pool", "city": "pillar"}
 const POOL_SLOW := 0.55
 const LAVA_HERO_PCT := 0.05       # of max HP per second
 const BRAZIER_CHANCE := 0.6
