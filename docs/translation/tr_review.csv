@@ -4117,7 +4117,7 @@ Triggers (Rare and Epic),Tetikleyiciler (Nadir ve Destansı),scripts/ui/GuildVie
 An Endless Rift milestone,Bir Sonsuz Yarık aşaması,scripts/ui/GuildViews.gd:1872
 Legendaries — %d/%d found,Efsaneviler — %d/%d bulundu,scripts/ui/GuildViews.gd:1875
 Crafting (Arcane Lab) turns three unequipped items or relics of one kind and rarity into one of the next rarity up.,"Zanaat (Gizem Laboratuvarı), aynı tür ve nadirlikteki kuşanılmamış üç eşyayı ya da kalıntıyı bir üst nadirlikte tek bir parçaya dönüştürür.",scripts/ui/GuildViews.gd:1913
-[color=#%s]3 × %s[/color]  →  [color=#%s]1 × %s[/color]   [color=#%s](numbers × %s)[/color],,scripts/ui/GuildViews.gd:1917
+[color=#%s]3 × %s[/color]  →  [color=#%s]1 × %s[/color]   [color=#%s](numbers × %s)[/color],[color=#%s]3 × %s[/color]  →  [color=#%s]1 × %s[/color]   [color=#%s](değerler × %s)[/color],scripts/ui/GuildViews.gd:1917
 "Items: three of the same category (Weapon, Armor or Focus). The new item rolls fresh stats at the best rank among the three.","Eşyalar: aynı kategoriden üç tane (Silah, Zırh ya da Odak). Yeni eşya, üçünün en yüksek rütbesinde yeni değerler alır.",scripts/ui/GuildViews.gd:1923
 "Relics: three of the same type (Ember, Frost...). The new relic keeps that type and rolls fresh effects.","Kalıntılar: aynı türden üç tane (Kor, Ayaz...). Yeni kalıntı bu türü korur ve yeni etkiler alır.",scripts/ui/GuildViews.gd:1924
 Equipped gear never goes in. Legendaries can't be crafted or fed in: they are fixed finds.,Kuşanılmış teçhizat kullanılmaz. Efsaneviler üretilemez ve malzeme olarak kullanılamaz: sabit buluntulardır.,scripts/ui/GuildViews.gd:1925

@@ -1914,7 +1914,7 @@ func _render_compendium_crafting(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 	for rarity in GameState.CRAFT_RARITY_UP:
 		var up := str(GameState.CRAFT_RARITY_UP[rarity])
-		var line := _rich_line("[color=#%s]3 × %s[/color]  →  [color=#%s]1 × %s[/color]   [color=#%s](numbers × %s)[/color]" % [
+		var line := _rich_line(tr("[color=#%s]3 × %s[/color]  →  [color=#%s]1 × %s[/color]   [color=#%s](numbers × %s)[/color]") % [
 			(ITEM_RARITY_COLOR[rarity] as Color).to_html(false), tr(str(rarity).capitalize()),
 			(ITEM_RARITY_COLOR[up] as Color).to_html(false), tr(up.capitalize()),
 			Palette.MUTED.to_html(false), str(GameData.find_rarity(up)["mult"])], 14)

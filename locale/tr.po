@@ -15889,7 +15889,7 @@ msgstr "Zanaat (Gizem Laboratuvarı), aynı tür ve nadirlikteki kuşanılmamı�
 
 #: scripts/ui/GuildViews.gd:1917
 msgid "[color=#%s]3 × %s[/color]  →  [color=#%s]1 × %s[/color]   [color=#%s](numbers × %s)[/color]"
-msgstr ""
+msgstr "[color=#%s]3 × %s[/color]  →  [color=#%s]1 × %s[/color]   [color=#%s](değerler × %s)[/color]"
 
 #: scripts/ui/GuildViews.gd:1923
 msgid "Items: three of the same category (Weapon, Armor or Focus). The new item rolls fresh stats at the best rank among the three."
