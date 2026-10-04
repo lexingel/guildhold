@@ -645,10 +645,20 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 				if heavy:
 					_camera_punch(arena)
 				await _impact_beat(arena, heavy)
+				# After each await the screen may have been rebuilt, freeing every
+				# node in the arena: passing one on would be a script error.
+				if not is_instance_valid(arena):
+					return
 				if monster_rects.has(i):
 					await _play_frames(monster_rects[i], GameData.monster_anim_frames(str(monsters[i]["name"]), "hurt"))
+					if not is_instance_valid(arena):
+						return
 				await _flash_white(mw)
+				if not is_instance_valid(arena):
+					return
 				await _spawn_damage_number(mw, "-%d" % int(round(dmg)), Palette.HAZARD, heavy)
+				if not is_instance_valid(arena):
+					return
 				if float(monster_hp_before[i]) > 0.0 and float(monsters[i]["hp"]) <= 0.0:
 					var mp = _monster_plates.get(i)
 					if mp != null and is_instance_valid(mp):
@@ -700,10 +710,12 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 			else:
 				dashed = true
 				await _dash(mw, vw.position.x + vw.custom_minimum_size.x * 0.85, 0.16 if not heavy_blow else 0.22)
-				if monster_rects.has(i):
+				if monster_rects.has(i) and is_instance_valid(arena):
 					await _play_frames(monster_rects[i], GameData.monster_anim_frames(str(m["name"]), "attack"), 0.06)
 		elif monster_rects.has(i):
 			await _play_frames(monster_rects[i], GameData.monster_anim_frames(str(m["name"]), "attack"))
+		if not is_instance_valid(arena):
+			return
 		if heavy_blow and not victims.is_empty():
 			var vw2: Control = hero_wrappers[victims[0].id]
 			Fx.ring(arena, vw2.position + Vector2(vw2.custom_minimum_size.x * 0.5, vw2.custom_minimum_size.y), vw2.custom_minimum_size.x * 1.3, Palette.HAZARD, 0.45)
@@ -731,12 +743,18 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 				if not chill_before.has(h.id) and (state.get("_chilled", {}) as Dictionary).has(h.id):
 					Fx.sigil(arena, _center(hwv), hwv.custom_minimum_size.x * 0.9, Palette.CRYSTALS, 0.5)
 				await _impact_beat(arena, heavy2)
+				if not is_instance_valid(arena):
+					return
 				var frames := GameData.hero_combat_frames(h.cls_id, h.pool_id, "hurt")
 				if not frames.is_empty() and hero_rects.has(h.id):
 					await _play_frames(hero_rects[h.id], frames)
 				else:
 					await _tween_hurt(hwv)
+				if not is_instance_valid(arena):
+					return
 				await _spawn_damage_number(hwv, "-%d" % dmg2, Palette.HAZARD, heavy2)
+				if not is_instance_valid(arena):
+					return
 				if before > 0 and h.hp <= 0:
 					AudioManager.cue("knockout", tr("[%s is down]") % tr(str(h.name.split(" the ")[0])), Palette.HAZARD)
 					await _tween_collapse(hwv)
@@ -753,7 +771,7 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 	if ns_after.has("result") and bool(ns_after["result"].get("won", false)):
 		AudioManager.play_sfx(GameData.SFX_PATH["victory"])
 		for h in party:
-			if h.hp > 0 and hero_wrappers.has(h.id):
+			if h.hp > 0 and hero_wrappers.has(h.id) and is_instance_valid(arena):
 				Fx.sparkles(arena, _center(hero_wrappers[h.id]), Palette.RANK_S, 12, 40.0)
 				await _tween_victory_pose(hero_wrappers[h.id])
 
@@ -819,8 +837,12 @@ func _anim_hero_attack(h: Hero, hw: Control, rect: TextureRect, tw: Control, tin
 	if role in MELEE_ROLES:
 		var sx := hw.position.x
 		await _dash(hw, tw.position.x - hw.custom_minimum_size.x * 0.9, 0.14)
+		if not is_instance_valid(arena):
+			return   # the screen was rebuilt mid-animation, freeing hw, rect and tw
 		if not frames.is_empty() and rect:
 			await _play_frames(rect, frames, 0.05)
+			if not is_instance_valid(arena):
+				return
 		Fx.burst(arena, "slash", _center(tw), tw.custom_minimum_size.y * 0.95, tint.lerp(Color.WHITE, 0.55), 16.0, randf_range(-0.5, 0.3))
 		_dash(hw, sx, 0.18)
 	else:
@@ -828,6 +850,8 @@ func _anim_hero_attack(h: Hero, hw: Control, rect: TextureRect, tw: Control, tin
 			await _play_frames(rect, frames, 0.06)
 		else:
 			await _tween_lunge(hw)
+		if not is_instance_valid(arena):
+			return
 		var arrow := role == "ranger"
 		var col: Color = Color.WHITE if arrow else (Palette.RANK_S if role == "cleric" else tint.lerp(Color.WHITE, 0.25))
 		var from := _center(hw) + Vector2(hw.custom_minimum_size.x * 0.3, -hw.custom_minimum_size.y * 0.1)
@@ -846,13 +870,16 @@ func _anim_hero_ability(h: Hero, action: String, hw: Control, rect: TextureRect,
 	var g := create_tween()
 	g.tween_property(hw, "modulate", Color(1.0 + charge.r * 0.6, 1.0 + charge.g * 0.6, 1.0 + charge.b * 0.6), 0.25)
 	await _await_or_timeout(g.finished, 1.0)
+	if not is_instance_valid(arena):
+		return   # the screen was rebuilt mid-animation, freeing every node in it
 	var frames := GameData.hero_combat_frames(h.cls_id, h.pool_id, "skill")
 	if not frames.is_empty() and rect:
 		await _play_frames(rect, frames, 0.06)
 	else:
 		await _tween_skill_flash(hw)
-	if is_instance_valid(hw):
-		create_tween().tween_property(hw, "modulate", Color.WHITE, 0.2)
+	if not is_instance_valid(arena):
+		return
+	create_tween().tween_property(hw, "modulate", Color.WHITE, 0.2)
 	var foes: Array = monster_wrappers.values().filter(func(w): return is_instance_valid(w))
 	match bucket:
 		"single_dmg":
@@ -860,6 +887,8 @@ func _anim_hero_ability(h: Hero, action: String, hw: Control, rect: TextureRect,
 				if role in MELEE_ROLES:
 					var sx := hw.position.x
 					await _dash(hw, tw.position.x - hw.custom_minimum_size.x * 0.9, 0.12)
+					if not is_instance_valid(arena):
+						return
 					Fx.burst(arena, "slash", _center(tw), tw.custom_minimum_size.y, tint.lerp(Color.WHITE, 0.4), 24.0, -0.4)
 					Fx.burst(arena, "slash", _center(tw), tw.custom_minimum_size.y * 0.9, tint.lerp(Color.WHITE, 0.4), 24.0, 1.2, true)
 					_camera_punch(arena)
@@ -868,6 +897,8 @@ func _anim_hero_ability(h: Hero, action: String, hw: Control, rect: TextureRect,
 					await _await_or_timeout(Fx.burst(arena, "holy", _center(tw) - Vector2(0, tw.custom_minimum_size.y * 0.1), tw.custom_minimum_size.y * 1.3, Color.WHITE, 22.0).finished, 1.5)
 				else:
 					await _await_or_timeout(Fx.projectile(arena, "arrow" if role == "ranger" else "bolt", _center(hw), _center(tw), 44.0, tint.lerp(Color.WHITE, 0.2), 0.24).finished, 1.0)
+					if not is_instance_valid(arena):
+						return
 					Fx.burst(arena, "impact", _center(tw), tw.custom_minimum_size.y * 0.9, tint.lerp(Color.WHITE, 0.3), 24.0)
 					_camera_punch(arena)
 		"aoe_dmg", "call":
@@ -965,7 +996,7 @@ func _run_combat_turns(state: Dictionary, hero_wrappers: Dictionary, hero_rects:
 	if pre_action.is_valid():
 		pre_action.call()
 	var force := force_first
-	while true:
+	while is_instance_valid(arena):   # the player may leave the fight's screen during the pause between turns
 		if not force:
 			var turn_order: Array = state.get("turn_order", [])
 			var turn_idx: int = int(state.get("turn_idx", 0))
