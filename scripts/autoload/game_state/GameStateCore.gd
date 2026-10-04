@@ -429,7 +429,12 @@ func feature_unlocked(id: String) -> bool:
 		"bestiary": return not monsters_seen.is_empty()
 		"quests": return rifts_sealed >= 1
 		"management": return rifts_sealed >= 2
-		"crafting", "daily", "rival": return rifts_sealed >= 3
+		# Spread out (the gameplay report): the rival and the Charter card own
+		# the third seal; Crafting the fifth; the Daily twist the seventh,
+		# after Act I's finale has opened Greater Rifts, the Tower and champions.
+		"rival": return rifts_sealed >= 3
+		"crafting": return rifts_sealed >= GameData.CRAFTING_SEALS
+		"daily": return rifts_sealed >= GameData.DAILY_SEALS
 		"tower": return campaign_act >= 2
 		"champions": return not champions.is_empty()
 	return true

@@ -58,7 +58,11 @@ func run() -> void:
 	check(GameState.check_feature_unlocks() == ["management"], "the second seal opens Management")
 	GameState.rifts_sealed = 3
 	var third := GameState.check_feature_unlocks()
-	check(third.has("crafting") and third.has("daily") and third.has("rival"), "the third opens crafting, the daily twist and rival moves %s" % [third])
+	check(third == ["rival"], "the third opens the rival's moves on their own %s" % [third])
+	GameState.rifts_sealed = GameData.CRAFTING_SEALS
+	check(GameState.check_feature_unlocks().has("crafting"), "Crafting opens at the fifth")
+	GameState.rifts_sealed = GameData.DAILY_SEALS
+	check(GameState.check_feature_unlocks().has("daily"), "the Daily twist at the seventh")
 	GameState.rifts_sealed = 0
 	check(GameState.feature_unlocked("management"), "an announced feature stays open")
 	# Tips.

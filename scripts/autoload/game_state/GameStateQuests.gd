@@ -43,7 +43,9 @@ func _bump(key: String, n: int = 1) -> void:
 
 ## Rolls one posting of a random type the guild can actually attempt now.
 func roll_quest() -> Dictionary:
-	var types := ["hunt", "hunt", "elite", "bounty", "seal_rank", "trial_small", "trial_flawless", "craft", "flawless_win"]
+	var types := ["hunt", "hunt", "elite", "bounty", "seal_rank", "trial_small", "trial_flawless", "flawless_win"]
+	if feature_unlocked("crafting"):
+		types.append("craft")
 	if greater_rift_unlocked():
 		types.append("seal_greater")
 	var type: String = types[randi() % types.size()]

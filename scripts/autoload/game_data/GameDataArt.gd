@@ -60,14 +60,16 @@ const ESCORT_NAMES := ["Wounded Survivor", "Lost Scout", "Stranded Merchant", "F
 ## Features open up as the guild grows instead of all at once. Each entry:
 ## what unlocks it (checked by GameState.feature_unlocked) and the toast that
 ## announces it. Roster, Recruits, Rift Hall and the Codex are always open.
+const CRAFTING_SEALS := 5
+const DAILY_SEALS := 7
 const FEATURE_UNLOCKS := {
 	"inventory": {"name": "Inventory", "hint": "Opens once you find your first item or relic", "news": "Loot you find is kept here — equip items on the Roster's Hero tab."},
 	"medical": {"name": "Medical Bay", "hint": "Opens after your first rift run", "news": "Wounded and downed heroes recover faster in a bed."},
 	"bestiary": {"name": "Bestiary", "hint": "Opens after your first fight", "news": "Every foe you meet is recorded here."},
 	"quests": {"name": "Quests", "hint": "Opens after you seal your first rift", "news": "Take on quests for Gold, Essence and Renown."},
 	"management": {"name": "Management", "hint": "Opens after you seal 2 rifts", "news": "Spend Essence (and Gold, for Defenses) on lasting guild upgrades."},
-	"crafting": {"name": "Crafting", "hint": "Opens after you seal 3 rifts", "news": "Combine 3 spare items or relics into a better one."},
-	"daily": {"name": "Daily twist", "hint": "Opens after you seal 3 rifts", "news": "Once a day a ladder rift can carry a twist: a special rule and a starting boon, for extra Essence. Tick it in the Rift Hall."},
+	"crafting": {"name": "Crafting", "hint": "Opens after you seal 5 rifts", "news": "Combine 3 spare items or relics into a better one."},
+	"daily": {"name": "Daily twist", "hint": "Opens after you seal 7 rifts", "news": "Once a day a ladder rift can carry a twist: a special rule and a starting boon, for extra Essence. Tick it in the Rift Hall."},
 	"rival": {"name": "Rival moves", "hint": "Opens after you seal 3 rifts", "news": "Once a week the rival guild may court a hero, dare you, or go after a contract. Answer before payday."},
 	"tower": {"name": "Tower of Trials", "hint": "Opens when you complete Act I", "news": "100 fixed floors in the Rift Hall. Each floor is always the same fight, and pays the first time you clear it."},
 	"champions": {"name": "Champions", "hint": "Opens when you free your first champion (the end of Act I)", "news": "A champion oversees your rift runs: their Boon for the party and their Call. Choose one and level them up under Roster > Champions."},
@@ -113,6 +115,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"New systems now arrive more gradually: the rival's moves at the third sealed rift, Crafting at the fifth, and the Daily twist at the seventh, after Act I's finale.",
 	"The Grandmaster's ledger no longer hides behind bad luck: after three sealed rifts without a page (while one is waiting in the current act), the next one finds it.",
 	"For playtesters: the founding screen can skip Act I, so you start with it done and can try the middle game straight away (champions, Riftbreaks, the rival's moves).",
 	"There is more to Hesper's story than she has told you. Each guild that finishes Act III hears a little more of it, and those who hear all of it, from guilds that have both kept and broken the Accord, may find a third way to end it.",
