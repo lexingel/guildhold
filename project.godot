@@ -23,6 +23,8 @@ boot_splash/stretch_mode=0
 boot_splash/use_filter=false
 boot_splash/image="res://assets/screens/splash.png"
 config/icon="res://icon.png"
+config/use_custom_user_dir.template=true
+config/custom_user_dir_name.template="Guildhold"
 
 [autoload]
 

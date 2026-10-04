@@ -148,6 +148,32 @@ func _ambient_path() -> String:
 	return GameData.TITLE_BG
 
 
+## Desktop: F11 or Alt+Enter switches fullscreen; everything else goes on to
+## BattleView's keys and pad buttons.
+func _unhandled_input(event: InputEvent) -> void:
+	if not OS.has_feature("web") and event is InputEventKey and event.pressed and not event.echo 			and (event.keycode == KEY_F11 or (event.keycode == KEY_ENTER and event.alt_pressed)):
+		_toggle_fullscreen()
+		get_viewport().set_input_as_handled()
+		return
+	super(event)
+
+
+## Fullscreen on or off; the desktop remembers it and goes back to the chosen
+## window size.
+func _toggle_fullscreen() -> void:
+	var full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+	if OS.has_feature("web"):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
+		if not full:
+			# A phone that allows it (Android) stays on its side while fullscreen.
+			JavaScriptBridge.eval("setTimeout(function(){ try { screen.orientation.lock('landscape').catch(function(){}); } catch (e) {} }, 400);", true)
+	else:
+		GameState.fullscreen = not full
+		GameState.save_settings()
+		_apply_resolution(GameState.resolution_idx)
+	render.call_deferred()
+
+
 ## Desktop-only: on a Web export the browser/canvas already owns sizing (via
 ## project.godot's stretch/mode="canvas_items" + aspect="expand", which fits
 ## the canvas to its container correctly on its own) — forcing an internal
@@ -157,6 +183,9 @@ func _ambient_path() -> String:
 ## makes sense where the game owns a real OS window, i.e. never on web.
 func _apply_resolution(idx: int) -> void:
 	if OS.has_feature("web"):
+		return
+	if GameState.fullscreen:
+		get_window().mode = Window.MODE_FULLSCREEN
 		return
 	var opts: Array = GameData.RESOLUTION_OPTIONS
 	var opt: Dictionary = opts[idx] if idx >= 0 and idx < opts.size() else opts[0]
@@ -1590,15 +1619,13 @@ func _feedback_panel() -> PanelContainer:
 	return p
 
 
-## Web: fill the screen (a browser only allows it from a click).
+## Fill the screen (a browser only allows it from a click).
 func _fullscreen_button() -> Button:
 	var full := DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
-	return _button(tr("Leave fullscreen") if full else tr("Fullscreen"), func():
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
-		if not full and OS.has_feature("web"):
-			# A phone that allows it (Android) stays on its side while fullscreen.
-			JavaScriptBridge.eval("setTimeout(function(){ try { screen.orientation.lock('landscape').catch(function(){}); } catch (e) {} }, 400);", true)
-		render.call_deferred())
+	var b := _button(tr("Leave fullscreen") if full else tr("Fullscreen"), _toggle_fullscreen)
+	if not OS.has_feature("web"):
+		b.tooltip_text = tr("F11 or Alt+Enter")
+	return b
 
 
 func _render_load_game(v: VBoxContainer) -> void:
@@ -3357,9 +3384,14 @@ func _render_settings(v: VBoxContainer) -> void:
 	else:
 		var res_opts: Array = GameData.RESOLUTION_OPTIONS
 		var res_idx := GameState.resolution_idx
-		v.add_child(_icon_button(GameData.BUTTON_ICON_PATH["sort"], tr("Resolution: %s") % tr(str(res_opts[res_idx]["label"])), func():
-			var next_idx: int = (res_idx + 1) % res_opts.size()
+		var win_row := HFlowContainer.new()
+		win_row.add_theme_constant_override("h_separation", 8)
+		win_row.add_child(_fullscreen_button())
+		v.add_child(win_row)
+		win_row.add_child(_icon_button(GameData.BUTTON_ICON_PATH["sort"], tr("Window: %s") % tr(str(res_opts[res_idx]["label"])), func():
+			var next_idx: int = (res_idx + 1) % res_opts.size() if not GameState.fullscreen else res_idx
 			GameState.resolution_idx = next_idx
+			GameState.fullscreen = false
 			GameState.save_settings()
 			_apply_resolution(next_idx)
 			render()
@@ -3437,7 +3469,10 @@ var _js_transfer_cb   # keeps the browser fetch callback alive
 func _render_save_backup(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 	v.add_child(_label("Backup", 15))
-	v.add_child(_wrap_label("Saves live in this browser/device only; clearing site data erases them. Export one to keep a copy or move it to another device. The previous save is also kept automatically in case one gets damaged.", 12, true))
+	if OS.has_feature("web"):
+		v.add_child(_wrap_label("Saves live in this browser/device only; clearing site data erases them. Export one to keep a copy or move it to another device. The previous save is also kept automatically in case one gets damaged.", 12, true))
+	else:
+		v.add_child(_wrap_label("Saves live in the Guildhold folder on this computer. Export one to keep a copy in its backups folder or move it to another device. The previous save is also kept automatically in case one gets damaged.", 12, true))
 	if GameState.guild_name != "":
 		var le := _label(tr("Last exported: %s") % tr(str(("never" if GameState.last_export_day < 0 else tr("day %d (today is day %d)") % [GameState.last_export_day, GameState.day]))), 12)
 		le.add_theme_color_override("font_color", Palette.HAZARD if GameState.last_export_day < 0 and GameState.rifts_sealed >= 3 else Palette.MUTED)
@@ -3454,11 +3489,22 @@ func _render_save_backup(v: VBoxContainer) -> void:
 				JavaScriptBridge.download_buffer(text.to_utf8_buffer(), "guild_save_%s.json" % GameState.guild_name.to_snake_case(), "application/json")
 				_backup_msg = "Downloaded, and copied to the clipboard."
 			else:
-				_backup_msg = "Copied to the clipboard — paste it somewhere safe."
+				DirAccess.make_dir_recursive_absolute(BACKUP_DIR)
+				var f := FileAccess.open(BACKUP_DIR + "/guild_save_%s_day%d.json" % [GameState.guild_name.to_snake_case(), GameState.day], FileAccess.WRITE)
+				if f:
+					f.store_string(text)
+					f.close()
+					_backup_msg = "Saved to the backups folder, and copied to the clipboard."
+				else:
+					_backup_msg = "Copied to the clipboard — paste it somewhere safe."
 		render()
 	)
 	exp.disabled = GameState.guild_name == ""
 	row.add_child(exp)
+	if not OS.has_feature("web"):
+		row.add_child(_button("Open saves folder", func():
+			DirAccess.make_dir_recursive_absolute(BACKUP_DIR)
+			OS.shell_open(ProjectSettings.globalize_path(BACKUP_DIR))))
 	row.add_child(_icon_button(GameData.BUTTON_ICON_PATH["sort"], tr("Import save…") if not _import_open else tr("Cancel import"), func():
 		_import_open = not _import_open
 		_import_text = ""
@@ -3469,9 +3515,11 @@ func _render_save_backup(v: VBoxContainer) -> void:
 	_render_transfer(v)
 	if _import_open:
 		var slot := GameState.active_slot
-		v.add_child(_wrap_label(tr("Paste an exported save below%s. It replaces Slot %d%s.") % [tr(str(tr(" or pick the file") if OS.has_feature("web") else "")), slot + 1, tr(str(" (%s)" % tr(str(GameState.guild_name)) if GameState.guild_name != "" else ""))], 12))
+		v.add_child(_wrap_label(tr("Paste an exported save below%s. It replaces Slot %d%s.") % [tr(str(tr(" or pick the file") if OS.has_feature("web") or OS.has_feature("pc") else "")), slot + 1, tr(str(" (%s)" % tr(str(GameState.guild_name)) if GameState.guild_name != "" else ""))], 12))
 		if OS.has_feature("web"):
 			v.add_child(_button("Choose file…", func(): _web_pick_save_file()))
+		elif OS.has_feature("pc"):
+			v.add_child(_button("Choose file…", func(): _desktop_pick_save_file()))
 		var te := TextEdit.new()
 		te.custom_minimum_size = Vector2(0, 90)
 		te.placeholder_text = "{\"guild_name\": ...}"
@@ -3680,6 +3728,18 @@ func _web_pick_save_file() -> void:
 	JavaScriptBridge.get_interface("window").godotSaveImportCb = _js_file_cb
 	JavaScriptBridge.eval("""(function(){var i=document.createElement('input');i.type='file';i.accept='.json,application/json';
 		i.onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){window.godotSaveImportCb(r.result);};r.readAsText(f);};i.click();})();""", true)
+
+
+const BACKUP_DIR := "user://backups"
+
+## Desktop: the system's own Open dialog, starting in the backups folder.
+func _desktop_pick_save_file() -> void:
+	DirAccess.make_dir_recursive_absolute(BACKUP_DIR)
+	DisplayServer.file_dialog_show(tr("Choose a save"), ProjectSettings.globalize_path(BACKUP_DIR), "", false,
+		DisplayServer.FILE_DIALOG_MODE_OPEN_FILE, PackedStringArray(["*.json"]), func(ok: bool, paths: PackedStringArray, _filter: int):
+			if ok and paths.size() > 0:
+				_import_text = FileAccess.get_file_as_string(paths[0])
+				render())
 
 
 ## Shared by Settings' "Save Slots" section and the title screen's Load Game

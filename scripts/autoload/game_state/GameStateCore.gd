@@ -30,6 +30,7 @@ var hearing_aid := false     # captions for meaningful sounds + an edge pulse on
 var ui_scale: float = 1.0   # whole-UI scale (Window.content_scale_factor), a settings.json preference   # animation time scale inside a rift (x1/x2/x3), a settings.json preference
 var sfx_volume: float = 1.0
 var resolution_idx: int = 0
+var fullscreen := false   # desktop: the window fills the screen (settings.json)
 var guild_name: String = ""
 var guild_crest: int = 1   # 1-8, index into GameData.CREST_PATH
 var next_id: int = 1
@@ -676,7 +677,7 @@ func save_settings() -> void:
 	var f := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify({
-			"music_volume": music_volume, "sfx_volume": sfx_volume, "resolution_idx": resolution_idx, "combat_speed": combat_speed, "ui_scale": ui_scale,
+			"music_volume": music_volume, "sfx_volume": sfx_volume, "resolution_idx": resolution_idx, "fullscreen": fullscreen, "combat_speed": combat_speed, "ui_scale": ui_scale,
 			"reduce_motion": reduce_motion, "colorblind": colorblind, "hearing_aid": hearing_aid, "language": language, "key_hints": key_hints,
 		}))
 
@@ -720,6 +721,7 @@ func load_settings() -> void:
 		language = str(parsed.get("language", "en"))
 		sfx_volume = parsed.get("sfx_volume", 1.0)
 		resolution_idx = parsed.get("resolution_idx", 0)
+		fullscreen = bool(parsed.get("fullscreen", false))
 
 
 ## Records every Legendary relic the guild holds, so the Compendium
