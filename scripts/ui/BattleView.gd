@@ -1061,8 +1061,7 @@ func _render_combat_node(v: VBoxContainer) -> void:
 		var pre_bg_idx := int(ns.get("bg_idx", 0)) % GameData.BATTLE_BACKGROUNDS.size()
 		var bw := _battle_width()
 		v.add_child(_banner(GameData.BATTLE_BACKGROUNDS[pre_bg_idx], bw, 120.0 if _compact() else minf(_battle_height(bw), 190.0)))   # scenery only: Engage stays high on the screen
-		var kind_label := tr("Boss") if is_boss else (tr("Elite") if kind == "elite" else (tr("Pillar") if kind == "pillar" else tr("Combat")))
-		v.add_child(_label(tr("A %s encounter awaits.") % tr(str(kind_label)), 16))
+		v.add_child(_label(tr("A boss awaits.") if is_boss else (tr("An elite awaits.") if kind == "elite" else (tr("A pillar of light awaits.") if kind == "pillar" else tr("A fight awaits."))), 16))
 		var coming := GameState.coming_feat()
 		if coming != "":   # the Feat, before Engage
 			var ft: Array = Combat.feat_preview_text(coming, kind)

@@ -2282,12 +2282,12 @@ func _render_endowment(v: VBoxContainer) -> void:
 
 
 func _render_management(v: VBoxContainer) -> void:
-	if GameState.legacy_written:
-		_render_endowment(v)
 	if GameState.keepers():
 		_render_accord_halls(v)
 	elif GameState.accord_ending == "break":
 		_render_open_hollow(v)
+	if GameState.legacy_written:   # spare Gold, after the halls or the walls
+		_render_endowment(v)
 	if mgmt_branch == "":
 		mgmt_branch = _mgmt_last
 	_mgmt_last = mgmt_branch

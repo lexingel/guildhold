@@ -1908,13 +1908,16 @@ func _render_campaign_panel(v: Container) -> void:
 		cv.add_child(_power_readout(best, rec, "Your best"))
 		if best < rec * 0.8:   # Deadly: say what raises power, not just that it's short
 			var advice: Array = GameState.power_advice()
-			var tip := _wrap_label((tr("Your best party is at %d%% of what the finale expects. What would help now:") % int(round(100.0 * best / maxf(1.0, rec)))) if not advice.is_empty() else
-				(tr("Your best party is at %d%% of what the finale expects. Seal more rifts at your top rank for gear, evolve heroes at level 10, level your champion, and build the Drill Yard.") % int(round(100.0 * best / maxf(1.0, rec)))), 12, true)
-			tip.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
-			cv.add_child(tip)
-			for a in advice:
-				var al := _wrap_label("• " + str(a["text"]), 12)
+			if advice.is_empty():
+				var tip := _wrap_label(tr("Your best party is at %d%% of what the finale expects. Seal more rifts at your top rank for gear, evolve heroes at level 10, level your champion, and build the Drill Yard.") % int(round(100.0 * best / maxf(1.0, rec))), 12, true)
+				tip.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+				cv.add_child(tip)
+			else:   # the best next step in view (the dock is short); the rest on hover
+				var al := _wrap_label(tr("Next step: %s") % str(advice[0]["text"]), 12)
 				al.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+				if advice.size() > 1:
+					al.tooltip_text = tr("Also: %s") % " ".join(advice.slice(1).map(func(a): return str(a["text"])))
+					al.mouse_filter = Control.MOUSE_FILTER_STOP
 				cv.add_child(al)
 	panel.add_child(cv)
 	v.add_child(panel)
