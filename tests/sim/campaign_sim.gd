@@ -27,6 +27,7 @@ const TARGETS := """Targets: wages+upkeep 35-50%% of Gold income (weeks 2-6) · 
 
 var days := 60
 var seeds := 4
+var seed0 := 7000   # the first seed (seed0=7100 for a second batch)
 var profile := ""
 var log_days := false
 var bold := false
@@ -55,6 +56,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("days="):
 			days = int(a.substr(5))
+		elif a.begins_with("seed0="):
+			seed0 = int(a.substr(6))
 		elif a.begins_with("seeds="):
 			seeds = int(a.substr(6))
 		elif a in ["investor", "casual"]:
@@ -108,7 +111,7 @@ func _ready() -> void:
 		var ratios: Array = []
 		var acts := {2: [], 3: [], 4: [], 5: []}
 		for s in seeds:
-			_guild(p, 7000 + s)
+			_guild(p, seed0 + s)
 			for r in fights:
 				var t: Array = all_fights.get(r, [0, 0])
 				all_fights[r] = [t[0] + fights[r][0], t[1] + fights[r][1]]
@@ -214,6 +217,10 @@ func _guild(p: String, s: int) -> void:
 		endless_runs, (("freed day %d" % freed_day) if freed_day >= 0 else "none freed") + ((", Descent depth %d" % descent_deepest) if descent_deepest > 0 else ""),
 		("beaten day %d after %d loss%s" % [morrow_day, morrow_lost, "" if morrow_lost == 1 else "es"]) if GameState.morrow_defeated else ("lost %d" % morrow_lost if morrow_lost > 0 else "-"),
 		("  · " + "; ".join(notes)) if not notes.is_empty() else ""])
+	var cur := GameState.current_act()
+	if not cur.is_empty() and GameState.campaign_act < 5:
+		var unmet: Array = (cur["objectives"] as Array).filter(func(o): return not GameState.campaign_objective_met(o)).map(func(o): return "%s (%d/%d)" % [str(o["label"]), GameState.campaign_objective_progress(o), int(o["target"])])
+		print("     stuck in Act %d since day %d: %s%s" % [GameState.campaign_act, int(act_day.get(GameState.campaign_act, 0)), ", ".join(unmet) if not unmet.is_empty() else "objectives met, finale not won", (" · finale tries %d/%d won · posts freed %d · best party %d vs finale %d" % [runs.get("finale", [0, 0])[0], runs.get("finale", [0, 0])[0] + runs.get("finale", [0, 0])[1], GameState.posts_freed(), Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id))), GameState.finale_recommended_power()])])
 	if ending_day >= 0:
 		var lost: Array = tides.filter(func(t): return not t[1])
 		print("     postgame (%s from day %d): Laurels %d at the ending, +%d after · %s · end %d Gold %d Essence, %d champions of %d" % [GameState.accord_ending, ending_day, ending_laurels,

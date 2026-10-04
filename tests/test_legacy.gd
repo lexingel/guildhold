@@ -295,6 +295,14 @@ func run() -> void:
 	GameState.maybe_find_ledger_page(false)
 	check(GameState.accord_pages == 2, "no page before its act, whatever the luck")
 
+	# Act IV's recommended power counts the Terms' growth for every empty post.
+	_guild("Honest Readout")
+	GameState.roll_champions()
+	GameState.campaign_act = 4
+	var rec_before := GameState.finale_recommended_power()
+	GameState.unlock_champion(GameState.next_lost_champion())
+	check(GameState.finale_recommended_power() > rec_before, "freeing a lost champion raises Act IV's recommended power, as it does the Terms")
+
 	# The pay table remembers past guilds.
 	_guild("Paymasters")
 	GameState.legacy["guilds"] = []

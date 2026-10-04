@@ -117,7 +117,8 @@ func finale_recommended_power() -> int:
 	var act := current_act()
 	if act.is_empty():
 		return 0
-	return int(round(Combat.recommended_power(str(act["tier"]), str(act.get("rank", ""))) * float(act["mult"])))
+	var grow := 1.0 + (GameData.TERMS_PER_POST * posts_freed() if int(act["act"]) == 4 else 0.0)   # as _apply_finale
+	return int(round(Combat.recommended_power(str(act["tier"]), str(act.get("rank", ""))) * float(act["mult"]) * grow))
 
 
 ## A biome for a new rift: the Vale in Act I, the Vale or the Marshes in Act
