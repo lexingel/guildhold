@@ -846,7 +846,7 @@ func seal_rift() -> void:
 		best_rift_rank_sealed = max(best_rift_rank_sealed, GameData.rift_rank_index(mapped_rank))
 		_on_rift_sealed(GameData.rift_rank_index(mapped_rank))
 		_check_challenge(GameData.rift_rank_index(mapped_rank))
-	var just_unlocked_greater := rifts_sealed == 2
+	var just_unlocked_greater := int(run.get("finale", 0)) == 1   # Greater Rifts open with Act I's finale
 	rifts_sealed += 1
 	add_reputation(GameData.SEAL_RENOWN_BASE + (GameData.rift_rank_index(mapped_rank) / 3 if mapped_rank != "" else 0))
 	# Guild Board tallies (see _quest_current).
@@ -895,8 +895,6 @@ func seal_rift() -> void:
 	state_changed.emit()
 
 
-## Earned by playing (sealing 3 rifts, lesser/greater/endless all count),
-## not by spending Guild Management currency like every other unlock today.
 ## Pays out a finished Endless Rift (survivors) run: a little gold, Essence
 ## (which also levels the champions), loot for elites and wardens, and every lost
 ## champion freed on the way. The guild spends a day on it (wages, healing).

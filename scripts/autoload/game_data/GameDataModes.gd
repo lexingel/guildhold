@@ -142,9 +142,7 @@ const TOWER_TITLES := [[10, "Tower Initiate"], [25, "Trial Climber"], [50, "Spir
 # Endless Rift is a survival mode, scripts/survivors).
 const DIFFICULTIES := [
 	{"id": "lesser", "name": "Lesser Rift", "floors": 7, "monster_hp": 20, "monster_dmg": 2.6, "coin": [18, 34], "crystal": [5, 11], "seal_essence": 10, "cache_chance": 0.08, "power": "Low", "rec_power": 90},
-	# Unlocked by GameState.greater_rift_unlocked() (seal 3 rifts) rather than
-	# Guild Management currency — sits between Lesser and the Ascendant-
-	# First-draft numbers, tunable after playing.
+	# Unlocked by GameState.greater_rift_unlocked() (Act I complete).
 	{"id": "greater", "name": "Greater Rift", "floors": 8, "monster_hp": 80, "monster_dmg": 8.6, "coin": [40, 70], "crystal": [11, 20], "seal_essence": 18, "cache_chance": 0.14, "power": "Medium", "rec_power": 500},
 ]
 

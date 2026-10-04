@@ -65,7 +65,7 @@ const FEATURE_UNLOCKS := {
 	"medical": {"name": "Medical Bay", "hint": "Opens after your first rift run", "news": "Wounded and downed heroes recover faster in a bed."},
 	"bestiary": {"name": "Bestiary", "hint": "Opens after your first fight", "news": "Every foe you meet is recorded here."},
 	"quests": {"name": "Quests", "hint": "Opens after you seal your first rift", "news": "Take on quests for Gold, Essence and Renown."},
-	"management": {"name": "Management", "hint": "Opens after you seal 2 rifts", "news": "Spend Essence on lasting guild upgrades."},
+	"management": {"name": "Management", "hint": "Opens after you seal 2 rifts", "news": "Spend Essence (and Gold, for Defenses) on lasting guild upgrades."},
 	"crafting": {"name": "Crafting", "hint": "Opens after you seal 3 rifts", "news": "Combine 3 spare items or relics into a better one."},
 	"daily": {"name": "Daily twist", "hint": "Opens after you seal 3 rifts", "news": "Once a day a ladder rift can carry a twist: a special rule and a starting boon, for extra Essence. Tick it in the Rift Hall."},
 	"rival": {"name": "Rival moves", "hint": "Opens after you seal 3 rifts", "news": "Once a week the rival guild may court a hero, dare you, or go after a contract. Answer before payday."},
