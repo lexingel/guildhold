@@ -649,7 +649,7 @@ func _accord_choice(cv: VBoxContainer) -> void:
 		var burn := _icon_domain_button("ember", "", "Break the Accord", func():
 			GameState.choose_accord_ending("break")
 			render())
-		burn.tooltip_text = tr("Burn the Terms. Every champion of the old guilds comes home; Riftbreaks come twice as often.")
+		burn.tooltip_text = tr("Burn the Terms. Every champion of the old guilds comes home; a tide of the Hollow breaks every week, stronger for each one you hold.")
 		row.add_child(burn)
 		if GameState.rewrite_open():
 			var rw := _icon_domain_button("violet", "", "Rewrite the Terms", func():
@@ -702,7 +702,7 @@ func _legacy_overlay(retire: bool) -> void:
 		else "Your guild's story is told. Choose up to two heroes the Vale will remember: they come back as champions in your later guilds, waiting to be freed in the Endless Rift.", 13))
 	var laurels := _label(tr("Laurels this guild leaves: %d") % GameState.laurels_earned(), 15)
 	laurels.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
-	laurels.tooltip_text = tr("5 for each act finished, 10 for the Accord's ending, 2 for each champion freed in the Endless Rift, 5 for the Royal Charter, 3 for Captain Morrow, 1 for each echo given back. Spent when founding your next guild.")
+	laurels.tooltip_text = tr("5 for each act finished, 10 for the Accord's ending (20 for rewriting it), 2 for each lost champion freed, 5 for the Royal Charter, 3 for Captain Morrow, 1 for each echo given back, and up to 60% more for oaths kept. After the ending, the Sky Beneath, the postgame and the Chronicle add more. Spent when founding your next guild.")
 	col.add_child(laurels)
 	if GameState.accord_ending == "renew" and GameState.accord_hero != "":
 		col.add_child(_wrap_label(tr("%s, who took the forty-first post, will be remembered too.") % GameState.accord_hero, 12, true))
@@ -1773,7 +1773,7 @@ func _render_campaign_panel(v: Container) -> void:
 	var cv := _vbox(6)
 	if GameState.campaign_done():
 		cv.add_child(_label("The campaign is complete", 16))
-		cv.add_child(_wrap_label("The Ashen Crown is shattered. Rifts still open — push the Endless Rift, climb the rift ladder to SSS, and take on quests.", 12, true))
+		cv.add_child(_wrap_label("The Sky Beneath is behind you. Rifts still open: push the Endless Rift, climb the rift ladder to SSS, take on quests, and finish what the Chronicle lists.", 12, true))
 		panel.add_child(cv)
 		v.add_child(panel)
 		return

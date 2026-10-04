@@ -484,7 +484,7 @@ static func rift_rank_index(rank_id: String) -> int:
 # Every kind that can appear on a hero build (skills/items/relics/traits/innate).
 const BUILD_KINDS := ["dmg_pct", "hp_pct", "speed_pct", "first_round_pct", "escalate_pct", "mend_pct", "hazard_guard_pct", "dodge_pct", "ability_power", "wipe_guard", "boss_alpha_strike"]
 
-# Guild Management: 4 branches, 9 upgrades of 5 levels. Every level adds the
+# Guild Management: 5 branches, 13 upgrades of 5 levels. Every level adds the
 # node's "every" effect (numbers from Combat.describe_node_effect); the
 # "perks" levels unlock something new (Lv2 perks marked "Order:" are Guild
 # Orders, used once per rift). Costs: cost_base + cost_step * current level.
@@ -657,7 +657,7 @@ const RIVAL_TEMPER_PULL := 0.6   # the chance its favourite move is the one it m
 const RIFT_CACHE_GOLD := {"lesser": 70, "greater": 170}
 
 ## The very first rift is a shorter, gentler training rift.
-## The campaign: three acts, each a region with a named foe. Meet an act's
+## The campaign: six acts, each a region with a named foe. Meet an act's
 ## objectives (GameState.campaign_objective_progress) to open its finale — a
 ## harder rift whose boss is the act's foe. Sealing it completes the act,
 ## pays its reward and opens the next tier (Act I: Greater Rifts, Act II:
@@ -1016,7 +1016,7 @@ const ACCORD_ENDING := {
 	"renew": {"title": "The Accord renewed", "subtitle": "%s holds the forty-first post",
 		"text": "The Hall is quiet. Up in the Vale the villagers wake to a morning without a single rift on the horizon, and do not know why. The guild knows. Every year, on the Night of Breaking, someone climbs down to the forty-first post and tells %s how the harvest went.\n\n(Riftbreaks have ended. The Endless Rift, the ladder and the quests carry on.)"},
 	"break": {"title": "The Accord broken", "subtitle": "Every post released",
-		"text": "The Terms burn green. Forty pillars go out at once, and forty people step into the dark and start walking home. Behind them, the Hollow rises to meet the sky. It will be a hard century. It will be an honest one.\n\n(Every champion of the old guilds is free. Riftbreaks come twice as often.)"},
+		"text": "The Terms burn green. Forty pillars go out at once, and forty people step into the dark and start walking home. Behind them, the Hollow rises to meet the sky. It will be a hard century. It will be an honest one.\n\n(Every champion of the old guilds is free. Riftbreaks end; a tide of the Hollow breaks every week, stronger for each one you hold.)"},
 	"rewrite": {"title": "The Terms rewritten", "subtitle": "The forty-second line",
 		"text": "Your guild writes one more line under the forty-first, in Hesper's hand, because hers is the only one the Terms accept: the posts are held in turns. Every guild in the Hall of Guilds sends someone down for a season, and they come back. The forty in the pillars walk home, and the Hollow stays shut behind the ones who take their place. Nobody holds it alone any more.\n\n(Riftbreaks have ended, every champion of this guild is free, and the old Accord halls can be restored.)"},
 }
@@ -1173,9 +1173,9 @@ const FIFTY_RIFTS := [
 const FOUNDINGS := {
 	"free": {"name": "Free Company", "desc": "As the Vale knows guilds: three heroes and 280 Gold."},
 	"mercenary": {"name": "Mercenary Company", "gold": 320, "contract_gold": 1.2, "wages": 1.15, "renown": 0.8, "laurels": 25,
-		"desc": "Hired swords: start with 600 Gold. Contracts pay 20% more Gold, wages are 15% higher, and Renown comes 20% slower. The Hollow Crown Company will make you an offer."},
+		"desc": "Hired swords: start with 320 more Gold. Contracts pay 20% more Gold, wages are 15% higher, and Renown comes 20% slower. The Hollow Crown Company will make you an offer."},
 	"temple": {"name": "Temple Order", "gold": -80, "wages": 0.8, "recover": 1, "echo_renown": 2.0, "echo_essence": 0.5, "laurels": 25,
-		"desc": "Sworn to mend: start with 200 Gold. Wages are 20% lower and downed heroes are back a run sooner. An echo given back earns twice the Renown; one kept, half the Essence."},
+		"desc": "Sworn to mend: start with 80 less Gold. Wages are 20% lower and downed heroes are back a run sooner. An echo given back earns twice the Renown; one kept, half the Essence."},
 	"smugglers": {"name": "The Lantern's Smugglers", "gold": 70, "prices": 0.25, "quiet_pay": 1.4, "laurels": 30, "deed": "quiet",
 		"desc": "Mother Ilse's people: start with 350 Gold. Shop prices are 25% lower, the Last Lantern is never your rival, and keeping quiet in the Charter War pays 40% more Gold instead of 25%."},
 	"accord": {"name": "Last of the Accord", "ledger": 2.0, "breach_sooner": 1, "deed": "ending",

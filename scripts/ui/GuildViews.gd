@@ -1076,12 +1076,6 @@ func _render_hub_cluster(v: VBoxContainer) -> void:
 	var title := ""
 	var entries: Array = []
 	match hub_cluster:
-		"command":
-			title = "Command Tent"
-			entries = [
-				[GameData.CAMP_HUB_ICON_PATH["roster"], "Heroes", func(): hub_cluster = ""; term_tab = "roster"; render()],
-				[GameData.CAMP_HUB_ICON_PATH["management"], "Management", func(): hub_cluster = ""; term_tab = "management"; render()],
-			]
 		"guild_hall":
 			title = "Guild Hall"
 			entries = [
@@ -1096,19 +1090,6 @@ func _render_hub_cluster(v: VBoxContainer) -> void:
 			entries = [
 				[GameData.CAMP_HUB_ICON_PATH["crafting"], "Crafting", func(): hub_cluster = ""; screen = "crafting_hall"; render()],
 				[GameData.CAMP_HUB_ICON_PATH["bestiary"], "Bestiary", func(): hub_cluster = ""; term_tab = "bestiary"; render()],
-			]
-		"trading_post":
-			title = "Trading Post"
-			entries = [
-				[GameData.CAMP_HUB_ICON_PATH["inventory"], "Items", func(): hub_cluster = ""; term_tab = "inventory"; render()],
-				[GameData.CAMP_HUB_ICON_PATH["crafting"], "Crafting", func(): hub_cluster = ""; screen = "crafting_hall"; render()],
-			]
-		"scholars_lodge":
-			title = "Scholar's Lodge"
-			entries = [
-				[GameData.CAMP_HUB_ICON_PATH["bestiary"], "Bestiary", func(): hub_cluster = ""; term_tab = "bestiary"; render()],
-				[GameData.CAMP_HUB_ICON_PATH["compendium"], "Codex", func(): hub_cluster = ""; term_tab = "compendium"; render()],
-				[GameData.CAMP_HUB_ICON_PATH["quests"], "Quests", func(): hub_cluster = ""; term_tab = "quests"; render()],
 			]
 	v.add_child(_label(title, 18))
 	var row := HBoxContainer.new()

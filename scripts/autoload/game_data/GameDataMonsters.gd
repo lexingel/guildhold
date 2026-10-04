@@ -12,7 +12,7 @@ const DUAL_WIELD_CLASSES := [
 ]
 const BOSS_MECHANICS := [
 	{"id": "enrage", "name": "Enraged", "desc": "Strikes harder the longer the fight drags on (past round 4)."},
-	{"id": "warded", "name": "Warded", "desc": "Shields and dodge cannot mitigate its first two retaliations."},
+	{"id": "warded", "name": "Warded", "desc": "Its first two rounds of retaliation can't be dodged."},
 	{"id": "regen", "name": "Regenerating", "desc": "Heals a portion of its health back each round it survives."},
 	{"id": "frenzied", "name": "Frenzied", "desc": "Hits harder than expected from the very first round."},
 ]

@@ -523,7 +523,7 @@ const STONEBOUND_CRYSTALS := 40
 const ABILITY_AWAKENING_COST := 3
 const ABILITY_AWAKENING_MOMENTUM := 2  # "buff" bucket's rider: Momentum refunded
 const ABILITY_AWAKENING_BUCKET := {
-	# Party-wide buffs/utility — rider: -1 round off the Ability's own cooldown.
+	# Party-wide buffs/utility — rider: Momentum back (ABILITY_AWAKENING_MOMENTUM).
 	"dodge_surge": "buff", "escalate_surge": "buff", "counter_surge": "buff",
 	"wipe_guard_surge": "buff", "team_shield_burst": "buff", "team_dmg_mult": "buff",
 	# Single-target damage — rider: every foe's damage output dips slightly.
@@ -543,7 +543,7 @@ const ABILITY_AWAKENING_BUCKET := {
 	"mark_target": "utility", "trap": "utility", "freeze_target": "utility",
 }
 const ABILITY_AWAKENING_BUCKET_DESC := {
-	"buff": "-1 round Ability cooldown",
+	"buff": "+2 Momentum back",
 	"single_dmg": "also weakens every foe's damage slightly",
 	"aoe_dmg": "also grants the party a dodge boost",
 	"support": "also shields the caster",
