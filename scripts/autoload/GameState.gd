@@ -78,6 +78,7 @@ func reset() -> void:
 	branches = {}
 	lore_dry = 0
 	lore_found_here = []
+	chosen_region = ""
 	accord_hero = ""
 	echoes_seen = []
 	charter_choice = ""
@@ -305,6 +306,7 @@ func load_save() -> bool:
 	branches = data.get("branches", {})
 	lore_dry = int(data.get("lore_dry", 0))
 	lore_found_here = data.get("lore_found_here", [])
+	chosen_region = str(data.get("chosen_region", ""))
 	if accord_ending != "" and not book2_started:   # a guild that ended the Accord before Book II existed
 		book2_started = true
 		pending_stories.append(_sky_beneath_card())

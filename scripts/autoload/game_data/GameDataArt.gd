@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The Unwritten Accord, part two: the Key and the Lantern. Who opens the rifts, who pays for it, and what Essence really is. Mother Ilse, Captain Morrow and Ser Aldric tell their own versions in their letters. New choices for guilds that know enough: buy Morrow, buy the Crown's hearing, keep or break the key, pour your echoes into Ezra's lantern. And two charters a truth opens: Vaelith's Rangers and the Ninth Lamp.",
 	"The Unwritten Accord, part one: the Vale's story now spreads across your guilds. Fragments turn up in rifts, on relics, in rival letters and at the pay table, and every later guild keeps them. Any two of a truth's fragments make it known (Library > Codex > Truths), and witnesses' claims are struck through or confirmed as you learn. Some truths open choices a first guild never gets.",
 	"Text that matches the game: the Mercenary and Temple charters say how much more or less Gold they start with, the Break ending describes its weekly tides, the Warded boss and some Awakened Abilities say what they really do, and the Laurels count lists every source.",
 	"The Accord Hall's finale grows less with every lost champion you free (2% each, was 5%), and when a finale is beyond your best party, the Act panel says how far, and what raises your power.",

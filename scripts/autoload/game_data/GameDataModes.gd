@@ -1178,6 +1178,10 @@ const FOUNDINGS := {
 		"desc": "Sworn to mend: start with 80 less Gold. Wages are 20% lower and downed heroes are back a run sooner. An echo given back earns twice the Renown; one kept, half the Essence."},
 	"smugglers": {"name": "The Lantern's Smugglers", "gold": 70, "prices": 0.25, "quiet_pay": 1.4, "laurels": 30, "deed": "quiet",
 		"desc": "Mother Ilse's people: start with 350 Gold. Shop prices are 25% lower, the Last Lantern is never your rival, and keeping quiet in the Charter War pays 40% more Gold instead of 25%."},
+	"rangers": {"name": "Vaelith's Rangers", "gold": -100, "ranger_offer": true, "role_dmg": {"ranger": 0.10}, "breach_warn": 1, "no_rival": "The Iron Chorus", "laurels": 25, "truth": "t_held_open",
+		"desc": "Deserters' wages: start with 100 less Gold. Every recruit board holds a ranger, rangers deal 10% more damage, and Riftbreaks warn you a day earlier. The Iron Chorus won't compete with deserters."},
+	"ninth_lamp": {"name": "The Ninth Lamp", "essence_gain": 0.8, "seal_renown": 1, "echo_chance": 2.0, "echo_touch": 1.0, "start_lab": 1, "laurels": 30, "truth": "t_sky",
+		"desc": "Keepers of the sky: Essence gains are 20% lower, but every seal earns 1 more Renown, echoes turn up twice as often and every kept echo touches a hero, and the Arcane Lab starts at level 1."},
 	"accord": {"name": "Last of the Accord", "ledger": 2.0, "breach_sooner": 1, "deed": "ending",
 		"desc": "Old Hesper's own guild: the Grandmaster's ledger pages turn up twice as often, but the Hollow knows you, and Riftbreaks come a day sooner."},
 }
@@ -1200,6 +1204,7 @@ const OATHS := {
 	"no_rest": {"name": "No Rest", "laurels": 0.10, "desc": "Medical Bay beds don't speed recovery."},
 	"hollow_touched": {"name": "Hollow-Touched", "laurels": 0.20, "desc": "Every foe has 15% more health."},
 	"long_watch": {"name": "The Long Watch", "laurels": 0.15, "desc": "Riftbreaks come twice as often."},
+	"ledger": {"name": "Sworn to the Ledger", "laurels": 0.10, "truths": 5, "desc": "Fragments of the Vale's story turn up twice as often, and every story branch costs half again as much."},
 }
 const OATH_LAURELS_CAP := 0.6
 

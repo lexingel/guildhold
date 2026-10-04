@@ -432,6 +432,7 @@ func change_morale(h: Hero, delta: int) -> void:
 ## hero unpaid twice running or at rock-bottom morale walks out (never one
 ## on a rift right now). Then the guild is compared with its rival.
 func run_payday() -> void:
+	_maybe_audit()   # B3's price, once in Act IV
 	if not hero_request.is_empty():
 		_news(tr("%s — no answer by payday, taken as a no.") % tr(str(request_title())))
 		answer_request(false)
@@ -463,7 +464,7 @@ func run_payday() -> void:
 	for h in heroes.duplicate():
 		if in_rift.has(h.id) or heroes.size() <= 1:
 			continue
-		if h.unpaid_weeks >= GameData.UNPAID_WEEKS_TO_LEAVE or h.morale <= GameData.MORALE_WALKOUT:
+		if h.unpaid_weeks >= GameData.UNPAID_WEEKS_TO_LEAVE or h.morale <= GameData.MORALE_WALKOUT or (h.unpaid_weeks >= 1 and h.history.has("morrow")):   # Morrow walks at once
 			left.append(h.name.split(" the ")[0])
 			_release(h)
 	var volunteers: Array[String] = []

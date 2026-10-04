@@ -38,7 +38,8 @@ func breach_place() -> String:
 
 
 func breach_warn_days() -> int:
-	return GameData.BREACH_WARN + (1 if lvl("def.watch") >= 1 else 0) + (1 if lvl("def.watch") >= 3 else 0)
+	return GameData.BREACH_WARN + (1 if lvl("def.watch") >= 1 else 0) + (1 if lvl("def.watch") >= 3 else 0) \
+		+ int(founding_rule("breach_warn", 0)) + (1 if str(branches.get("key", "")) == "broken" else 0)
 
 
 ## What the Defenses research brings to a defense (DefenseRun opts).
@@ -164,6 +165,8 @@ func _swell_breach() -> void:
 	var idx := best
 	if randf() < GameData.BREACH_UP_CHANCE and best + 1 < GameData.RIFT_RANKS.size() and ladder_rank_lock(str(GameData.RIFT_RANKS[best + 1]["id"])) == "":
 		idx = best + 1
+	if str(branches.get("key", "")) == "kept":   # B4: the doors know who has the key
+		idx = mini(idx + 1, GameData.RIFT_RANKS.size() - 1)
 	var camp := idx >= GameData.rift_rank_index(GameData.BREACH_CAMP_RANK)
 	breach = {"rank": idx, "region": "camp" if camp else pick_biome(), "started": day, "breaks_on": day + breach_warn_days(), "broken": false}
 	pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("A rift is swelling"),

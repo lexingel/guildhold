@@ -129,10 +129,19 @@ func finale_recommended_power() -> int:
 
 ## A biome for a new rift: the Vale in Act I, the Vale or the Marshes in Act
 ## II, any of the three after that.
-func pick_biome() -> String:
+func pick_biome(for_run: bool = false) -> String:
+	var open := open_regions()
+	if for_run and key_region_open() and open.has(chosen_region):   # Pip's Key
+		return chosen_region
+	return str(open[randi() % open.size()])
+
+
+## The regions a rift can open in now (weighted: a region listed twice is
+## twice as likely).
+func open_regions() -> Array:
 	var open := ["vale"] if campaign_act <= 1 else (["vale", "marsh", "marsh"] if campaign_act == 2 else ["vale", "marsh", "ashen"])
 	open.append_array(book2_regions())
-	return str(open[randi() % open.size()])
+	return open
 
 
 ## The Sky Beneath's regions this guild has reached (none after closing the doors).
@@ -193,6 +202,9 @@ func _complete_act(act_num: int) -> void:
 		var turn_card: Dictionary = GameData.CHARTER_TURN.duplicate(true)
 		if sworn("never_sell"):
 			turn_card["choices"] = ["expose"]   # the oath: the page goes to the Crown
+		var page := lore_event("charter", "turn")
+		if page != "":
+			turn_card["text"] = tr(str(turn_card["text"])) + "\n\n" + page
 		pending_stories.append(turn_card)   # after Act III's intro (below)
 	if act_num == 3:
 		_find_line_piece()
@@ -211,7 +223,11 @@ func _complete_act(act_num: int) -> void:
 	else:
 		pending_stories.append(_act_intro_card(campaign_act))
 		if campaign_act == 2 and founding == "mercenary":
-			pending_stories.append(GameData.MERCENARY_OFFER.duplicate())
+			var offer: Dictionary = GameData.MERCENARY_OFFER.duplicate()
+			var wm := lore_event("mercenary", "offer")
+			if wm != "":
+				offer["text"] = tr(str(offer["text"])) + "\n\n" + wm
+			pending_stories.append(offer)
 		# The Charter War's turn waits until after Act III's intro.
 		var turn := pending_stories.filter(func(c): return str(c.get("kind", "")) == "charter")
 		for c in turn:
@@ -242,7 +258,7 @@ func choose_vaelith(choice: String) -> void:
 			if relics[i].id == str(card.get("relic", "")):
 				relics.remove_at(i)
 				break
-		crystals = maxi(0, crystals - GameData.VAELITH_SPARE_ESSENCE)
+		crystals = maxi(0, crystals - branch_cost(GameData.VAELITH_SPARE_ESSENCE))
 		unlock_champion("vaelith")
 		if rival_name == "The Iron Chorus":
 			rival_renown += GameData.VAELITH_CHORUS_RENOWN
@@ -289,7 +305,7 @@ func maybe_find_ledger_page(finale: bool) -> void:
 ## What the Rifts Take: from Act II a sealed rift sometimes leaves an echo
 ## (GameData.ECHOES, each once), a choice card: give it back or keep it.
 func maybe_echo() -> void:
-	if campaign_act < 2 or pending_stories.any(func(c): return str(c.get("kind", "")) == "echo") or randf() >= GameData.ECHO_CHANCE * year_mult("echo_chance"):
+	if campaign_act < 2 or pending_stories.any(func(c): return str(c.get("kind", "")) == "echo") or randf() >= GameData.ECHO_CHANCE * year_mult("echo_chance") * float(founding_rule("echo_chance", 1.0)):
 		return
 	var left: Array = GameData.ECHOES.filter(func(e): return not echoes_seen.has(str(e["id"])))
 	if left.is_empty():
@@ -324,9 +340,18 @@ func answer_echo(choice: String) -> void:
 		crystals += int(round(int(card.get("essence", echo_essence())) * float(founding_rule("echo_essence", 1.0)) * year_mult("echo_essence")))
 		_news(tr("An echo was kept: %s (+%d Essence).") % [tr(str(card["title"])), int(card.get("essence", 0))])
 		_echo_touch(str(card["echo"]))
+		lore_event("echo_kept", str(card["echo"]))
 	if echoes_seen.size() == 3:   # the third echo brings Ezra
 		var ez: Dictionary = GameData.EZRA_VISIT["gave" if echoes_returned * 2 >= echoes_seen.size() else "kept"]
-		pending_stories.append({"title": tr(str(ez["title"])), "subtitle": tr(str(ez["subtitle"])), "text": tr(str(ez["text"]))})
+		var ez_card := {"title": tr(str(ez["title"])), "subtitle": tr(str(ez["subtitle"])), "text": tr(str(ez["text"]))}
+		var lamp := lore_event("ezra", "visit")
+		if lamp != "":
+			ez_card["text"] = str(ez_card["text"]) + "\n\n" + lamp
+		if truth_known("t_lantern") and str(branches.get("lantern", "")) == "":   # B6
+			ez_card["kind"] = "ezra"
+			ez_card["choices"] = ["keep", "pour"]
+			ez_card["text"] = str(ez_card["text"]) + tr(GameData.EZRA_CHOICE_TEXT)
+		pending_stories.append(ez_card)
 	save()
 	state_changed.emit()
 
@@ -334,7 +359,7 @@ func answer_echo(choice: String) -> void:
 ## A kept echo may touch a hero who recognises what's in it (Echo-Touched).
 func _echo_touch(echo_id: String) -> void:
 	var pool: Array = heroes.filter(func(h): return not h.is_champion and not h.quirks.has("Echo-Touched"))
-	if pool.is_empty() or randf() >= GameData.ECHO_TOUCH_CHANCE:
+	if pool.is_empty() or randf() >= float(founding_rule("echo_touch", GameData.ECHO_TOUCH_CHANCE)):
 		return
 	var h: Hero = pool[randi() % pool.size()]
 	h.history["echoes"] = 1
@@ -345,15 +370,23 @@ func _echo_touch(echo_id: String) -> void:
 		"text": tr(str(t["text"])) % [n, tr(str(GameData.ECHO_HOLDS.get(echo_id, "something"))), n, n]})
 
 
+## "gave" or "kept": what the Vale remembers of the echoes (a poured lantern, B6, is giving).
+func vale_verdict() -> String:
+	return "gave" if echoes_returned * 2 >= echoes_seen.size() or str(branches.get("lantern", "")) == "poured" else "kept"
+
+
 ## What the Vale remembers (the campaign's end, after three echoes or more).
 func _vale_remembers() -> Dictionary:
-	var v: Dictionary = GameData.VALE_REMEMBERS["gave" if echoes_returned * 2 >= echoes_seen.size() else "kept"]
+	var v: Dictionary = GameData.VALE_REMEMBERS[vale_verdict()]
 	return {"title": tr(str(v["title"])), "subtitle": tr(str(v["subtitle"])), "text": tr(str(v["text"]))}
 
 
 ## The Charter War's turn: "expose" the Hollow Crown Company or keep "quiet"
 ## (the choice card that opens Act III).
 func choose_charter(choice: String) -> void:
+	if choice == "turn":
+		turn_morrow()
+		return
 	if charter_choice != "" or not GameData.CHARTER_RESULT.has(choice) or (choice == "quiet" and sworn("never_sell")):
 		return
 	charter_choice = choice
@@ -366,14 +399,20 @@ func choose_charter(choice: String) -> void:
 	var r: Dictionary = GameData.CHARTER_RESULT[choice]
 	if not pending_stories.is_empty() and str(pending_stories[0].get("kind", "")) == "charter":
 		pending_stories.pop_front()
-	pending_stories.push_front({"title": tr(str(r["title"])), "subtitle": tr(str(r["subtitle"])), "text": tr(hesper_alt("charter_quiet", str(r["text"])) if choice == "quiet" else str(r["text"]))})
+	var small := lore_event("charter", "quiet") if choice == "quiet" else ""
+	pending_stories.push_front({"title": tr(str(r["title"])), "subtitle": tr(str(r["subtitle"])), "text": tr(hesper_alt("charter_quiet", str(r["text"])) if choice == "quiet" else str(r["text"])) + ("\n\n" + small if small != "" else "")})
 	_news(tr(str(r["title"])) + ".")
 	save()
 	state_changed.emit()
 
 
 ## The Crown's hearing (Act III's end): the Royal Charter to the Renown leader.
-func _charter_hearing() -> Dictionary:
+func _charter_hearing(accepted: bool = false) -> Dictionary:
+	if charter_choice == "turn" and not accepted and not branches.has("turn_hearing"):   # B2: the Crown remembers Morrow
+		branches["turn_hearing"] = "done"
+		rival_renown += GameData.MORROW_TURN_HEARING
+	if not accepted and reputation < rival_renown and truth_known("t_warden"):   # B3: the Charter has a price
+		return GameData.HEARING_CHOICE.duplicate(true)
 	charter_result = "won" if reputation >= rival_renown else "lost"
 	var h: Dictionary = GameData.CHARTER_HEARING[charter_result]
 	var rn := tr(str(rival_name))
@@ -381,8 +420,104 @@ func _charter_hearing() -> Dictionary:
 	if charter_result == "lost":
 		card["subtitle"] = card["subtitle"] % rn
 		card["text"] = card["text"] % rn
+	else:
+		var left := lore_event("hearing", "won")
+		if left != "":
+			card["text"] = str(card["text"]) + "\n\n" + left
 	_news(card["subtitle"] + ".")
 	return card
+
+
+## B2: a guild that knows who pays the Company can buy Morrow instead.
+func morrow_turn_open() -> bool:
+	return truth_known("t_paymaster") and charter_choice == ""
+
+
+## Turns Morrow (B2): the bribe, Morrow on the roster on double wages, the
+## Company's hunt called off, and the key on the table (B4). Returns "" or why not.
+func turn_morrow() -> String:
+	if not morrow_turn_open():
+		return tr("Morrow can't be bought by this guild.")
+	var cost := branch_cost(GameData.MORROW_TURN_COST)
+	if coins < cost:
+		return tr("Turning Morrow takes %d Gold.") % cost
+	coins -= cost
+	charter_choice = "turn"
+	branches["morrow"] = "turned"
+	var m: Hero = null
+	for i in 40:
+		m = Combat.gen_hero("S", GameData.MORROW_HERO_LEVEL)
+		if m.cls_id == "rogue":
+			break
+	m.name = "Morrow the %s" % m.name.split(" the ")[1]
+	m.history["morrow"] = 1
+	heroes.append(m)
+	wage_raise[m.id] = 1.0   # double wages
+	if not pending_stories.is_empty() and str(pending_stories[0].get("kind", "")) == "charter":
+		pending_stories.pop_front()
+	_offer_key()
+	pending_stories.push_front(GameData.MORROW_TURNED.duplicate())
+	_news(tr("Captain Morrow was bought, and joined the guild."))
+	save()
+	state_changed.emit()
+	return ""
+
+
+## B4: the key, kept or broken (once Morrow is beaten or turned, and the
+## guild knows what it opens).
+func _offer_key() -> void:
+	if truth_known("t_key") and str(branches.get("key", "")) == "":
+		pending_stories.append(GameData.KEY_CHOICE.duplicate(true))
+
+
+func choose_key(choice: String) -> void:
+	if pending_stories.is_empty() or str(pending_stories[0].get("kind", "")) != "key":
+		return
+	pending_stories.pop_front()
+	branches["key"] = "kept" if choice == "keep" else "broken"
+	if choice != "keep":
+		add_reputation(GameData.KEY_BREAK_RENOWN)
+		chosen_region = ""
+	pending_stories.push_front((GameData.KEY_KEPT if choice == "keep" else GameData.KEY_BROKEN).duplicate())
+	save()
+	state_changed.emit()
+
+
+## B3: the Crown's hearing, bought (or the verdict accepted).
+func choose_hearing(choice: String) -> String:
+	if pending_stories.is_empty() or str(pending_stories[0].get("kind", "")) != "hearing":
+		return ""
+	var cost := branch_cost(GameData.HEARING_BUY_COST)
+	if choice == "buy" and coins < cost:
+		return tr("Buying the Charter takes %d Gold.") % cost
+	pending_stories.pop_front()
+	if choice == "buy":
+		coins -= cost
+		charter_result = "won"
+		branches["hearing"] = "bought"
+		pending_stories.push_front(GameData.HEARING_BOUGHT.duplicate())
+		_news(tr("The Royal Charter was bought."))
+	else:
+		pending_stories.push_front(_charter_hearing(true))
+	save()
+	state_changed.emit()
+	return ""
+
+
+## B6: Ezra's lantern, filled with the vault's kept echoes (or not).
+func choose_lantern(choice: String) -> void:
+	if pending_stories.is_empty() or str(pending_stories[0].get("kind", "")) != "ezra":
+		return
+	pending_stories.pop_front()
+	if choice == "pour":
+		branches["lantern"] = "poured"
+		crystals = maxi(0, crystals - branch_cost(GameData.LANTERN_PER_ECHO) * (echoes_seen.size() - echoes_returned))
+		for h in heroes:
+			h.quirks.erase("Echo-Touched")
+		pending_stories.push_front(GameData.LANTERN_POURED.duplicate())
+		_news(tr("The kept echoes were poured into Ezra's lantern."))
+	save()
+	state_changed.emit()
 
 
 ## Wen's line for the Memorial (by voice, a steady pick per name).
@@ -867,7 +1002,7 @@ func laurels_earned() -> int:
 	n += int(L["ending"]) if accord_ending != "" else 0
 	n += GameData.REWRITE_LAURELS if accord_ending == "rewrite" else 0
 	n += posts_freed() * int(L["freed"])
-	n += int(L["charter"]) if charter_result == "won" else 0
+	n += int(L["charter"]) if charter_result == "won" and str(branches.get("hearing", "")) != "bought" else 0
 	n += int(L["morrow"]) if morrow_defeated else 0
 	n += echoes_returned * int(L["echo"])
 	return int(round(n * (1.0 + oath_bonus())))
@@ -936,7 +1071,7 @@ func write_legacy(hero_ids: Array, retired: bool = false) -> int:
 		"name": guild_name, "crest": guild_crest, "ending": accord_ending, "retired": retired, "day": day, "act": campaign_act,
 		"rifts": rifts_sealed, "laurels": earned, "remembered": names, "fallen": fallen.size(), "charter": charter_result,
 		"quiet": charter_choice == "quiet", "founding": founding, "oaths": oaths.duplicate(), "year": vale_year.duplicate(true),
-		"branches": branches.duplicate(), "fragments": lore_found_here.size()})
+		"branches": branches.duplicate(), "fragments": lore_found_here.size(), "vale": vale_verdict() if echoes_seen.size() >= 3 else ""})
 	legacy_written = true
 	save_legacy()
 	save()
@@ -1001,6 +1136,8 @@ func apply_legacy_gifts(ids: Array) -> Array:
 			"clerks_copy":
 				accord_pages = maxi(accord_pages, 2)
 				hear_ledger_claims()
+			"pips_key":
+				branches["key_gift"] = "yes"
 		applied.append(g["id"])
 	if not applied.is_empty():
 		save_legacy()
@@ -1010,7 +1147,7 @@ func apply_legacy_gifts(ids: Array) -> Array:
 
 ## A founding gift is open: some need a truth (the Unwritten Accord).
 func gift_open(g: Dictionary) -> bool:
-	return not g.has("truth") or truth_known(str(g["truth"]))
+	return lore_option_open(g)
 
 
 ## B5: Hesper can sign the forty-first line in this guild's Renew ending.
@@ -1067,7 +1204,7 @@ func skip_act_one() -> void:
 ## Laurels, or by a deed a guild in the Hall of Guilds did.
 func founding_unlocked(id: String) -> bool:
 	var f: Dictionary = GameData.FOUNDINGS.get(id, {})
-	if f.is_empty() or (id == "accord" and hesper_posted()):   # Hesper's own guild, and she's at the post
+	if f.is_empty() or (id == "accord" and hesper_posted()) or not lore_option_open(f):   # Hesper's own guild, and she's at the post; a truth's charter
 		return false
 	if not f.has("laurels") and not f.has("deed"):
 		return true
@@ -1088,6 +1225,8 @@ func unlock_founding(id: String) -> String:
 		return ""
 	if not f.has("laurels"):
 		return tr("This charter is earned by a deed, not bought.")
+	if not lore_option_open(f):
+		return tr("This charter needs a truth first.")
 	if int(legacy.get("laurels", 0)) < int(f["laurels"]):
 		return tr("Not enough Laurels.")
 	legacy["laurels"] = int(legacy["laurels"]) - int(f["laurels"])
@@ -1105,9 +1244,12 @@ func apply_founding(id: String) -> void:
 		id = "free"
 	founding = id
 	coins += int(founding_rule("gold", 0))
-	if id == "smugglers" and rival_name == "The Last Lantern":
-		var others: Array = GameData.RIVAL_NAMES.filter(func(n): return n != "The Last Lantern")
+	var shunned := "The Last Lantern" if id == "smugglers" else str(founding_rule("no_rival", ""))
+	if shunned != "" and rival_name == shunned:
+		var others: Array = GameData.RIVAL_NAMES.filter(func(n): return n != shunned)
 		rival_name = str(others[randi() % others.size()])
+	if int(founding_rule("start_lab", 0)) > 0:
+		upgrades["res.lab"] = maxi(int(founding_rule("start_lab", 0)), int(upgrades.get("res.lab", 0)))
 	if id == "accord":
 		for i in pending_stories.size():
 			if str(pending_stories[i].get("title", "")) == str(GameData.PROLOGUE["title"]):
@@ -1118,7 +1260,8 @@ func apply_founding(id: String) -> void:
 ## [Gold, Essence] to restore hall `id` next.
 func hall_cost(id: String) -> Array:
 	if id == "grandmaster":
-		return GameData.GRANDMASTER_HALL_COST
+		var forced := GameData.KEY_HALL_FORCED if str(branches.get("key", "")) == "broken" else 1.0   # B4: no key to open it
+		return [int(round(int(GameData.GRANDMASTER_HALL_COST[0]) * forced)), int(round(int(GameData.GRANDMASTER_HALL_COST[1]) * forced))]
 	var n := halls_restored.filter(func(h): return h != "grandmaster").size()
 	return [int(GameData.HALL_COST[0]) + int(GameData.HALL_COST_STEP[0]) * n, int(GameData.HALL_COST[1]) + int(GameData.HALL_COST_STEP[1]) * n]
 
@@ -1146,7 +1289,7 @@ func restore_hall(id: String) -> String:
 	crystals -= int(c[1])
 	halls_restored.append(id)
 	var hall: Dictionary = GameData.ACCORD_HALLS.filter(func(h): return h["id"] == id)[0]
-	var htext := tr(hesper_alt("iron_oath", str(hall["text"])) if id == "iron_oath" else str(hall["text"]))
+	var htext := tr(hesper_alt("iron_oath", str(hall["text"])) if id == "iron_oath" else (GameData.KEY_HALL_TEXT if id == "grandmaster" and str(branches.get("key", "")) == "broken" else str(hall["text"])))
 	var frag := lore_event("hall", id)
 	pending_stories.append({"title": tr(str(hall["name"])), "subtitle": tr("Keepers of the Vale"), "text": htext + ("\n\n" + tr(frag) if frag != "" else "")})
 	_news(tr("%s is restored.") % tr(str(hall["name"])))

@@ -104,6 +104,7 @@ var branches: Dictionary = {}    # the story web's branches this guild took ("va
 var lore_dry := 0                # seals since a fragment could have turned up and didn't (LORE_PITY)
 var lore_found_here: Array = []  # fragments this guild found (the Hall of Guilds record)
 var _in_veteran := false         # the veteran start is completing Act I (no story choices)
+var chosen_region := ""         # Pip's Key: the region the player picked for the next rifts ("" = any)
 var accord_pages: int = 0     # pages of the Grandmaster's ledger found (GameData.LEDGER_PAGES, in order)
 var relics_found: Array = []   # every Legendary relic id this guild has held (the Compendium's record)
 
@@ -261,6 +262,11 @@ func full_heal_between_runs() -> bool:
 
 
 ## Drill Yard: party damage (Combat.start_combat) and max HP (Combat.max_hp).
+## A charter's damage bonus for a role (Vaelith's Rangers: rangers).
+func charter_role_dmg(h: Hero) -> float:
+	return float((founding_rule("role_dmg", {}) as Dictionary).get(h.cls_id, 0.0))
+
+
 func tactical_bonus() -> float:
 	return 1.0 + 0.04 * lvl("ops.drill")
 
@@ -278,7 +284,7 @@ func respec_fee_reduction() -> float:
 
 
 func crystal_yield_bonus() -> float:
-	return 1.0 + 0.08 * lvl("infra.amplifiers")
+	return (1.0 + 0.08 * lvl("infra.amplifiers")) * float(founding_rule("essence_gain", 1.0))
 
 
 func energy_extract_chance() -> float:
@@ -302,7 +308,7 @@ func hazards_nonlethal() -> bool:
 
 
 func seal_bonus_mult() -> float:
-	return 1.0 + 0.10 * lvl("infra.wardstones")
+	return (1.0 + 0.10 * lvl("infra.wardstones")) * float(founding_rule("essence_gain", 1.0))
 
 
 func broker_fee_reduction() -> float:
@@ -410,11 +416,11 @@ func founding_rule(key: String, default: Variant) -> Variant:
 
 
 func charter_pay(essence: bool) -> float:
-	var m := GameData.CHARTER_PAY if charter_result == "won" else 1.0
+	var m := (GameData.HEARING_BUY_PAY if str(branches.get("hearing", "")) == "bought" else GameData.CHARTER_PAY) if charter_result == "won" else 1.0
 	if not essence:
 		m *= float(founding_rule("contract_gold", 1.0)) * (1.0 + hall_bonus("gold")) * year_mult("contract_gold")
 	else:
-		m *= 1.0 + hall_bonus("essence")
+		m *= 1.0 + hall_bonus("essence") + (GameData.LANTERN_ESSENCE if str(branches.get("lantern", "")) == "poured" else 0.0)
 	if not essence and charter_choice == "quiet":
 		m *= float(founding_rule("quiet_pay", GameData.CHARTER_QUIET_PAY))
 	return m
@@ -763,7 +769,7 @@ func save() -> void:
 		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "training_week": training_week, "trained_this_week": trained_this_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
-		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
+		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
 		"run": _run_for_save(),
 		
 		"monsters_seen": monsters_seen, "bosses_defeated": bosses_defeated, "hazards_seen": hazards_seen,

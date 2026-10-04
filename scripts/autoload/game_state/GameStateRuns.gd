@@ -31,7 +31,7 @@ func start_run(diff_id: String, hero_ids: Array[String], starting_relic: Relic, 
 		"hero_ids": hero_ids, "shield": shield, "boss_rounds": 0,
 		"node_kind": "", "node_state": {}, "sealed": null, "anchor_used": false,
 		"start_coins": coins, "start_crystals": crystals, "heroes_lost": 0, "start_snap": run_snapshot(hero_ids),
-		"rift_rank": rift_rank, "seed": randi(), "training": training, "biome": pick_biome(),
+		"rift_rank": rift_rank, "seed": randi(), "training": training, "biome": pick_biome(true),
 		"overseer": overseer if champions.has(overseer) else "",
 	}
 	if training:
@@ -301,7 +301,9 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 					morrow_defeated = true
 					coins += int(GameData.MORROW_REWARD["coins"])
 					add_reputation(int(GameData.MORROW_REWARD["reputation"]))
-					pending_stories.append({"title": tr(str(GameData.MORROW_DOWN["title"])), "subtitle": tr(str(GameData.MORROW_DOWN["subtitle"])), "text": tr(str(GameData.MORROW_DOWN["text"]))})
+					var down := lore_event("morrow", "down")   # the story web: the key, a confession
+					pending_stories.append({"title": tr(str(GameData.MORROW_DOWN["title"])), "subtitle": tr(str(GameData.MORROW_DOWN["subtitle"])), "text": tr(str(GameData.MORROW_DOWN["text"])) + ("\n\n" + down if down != "" else "")})
+					_offer_key()
 					_news(tr("Captain Morrow is beaten; the Hollow Crown Company is finished."))
 			elif kind == "elite":
 				elites_won += 1
@@ -316,6 +318,8 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 				var mname := str(m.get("name", ""))
 				if mname != "":
 					monster_kill_counts[mname] = int(monster_kill_counts.get(mname, 0)) + 1
+					if mname == "Company Crossbowman":   # the story web: a Bestiary note
+						lore_event("bestiary", mname)
 			var flawless := true
 			for h in state.get("party", []):
 				if h.hp <= 0:
@@ -851,7 +855,7 @@ func seal_rift() -> void:
 		_check_challenge(GameData.rift_rank_index(mapped_rank))
 	var just_unlocked_greater := int(run.get("finale", 0)) == 1   # Greater Rifts open with Act I's finale
 	rifts_sealed += 1
-	add_reputation(GameData.SEAL_RENOWN_BASE + (GameData.rift_rank_index(mapped_rank) / 3 if mapped_rank != "" else 0))
+	add_reputation(GameData.SEAL_RENOWN_BASE + (GameData.rift_rank_index(mapped_rank) / 3 if mapped_rank != "" else 0) + int(founding_rule("seal_renown", 0)))
 	# Guild Board tallies (see _quest_current).
 	if mapped_rank != "":
 		_bump("rank_seals:%d" % GameData.rift_rank_index(mapped_rank))

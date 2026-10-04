@@ -338,6 +338,12 @@ func _answer_stories() -> void:
 				GameState.choose_sky_ending("both")
 			"vaelith":
 				GameState.choose_vaelith("end")
+			"hearing":
+				GameState.choose_hearing("accept")
+			"key":
+				GameState.choose_key("break")
+			"ezra":
+				GameState.choose_lantern("keep")
 			_:
 				GameState.choose_accord_ending(ending, GameState.heroes[0].id)
 		if not GameState.pending_stories.is_empty() and GameState.pending_stories[0] == c:

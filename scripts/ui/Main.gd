@@ -540,6 +540,17 @@ func _story_overlay(card_data: Dictionary) -> void:
 		elif str(card_data.get("kind", "")) == "vaelith":   # B1 (the Unwritten Accord)
 			_two_way_choice(cv, "Drive her back", tr("As the story goes: she falls back through the Breach"), func(): GameState.choose_vaelith("end"),
 				"Let her go", tr("No relic from this finale and half its Essence. She joins as a champion; Act IV's finale is %d%% weaker") % int(round(GameData.VAELITH_FINALE_CUT * 100)), func(): GameState.choose_vaelith("spare"))
+		elif str(card_data.get("kind", "")) == "hearing":   # B3
+			_two_way_choice(cv, "Accept the verdict", tr("The Charter goes to the guild with more Renown"), func(): GameState.choose_hearing("accept"),
+				tr("Buy the Charter (%d Gold)") % GameState.branch_cost(GameData.HEARING_BUY_COST), tr("Contracts pay 10% more, not 20%. No Laurels for it, and the Crown's auditors come in Act IV"), func():
+					_flavor_toast = GameState.choose_hearing("buy"))
+		elif str(card_data.get("kind", "")) == "key":   # B4
+			_two_way_choice(cv, "Keep the key", tr("Choose each rift's region; every Riftbreak comes a rank higher"), func(): GameState.choose_key("keep"),
+				"Break it", tr("+%d Renown, a day more warning before Riftbreaks; the Grandmaster's Hall costs a quarter more") % GameData.KEY_BREAK_RENOWN, func(): GameState.choose_key("break"))
+		elif str(card_data.get("kind", "")) == "ezra":   # B6
+			var kept := GameState.echoes_seen.size() - GameState.echoes_returned
+			_two_way_choice(cv, "Keep your echoes", tr("Ezra goes on his way"), func(): GameState.choose_lantern("keep"),
+				"Pour them into the lantern", tr("-%d Essence and Echo-Touched heroes lose the quirk; contracts pay 10%% more Essence, and the Vale remembers what you gave") % (GameState.branch_cost(GameData.LANTERN_PER_ECHO) * kept), func(): GameState.choose_lantern("pour"))
 		elif str(card_data.get("kind", "")) == "sky":
 			_two_way_choice(cv, "Keep the doors open", tr("Both worlds: Hollow-born heroes join your recruit board, in later guilds too"), func(): GameState.choose_sky_ending("both"),
 				"Close every door", tr("Ours: +%d Laurels, and the Hollow's foes leave the ladder") % GameData.SKY_OURS_LAURELS, func(): GameState.choose_sky_ending("ours"))
@@ -600,6 +611,14 @@ func _charter_choice(cv: VBoxContainer) -> void:
 		render())
 	quiet.tooltip_text = tr("Contracts pay %d%% more Gold for the rest of the campaign. The Accord said: never sell a rift.") % int(round((GameData.CHARTER_QUIET_PAY - 1.0) * 100))
 	row.add_child(quiet)
+	if GameState.morrow_turn_open():   # B2 (the Unwritten Accord)
+		var cost := GameState.branch_cost(GameData.MORROW_TURN_COST)
+		var turn := _icon_domain_button("violet", "", tr("Turn Morrow (%d Gold)") % cost, func():
+			_flavor_toast = GameState.turn_morrow()
+			render())
+		turn.disabled = GameState.coins < cost
+		turn.tooltip_text = tr("You know who pays him. Morrow joins as a Rank S rogue on double wages and the Company stops hunting; the Crown will remember at its hearing.")
+		row.add_child(turn)
 	cv.add_child(row)
 	_combat_hotkeys = {}
 
@@ -792,7 +811,7 @@ func _founding_charters() -> Control:
 			_pending_founding = k
 			render())
 		row.add_child(b)
-		if not open and f.has("laurels") and int(GameState.legacy.get("laurels", 0)) >= int(f["laurels"]):
+		if not open and f.has("laurels") and int(GameState.legacy.get("laurels", 0)) >= int(f["laurels"]) and GameState.lore_option_open(f):
 			row.add_child(_button(tr("Unlock · %d Laurels") % int(f["laurels"]), func(k=id):
 				_flavor_toast = GameState.unlock_founding(k)
 				if _flavor_toast == "":
@@ -810,10 +829,22 @@ func _founding_charters() -> Control:
 				how.append(tr("%d Laurels") % int(f["laurels"]))
 			if f.has("deed"):
 				how.append(tr(str(GameData.FOUNDING_DEEDS[f["deed"]])))
+			if f.has("truth") and not GameState.truth_known(str(f["truth"])):   # the story web
+				locked.append(tr("%s: needs a truth from %s") % [tr(str(f["name"])), tr(_arc_name(str(f["truth"])))])
+				continue
 			locked.append(tr("%s: %s") % [tr(str(f["name"])), tr(" or ").join(how)])
 	if not locked.is_empty():
 		col.add_child(_wrap_label(tr("Still locked — %s") % "; ".join(locked), 11, true))
 	return col
+
+
+## The arc a truth belongs to, by name (the founding screen's locks).
+func _arc_name(truth: String) -> String:
+	var arc := str(GameData.TRUTHS.get(truth, {}).get("arc", ""))
+	for a in GameData.LORE_ARCS:
+		if str(a[0]) == arc:
+			return str(a[1])
+	return arc
 
 
 ## The founding screen's year in the Vale (for a returning player): two
@@ -857,6 +888,9 @@ func _founding_oaths() -> Control:
 		b.button_pressed = _pending_oaths.has(id)
 		b.text = tr("%s · +%d%%") % [tr(str(o["name"])), int(round(float(o["laurels"]) * 100.0))]
 		b.tooltip_text = tr(str(o["desc"]))
+		if not GameState.lore_option_open(o):   # the story web: enough truths known
+			b.text = tr("%s · needs %d truths") % [tr(str(o["name"])), int(o.get("truths", 0))]
+			b.disabled = true
 		b.pressed.connect(func(k=id):
 			if _pending_oaths.has(k):
 				_pending_oaths.erase(k)
@@ -2191,6 +2225,23 @@ func _ladder_card(best: int, go: Callable) -> Control:
 			b.tooltip_text = tr("Rank %s — sealed") % tr(str(rid))
 		row.add_child(b)
 	cv.add_child(row)
+	if GameState.key_region_open():   # Pip's Key: the player picks the region
+		var reg := HFlowContainer.new()
+		reg.add_theme_constant_override("h_separation", 6)
+		reg.add_child(_label("Pip's Key:", 12, true))
+		var seen := {}
+		for r_id in [""] + GameState.open_regions():
+			if seen.has(r_id):
+				continue
+			seen[r_id] = true
+			var rb := _button(tr("Any region") if r_id == "" else tr(str(GameData.BIOMES[r_id]["name"])), func(id=r_id):
+				GameState.chosen_region = id
+				GameState.save()
+				render())
+			rb.toggle_mode = true
+			rb.button_pressed = GameState.chosen_region == r_id or (r_id == "" and not GameState.open_regions().has(GameState.chosen_region))
+			reg.add_child(rb)
+		cv.add_child(reg)
 	var rank: Dictionary = GameData.find_rift_rank(_ladder_pick)
 	var base: Dictionary = GameData.DIFFICULTIES[0]
 	for d in GameData.DIFFICULTIES:

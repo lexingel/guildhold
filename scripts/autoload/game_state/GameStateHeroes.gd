@@ -194,6 +194,15 @@ func recruit_top_up() -> void:
 		var good_ranks := ["C", "B", "A", "S"]
 		_drop_offer(recruit_pool[recruit_pool.size() - 1])
 		_post_offer(gen_recruit_offer(good_ranks[randi() % good_ranks.size()]))
+	if bool(founding_rule("ranger_offer", false)) and not recruit_pool.is_empty() and not recruit_pool.any(func(h): return h.cls_id == "ranger"):   # Vaelith's Rangers
+		var ranger := gen_recruit_offer()
+		for i in 40:
+			if ranger.cls_id == "ranger":
+				break
+			ranger = gen_recruit_offer()
+		if ranger.cls_id == "ranger":
+			_drop_offer(recruit_pool[0])
+			_post_offer(ranger)
 	recruit_rerolls = 0
 
 

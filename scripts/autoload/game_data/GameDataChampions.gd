@@ -254,6 +254,7 @@ const LEGACY_GIFTS := [
 	{"id": "contacts", "cost": 6, "name": "Old contacts: two Rank C recruits waiting"},
 	{"id": "veteran", "cost": 12, "name": "Veteran start: Act I already done"},
 	{"id": "clerks_copy", "cost": 6, "name": "The Clerk's Copy: two ledger pages already found", "truth": "t_blank_line"},
+	{"id": "pips_key", "cost": 8, "name": "Pip's Key: choose your rifts' region until Act III is done", "truth": "t_key"},
 ]
 ## The veteran start: Act I done, with what a guild has by then (the sim, 10
 ## guilds: ~6 heroes, the starters at level 4-5 and a Rank C-B recruit,

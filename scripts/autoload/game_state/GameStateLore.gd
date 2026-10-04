@@ -60,6 +60,12 @@ func lore_gate(f: Dictionary, ctx: Dictionary = {}) -> bool:
 		return false
 	if g.has("hall") and not _hall_has(str(g["hall"])):
 		return false
+	if g.has("morrow") and not (morrow_defeated or str(branches.get("morrow", "")) == "turned"):
+		return false
+	if g.has("upgrade"):
+		var u := str(g["upgrade"]).split(":")
+		if lvl(u[0]) < int(u[1]):
+			return false
 	if hesper_posted() and (f.get("lines", []) as Array).any(func(l): return str(l[0]) == "Hesper"):
 		return false   # she isn't at the pay table
 	return true
@@ -71,6 +77,12 @@ func _hall_has(what: String) -> bool:
 	match what:
 		"spared_vaelith":
 			return hall.any(func(g): return str((g.get("branches", {}) as Dictionary).get("vaelith", "")) == "spared")
+		"kept_quiet":
+			return hall.any(func(g): return bool(g.get("quiet", false)))
+		"kept_echoes":   # the Vale remembered a guild for what it kept
+			return hall.any(func(g): return str(g.get("vale", "")) == "kept")
+		"tides5":
+			return hall.any(func(g): return str(g.get("ending", "")) == "break" and int(g.get("best_tide", 0)) >= 5)
 	return false
 
 
@@ -141,11 +153,14 @@ func claim_status(c: Dictionary) -> String:
 	return str(c["verdict"]) if truth_known(str(c.get("truth", ""))) else "open"
 
 
-## An event that can carry a fragment (echo, finale, crossing, line, hall,
-## ending). Returns the found fragment's text to add to the event's card, or "".
+## An event that can carry fragments (echo, finale, crossing, line, hall,
+## ending, ...). Returns the found fragments' text to add to the event's card
+## (translated, paragraphs), or "".
 func lore_event(channel: String, on: String) -> String:
-	var open := _lore_open(channel, on)
-	return find_fragment(str(open[0])) if not open.is_empty() else ""
+	var texts: Array = []
+	for id in _lore_open(channel, on):
+		texts.append(tr(find_fragment(str(id))))
+	return "\n\n".join(texts)
 
 
 ## The ledger's claims, heard as its pages are found.
@@ -163,7 +178,7 @@ func lore_on_seal(region: String, rank: int) -> String:
 	var open: Array = _lore_open("relic", "", ctx) + _lore_open("seal", "", ctx) + _lore_open("ledger", "", ctx)
 	if open.is_empty():
 		return ""
-	if lore_dry < GameData.LORE_PITY and randf() >= GameData.LORE_SEAL_CHANCE:
+	if lore_dry < GameData.LORE_PITY and randf() >= GameData.LORE_SEAL_CHANCE * (GameData.LEDGER_OATH_FRAGMENTS if sworn("ledger") else 1.0):
 		lore_dry += 1
 		return ""
 	lore_dry = 0
@@ -187,7 +202,7 @@ func lore_payday_scene(last: String) -> String:
 	if last.begins_with("lore") or last.begins_with("claim") or last == "hesper_posted":
 		return ""
 	var open := _lore_open("payday")
-	if not open.is_empty() and randf() < GameData.LORE_PAYDAY_CHANCE:
+	if not open.is_empty() and randf() < GameData.LORE_PAYDAY_CHANCE * (GameData.LEDGER_OATH_FRAGMENTS if sworn("ledger") else 1.0):
 		var id := str(open[randi() % open.size()])
 		find_fragment(id)
 		return "lore:" + id
@@ -230,3 +245,29 @@ func lore_letter_ps() -> String:
 		return str(entry[1])
 	var open := _lore_open("letter")
 	return find_fragment(str(open[0])) if not open.is_empty() else ""
+
+
+## A story branch's price, half again under the Sworn to the Ledger oath.
+func branch_cost(n: int) -> int:
+	return int(round(n * (GameData.LEDGER_OATH_COST if sworn("ledger") else 1.0)))
+
+
+## Pip's Key: the player picks the region of the next rifts, while the key is
+## kept (B4) or, with the founding gift, until Act III is done.
+func key_region_open() -> bool:
+	return str(branches.get("key", "")) == "kept" or (str(branches.get("key_gift", "")) != "" and campaign_act <= GameData.PIPS_KEY_UNTIL_ACT)
+
+
+## A founding option (charter, gift, oath) a truth or enough truths open.
+func lore_option_open(o: Dictionary) -> bool:
+	return (not o.has("truth") or truth_known(str(o["truth"]))) and _lore_list("truths").size() >= int(o.get("truths", 0))
+
+
+## The Crown's auditors (B3's price): once, at Act IV's first payday.
+func _maybe_audit() -> void:
+	if str(branches.get("hearing", "")) == "bought" and campaign_act >= 4 and not branches.has("audit"):
+		branches["audit"] = "done"
+		var take := int(round(coins * GameData.HEARING_AUDIT_SHARE))
+		coins -= take
+		pending_stories.append(GameData.HEARING_AUDIT.duplicate())
+		_news(tr("The Crown's auditors took %d Gold.") % take)

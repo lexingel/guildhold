@@ -138,7 +138,7 @@ func max_hp(h: Hero) -> int:
 
 
 func dmg_of(h: Hero) -> int:
-	return round(h.base_dmg * (1.0 + hero_skill_total(h, "dmg_pct")))
+	return round(h.base_dmg * (1.0 + hero_skill_total(h, "dmg_pct") + GameState.charter_role_dmg(h)))
 
 
 ## Turn-order speed — determines where a hero falls in a round's turn order
