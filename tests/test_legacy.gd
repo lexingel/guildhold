@@ -276,6 +276,25 @@ func run() -> void:
 	GameState.apply_legacy_gifts(["veteran"])
 	check(GameState.campaign_act == 2 and GameState.skipped_act1 and GameState.heroes.size() == skip_heroes and skip_heroes > 3, "the playtest shortcut starts at Act II, once")
 
+	# The ledger's bad luck protection: three dry seals, then a page for sure.
+	_guild("Unlucky")
+	GameState.campaign_act = 3
+	GameState.accord_pages = 0
+	GameState.ledger_dry = GameData.LEDGER_PITY
+	GameState.maybe_find_ledger_page(false)
+	check(GameState.accord_pages == 1 and GameState.ledger_dry == 0, "after three seals without a page, the next one finds it")
+	var dry_before := GameState.ledger_dry
+	for i in 40:
+		GameState.ledger_dry = mini(GameState.ledger_dry, GameData.LEDGER_PITY - 1)
+		GameState.maybe_find_ledger_page(false)
+	check(GameState.accord_pages > 1 and dry_before == 0, "pages keep turning up")
+	GameState.accord_pages = 0
+	GameState.campaign_act = 1
+	GameState.ledger_dry = GameData.LEDGER_PITY
+	GameState.accord_pages = 2
+	GameState.maybe_find_ledger_page(false)
+	check(GameState.accord_pages == 2, "no page before its act, whatever the luck")
+
 	# The pay table remembers past guilds.
 	_guild("Paymasters")
 	GameState.legacy["guilds"] = []

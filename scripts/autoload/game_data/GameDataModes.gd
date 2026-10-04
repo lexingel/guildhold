@@ -863,6 +863,9 @@ const CHRONICLE_REVEALS := [
 ## The Grandmaster's ledger: pages found in sealed rifts (a finale always
 ## turns one up). A page shows once the campaign reaches its act.
 const LEDGER_PAGE_CHANCE := 0.35
+## Bad luck protection: after this many seals without a page (while one is
+## waiting in the current act), the next seal finds it. Act IV needs all 7.
+const LEDGER_PITY := 3
 const LEDGER_PAGES := [
 	{"act": 1, "text": "Day 1. The Hollow is rising faster than we can close it. The Assay has no mark for what came through at Thornwood. I have called every guild to the Hall."},
 	{"act": 1, "text": "Day 3. A voice answered from the deepest rift. It offered terms. I wrote them down so that I could refuse them properly."},

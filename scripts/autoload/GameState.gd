@@ -69,6 +69,7 @@ func reset() -> void:
 	accord_ending = ""
 	line_piece_seen = false
 	skipped_act1 = false
+	ledger_dry = 0
 	accord_hero = ""
 	echoes_seen = []
 	charter_choice = ""
@@ -287,6 +288,7 @@ func load_save() -> bool:
 	accord_ending = str(data.get("accord_ending", ""))
 	line_piece_seen = bool(data.get("line_piece_seen", false))
 	skipped_act1 = bool(data.get("skipped_act1", false))
+	ledger_dry = int(data.get("ledger_dry", 0))
 	accord_hero = str(data.get("accord_hero", ""))
 	echoes_seen = data.get("echoes_seen", [])
 	charter_choice = str(data.get("charter_choice", ""))

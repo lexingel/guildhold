@@ -207,8 +207,12 @@ func maybe_find_ledger_page(finale: bool) -> void:
 	if accord_pages >= GameData.LEDGER_PAGES.size():
 		return
 	var page: Dictionary = GameData.LEDGER_PAGES[accord_pages]
-	if campaign_act < int(page["act"]) or (not finale and randf() >= GameData.LEDGER_PAGE_CHANCE * float(founding_rule("ledger", 1.0))):
+	if campaign_act < int(page["act"]):
 		return
+	if not finale and ledger_dry < GameData.LEDGER_PITY and randf() >= GameData.LEDGER_PAGE_CHANCE * float(founding_rule("ledger", 1.0)):
+		ledger_dry += 1
+		return
+	ledger_dry = 0
 	accord_pages += 1
 	pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("A page of the Grandmaster's ledger"),
 		"text": tr("Page %d of %d, found in the rift. Read it in Library > Codex > Chronicle.") % [accord_pages, GameData.LEDGER_PAGES.size()]})

@@ -113,6 +113,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The Grandmaster's ledger no longer hides behind bad luck: after three sealed rifts without a page (while one is waiting in the current act), the next one finds it.",
 	"For playtesters: the founding screen can skip Act I, so you start with it done and can try the middle game straight away (champions, Riftbreaks, the rival's moves).",
 	"There is more to Hesper's story than she has told you. Each guild that finishes Act III hears a little more of it, and those who hear all of it, from guilds that have both kept and broken the Accord, may find a third way to end it.",
 	"The Vale this year: after your first guild, each new one is founded in a different year. Two of eight year modifiers (a dry year, restless rifts, the Hollow stirring in one region, a hard winter...) each change the campaign one way for better and one for worse, and the rival has a temperament: hiring, boasting or undercutting. Roll the year again for 2 Laurels; Guild > Records shows it.",
