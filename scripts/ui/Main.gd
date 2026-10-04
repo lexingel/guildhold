@@ -611,6 +611,7 @@ var _pending_gifts: Array = []   # founding gifts chosen with Laurels
 var _pending_founding := "free"  # the founding charter picked
 var _pending_oaths: Array = []   # oaths to swear at founding
 var _pending_year: Dictionary = {}   # the year rolled on the founding screen
+var _pending_skip := false   # the playtest shortcut: found with Act I done
 
 
 ## The legacy moment: after the Accord's ending (or when retiring), pick up
@@ -1504,6 +1505,8 @@ func _feedback_report() -> String:
 		bits.append(tr("Day %d, Act %d, %d heroes, %d rifts sealed, best rank %s, Endless best %d:%02d, Tower floor %d") % [GameState.day, GameState.campaign_act, GameState.heroes.size(),
 			GameState.rifts_sealed, GameData.RIFT_RANKS[clampi(GameState.best_rift_rank_sealed, 0, GameData.RIFT_RANKS.size() - 1)]["id"] if GameState.best_rift_rank_sealed >= 0 else "none",
 			GameState.best_endless_time / 60, GameState.best_endless_time % 60, GameState.tower_best])
+		if GameState.skipped_act1:
+			bits.append(tr("Started with Act I skipped (playtest shortcut)"))
 		bits.append_array(_session_lines())
 	return "\n".join(bits) + tr("\n\nWhat happened:\n\nWhat you expected:\n\nAnything confusing, too hard or too easy:\n")
 
@@ -1662,6 +1665,12 @@ func _render_onboard(v: VBoxContainer) -> void:
 		v.add_child(_founding_charters())
 		v.add_child(_founding_oaths())
 		v.add_child(_founding_gifts())
+	var skip := CheckBox.new()
+	skip.text = tr("Playtest: skip Act I (start with it done, and the heroes, gear and Gold a guild has by then)")
+	skip.button_pressed = _pending_skip
+	skip.toggled.connect(func(on): _pending_skip = on)
+	skip.tooltip_text = tr("For testers who want to see the middle game: champions, Riftbreaks and the rival's moves. Your Feedback report will say you skipped Act I.")
+	v.add_child(skip)
 	var found := _icon_domain_button("violet", GameData.BUTTON_ICON_PATH["confirm"], "Found the Guild", func():
 		var n := edit.text.strip_edges()
 		if n == "":
@@ -1682,6 +1691,9 @@ func _render_onboard(v: VBoxContainer) -> void:
 		GameState.refresh_recruit_pool()
 		GameState.apply_legacy_gifts(_pending_gifts)
 		_pending_gifts.clear()
+		if _pending_skip:
+			GameState.skip_act_one()
+		_pending_skip = false
 		GameState.save()
 		pending_guild_name = ""
 		pending_crest = 1

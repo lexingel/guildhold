@@ -266,6 +266,16 @@ func run() -> void:
 	check(GameState.hall_lock(str(GameData.ACCORD_HALLS[0]["id"])) == "" and GameState.board_lines().any(func(l): return l["id"] == "halls"), "rewritten: the old halls can be restored")
 	GameState.legacy = {"laurels": 0, "guilds": [], "champions": {}}
 
+	# The playtest shortcut: Act I skipped once, never twice (not with the gift either).
+	_guild("Shortcut")
+	GameState.refresh_recruit_pool()
+	GameState.skip_act_one()
+	var skip_heroes := GameState.heroes.size()
+	GameState.skip_act_one()
+	GameState.legacy["laurels"] = 50
+	GameState.apply_legacy_gifts(["veteran"])
+	check(GameState.campaign_act == 2 and GameState.skipped_act1 and GameState.heroes.size() == skip_heroes and skip_heroes > 3, "the playtest shortcut starts at Act II, once")
+
 	# The pay table remembers past guilds.
 	_guild("Paymasters")
 	GameState.legacy["guilds"] = []

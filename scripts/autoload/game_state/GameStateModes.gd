@@ -834,6 +834,8 @@ func apply_legacy_gifts(ids: Array) -> Array:
 ## The veteran start (a Laurels gift): Act I done, the way a quick guild
 ## finishes it. Act I's own completion runs (its reward, relic and cards).
 func _veteran_start() -> void:
+	if campaign_act >= 2:
+		return
 	for h in heroes:
 		while h.level < GameData.VETERAN_LEVEL:
 			Combat.gain_xp(h, Combat.xp_to_next(h.level))
@@ -859,6 +861,16 @@ func _veteran_start() -> void:
 	var intro := str(_act_intro_card(1)["title"])
 	pending_stories = pending_stories.filter(func(c): return str(c.get("title", "")) != intro)
 	_complete_act(1)   # feature unlocks follow on the next render (Main)
+
+
+## The playtest shortcut on the founding screen: Act I done, the way the
+## veteran start does it, so testers can reach the middle game quickly.
+func skip_act_one() -> void:
+	if campaign_act >= 2:
+		return
+	_veteran_start()
+	skipped_act1 = true
+	save()
 
 
 ## ---- Founding charters ----
