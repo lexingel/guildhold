@@ -56,6 +56,7 @@ var fights := {}         # rank -> [won, lost]
 var runs := {}           # rank -> [sealed, lost]
 var rounds := {}         # rank -> [fights, total rounds, fights over in round 1]
 var act_day := {}        # act finished -> day
+var act_runs := {}       # act -> [sealed, lost, rest days, defense days]
 var notes: Array[String] = []
 
 
@@ -172,6 +173,7 @@ func _guild(p: String, s: int) -> void:
 	runs = {}
 	rounds = {}
 	act_day = {}
+	act_runs = {}
 	notes = []
 	ambush = [0, 0]
 	endless_runs = 0
@@ -255,7 +257,7 @@ func _guild(p: String, s: int) -> void:
 	var cur := GameState.current_act()
 	if not cur.is_empty():
 		var unmet: Array = (cur["objectives"] as Array).filter(func(o): return not GameState.campaign_objective_met(o)).map(func(o): return "%s (%d/%d)" % [str(o["label"]), GameState.campaign_objective_progress(o), int(o["target"])])
-		print("     stuck in Act %d since day %d: %s%s" % [GameState.campaign_act, int(act_day.get(GameState.campaign_act, 0)), ", ".join(unmet) if not unmet.is_empty() else "objectives met, finale not won", (" · finale tries %d/%d won · posts freed %d · best party %d vs finale %d" % [runs.get("finale", [0, 0])[0], runs.get("finale", [0, 0])[0] + runs.get("finale", [0, 0])[1], GameState.posts_freed(), Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id))), GameState.finale_recommended_power()])])
+		print("     stuck in Act %d since day %d: %s%s" % [GameState.campaign_act, int(act_day.get(GameState.campaign_act, 0)), ", ".join(unmet) if not unmet.is_empty() else "objectives met, finale not won", (" · finale tries %d/%d won · posts freed %d · best party %d vs finale %d · seals: Glass %d, City %d, crossings %d · this act: %s sealed/lost/rest/defend" % [runs.get("finale", [0, 0])[0], runs.get("finale", [0, 0])[0] + runs.get("finale", [0, 0])[1], GameState.posts_freed(), Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id))), GameState.finale_recommended_power(), int(GameState.quest_tally.get("biome_seals:glass", 0)), int(GameState.quest_tally.get("biome_seals:city", 0)), GameState.crossings_answered, str(act_runs.get(GameState.campaign_act, []))])])
 	if ending_day >= 0:
 		var lost: Array = tides.filter(func(t): return not t[1])
 		print("     postgame (%s from day %d): Laurels %d at the ending, +%d after · %s · end %d Gold %d Essence, %d champions of %d" % [GameState.accord_ending, ending_day, ending_laurels,
@@ -307,6 +309,9 @@ func _day(p: String) -> void:
 		_idle_spend()
 	_spent += maxi(0, g0 - GameState.coins)
 	if GameState.breach_broken():
+		var da: Array = act_runs.get(GameState.campaign_act, [0, 0, 0, 0])
+		da[3] += 1
+		act_runs[GameState.campaign_act] = da
 		_defend()
 		return
 	if GameState.day % 2 == 0 and _endless_due():
@@ -317,6 +322,9 @@ func _day(p: String) -> void:
 		return
 	var party := _pick_party()
 	if party.is_empty():
+		var ra: Array = act_runs.get(GameState.campaign_act, [0, 0, 0, 0])
+		ra[2] += 1
+		act_runs[GameState.campaign_act] = ra
 		GameState.rest_guild()
 		return
 	# The number the Party screen shows: relics, synergies and bonds included.
@@ -340,6 +348,9 @@ func _day(p: String) -> void:
 		var ct: Array = curve.get(b, [0, 0])
 		ct[0 if res == "sealed" else 1] += 1
 		curve[b] = ct
+	var ar: Array = act_runs.get(GameState.campaign_act, [0, 0, 0, 0])
+	ar[0 if res == "sealed" else 1] += 1
+	act_runs[GameState.campaign_act] = ar
 	var rt: Array = runs.get(rank, [0, 0])
 	rt[0 if res == "sealed" else 1] += 1
 	runs[rank] = rt
@@ -410,10 +421,8 @@ func _idle_spend() -> void:
 			GameState.recruit_hero(offer.id)
 	if GameState.feast_ready() and GameState.heroes.any(func(h): return h.morale < 45) and GameState.coins > bill + GameState.feast_cost():
 		GameState.hold_feast()
-	if advice and GameState.finale_ready():   # a casual player who reads the Act panel's advice when stuck
-		var act := GameState.current_act()
-		var rec := GameState.finale_recommended_power()
-		if Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id))) < rec * 0.8:
+	if advice:   # a casual player who reads the Act panel's advice when it shows
+		if GameState.advice_due(Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id)))):
 			for i in 3:
 				var tips: Array = GameState.power_advice()
 				if tips.is_empty() or GameState.follow_advice(tips[0]) != "":

@@ -755,6 +755,8 @@ const BOOK2_ACT_LAURELS := 5
 const HOLLOWBORN_CHANCE := 0.2    # of a new recruit, once the doors are open
 const TRAINING_RIFT := {"floors": 4, "monster_hp_mult": 0.8, "monster_dmg_mult": 0.85}
 const QUEST_POSTED := 6
+## Days in an act, objectives unmet, before the Act panel offers power advice.
+const ADVICE_STUCK_DAYS := 7
 const QUEST_BOARD_BG := "res://assets/screens/quest_board.png"
 const QUEST_ACTIVE_MAX := 3
 const QUEST_REFRESH_DAYS := 3

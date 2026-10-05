@@ -1906,11 +1906,12 @@ func _render_campaign_panel(v: Container) -> void:
 	fb.tooltip_text = tr("Recommended power %d") % GameState.finale_recommended_power() if ready else tr("Complete every objective above first")
 	fb.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	cv.add_child(fb)
-	if ready:
-		var best := _best_party_power()
-		var rec := GameState.finale_recommended_power()
+	var best := _best_party_power()
+	var rec := GameState.finale_recommended_power()
+	var due := GameState.advice_due(best)
+	if ready or due:
 		cv.add_child(_power_readout(best, rec, "Your best"))
-		if best < rec * 0.8:   # Deadly: say what raises power, not just that it's short
+		if due:   # Deadly: say what raises power, not just that it's short (also when too weak to meet the objectives)
 			var advice: Array = GameState.power_advice()
 			if advice.is_empty():
 				var tip := _wrap_label(tr("Your best party is at %d%% of what the finale expects. Seal more rifts at your top rank for gear, evolve heroes at level 10, level your champion, and build the Drill Yard.") % int(round(100.0 * best / maxf(1.0, rec))), 12, true)

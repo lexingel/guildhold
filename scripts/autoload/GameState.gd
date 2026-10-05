@@ -70,6 +70,7 @@ func reset() -> void:
 	line_piece_seen = false
 	skipped_act1 = false
 	ledger_dry = 0
+	act_since = 0
 	crossings_answered = 0
 	crossings_through = 0
 	gates_held = 0
@@ -307,6 +308,7 @@ func load_save() -> bool:
 	line_piece_seen = bool(data.get("line_piece_seen", false))
 	skipped_act1 = bool(data.get("skipped_act1", false))
 	ledger_dry = int(data.get("ledger_dry", 0))
+	act_since = int(data.get("act_since", 0))
 	crossings_answered = int(data.get("crossings_answered", 0))
 	crossings_through = int(data.get("crossings_through", 0))
 	gates_held = int(data.get("gates_held", 0))

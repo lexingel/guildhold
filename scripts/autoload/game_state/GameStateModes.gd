@@ -103,6 +103,19 @@ func campaign_objective_progress(o: Dictionary) -> int:
 	return 0
 
 
+## The act's named wardens not yet beaten (Act III's Korrath and Drevok): a
+## rift's boss is one of them when its region has them. Drevok guards only
+## the Ashen Crown, as one of two bosses; in the sim 2 of 16 casual guilds
+## sealed 15+ rifts in Act III without meeting him and sat there 60 days.
+func wanted_wardens() -> Array:
+	var out: Array = []
+	for o in current_act().get("objectives", []):
+		var t := str(o["type"])
+		if t.begins_with("boss:") and campaign_objective_progress(o) < int(o["target"]):
+			out.append(t.trim_prefix("boss:"))
+	return out
+
+
 ## Lost champions freed in the Endless Rift: the posts the guild has emptied.
 func posts_freed() -> int:
 	return lost_champions().filter(func(e): return champion_unlocked(str(e[0]))).size()
@@ -182,6 +195,7 @@ func _complete_act(act_num: int) -> void:
 	var relic := Combat.gen_unique_relic()
 	relics.append(relic)
 	campaign_act = act_num + 1
+	act_since = day
 	var subtitle := tr("Act %s complete — +%d Essence, %s") % [tr(str(_roman(act_num))), int(reward.get("crystals", 0)), tr(str(relic.name))]
 	if str(act["opens"]) != "":
 		subtitle += tr(" · %s unlocked") % tr(str(act["opens"]))
@@ -1500,6 +1514,17 @@ func restore_hall(id: String) -> String:
 
 
 ## What would raise the guild's power right now, with what it costs: the
+## Whether the Act panel gives power advice for a best party of `best`: under
+## 80% of the finale, once the finale is open or once the guild has spent
+## ADVICE_STUCK_DAYS in the act (a guild too weak to meet the objectives: the
+## 0.46 sim's Act V stalls were guilds losing half their runs, short of a
+## Rank S seal or the crossings, that never saw the advice).
+func advice_due(best: int) -> bool:
+	if current_act().is_empty():
+		return false
+	return best < finale_recommended_power() * 0.8 and (finale_ready() or day - act_since >= GameData.ADVICE_STUCK_DAYS)
+
+
 ## Act panel's advice when a finale is out of reach (casual guilds in the sim
 ## sat at 70-85% of a finale with 10-34k Gold and 5-15k Essence unspent).
 ## [{"kind", "text", "id", "choice"}], most useful first, at most three.

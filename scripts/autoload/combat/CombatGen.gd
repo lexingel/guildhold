@@ -325,6 +325,10 @@ func gen_monster(diff: Dictionary, floor_idx: int, kind: String) -> Dictionary:
 	elif kind == "boss":
 		# A region's own wardens: a new guild in the Vale never meets the Act III boss.
 		var bosses: Array = GameData.BIOMES.get(str(diff.get("biome", "")), {}).get("bosses", GameData.BOSS_NAMES)
+		var wanted: Array = GameState.wanted_wardens()
+		var due: Array = bosses.filter(func(b): return wanted.has(b))   # a warden the act still needs comes first
+		if not due.is_empty():
+			bosses = due
 		name = "%s, %s Warden" % [bosses[randi() % bosses.size()], diff["name"].split(" ")[0]]
 	elif kind == "elite":
 		var elites: Array = GameData.BIOMES.get(str(diff.get("biome", "")), {}).get("elites", GameData.ELITE_NAMES)

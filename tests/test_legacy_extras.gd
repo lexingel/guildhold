@@ -127,4 +127,29 @@ func run() -> void:
 	check(not tips.is_empty() and str(tips[0]["kind"]) == "evolve" and str(tips[0]["text"]).contains("Essence"), "a level-10 hero and spare Essence: evolve (%s)" % (str(tips[0]["text"]) if not tips.is_empty() else "none"))
 	var r0 := h0.rank
 	check(GameState.follow_advice(tips[0]) == "" and h0.rank != r0, "and following it evolves them")
+
+	# The advice also comes to a guild too weak to meet the objectives, after a week in the act.
+	GameState.campaign_act = 5
+	GameState.accord_ending = "renew"
+	GameState.quest_tally.clear()
+	GameState.act_since = GameState.day
+	var weak := int(GameState.finale_recommended_power() * 0.5)
+	check(not GameState.finale_ready() and not GameState.advice_due(weak), "a fresh act with objectives unmet: no advice yet")
+	GameState.day += GameData.ADVICE_STUCK_DAYS
+	check(GameState.advice_due(weak), "a week stuck on them: the advice shows")
+	check(not GameState.advice_due(GameState.finale_recommended_power()), "a strong enough guild gets none")
+
+	# Act III's wardens: an Ashen Crown rift's boss is Drevok until he's beaten.
+	GameState.campaign_act = 3
+	GameState.quest_tally.clear()
+	var diff := {"biome": "ashen", "name": "Greater Rift", "monster_hp": 100, "monster_dmg": 10}
+	var names: Array = []
+	for i in 20:
+		names.append(str(Combat.gen_monster(diff, 0, "boss")["name"]).split(",")[0])
+	check(names.all(func(n): return n == "Drevok"), "while Drevok is wanted, the Ashen Crown's warden is always him")
+	GameState.quest_tally["boss:Drevok"] = 1
+	names.clear()
+	for i in 40:
+		names.append(str(Combat.gen_monster(diff, 0, "boss")["name"]).split(",")[0])
+	check(names.has("Sythrane") and names.has("Drevok"), "once he's beaten, either warden again")
 	GameState.delete_slot(9)
