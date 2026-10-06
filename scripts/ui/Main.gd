@@ -16,6 +16,7 @@ func _ready() -> void:
 	GameState.load_active_slot()
 	AudioManager.set_music_volume(GameState.music_volume)
 	AudioManager.set_sfx_volume(GameState.sfx_volume)
+	AudioManager.set_voice_volume(GameState.voice_volume)
 	_apply_resolution(GameState.resolution_idx)
 	get_tree().root.content_scale_factor = GameState.ui_scale
 	_fit_to_window()
@@ -445,6 +446,8 @@ func render() -> void:
 	# world instead of a slideshow of unrelated pages.
 	# Not before the guild is founded: the Act I intro waits for the camp, even
 	# when Settings is opened from the naming screen.
+	if GameState.pending_stories.is_empty():
+		AudioManager.stop_voice("story:")   # the card was dismissed: so is its narration
 	if _rotate_prompt:
 		_rotate_overlay()
 	elif _retire_open and GameState.can_retire():
@@ -455,6 +458,8 @@ func render() -> void:
 			_sfx_seen[card_key] = true
 			AudioManager.play_sfx(GameData.SFX_PATH["story"])
 		_story_overlay(GameState.pending_stories[0])
+		var card: Dictionary = GameState.pending_stories[0]
+		AudioManager.play_voice(card_key + "|" + str(card.get("text", "")).left(40), AudioManager.voice_clips_in(str(card.get("text", ""))))
 	elif screen == "camp" and GameState.legacy_due():
 		_legacy_overlay(false)
 	elif screen in ["camp", "rift_hall"] and GameState.guild_name != "" and _unseen_matter() != "":
@@ -3474,6 +3479,22 @@ func _render_settings(v: VBoxContainer) -> void:
 		AudioManager.set_sfx_volume(val)
 		GameState.save_settings()
 	))
+	var voice_row := _volume_row("Voice", GameState.voice_volume, func(val: float):
+		GameState.voice_volume = val
+		AudioManager.set_voice_volume(val)
+		GameState.save_settings()
+	)
+	var voice_btn := _button(tr("Spoken lines: on") if GameState.voice_on else tr("Spoken lines: off"), func():
+		GameState.voice_on = not GameState.voice_on
+		if not GameState.voice_on:
+			AudioManager.stop_voice()
+		GameState.save_settings()
+		render())
+	voice_btn.toggle_mode = true
+	voice_btn.button_pressed = GameState.voice_on
+	voice_btn.tooltip_text = tr("The narrator reads the story cards, and the guild's people speak at the pay table and in rival letters. English only for now.")
+	voice_row.add_child(voice_btn)
+	v.add_child(voice_row)
 
 	var speed_row := HBoxContainer.new()
 	speed_row.add_theme_constant_override("separation", 6)

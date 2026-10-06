@@ -29,6 +29,8 @@ var language := "en"         # a GameData.LANGUAGES locale (settings.json)
 var hearing_aid := false     # captions for meaningful sounds + an edge pulse on big hits (settings.json; see AudioManager.cue)
 var ui_scale: float = 1.0   # whole-UI scale (Window.content_scale_factor), a settings.json preference   # animation time scale inside a rift (x1/x2/x3), a settings.json preference
 var sfx_volume: float = 1.0
+var voice_volume: float = 1.0
+var voice_on := true   # spoken story lines (English only; settings.json)
 var resolution_idx: int = 0
 var fullscreen := false   # desktop: the window fills the screen (settings.json)
 var guild_name: String = ""
@@ -706,7 +708,7 @@ func save_settings() -> void:
 	var f := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify({
-			"music_volume": music_volume, "sfx_volume": sfx_volume, "resolution_idx": resolution_idx, "fullscreen": fullscreen, "combat_speed": combat_speed, "ui_scale": ui_scale,
+			"music_volume": music_volume, "sfx_volume": sfx_volume, "voice_volume": voice_volume, "voice_on": voice_on, "resolution_idx": resolution_idx, "fullscreen": fullscreen, "combat_speed": combat_speed, "ui_scale": ui_scale,
 			"reduce_motion": reduce_motion, "colorblind": colorblind, "hearing_aid": hearing_aid, "language": language, "key_hints": key_hints,
 		}))
 
@@ -749,6 +751,8 @@ func load_settings() -> void:
 		hearing_aid = bool(parsed.get("hearing_aid", false))
 		language = str(parsed.get("language", "en"))
 		sfx_volume = parsed.get("sfx_volume", 1.0)
+		voice_volume = float(parsed.get("voice_volume", 1.0))
+		voice_on = bool(parsed.get("voice_on", true))
 		resolution_idx = parsed.get("resolution_idx", 0)
 		fullscreen = bool(parsed.get("fullscreen", false))
 

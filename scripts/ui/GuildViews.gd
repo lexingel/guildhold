@@ -648,6 +648,9 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 		var ll := _wrap_label(letter, 13)
 		ll.add_theme_color_override("font_color", Palette.RANK_S)
 		col.add_child(ll)
+		var said := AudioManager.voice_clips_in(letter)
+		if not said.is_empty():
+			col.add_child(_voice_heading("", "letter:" + letter.left(60), said))
 	var btns := HFlowContainer.new()
 	btns.add_theme_constant_override("h_separation", 8)
 	btns.add_theme_constant_override("v_separation", 6)
@@ -820,7 +823,12 @@ func _treasury_card() -> PanelContainer:
 		if not scene.is_empty():
 			# The Guildhold Chronicle: the cast at the pay table.
 			var talk := _vbox(2)
-			talk.add_child(_label("At the pay table", 12, true))
+			var clips: Array[String] = []   # the voiced lines (the ones that name a past guild or hero aren't)
+			for ln in scene:
+				var clip := AudioManager.voice_clip_for(str(ln[1]))
+				if clip != "":
+					clips.append(clip)
+			talk.add_child(_voice_heading("At the pay table", "payday:%d:%s" % [int(rep.get("day", 0)), str(rep.get("scene", ""))], clips))
 			var names := {"guild": str(rep.get("past", "")), "hero": str(rep.get("past_hero", ""))}
 			for ln in scene:
 				var face_path := "res://assets/npc/%s.png" % str(ln[0]).to_lower()   # Wen, Dobbs, Hesper, Pip
@@ -2253,6 +2261,26 @@ func _render_accord_halls(v: VBoxContainer) -> void:
 
 
 const TIDE_PIC := "res://assets/halls/open_hollow.png"
+
+
+## A heading (or just a Listen button, for "") over a voiced moment: it speaks
+## once when first shown, and Listen plays it again. Nothing when the moment
+## has no clips, or spoken lines are off or not in this language.
+func _voice_heading(text: String, key: String, clips: Array[String]) -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	if text != "":
+		row.add_child(_label(text, 12, true))
+	if clips.is_empty() or not AudioManager.voice_wanted():
+		return row
+	var b := _button(tr("Listen"), func(): AudioManager.play_voice(key, clips, true))
+	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	b.add_theme_font_size_override("font_size", 11)
+	b.tooltip_text = tr("Hear it again")
+	row.add_child(b)
+	if GameState.pending_stories.is_empty():   # a story card on top speaks first; this waits for the next look
+		AudioManager.play_voice(key, clips)
+	return row
 
 
 ## The Open Hollow (Break): the tides so far, and tidewalls to raise.

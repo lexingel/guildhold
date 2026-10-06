@@ -17,6 +17,17 @@ var _current_music_idx := 0
 var _current_music_path := ""
 var _sfx_players: Array[AudioStreamPlayer] = []
 var _sfx_next := 0
+## Spoken lines (assets/voice): the narrator's story cards, the pay table,
+## rival letters. A clip is found by its English text (VoiceLines), so a card
+## plays whatever voiced lines it shows, in order, with no ids threaded
+## through the story code. English only, and GameState.voice_on.
+const VOICE_DIR := "res://assets/voice/"
+const VOICE_GAP := 0.35   # seconds between two lines of one scene
+var _voice_player: AudioStreamPlayer
+var _voice_queue: Array[String] = []
+var _voice_key := ""
+var _voice_heard := {}   # moments already spoken this session (a re-render doesn't replay them)
+var _voice_found := {}   # text -> its clips (a card is matched once)
 
 
 func _ready() -> void:
@@ -31,6 +42,14 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		_sfx_players.append(p)
+	_voice_player = AudioStreamPlayer.new()
+	_voice_player.bus = "Voice"
+	add_child(_voice_player)
+	_voice_player.finished.connect(func():
+		var key := _voice_key
+		await get_tree().create_timer(VOICE_GAP).timeout
+		if key == _voice_key:
+			_voice_next())
 
 
 ## Crossfades to `path` over `fade_time` seconds; pass "" to just fade out
@@ -97,6 +116,78 @@ func set_music_volume(linear: float) -> void:
 
 func set_sfx_volume(linear: float) -> void:
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(clampf(linear, 0.0001, 1.0)))
+
+
+func set_voice_volume(linear: float) -> void:
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Voice"), linear_to_db(clampf(linear, 0.0001, 1.0)))
+
+
+## The voiced lines inside `text`, in reading order (clip files). A line
+## inside a longer voiced one isn't counted twice.
+func voice_clips_in(text: String) -> Array[String]:
+	if _voice_found.has(text):
+		return _voice_found[text]
+	var hits := []
+	for line in VoiceLines.LINES:
+		var at := text.find(str(line[0]))
+		if at >= 0:
+			hits.append([at, str(line[0]).length(), str(line[1])])
+	hits.sort_custom(func(a, b): return a[0] < b[0] or (a[0] == b[0] and a[1] > b[1]))
+	var out: Array[String] = []
+	var reach := -1
+	for h in hits:
+		if int(h[0]) >= reach:
+			out.append(str(h[2]))
+			reach = int(h[0]) + int(h[1])
+	_voice_found[text] = out
+	return out
+
+
+## The clip for exactly this line ("" if it isn't voiced): one line of a
+## pay-table scene, where a short line could sit inside another's text.
+func voice_clip_for(line: String) -> String:
+	for l in VoiceLines.LINES:
+		if str(l[0]) == line:
+			return str(l[1])
+	return ""
+
+
+func voice_wanted() -> bool:
+	return GameState.voice_on and GameState.language == "en"
+
+
+## Speaks `clips` once for the moment `key` (a card, a payday, a letter);
+## `again` replays it (a Listen button). Starting one moment stops another.
+func play_voice(key: String, clips: Array, again := false) -> void:
+	if clips.is_empty() or not voice_wanted() or (_voice_heard.has(key) and not again):
+		return
+	_voice_heard[key] = true
+	_voice_player.stop()
+	_voice_key = key
+	_voice_queue.assign(clips)
+	_voice_next()
+
+
+## Stops the voice if it's speaking `key_prefix`'s moment (any, for "").
+func stop_voice(key_prefix := "") -> void:
+	if _voice_key != "" and _voice_key.begins_with(key_prefix):
+		_voice_player.stop()
+		_voice_queue.clear()
+		_voice_key = ""
+
+
+func voice_speaking(key_prefix := "") -> bool:
+	return _voice_key != "" and _voice_key.begins_with(key_prefix) and (_voice_player.playing or not _voice_queue.is_empty())
+
+
+func _voice_next() -> void:
+	while not _voice_queue.is_empty():
+		var path: String = VOICE_DIR + str(_voice_queue.pop_front())
+		if ResourceLoader.exists(path):
+			_voice_player.stream = load(path)
+			_voice_player.play()
+			return
+	_voice_key = ""
 
 
 # ---------------- Hearing aid ----------------
