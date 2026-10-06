@@ -292,6 +292,29 @@ func _guild_status_board() -> PanelContainer:
 			render())
 		gh.add_child(hide)
 		col.add_child(gh)
+	# Three goals, always in view (0.53): what moves the story, what makes the
+	# guild stronger, and one thing worth doing on the side.
+	var goals := _guild_goals()
+	for g in goals:
+		var gb := Button.new()
+		gb.flat = true
+		gb.text = "%s  %s" % [tr(str(g[0])), tr(str(g[1]))]
+		gb.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		gb.add_theme_font_size_override("font_size", 14)
+		gb.add_theme_color_override("font_color", g[2])
+		gb.add_theme_color_override("font_hover_color", Palette.EMBER_BRIGHT)
+		gb.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		gb.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		var gt := StyleBoxEmpty.new()
+		gt.content_margin_top = 1
+		gt.content_margin_bottom = 1
+		for sn in ["normal", "hover", "pressed", "focus"]:
+			gb.add_theme_stylebox_override(sn, gt)
+		gb.tooltip_text = tr(str(g[1]))
+		gb.pressed.connect(g[3])
+		col.add_child(gb)
+	if not goals.is_empty():
+		col.add_child(_hsep())
 	var lines: Array = (guide.get("steps", []) as Array).slice(0, 1) + _guild_status_lines()
 	if lines.is_empty():
 		col.add_child(_label("All quiet. The rifts are waiting.", 12, true))
@@ -367,16 +390,6 @@ func _guild_status_lines() -> Array:
 		out.append([tr("A Rank %s rift breaks in %d day%s") % [tr(GameState.breach_rank_id()), dl, tr(str(_pl(dl)))], Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
 	if not GameState.damaged.is_empty():
 		out.append([tr("%d building%s damaged: repair in Manage") % [GameState.damaged.size(), tr(str(_pl(GameState.damaged.size())))], Palette.HAZARD, go_term.call("management")])
-	var act := GameState.current_act()
-	if not act.is_empty():
-		if GameState.finale_ready():
-			out.append([tr("Finale open: %s") % tr(str(act["finale"])), Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
-		else:
-			for o in act["objectives"]:
-				if not GameState.campaign_objective_met(o):
-					var prog := "" if str(o["type"]) == "map_rank" else " (%d/%d)" % [mini(GameState.campaign_objective_progress(o), int(o["target"])), int(o["target"])]
-					out.append([tr("Act %s: %s%s") % [tr(str(GameState._roman(int(act["act"])))), tr(str(o["label"])), tr(str(prog))], Palette.TEXT, go_screen.call("rift_hall")])
-					break
 	if not GameState.heroes.is_empty():
 		if not GameState.hero_request.is_empty():
 			out.append([GameState.request_title() + tr(" — answer before payday"), Palette.EMBER_BRIGHT, go_term.call("ledger")])
@@ -418,10 +431,44 @@ func _guild_status_lines() -> Array:
 						best = tr("%s Lv%d") % [tr(str(n["name"])), lv + 1]
 		if best != "" and GameState.crystals >= best_cost:
 			out.append([tr("Upgrade ready: %s (%d Essence)") % [tr(str(best)), best_cost], Palette.CRYSTALS, go_term.call("management")])
-	if GameState.feature_unlocked("tower"):
-		var f := GameState.tower_next_floor()
-		if f > 0:
-			out.append([tr("Tower of Trials: floor %d next") % f, Palette.MUTED, go_screen.call("tower")])
+	return out
+
+
+## The board's three goals (0.53): [tag, text, colour, action] for the story,
+## growing stronger, and one optional thing. Empty before the first hero.
+func _guild_goals() -> Array:
+	if GameState.heroes.is_empty():
+		return []
+	var out: Array = []
+	var go_term := func(tab: String): return func(): term_tab = tab; render()
+	var go_screen := func(s: String): return func(): screen = s; render()
+	var act := GameState.current_act()
+	if act.is_empty():
+		out.append(["Story", tr("The campaign is done: push the Endless Rift and the ladder to SSS"), Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
+	elif GameState.finale_ready():
+		out.append(["Story", tr("Face the finale: %s") % tr(str(act["finale"])), Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
+	else:
+		for o in act["objectives"]:
+			if not GameState.campaign_objective_met(o):
+				var prog := "" if str(o["type"]) == "map_rank" else " (%d/%d)" % [mini(GameState.campaign_objective_progress(o), int(o["target"])), int(o["target"])]
+				out.append(["Story", tr("Act %s: %s%s") % [tr(str(GameState._roman(int(act["act"])))), tr(str(o["label"])), tr(str(prog))], Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
+				break
+	# Grow: the advice when the guild is behind the act, else the rank to climb.
+	var behind := not act.is_empty() and _best_party_power() < GameState.finale_recommended_power() * 0.95
+	var advice: Array = GameState.power_advice() if behind else []
+	if not advice.is_empty():
+		var a: Dictionary = advice[0]
+		var where: Callable = {"evolve": go_term.call("roster"), "recruit": go_term.call("recruits"), "drill": go_term.call("management"), "champion": go_term.call("champions")}.get(str(a["kind"]), go_term.call("roster"))
+		out.append(["Grow", str(a["text"]), Palette.TEXT, where])
+	else:
+		out.append(["Grow", tr("Seal a Rank %s rift: better gear, more Essence") % tr(GameState.highest_open_rank()), Palette.TEXT, go_screen.call("rift_hall")])
+	# Optional: a lost champion, else a contract, else the Tower.
+	if GameState.feature_unlocked("champions") and GameState.next_lost_champion() != "":
+		out.append(["Optional", tr("Find a lost champion in the Endless Rift"), Palette.MUTED, go_screen.call("rift_hall")])
+	elif GameState.feature_unlocked("quests") and GameState.guild_board.any(func(q): return str(q["status"]) == "posted"):
+		out.append(["Optional", tr("Take a contract from the Quest board"), Palette.MUTED, go_term.call("quests")])
+	elif GameState.feature_unlocked("tower") and GameState.tower_next_floor() > 0:
+		out.append(["Optional", tr("Tower of Trials: floor %d next") % GameState.tower_next_floor(), Palette.MUTED, go_screen.call("tower")])
 	return out
 
 

@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The guild status board now opens on three goals: the story's next step, the best way to grow stronger, and one thing worth doing on the side. New item icons for every weapon, armour and legendary, the Pearl Colossus and the Ember Whelp redrawn, and a smaller download: the game loads about a fifth faster.",
 	"Fights hit harder: every blow flashes and lands with a short pause, attacks wind up before they strike, and each way of fighting has its own effect: a cleave for warriors, a twin cut for rogues, an arrow strike, a holy strike, a burst for each mage element, and claws, spells or acid from foes. Cards have pixel corners, and icons stay crisp.",
 	"Foes face the right way: in Riftbreak they no longer walk backwards down the road, and Korrath, Captain Morrow, the Spire Oracle, the Rooftop Harrier and the Tideglass Moth turn toward your heroes. Founding a guild is calmer: name and crest up front, everything else under Founding options. Loot is mostly gear now (8 in 10 drops in Act I, 7 in 10 after), so fewer spare relics pile up.",
 	"Skip the opening and the narrator still reads the Night of Breaking to you, Hesper's version too for a guild founded on the old oath.",
@@ -446,6 +447,8 @@ static func hero_anim_frames(role: String, action: String) -> Array[String]:
 		return frames
 	for i in 5:
 		frames.append("res://assets/heroes/anim/%s_%s_%d.png" % [role, action, i])
+	if not ResourceLoader.exists(frames[1]):
+		return []   # the class-level frames were retired in 0.53: every hero has a subclass's own
 	return frames
 
 
@@ -460,6 +463,8 @@ static func subclass_anim_frames(pool_id: String, action: String) -> Array[Strin
 		frames.append("res://assets/heroes/subclass_anim/%s_%s_%d.png" % [pool_id, action, i])
 	if not ResourceLoader.exists(frames[1]):
 		return []
+	if not ResourceLoader.exists(frames[0]):   # frame 0 is the still itself (0.53: not stored twice)
+		frames[0] = ("res://assets/champions/%s.png" % pool_id.trim_prefix("champ_")) if pool_id.begins_with("champ_") else str(SUBCLASS_PORTRAIT_PATH.get(pool_id, frames[0]))
 	return frames
 
 
@@ -640,7 +645,7 @@ static func monster_sprite_key(monster_name: String) -> String:
 ## Every foe sprite needs an entry (test_sprite_facing), so new art can't slip
 ## in facing the wrong way unnoticed.
 const FOE_FACING := {
-	"company_sellsword": "front", "company_crossbowman": "left", "captain_morrow": "right", "ember_whelp": "front", "sable_fang": "left",
+	"company_sellsword": "front", "company_crossbowman": "left", "captain_morrow": "right", "ember_whelp": "left", "sable_fang": "left",
 	"marrow_crawler": "front", "hollow_reaver": "front", "husk_brute": "front", "cinder_moth": "front", "gloom_stalker": "left",
 	"rift_wisp": "front", "bog_wretch": "front", "silt_crawler": "front", "glass_wisp": "front", "mirror_fiend": "front",
 	"frost_stalker": "left", "ashclad_ghoul": "front", "deep_anchorite": "front", "voidling_sprite": "left", "warbound_elite": "front",
@@ -690,6 +695,8 @@ static func monster_anim_frames(monster_name: String, action: String) -> Array[S
 	var frames: Array[String] = []
 	for i in 5:
 		frames.append("res://assets/monsters/anim/%s_%s_%d.png" % [key, action, i])
-	if not ResourceLoader.exists(frames[0]):
+	if not ResourceLoader.exists(frames[1]):
 		return []
+	if not ResourceLoader.exists(frames[0]):   # frame 0 is the battle sprite itself (0.53: not stored twice)
+		frames[0] = str(MONSTER_SPRITE_PATH[key])
 	return frames

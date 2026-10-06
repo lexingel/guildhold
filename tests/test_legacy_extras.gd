@@ -28,7 +28,7 @@ func _offers(n: int) -> Array:
 
 func run() -> void:
 	check(Hero.from_dict({"name": "Coren the The Unbound"}).name == "Coren the Unbound", "an older save's doubled 'the' is dropped")
-	check(GameData.hero_combat_frames("warrior", "champ_brannoch", "attack").all(func(p): return "champ_brannoch" in p), "a champion never swings as the generic warrior")
+	check(GameData.hero_combat_frames("warrior", "champ_brannoch", "attack").all(func(p): return "champ_brannoch" in p or p.ends_with("champions/brannoch.png")), "a champion never swings as the generic warrior (frame 0 is their portrait)")
 	# Loot (0.51.2): mostly gear, most of all in Act I; relics stay a minority.
 	var was_act: int = GameState.campaign_act
 	for act in [1, 3]:

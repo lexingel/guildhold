@@ -74,7 +74,16 @@ func run() -> void:
 		var parts := f.rsplit("_", true, 2)
 		var key := parts[0]
 		if not still_of.has(key):
-			still_of[key] = _size(str(p).get_base_dir().path_join("%s_%s_0.png" % [key, parts[1]]))
+			var own0 := str(p).get_base_dir().path_join("%s_%s_0.png" % [key, parts[1]])
+			var still := own0   # frame 0 is the still itself unless the set keeps its own (0.53)
+			if not ResourceLoader.exists(own0):
+				if "/monsters/" in str(p):
+					still = "res://assets/monsters/%s.png" % key
+				elif key.begins_with("champ_"):
+					still = GameData.champion_portrait(key.trim_prefix("champ_"))
+				else:
+					still = str(GameData.SUBCLASS_PORTRAIT_PATH.get(key, own0))
+			still_of[key] = _size(still)
 		if _size(p) != still_of[key]:
 			jumps.append(f)
 	check(anim.size() > 2000 and jumps.is_empty(), "%d attack/hit/skill frames match their first frame %s" % [anim.size(), jumps.slice(0, 10)])
