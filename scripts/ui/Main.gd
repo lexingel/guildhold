@@ -517,6 +517,16 @@ func _story_overlay(card_data: Dictionary) -> void:
 	card.theme_type_variation = &"CardPanelEmber"
 	card.custom_minimum_size.x = minf(560.0, get_viewport().get_visible_rect().size.x - 40.0)
 	var cv := _vbox(10)
+	var art := GameData.story_art(card_data)
+	if art != "" and not _compact():   # the moment's picture (none on a short phone screen)
+		var pic := TextureRect.new()
+		pic.texture = load(art)
+		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		var w := card.custom_minimum_size.x - 24.0
+		pic.custom_minimum_size = Vector2(0, minf(w * 120.0 / 288.0, get_viewport().get_visible_rect().size.y * 0.25))
+		cv.add_child(pic)
 	var title := _label(str(card_data.get("title", "")), 24)
 	title.add_theme_color_override("font_color", Palette.RANK_S)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

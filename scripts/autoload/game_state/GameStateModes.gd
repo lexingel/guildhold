@@ -625,7 +625,7 @@ func choose_epilogue(choice: String) -> void:
 	_add_postgame_laurels(GameData.EPILOGUE_LAURELS, {"epilogue": choice})   # saves the legacy too
 	save_legacy()
 	var e: Dictionary = GameData.EPILOGUE_ENDING[choice]
-	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": tr(str(e["text"]))})
+	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": tr(str(e["text"])), "art": "epilogue_" + choice})
 	_news(tr(str(e["title"])) + ".")
 	save()
 	state_changed.emit()
@@ -685,7 +685,7 @@ func choose_accord_ending(choice: String, hero_id: String = "") -> String:
 	if accord_ending != "" or not GameData.ACCORD_ENDING.has(choice):
 		return ""
 	var end: Dictionary = GameData.ACCORD_ENDING[choice]
-	var card := {"title": tr(str(end["title"])), "subtitle": tr(str(end["subtitle"])), "text": tr(str(end["text"]))}
+	var card := {"title": tr(str(end["title"])), "subtitle": tr(str(end["subtitle"])), "text": tr(str(end["text"])), "art": "ending_" + choice}
 	if choice == "rewrite" and not rewrite_open():
 		return tr("The forty-second line isn't open to this guild.")
 	if choice == "renew" and hero_id == "hesper":   # B5: the clerk signs the line herself
@@ -757,7 +757,7 @@ func _act_intro_card(act_num: int) -> Dictionary:
 	elif act_num == 5 and not moot() and charter_result == "lost":
 		lines.append(tr(GameData.PAYOFF_CHARTER_LOST) % tr(str(rival_name)))
 	var text := str(act["intro"]) if lines.is_empty() else tr(str(act["intro"])) + "\n\n" + "\n\n".join(lines)
-	return {"title": tr("Act %s — %s") % [tr(str(_roman(act_num))), tr(str(act["name"]))], "subtitle": tr("Foe: %s") % tr(str(act["foe"])), "text": text}
+	return {"title": tr("Act %s — %s") % [tr(str(_roman(act_num))), tr(str(act["name"]))], "subtitle": tr("Foe: %s") % tr(str(act["foe"])), "text": text, "act_intro": act_num}
 
 
 static func _roman(n: int) -> String:
@@ -773,7 +773,7 @@ func _sky_beneath_card() -> Dictionary:
 		line = line % accord_hero
 	if charter_choice == "quiet":   # a payoff: Morrow's money pays for the climb down
 		line += "\n\n" + tr(hesper_alt("payoff_quiet", GameData.PAYOFF_QUIET))
-	return {"title": tr(str(c["title"])), "subtitle": tr(str(c["subtitle"])), "text": tr(hesper_alt("sky_beneath", str(c["text"]))) + "\n\n" + line}
+	return {"title": tr(str(c["title"])), "subtitle": tr(str(c["subtitle"])), "text": tr(hesper_alt("sky_beneath", str(c["text"]))) + "\n\n" + line, "art": "sky_beneath"}
 
 
 ## A crossing (Book II): a sealed rift in the Sky Beneath sometimes ends at a
@@ -901,7 +901,7 @@ func choose_sky_ending(choice: String) -> void:
 		if not seen.is_empty():
 			ep["text"] = tr(str(ep["text"])) + "\n\n" + "\n\n".join(seen)
 		pending_stories.push_front(ep)
-	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": _with_lines(tr(str(e["text"])), _sky_payoffs(choice))})
+	pending_stories.push_front({"title": tr(str(e["title"])), "subtitle": tr(str(e["subtitle"])), "text": _with_lines(tr(str(e["text"])), _sky_payoffs(choice)), "art": "sky_" + choice})
 	_news(tr(str(e["title"])) + ".")
 	save()
 	state_changed.emit()

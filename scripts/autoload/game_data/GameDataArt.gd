@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The story has pictures: every act, the big choices and every ending now open on an illustration, from the rift splitting the Vale to the last door between the worlds.",
 	"The Terms, Act IV's finale, has its own shape at last: the Grandmaster's, written in green ink. The rival guilds' leaders have their own portraits, Morrow included, and Wen, Dobbs and Hesper have faces at the pay table.",
 	"New art for the Sky Beneath: all 30 foes of the Glass Coast and the Inverted City, with their own attacks and walks, and six new battle backgrounds. Hesper and Vaelith have their own portraits as champions, with a walk and a signature move in the Endless Rift; Morrow and the First Signatory have theirs when they join your guild; and the seven Accord halls have pictures on the Keepers of the Vale tab.",
 	"When a guild is stuck on an act's objectives because its heroes are too weak, the Act panel now says what would help after a week, not only once the finale is open. And Act III's wardens stop hiding: while Korrath or Drevok is still to be beaten, a rift in his region always ends with him.",
@@ -288,6 +289,21 @@ const HERO_DETAIL_BG := "res://assets/screens/hero_detail_bg.png"
 const HERO_LOOK_HUES := [0.0, 0.5, 0.3, 0.7, 0.15]
 ## Hollow-born heroes (the Sky Beneath) wear a sea-glass variant of their own.
 const HOLLOW_LOOK := 99
+## Story cards' pictures (assets/story/<id>.png): a card's own "art", else
+## by its choice's kind, else its act (an act's intro and outro share one).
+const STORY_ART_KIND := {"vaelith": "vaelith", "spire": "spire", "charter": "charter", "brannoch": "brannoch", "sky": "sky_choice", "epilogue": "epilogue_choice"}
+
+
+static func story_art(card: Dictionary) -> String:
+	var id := str(card.get("art", ""))
+	if id == "":
+		id = str(STORY_ART_KIND.get(str(card.get("kind", "")), ""))
+	if id == "" and card.has("act_intro"):
+		id = "act_%d" % int(card["act_intro"])
+	if id == "" and card.has("act_outro"):
+		id = "act_%d" % int(card["act_outro"])
+	var p := "res://assets/story/%s.png" % id
+	return p if id != "" and ResourceLoader.exists(p) else ""
 const HOLLOW_LOOK_HUE := 0.45
 const HERO_PORTRAIT_PATH := {
 	"warrior": "res://assets/heroes/warrior.png",

@@ -916,7 +916,7 @@ static func morale_tier(m: int) -> Array:
 
 ## The Broken Accord (the campaign's story). The game opens on this card,
 ## before Act I's.
-const PROLOGUE := {"title": "The Night of Breaking", "subtitle": "The end of the Accord",
+const PROLOGUE := {"title": "The Night of Breaking", "subtitle": "The end of the Accord", "art": "prologue",
 	"text": "For three hundred years the guilds of the Accord kept the rifts shut. They swore one oath: close what opens, share what you find, never sell a rift. Then, in a single night, every rift in the Vale opened at once, and every Accord guild went in. None of them came back. By morning their halls stood empty.\n\nThe villages still need a guild. They have yours."}
 
 ## The Codex's Chronicle: what everyone knows (always shown), then what the
@@ -1045,7 +1045,7 @@ const TERMS_PER_POST := 0.02
 ## forty-first post and Riftbreaks end. Break: every post is released (every
 ## champion of this guild freed) and the Hollow rises: Riftbreaks come twice
 ## as often.
-const ACCORD_CHOICE := {"title": "The last signature", "subtitle": "The Accord Hall",
+const ACCORD_CHOICE := {"title": "The last signature", "subtitle": "The Accord Hall", "art": "accord_choice",
 	"text": "The Terms lie open on the floor of the Hall: forty-one lines, forty signed. Sign the last, and one of your heroes takes the forty-first post forever; the rifts close for good. Or burn it, and every post is released at once; the champions come home, and the Hollow comes up with them.",
 	"choices": ["renew", "break"]}
 const ACCORD_ENDING := {
@@ -1224,7 +1224,7 @@ const FOUNDINGS := {
 ## How a charter is unlocked by a deed (a guild in the Hall of Guilds did it).
 const FOUNDING_DEEDS := {"quiet": "Kept quiet in a Charter War", "ending": "Finish a campaign"}
 ## The Last of the Accord's own prologue (instead of PROLOGUE).
-const ACCORD_PROLOGUE := {"title": "The Night of Breaking", "subtitle": "Old Hesper remembers",
+const ACCORD_PROLOGUE := {"title": "The Night of Breaking", "subtitle": "Old Hesper remembers", "art": "prologue",
 	"text": "Hesper had a fever on the Night of Breaking and missed it. Every other guild of the Accord went into the rifts that night, hers too, and none came back. Twenty years on she has a hall again, three recruits, and the old oath: close what opens, share what you find, never sell a rift. She means to keep it this time."}
 ## A Mercenary Company's Act II: the Hollow Crown Company comes calling.
 const MERCENARY_OFFER := {"title": "An offer from the Company", "subtitle": "Captain Morrow",
