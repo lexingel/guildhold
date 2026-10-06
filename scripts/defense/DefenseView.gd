@@ -175,7 +175,7 @@ func _sync() -> void:
 			_world.add_child(n)
 			_foe_nodes[f["id"]] = n
 		n.position = f["pos"]
-		n.flip_h = (float(f["facing"]) < 0.0) != bool(n.get_meta("away", false))
+		n.flip_h = (float(f["facing"]) > 0.0) != bool(n.get_meta("away", false))   # foe art faces left (as in the Endless Rift); heading right, it turns
 		n.modulate = Color(2, 2, 2) if float(f["flash"]) > 0.0 else (Color(0.7, 0.85, 1.2) if float(f["slow_t"]) > 0.0 else Color(1, 1, 1))
 		var still := int(f["held_by"]) >= 0 or float(f["stun_t"]) > 0.0
 		if still and n.is_playing():

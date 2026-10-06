@@ -735,6 +735,7 @@ var _pending_founding := "free"  # the founding charter picked
 var _pending_oaths: Array = []   # oaths to swear at founding
 var _pending_year: Dictionary = {}   # the year rolled on the founding screen
 var _pending_skip := false   # the playtest shortcut: found with Act I done
+var _founding_open := false   # the founding screen's optional section, opened
 
 
 ## The legacy moment: after the Accord's ending (or when retiring), pick up
@@ -838,22 +839,26 @@ func _founding_charters() -> Control:
 	for id in GameData.FOUNDINGS:
 		var f: Dictionary = GameData.FOUNDINGS[id]
 		var open := GameState.founding_unlocked(id)
+		var affordable: bool = not open and f.has("laurels") and int(GameState.legacy.get("laurels", 0)) >= int(f["laurels"]) and GameState.lore_option_open(f)
+		if not open and not affordable:
+			continue   # listed under "more locked" below
 		var b := Button.new()
-		b.toggle_mode = true
-		b.button_pressed = id == _pending_founding
-		b.text = tr(str(f["name"])) if open else tr("%s · locked") % tr(str(f["name"]))
-		b.disabled = not open
 		b.tooltip_text = tr(str(f["desc"]))
-		b.pressed.connect(func(k=id):
-			_pending_founding = k
-			render())
-		row.add_child(b)
-		if not open and f.has("laurels") and int(GameState.legacy.get("laurels", 0)) >= int(f["laurels"]) and GameState.lore_option_open(f):
-			row.add_child(_button(tr("Unlock · %d Laurels") % int(f["laurels"]), func(k=id):
+		if open:
+			b.toggle_mode = true
+			b.button_pressed = id == _pending_founding
+			b.text = tr(str(f["name"]))
+			b.pressed.connect(func(k=id):
+				_pending_founding = k
+				render())
+		else:
+			b.text = tr("%s · unlock for %d Laurels") % [tr(str(f["name"])), int(f["laurels"])]
+			b.pressed.connect(func(k=id):
 				_flavor_toast = GameState.unlock_founding(k)
 				if _flavor_toast == "":
 					_pending_founding = k
-				render()))
+				render())
+		row.add_child(b)
 	col.add_child(row)
 	var cur: Dictionary = GameData.FOUNDINGS[_pending_founding]
 	col.add_child(_wrap_label(str(cur["desc"]), 12, true))
@@ -870,8 +875,17 @@ func _founding_charters() -> Control:
 				locked.append(tr("%s: needs a truth from %s") % [tr(str(f["name"])), tr(_arc_name(str(f["truth"])))])
 				continue
 			locked.append(tr("%s: %s") % [tr(str(f["name"])), tr(" or ").join(how)])
-	if not locked.is_empty():
-		col.add_child(_wrap_label(tr("Still locked — %s") % "; ".join(locked), 11, true))
+	var shown := 0
+	for id in GameData.FOUNDINGS:
+		var f: Dictionary = GameData.FOUNDINGS[id]
+		if not GameState.founding_unlocked(id) and f.has("laurels") and int(GameState.legacy.get("laurels", 0)) >= int(f["laurels"]) and GameState.lore_option_open(f):
+			shown += 1
+	var hidden := locked.size() - shown
+	if hidden > 0:   # what still opens the rest, on hover
+		var ll := _label(tr("%d more locked") % hidden, 11, true)
+		ll.tooltip_text = "\n".join(locked)
+		ll.mouse_filter = Control.MOUSE_FILTER_STOP
+		col.add_child(ll)
 	return col
 
 
@@ -1780,58 +1794,27 @@ func _render_onboard(v: VBoxContainer) -> void:
 	edit.placeholder_text = "Guild name"
 	edit.text = pending_guild_name
 	edit.text_changed.connect(func(t: String): pending_guild_name = t)
+	# Name and crest on one row: the two things every guild picks.
 	var name_row := HBoxContainer.new()
 	name_row.add_theme_constant_override("separation", 8)
+	var crest := _icon(GameData.CREST_PATH[pending_crest - 1], 40)
+	crest.tooltip_text = tr("Your crest")
+	name_row.add_child(crest)
 	edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	edit.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	name_row.add_child(edit)
 	# A name without typing (a phone's keyboard can be awkward in a browser).
-	name_row.add_child(_icon_button(GameData.BUTTON_ICON_PATH["dice"], "Random name", func():
+	var rn := _icon_button(GameData.BUTTON_ICON_PATH["dice"], "Random name", func():
 		pending_guild_name = "The %s %s" % [GUILD_NAME_A[randi() % GUILD_NAME_A.size()], GUILD_NAME_B[randi() % GUILD_NAME_B.size()]]
-		render()))
-	v.add_child(name_row)
-
-	v.add_child(_label("Choose a Crest", 16))
-	var crest_row := HBoxContainer.new()
-	crest_row.add_theme_constant_override("separation", 12)
-	crest_row.add_child(_icon(GameData.CREST_PATH[pending_crest - 1], 64))
-	crest_row.add_child(_icon_button(GameData.BUTTON_ICON_PATH["dice"], "Randomize", func():
+		render())
+	rn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	name_row.add_child(rn)
+	var rc := _icon_button(GameData.BUTTON_ICON_PATH["dice"], "New crest", func():
 		pending_crest = 1 + randi() % GameData.CREST_PATH.size()
-		render()
-	))
-	v.add_child(crest_row)
-	var open_colours: Array = GameData.BANNER_COLOURS.keys().filter(func(c): return GameState.banner_colour_open(str(c)))
-	if open_colours.size() > 1:   # banner colours earned by the guilds in the Hall
-		v.add_child(_label("Banner colour", 14))
-		var colour_row := HFlowContainer.new()
-		colour_row.add_theme_constant_override("h_separation", 8)
-		for c in open_colours:
-			var sw := ColorRect.new()
-			sw.custom_minimum_size = Vector2(16, 16)
-			sw.color = GameState.banner_cloth(str(c), pending_crest)
-			colour_row.add_child(sw)
-			var cb := Button.new()
-			cb.toggle_mode = true
-			cb.button_pressed = _pending_colour == str(c)
-			cb.text = tr(str(GameData.BANNER_COLOURS[c]["name"]))
-			if str(GameData.BANNER_COLOURS[c]["how"]) != "":
-				cb.tooltip_text = tr("Earned: %s") % tr(str(GameData.BANNER_COLOURS[c]["how"]))
-			cb.pressed.connect(func(k=str(c)):
-				_pending_colour = k
-				render())
-			colour_row.add_child(cb)
-		v.add_child(colour_row)
-
-	if not (GameState.legacy.get("guilds", []) as Array).is_empty():
-		v.add_child(_founding_year())
-		v.add_child(_founding_charters())
-		v.add_child(_founding_oaths())
-		v.add_child(_founding_gifts())
-	var skip := CheckBox.new()
-	skip.text = tr("Playtest: skip Act I (start with it done, and the heroes, gear and Gold a guild has by then)")
-	skip.button_pressed = _pending_skip
-	skip.toggled.connect(func(on): _pending_skip = on)
-	skip.tooltip_text = tr("For testers who want to see the middle game: champions, Riftbreaks and the rival's moves. Your Feedback report will say you skipped Act I.")
-	v.add_child(skip)
+		render())
+	rc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	name_row.add_child(rc)
+	v.add_child(name_row)
 	var found := _icon_domain_button("violet", GameData.BUTTON_ICON_PATH["confirm"], "Found the Guild", func():
 		var n := edit.text.strip_edges()
 		if n == "":
@@ -1867,6 +1850,68 @@ func _render_onboard(v: VBoxContainer) -> void:
 	)
 	v.add_child(found)
 	edit.text_submitted.connect(func(_t): found.pressed.emit())   # Enter founds it too
+
+	# Everything else is optional: one line saying what's picked, opened on demand.
+	var returning := not (GameState.legacy.get("guilds", []) as Array).is_empty()
+	var open_colours: Array = GameData.BANNER_COLOURS.keys().filter(func(c): return GameState.banner_colour_open(str(c)))
+	var bits: Array[String] = []
+	if returning:
+		bits.append(tr(str(GameData.FOUNDINGS[_pending_founding if GameState.founding_unlocked(_pending_founding) else "free"]["name"])))
+		bits.append(tr("%d oath%s") % [_pending_oaths.size(), _pl(_pending_oaths.size())] if not _pending_oaths.is_empty() else tr("no oaths"))
+		if not _pending_gifts.is_empty():
+			bits.append(tr("%d gift%s") % [_pending_gifts.size(), _pl(_pending_gifts.size())])
+	if open_colours.size() > 1:
+		bits.append(tr(str(GameData.BANNER_COLOURS.get(_pending_colour, GameData.BANNER_COLOURS["crest"])["name"])))
+	if _pending_skip:
+		bits.append(tr("skipping Act I"))
+	var opts := _button(("▾ " if _founding_open else "▸ ") + tr("Founding options") + ("" if bits.is_empty() else "  ·  " + "  ·  ".join(bits)), func():
+		_founding_open = not _founding_open
+		render())
+	opts.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	opts.flat = true
+	opts.tooltip_text = tr("Charter, oaths, Laurel gifts, the Vale's year and banner colour. All optional.") if returning else tr("Banner colour and the playtest shortcut. All optional.")
+	v.add_child(opts)
+	if _founding_open:
+		var box := PanelContainer.new()
+		box.theme_type_variation = &"CardPanelViolet"
+		var ov := _vbox(10)
+		if open_colours.size() > 1:   # banner colours earned by the guilds in the Hall
+			ov.add_child(_label("Banner colour", 14))
+			var colour_row := HFlowContainer.new()
+			colour_row.add_theme_constant_override("h_separation", 8)
+			for c in open_colours:
+				var sw := ColorRect.new()
+				sw.custom_minimum_size = Vector2(16, 16)
+				sw.color = GameState.banner_cloth(str(c), pending_crest)
+				colour_row.add_child(sw)
+				var cb := Button.new()
+				cb.toggle_mode = true
+				cb.button_pressed = _pending_colour == str(c)
+				cb.text = tr(str(GameData.BANNER_COLOURS[c]["name"]))
+				if str(GameData.BANNER_COLOURS[c]["how"]) != "":
+					cb.tooltip_text = tr("Earned: %s") % tr(str(GameData.BANNER_COLOURS[c]["how"]))
+				cb.pressed.connect(func(k=str(c)):
+					_pending_colour = k
+					render())
+				colour_row.add_child(cb)
+			ov.add_child(colour_row)
+		if returning:
+			ov.add_child(_founding_charters())
+			ov.add_child(_founding_oaths())
+			ov.add_child(_founding_gifts())
+			ov.add_child(_founding_year())
+		var skip := CheckBox.new()
+		skip.text = tr("Playtest: skip Act I (start with it done, and the heroes, gear and Gold a guild has by then)")
+		skip.button_pressed = _pending_skip
+		skip.toggled.connect(func(on):
+			_pending_skip = on
+			render())
+		skip.tooltip_text = tr("For testers who want to see the middle game: champions, Riftbreaks and the rival's moves. Your Feedback report will say you skipped Act I.")
+		ov.add_child(skip)
+		box.add_child(ov)
+		v.add_child(box)
+	elif returning and _pending_year.is_empty():
+		_pending_year = GameState.roll_vale_year()   # rolled even unseen, as before
 
 
 # ---------------- Rift Hall ----------------

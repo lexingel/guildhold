@@ -29,6 +29,18 @@ func _offers(n: int) -> Array:
 func run() -> void:
 	check(Hero.from_dict({"name": "Coren the The Unbound"}).name == "Coren the Unbound", "an older save's doubled 'the' is dropped")
 	check(GameData.hero_combat_frames("warrior", "champ_brannoch", "attack").all(func(p): return "champ_brannoch" in p), "a champion never swings as the generic warrior")
+	# Loot (0.51.2): mostly gear, most of all in Act I; relics stay a minority.
+	var was_act: int = GameState.campaign_act
+	for act in [1, 3]:
+		GameState.campaign_act = act
+		var gear := 0
+		for i in 600:
+			if str(Combat.gen_loot("common")["loot_type"]) == "item":
+				gear += 1
+		var share := gear / 600.0
+		var want: float = GameData.LOOT_GEAR_SHARE_ACT1 if act == 1 else GameData.LOOT_GEAR_SHARE
+		check(absf(share - want) < 0.07, "Act %d: %d%% of drops are gear (aim %d%%)" % [act, int(share * 100), int(want * 100)])
+	GameState.campaign_act = was_act
 	# The endowment: spare Gold for the next guild, a Laurel at a time.
 	_legacy([])
 	_guild("Endowers")

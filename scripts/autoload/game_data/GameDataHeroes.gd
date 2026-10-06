@@ -9,6 +9,11 @@ const CLASSES := [
 ]
 
 # Item/relic rarity only — heroes and Champions use RANKS below.
+## A loot drop's chance to be gear rather than a relic. Every hero wears
+## several pieces but the guild equips only a few relics, so gear comes far
+## more often, and most of all in Act I, when the founders are bare.
+const LOOT_GEAR_SHARE := 0.7
+const LOOT_GEAR_SHARE_ACT1 := 0.8
 const RARITIES := [
 	{"id": "common", "name": "Common", "mult": 1.0, "cost": 40, "weight": 60},
 	{"id": "rare", "name": "Rare", "mult": 1.4, "cost": 120, "weight": 32},

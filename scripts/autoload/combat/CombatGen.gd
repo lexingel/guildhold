@@ -249,7 +249,7 @@ func gen_unique_item() -> Item:
 
 ## Returns {"loot_type": "item"|"relic", "obj": Item|Relic}
 func gen_loot(rarity_id: String) -> Dictionary:
-	if randf() < 0.5:
+	if randf() < (GameData.LOOT_GEAR_SHARE_ACT1 if GameState.campaign_act <= 1 else GameData.LOOT_GEAR_SHARE):
 		return {"loot_type": "item", "obj": gen_item(rarity_id)}
 	return {"loot_type": "relic", "obj": gen_relic(rarity_id)}
 

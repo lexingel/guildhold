@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Foes face the right way: in Riftbreak they no longer walk backwards down the road, and Korrath, Captain Morrow, the Spire Oracle, the Rooftop Harrier and the Tideglass Moth turn toward your heroes. Founding a guild is calmer: name and crest up front, everything else under Founding options. Loot is mostly gear now (8 in 10 drops in Act I, 7 in 10 after), so fewer spare relics pile up.",
 	"Skip the opening and the narrator still reads the Night of Breaking to you, Hesper's version too for a guild founded on the old oath.",
 	"The Vale has voices: the narrator reads the story cards, Wen, Dobbs and Hesper talk at the pay table, and the rival leaders read out their letters, Brannoch his memory. Settings has a Voice volume and an on/off switch, and Listen plays a scene again. English only for now.",
 	"Four foes redrawn to match the rest of the Vale: the Mire Sniper, the Voidling Sprite, the Choir Sprite and the Falling Sky itself, each with new attacks and walks. The Glass Coast and Inverted City grounds are calmer, so heroes stand out on them.",
@@ -638,6 +639,7 @@ static func monster_sprite_key(monster_name: String) -> String:
 const SPRITE_FACES_AWAY := {
 	"carrion_crier": true, "hedge_warden": true,
 	"lantern_wight": true, "tide_caller": true, "cinder_hound": true,
+	"korrath": true, "captain_morrow": true, "spire_oracle": true, "rooftop_harrier": true, "tideglass_moth": true,
 }
 
 
