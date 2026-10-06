@@ -842,6 +842,7 @@ func answer_crossing(choice: String) -> void:
 					break
 			s.quirks = s.quirks.filter(func(q): return GameData.QUIRKS.get(q, {}).get("origin", "") != "born")
 			s.quirks.append("Hollow-born")
+			s.history["signatory"] = 1   # her own portrait (GameData.hero_portrait)
 			heroes.append(s)
 			var page := lore_event("signatory", "through")
 			pending_stories.push_front({"title": tr("The First Signatory"), "subtitle": tr("She joins the guild"), "text": page if page != "" else tr(str(GameData.FRAGMENTS["f_first_page"]["text"]))})

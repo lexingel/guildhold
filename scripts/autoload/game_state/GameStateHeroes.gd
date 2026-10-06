@@ -69,7 +69,7 @@ func quirk_treat_cost() -> int:
 func refresh_looks() -> void:
 	var taken := {}   # portrait -> {look: true}
 	for h in heroes:
-		var art := GameData.portrait_for_hero(h.cls_id, h.pool_id)
+		var art := GameData.hero_portrait(h)
 		var t: Dictionary = taken.get(art, {})
 		if h.look_of != art or t.has(h.look):
 			h.look = _free_look(t)
@@ -84,7 +84,7 @@ func look_for(h: Hero) -> int:
 		return GameData.HOLLOW_LOOK
 	if heroes.has(h):
 		return h.look
-	var art := GameData.portrait_for_hero(h.cls_id, h.pool_id)
+	var art := GameData.hero_portrait(h)
 	var t := {}
 	for o in heroes:
 		if o.look_of == art:

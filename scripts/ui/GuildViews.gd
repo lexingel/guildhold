@@ -2216,9 +2216,19 @@ func _render_accord_halls(v: VBoxContainer) -> void:
 		var id := str(h["id"])
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
+		var done := GameState.halls_restored.has(id)
+		var pic_path := "res://assets/halls/%s.png" % id
+		if ResourceLoader.exists(pic_path):   # the hall as it stands: dim until restored
+			var pic := TextureRect.new()
+			pic.texture = load(pic_path)
+			pic.custom_minimum_size = Vector2(96, 60)
+			pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			pic.modulate = Color.WHITE if done else Color(0.55, 0.55, 0.6)
+			row.add_child(pic)
 		var col := _vbox(0)
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var done := GameState.halls_restored.has(id)
 		var nm := _label(tr(str(h["name"])), 14)
 		if done:
 			nm.add_theme_color_override("font_color", Palette.RANK_S)

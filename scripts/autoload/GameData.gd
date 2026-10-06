@@ -20,6 +20,18 @@ static func portrait_for_hero(cls_id: String, pool_id: String) -> String:
 	return HERO_PORTRAIT_PATH.get(role, "")
 
 
+## A hero's portrait: their own if they have one (a story character who
+## joins: Morrow turned, the First Signatory), else their subclass's.
+const UNIQUE_PORTRAIT := {"morrow": "res://assets/heroes/unique/morrow.png", "signatory": "res://assets/heroes/unique/first_signatory.png"}
+
+
+static func hero_portrait(h) -> String:
+	for k in UNIQUE_PORTRAIT:
+		if h.history.has(k) and ResourceLoader.exists(str(UNIQUE_PORTRAIT[k])):
+			return str(UNIQUE_PORTRAIT[k])
+	return portrait_for_hero(h.cls_id, h.pool_id)
+
+
 ## An English plural ending for `n` things ("s", or "es" for hero), none in
 ## Turkish, where a noun after a number stays singular ("3 gün").
 ## ponytail: suffix-only plurals; switch call sites to tr_n() when a language

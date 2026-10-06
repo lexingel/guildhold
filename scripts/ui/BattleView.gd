@@ -502,7 +502,7 @@ func _turn_order_strip(state: Dictionary) -> Control:
 		if is_hero:
 			var h := _hero_by_id(party, str(entry["id"]))
 			if h:
-				icon_path = GameData.portrait_for_hero(h.cls_id, h.pool_id)
+				icon_path = GameData.hero_portrait(h)
 				tip = h.name
 				if h.hp <= 0:
 					continue
@@ -1612,7 +1612,7 @@ func _run_report() -> Control:
 		var hr := HBoxContainer.new()
 		hr.add_theme_constant_override("separation", 6)
 		hr.custom_minimum_size.x = 150
-		var portrait := GameData.portrait_for_hero(h.cls_id, h.pool_id)
+		var portrait := GameData.hero_portrait(h)
 		if portrait != "":
 			var pic := _icon(portrait, 36)
 			_hero_look(pic, h)
@@ -1965,10 +1965,10 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 	# --- Heroes: back row on the left, front row nearest the enemy. ---
 	var line: Array[Hero] = []
 	for h in living_heroes:
-		if h.formation == "back" and GameData.portrait_for_hero(h.cls_id, h.pool_id) != "":
+		if h.formation == "back" and GameData.hero_portrait(h) != "":
 			line.append(h)
 	for h in living_heroes:
-		if h.formation != "back" and GameData.portrait_for_hero(h.cls_id, h.pool_id) != "":
+		if h.formation != "back" and GameData.hero_portrait(h) != "":
 			line.append(h)
 	var hz_x := W * 0.03
 	var hz_w := W * 0.49
@@ -1994,7 +1994,7 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 			arena.add_child(ring)
 			_pulse(ring)
 		var rect := _hero_icon(h, int(size))
-		rect.flip_h = GameData.faces_away(GameData.portrait_for_hero(h.cls_id, h.pool_id))
+		rect.flip_h = GameData.faces_away(GameData.hero_portrait(h))
 		var wrapper := _wrap_icon(rect)
 		wrapper.position = Vector2(cx - size * 0.5, feet - size)
 		_add_ground_shadow(arena, wrapper.position, size)
