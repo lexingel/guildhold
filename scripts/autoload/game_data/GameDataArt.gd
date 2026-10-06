@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Four foes redrawn to match the rest of the Vale: the Mire Sniper, the Voidling Sprite, the Choir Sprite and the Falling Sky itself, each with new attacks and walks. The Glass Coast and Inverted City grounds are calmer, so heroes stand out on them.",
 	"Every hero now has new art: the clerics in white and gold and the rogues in dark violet join the warriors, rangers and mages, each with a new portrait, new attack, hit and skill animations and a new Endless Rift walk. Champions swing, flinch and cast as themselves instead of turning into a plain warrior mid-fight. Every skill has its own icon, the Tower's and the Endless Rift's legendary relics have theirs, the Glass Coast and the Inverted City have their own ground, the Open Hollow has a picture, and two heroes of the same kind keep their role's colour.",
 	"New portraits for every warrior, ranger and mage, in their role colours: red tabards on the warriors, green cloaks on the rangers, blue robes on the mages. Each has new attack, hit and skill animations and a new walk in the Endless Rift. Clerics and rogues are next.",
 	"The story has pictures: every act, the big choices and every ending now open on an illustration, from the rift splitting the Vale to the last door between the worlds.",
@@ -633,7 +634,7 @@ static func monster_sprite_key(monster_name: String) -> String:
 ## the left facing right, foes on the right facing left), by sprite name; the
 ## arena and the Endless Rift mirror it. Front-facing art is left alone.
 const SPRITE_FACES_AWAY := {
-	"carrion_crier": true, "hedge_warden": true, "mire_sniper": true,
+	"carrion_crier": true, "hedge_warden": true,
 	"lantern_wight": true, "tide_caller": true, "cinder_hound": true,
 }
 

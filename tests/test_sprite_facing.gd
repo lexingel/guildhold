@@ -10,7 +10,7 @@ func _frames(n: int = 3) -> void:
 
 
 func run() -> void:
-	check(GameData.faces_away("res://assets/monsters/mire_sniper.png") and GameData.faces_away("carrion_crier"), "wrong-way foes are listed (by path or key)")
+	check(GameData.faces_away("res://assets/monsters/hedge_warden.png") and GameData.faces_away("carrion_crier"), "wrong-way foes are listed (by path or key)")
 	check(not GameData.faces_away("sub_acolyte") and not GameData.faces_away("res://assets/heroes/cleric.png"), "the redrawn heroes (0.50) all face the right way")
 	check(not GameData.faces_away("ash_harrier") and not GameData.faces_away("sub_duskstalker"), "art that already faces the right way is left alone")
 	for key in GameData.SPRITE_FACES_AWAY:
@@ -42,10 +42,10 @@ func run() -> void:
 	# The turn-order strip mirrors the same art the arena does.
 	var party: Array[Hero] = []
 	var strip: Control = main._turn_order_strip({"party": party, "turn_idx": 0,
-		"monsters": [{"name": "Mire Sniper", "hp": 10.0}, {"name": "Ash Harrier", "hp": 10.0}],
+		"monsters": [{"name": "Carrion Crier", "hp": 10.0}, {"name": "Ash Harrier", "hp": 10.0}],
 		"turn_order": [{"type": "monster", "id": 0}, {"type": "monster", "id": 1}]})
 	var icons := strip.find_children("*", "TextureRect", true, false)
-	check(icons.size() == 2 and icons[0].flip_h and not icons[1].flip_h, "turn-order icons: Mire Sniper mirrored, Ash Harrier not")
+	check(icons.size() == 2 and icons[0].flip_h and not icons[1].flip_h, "turn-order icons: Carrion Crier mirrored, Ash Harrier not")
 	strip.free()
 	main.queue_free()
 	await _frames()
