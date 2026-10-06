@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"New portraits for every warrior, ranger and mage, in their role colours: red tabards on the warriors, green cloaks on the rangers, blue robes on the mages. Each has new attack, hit and skill animations and a new walk in the Endless Rift. Clerics and rogues are next.",
 	"The story has pictures: every act, the big choices and every ending now open on an illustration, from the rift splitting the Vale to the last door between the worlds.",
 	"The Terms, Act IV's finale, has its own shape at last: the Grandmaster's, written in green ink. The rival guilds' leaders have their own portraits, Morrow included, and Wen, Dobbs and Hesper have faces at the pay table.",
 	"New art for the Sky Beneath: all 30 foes of the Glass Coast and the Inverted City, with their own attacks and walks, and six new battle backgrounds. Hesper and Vaelith have their own portraits as champions, with a walk and a signature move in the Endless Rift; Morrow and the First Signatory have theirs when they join your guild; and the seven Accord halls have pictures on the Keepers of the Vale tab.",

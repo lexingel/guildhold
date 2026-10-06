@@ -571,7 +571,7 @@ func evolve_hero(hero_id: String, target_pool_id: String) -> String:
 	h.innate_kind = next["kind"]
 	var rank_idx := GameData.rank_index(next["rank"])
 	h.innate_value = Combat.hero_innate_value(next, rank_idx)
-	h.name = "%s the %s" % [h.name.split(" the ")[0], next["name"]]
+	h.name = "%s the %s" % [h.name.split(" the ")[0], str(next["name"]).trim_prefix("The ")]
 	h.hp = Combat.max_hp(h)
 	var passive := GameData.subclass_passive(h.pool_id)
 	push_toast(h, tr("Evolved — Rank %s") % tr(str(h.rank)), tr("%s · new passive: %s") % [tr(str(h.name)), tr(str(passive.get("name", "none")))])

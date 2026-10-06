@@ -27,6 +27,7 @@ func _offers(n: int) -> Array:
 
 
 func run() -> void:
+	check(Hero.from_dict({"name": "Coren the The Unbound"}).name == "Coren the Unbound", "an older save's doubled 'the' is dropped")
 	# The endowment: spare Gold for the next guild, a Laurel at a time.
 	_legacy([])
 	_guild("Endowers")

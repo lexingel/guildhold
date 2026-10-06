@@ -29,7 +29,7 @@ func gen_hero(rank_id: String, level_hint: int) -> Hero:
 		taken[other.name.split(" the ")[0]] = true
 	var free_names: Array = GameData.FIRST_NAMES.filter(func(n): return not taken.has(n))
 	var names: Array = free_names if not free_names.is_empty() else GameData.FIRST_NAMES
-	h.name = "%s the %s" % [names[randi() % names.size()], cls["name"]]
+	h.name = "%s the %s" % [names[randi() % names.size()], str(cls["name"]).trim_prefix("The ")]
 	h.cls_id = cls["role"]
 	h.pool_id = cls["id"]
 	h.type = cls["type"]

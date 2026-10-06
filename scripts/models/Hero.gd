@@ -82,7 +82,7 @@ func to_dict() -> Dictionary:
 static func from_dict(d: Dictionary) -> Hero:
 	var h := Hero.new()
 	h.id = d.get("id", "")
-	h.name = d.get("name", "")
+	h.name = str(d.get("name", "")).replace(" the The ", " the ")   # older saves: "Coren the The Unbound"
 	h.cls_id = d.get("cls_id", "")
 	h.pool_id = d.get("pool_id", "")
 	h.type = d.get("type", "")
