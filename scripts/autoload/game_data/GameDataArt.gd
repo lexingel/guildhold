@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Every hero now has new art: the clerics in white and gold and the rogues in dark violet join the warriors, rangers and mages, each with a new portrait, new attack, hit and skill animations and a new Endless Rift walk. Champions swing, flinch and cast as themselves instead of turning into a plain warrior mid-fight. Every skill has its own icon, the Tower's and the Endless Rift's legendary relics have theirs, the Glass Coast and the Inverted City have their own ground, the Open Hollow has a picture, and two heroes of the same kind keep their role's colour.",
 	"New portraits for every warrior, ranger and mage, in their role colours: red tabards on the warriors, green cloaks on the rangers, blue robes on the mages. Each has new attack, hit and skill animations and a new walk in the Endless Rift. Clerics and rogues are next.",
 	"The story has pictures: every act, the big choices and every ending now open on an illustration, from the rift splitting the Vale to the last door between the worlds.",
 	"The Terms, Act IV's finale, has its own shape at last: the Grandmaster's, written in green ink. The rival guilds' leaders have their own portraits, Morrow included, and Wen, Dobbs and Hesper have faces at the pay table.",
@@ -285,9 +286,10 @@ const STATUS_PLATE_PATH := "res://assets/ui/status_plate.png"
 const PORTRAIT_FRAME_PATH := "res://assets/ui/portrait_frame.png"
 const ABILITY_BAR_STRIP_PATH := "res://assets/ui/ability_bar_strip.png"
 const HERO_DETAIL_BG := "res://assets/screens/hero_detail_bg.png"
-## Hue turns for hero colour variants (look 0 keeps the art as drawn); the
-## most different first. A 6th hero sharing one portrait wraps round to 1.
-const HERO_LOOK_HUES := [0.0, 0.5, 0.3, 0.7, 0.15]
+## Hue turns for hero colour variants (look 0 keeps the art as drawn): small
+## enough that a warrior's red stays a red and a ranger's green a green (0.49),
+## the most different first. A 6th hero sharing one portrait wraps round to 1.
+const HERO_LOOK_HUES := [0.0, -0.06, 0.05, -0.03, 0.03]
 ## Hollow-born heroes (the Sky Beneath) wear a sea-glass variant of their own.
 const HOLLOW_LOOK := 99
 ## Story cards' pictures (assets/story/<id>.png): a card's own "art", else
@@ -466,7 +468,9 @@ static func subclass_anim_frames(pool_id: String, action: String) -> Array[Strin
 ## to the generic role animation, since portrait_for_hero shows them that same
 ## generic art at rest.
 static func hero_combat_frames(cls_id: String, pool_id: String, action: String) -> Array[String]:
-	if SUBCLASS_PORTRAIT_PATH.has(pool_id):
+	# Champions have their own portraits, so the role's frames would be a
+	# stranger mid-swing: only their own (subclass_anim/champ_<id>_*), else a tween.
+	if SUBCLASS_PORTRAIT_PATH.has(pool_id) or pool_id.begins_with("champ_"):
 		return subclass_anim_frames(pool_id, action)
 	return hero_anim_frames(cls_id, action)
 const MONSTER_SPRITE_PATH := {
@@ -631,7 +635,6 @@ static func monster_sprite_key(monster_name: String) -> String:
 const SPRITE_FACES_AWAY := {
 	"carrion_crier": true, "hedge_warden": true, "mire_sniper": true,
 	"lantern_wight": true, "tide_caller": true, "cinder_hound": true,
-	"cleric": true, "acolyte": true, "herbalist": true,
 }
 
 

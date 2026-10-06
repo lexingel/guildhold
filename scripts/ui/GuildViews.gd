@@ -2252,9 +2252,20 @@ func _render_accord_halls(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 
 
+const TIDE_PIC := "res://assets/halls/open_hollow.png"
+
+
 ## The Open Hollow (Break): the tides so far, and tidewalls to raise.
 func _render_open_hollow(v: VBoxContainer) -> void:
 	v.add_child(_label(tr("The Open Hollow · %d tides held of %d") % [GameState.tides_held, GameState.tide_count], 18))
+	if ResourceLoader.exists(TIDE_PIC):
+		var pic := TextureRect.new()
+		pic.texture = load(TIDE_PIC)
+		pic.custom_minimum_size = Vector2(0, 150)   # fills the column width, any screen
+		pic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		pic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		pic.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		v.add_child(pic)
 	v.add_child(_wrap_label("The Hollow is out. A tide breaks every week, and each one held makes the next stronger. Every tidewall holds a little of it back.", 12, true))
 	var next := 1.0 + GameData.TIDE_GROWTH * GameState.tides_held
 	var row := HBoxContainer.new()

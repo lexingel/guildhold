@@ -11,7 +11,7 @@ func _frames(n: int = 3) -> void:
 
 func run() -> void:
 	check(GameData.faces_away("res://assets/monsters/mire_sniper.png") and GameData.faces_away("carrion_crier"), "wrong-way foes are listed (by path or key)")
-	check(GameData.faces_away("sub_acolyte") and GameData.faces_away("res://assets/heroes/cleric.png"), "wrong-way heroes too, including Endless walk keys")
+	check(not GameData.faces_away("sub_acolyte") and not GameData.faces_away("res://assets/heroes/cleric.png"), "the redrawn heroes (0.50) all face the right way")
 	check(not GameData.faces_away("ash_harrier") and not GameData.faces_away("sub_duskstalker"), "art that already faces the right way is left alone")
 	for key in GameData.SPRITE_FACES_AWAY:
 		var known := GameData.MONSTER_SPRITE_PATH.has(key) or GameData.SUBCLASS_PORTRAIT_PATH.has(key) or ResourceLoader.exists("res://assets/heroes/%s.png" % key)
