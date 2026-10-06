@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Skip the opening and the narrator still reads the Night of Breaking to you, Hesper's version too for a guild founded on the old oath.",
 	"The Vale has voices: the narrator reads the story cards, Wen, Dobbs and Hesper talk at the pay table, and the rival leaders read out their letters, Brannoch his memory. Settings has a Voice volume and an on/off switch, and Listen plays a scene again. English only for now.",
 	"Four foes redrawn to match the rest of the Vale: the Mire Sniper, the Voidling Sprite, the Choir Sprite and the Falling Sky itself, each with new attacks and walks. The Glass Coast and Inverted City grounds are calmer, so heroes stand out on them.",
 	"Every hero now has new art: the clerics in white and gold and the rogues in dark violet join the warriors, rangers and mages, each with a new portrait, new attack, hit and skill animations and a new Endless Rift walk. Champions swing, flinch and cast as themselves instead of turning into a plain warrior mid-fight. Every skill has its own icon, the Tower's and the Endless Rift's legendary relics have theirs, the Glass Coast and the Inverted City have their own ground, the Open Hollow has a picture, and two heroes of the same kind keep their role's colour.",

@@ -40,6 +40,7 @@ func run() -> void:
 	var intro: Dictionary = GameState._act_intro_card(1)
 	check(AudioManager.voice_clips_in(str(intro["text"])).has("CAMPAIGN_0_.intro.ogg"), "Act I's intro card speaks")
 	check(AudioManager.voice_clips_in(str(GameData.CHARTER_TURN["text"])) == ["CHARTER_TURN.ogg"], "the Charter's card speaks one line")
+	check(AudioManager.voice_clips_in(str(GameData.PROLOGUE["text"])) == ["PROLOGUE.ogg"] and AudioManager.voice_clips_in(str(GameData.ACCORD_PROLOGUE["text"])) == ["ACCORD_PROLOGUE.ogg"], "both prologue cards are read (when the opening is skipped)")
 	check(AudioManager.voice_clips_in(GameState.champion_memory_line("brannoch")).size() == 1, "Brannoch remembers aloud")
 	# The pay table: each line by itself; a line naming a past guild stays silent.
 	var first: Array = GameData.PAYDAY_SCENES["first"]
