@@ -315,6 +315,10 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 			coins += int(result["coin"])
 			crystals += int(result["crystal"]) + int(result["bonus_crystal"])
 			_attune_gear(state.get("party", []))
+			if GameData.POST_FIGHT_MEND > 0.0 and not run.has("tower"):   # a breath between fights
+				for h in state.get("party", []):
+					if h.hp > 0:
+						h.hp = mini(Combat.max_hp(h), h.hp + int(ceil(Combat.max_hp(h) * GameData.POST_FIGHT_MEND)))
 			if kind == "boss":
 				run["boss_rounds"] = int(result["rounds"])
 				var bname := str(result["monster_name"]).split(",")[0]
@@ -866,6 +870,7 @@ func advance_node() -> void:
 
 
 func seal_rift() -> void:
+	note_milestone("first seal")
 	_rescue_left_behind()
 	maybe_find_ledger_page(int(run.get("finale", 0)) > 0)
 	if not run.has("tower"):   # the story web: a fragment in the rift
@@ -948,6 +953,7 @@ func seal_rift() -> void:
 ## champion freed on the way. The guild spends a day on it (wages, healing).
 ## Returns what was earned for the result screen.
 func finish_survivors(r: SurvivorsRun) -> Dictionary:
+	note_milestone("first Endless run")
 	var pay := r.rewards()
 	coins += int(pay["coins"])
 	crystals += int(pay["crystals"])

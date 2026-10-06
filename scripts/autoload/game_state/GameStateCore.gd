@@ -149,6 +149,16 @@ var trained_this_week: int = 0
 ## in the game ("secs") and fights won and lost by hand and on Auto
 ## ("hand_w", "hand_l", "auto_w", "auto_l").
 var session: Dictionary = {}
+
+
+## A first-time moment, kept with the minutes played when it happened, for
+## the Feedback report (0.53): where a tester's hours went, without sending
+## anything anywhere. Only the first time counts.
+func note_milestone(id: String) -> void:
+	var m: Dictionary = session.get("milestones", {})
+	if not m.has(id):
+		m[id] = int(float(session.get("secs", 0.0)) / 60.0)
+		session["milestones"] = m
 var rival_event: Dictionary = {}   # the rival's move waiting for an answer ({type, day, ...}; see maybe_rival_move)
 var contest_start: Dictionary = {}   # both guilds' Renown when this month's contest began ({ours, theirs}; empty: not started)
 var hero_request: Dictionary = {}   # this week's request: {type, ids, day}, or empty

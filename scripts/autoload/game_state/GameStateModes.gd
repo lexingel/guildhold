@@ -188,6 +188,7 @@ func _apply_finale(diff: Dictionary) -> Dictionary:
 
 ## Sealing a finale: the act's reward, a Legendary relic, the next act.
 func _complete_act(act_num: int) -> void:
+	note_milestone("Act %d done" % act_num)
 	var act: Dictionary = GameData.CAMPAIGN[act_num - 1]
 	var reward: Dictionary = act["reward"]
 	var first_card := pending_stories.size()
@@ -1000,6 +1001,7 @@ func _memorialize(h: Hero, cause: String) -> void:
 		"day": day, "cause": cause, "rifts": int(h.history.get("rifts_cleared", 0)), "kills": int(h.history.get("kills", 0)),
 		"line": memorial_line(h)})
 	heroes_lost_total += 1
+	note_milestone("first hero lost")
 
 
 # ---------------- Run boons ----------------

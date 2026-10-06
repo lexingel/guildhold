@@ -453,8 +453,8 @@ func _guild_goals() -> Array:
 				var prog := "" if str(o["type"]) == "map_rank" else " (%d/%d)" % [mini(GameState.campaign_objective_progress(o), int(o["target"])), int(o["target"])]
 				out.append(["Story", tr("Act %s: %s%s") % [tr(str(GameState._roman(int(act["act"])))), tr(str(o["label"])), tr(str(prog))], Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
 				break
-	# Grow: the advice when the guild is behind the act, else the rank to climb.
-	var behind := not act.is_empty() and _best_party_power() < GameState.finale_recommended_power() * 0.95
+	# Grow: the Act panel's advice once the guild is stuck (advice_due), else the rank to climb.
+	var behind := GameState.advice_due(_best_party_power())
 	var advice: Array = GameState.power_advice() if behind else []
 	if not advice.is_empty():
 		var a: Dictionary = advice[0]

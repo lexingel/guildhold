@@ -215,7 +215,9 @@ func _fit_to_window() -> bool:
 		want = Vector2i(760, 800)
 	elif css.y < COMPACT_MAX_H:
 		want = COMPACT_CANVAS
-	var rotate := portrait and css.x < COMPACT_MAX_H
+	# Only a phone or tablet is asked to turn; a narrow desktop window gets the
+	# portrait canvas instead (0.53: the prompt blocked a tall browser window).
+	var rotate := portrait and css.x < COMPACT_MAX_H and DisplayServer.is_touchscreen_available()
 	if win.content_scale_size == want and rotate == _rotate_prompt:
 		return false
 	win.content_scale_size = want
@@ -1687,6 +1689,9 @@ func _session_lines() -> Array[String]:
 		ap += h.attr_points
 	out.append(tr("Unspent: %d Gold, %d Essence, %d skill points, %d attribute points") % [GameState.coins, GameState.crystals, sp, ap])
 	out.append(tr("Renown %d vs rival %d; heroes lost %d") % [GameState.reputation, GameState.rival_renown, GameState.heroes_lost_total])
+	var ms: Dictionary = s.get("milestones", {})
+	if not ms.is_empty():   # first-time moments, minutes into play (0.53)
+		out.append(tr("Milestones (minutes played): %s") % ", ".join(ms.keys().map(func(k): return "%s %d" % [k, int(ms[k])])))
 	return out
 
 
@@ -1828,6 +1833,7 @@ func _render_onboard(v: VBoxContainer) -> void:
 		GameState.banner_colour = _pending_colour if GameState.banner_colour_open(_pending_colour) else "crest"
 		_pending_colour = "crest"
 		GameState.apply_founding(_pending_founding)
+		GameState.note_milestone("founded")
 		_pending_founding = "free"
 		GameState.oaths = _pending_oaths.duplicate()
 		_pending_oaths.clear()
@@ -1864,7 +1870,7 @@ func _render_onboard(v: VBoxContainer) -> void:
 		bits.append(tr(str(GameData.BANNER_COLOURS.get(_pending_colour, GameData.BANNER_COLOURS["crest"])["name"])))
 	if _pending_skip:
 		bits.append(tr("skipping Act I"))
-	var opts := _button(("▾ " if _founding_open else "▸ ") + tr("Founding options") + ("" if bits.is_empty() else "  ·  " + "  ·  ".join(bits)), func():
+	var opts := _button(("−  " if _founding_open else "+  ") + tr("Founding options") + ("" if bits.is_empty() else "  ·  " + "  ·  ".join(bits)), func():
 		_founding_open = not _founding_open
 		render())
 	opts.alignment = HORIZONTAL_ALIGNMENT_LEFT

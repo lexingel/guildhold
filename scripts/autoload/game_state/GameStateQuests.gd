@@ -433,6 +433,7 @@ func change_morale(h: Hero, delta: int) -> void:
 ## hero unpaid twice running or at rock-bottom morale walks out (never one
 ## on a rift right now). Then the guild is compared with its rival.
 func run_payday() -> void:
+	note_milestone("first payday")
 	_maybe_audit()   # B3's price, once in Act IV
 	if not hero_request.is_empty():
 		_news(tr("%s — no answer by payday, taken as a no.") % tr(str(request_title())))

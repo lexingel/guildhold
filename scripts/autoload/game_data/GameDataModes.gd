@@ -455,6 +455,10 @@ const WOUND_HEAL_PER_RUN := 0.5
 ## the sim can sweep it.
 var RANK_THREAT_HP := 1.3
 var RANK_THREAT_DMG := 1.3
+## Share of max HP a living hero gets back after each won fight in a rift
+## (not the Tower). Trades run-long attrition for fights that matter on their
+## own (0.53, sim-tuned with RANK_THREAT_*). A var so the sim can sweep it.
+var POST_FIGHT_MEND := 0.0
 const RIFT_RANKS := [
 	{"id": "F", "rec": 65, "base": "lesser", "hp": 0.8, "dmg": 0.85, "reward": 1.0},
 	{"id": "E", "rec": 160, "base": "lesser", "hp": 1.8, "dmg": 1.6, "reward": 1.4},

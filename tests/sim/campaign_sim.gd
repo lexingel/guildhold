@@ -74,6 +74,8 @@ func _ready() -> void:
 			GameData.RANK_THREAT_HP = float(a.substr(3))
 		elif a.begins_with("dmg="):
 			GameData.RANK_THREAT_DMG = float(a.substr(4))
+		elif a.begins_with("mend="):
+			GameData.POST_FIGHT_MEND = float(a.substr(5))
 		elif a.begins_with("attr="):
 			force_attr = a.substr(5)
 		elif a.begins_with("tide_growth="):
@@ -119,7 +121,7 @@ func _ready() -> void:
 	var keep_legacy := FileAccess.get_file_as_bytes(GameState.LEGACY_PATH) if FileAccess.file_exists(GameState.LEGACY_PATH) else PackedByteArray()
 	FileAccess.open(bak, FileAccess.WRITE).store_buffer(keep_legacy)
 	print(TARGETS % [])
-	print("Rank threat: hp x%.2f, dmg x%.2f" % [GameData.RANK_THREAT_HP, GameData.RANK_THREAT_DMG])
+	print("Rank threat: hp x%.2f, dmg x%.2f, mend %.2f" % [GameData.RANK_THREAT_HP, GameData.RANK_THREAT_DMG, GameData.POST_FIGHT_MEND])
 	for p in (["investor", "casual"] if profile == "" else [profile]):
 		var all_fights := {}
 		var all_runs := {}

@@ -201,6 +201,7 @@ func _close_breach() -> void:
 ## {held, coins, crystals, lost_coins, lost_crystals, damaged: [names], wounded: [names]}.
 ## A defense takes the guild's day.
 func resolve_breach(result: Dictionary) -> Dictionary:
+	note_milestone("first Riftbreak")
 	var held := bool(result.get("held", false))
 	_resolving = true   # the day passing below mustn't tick breaches
 	pass_time()   # the defense takes the day; its wounds come after
