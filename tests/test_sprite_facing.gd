@@ -14,6 +14,12 @@ func run() -> void:
 	check(not GameData.faces_away("sub_acolyte") and not GameData.faces_away("res://assets/heroes/cleric.png"), "the redrawn heroes (0.50) all face the right way")
 	check(not GameData.faces_away("ash_harrier") and not GameData.faces_away("sub_duskstalker"), "art that already faces the right way is left alone")
 	check(GameData.faces_away("korrath") and GameData.faces_away("res://assets/monsters/spire_oracle.png"), "the right-facing bosses are mirrored too (0.51.2)")
+	var unset: Array = []
+	for name in GameData.MONSTER_SPRITE_PATH:
+		var key := str(GameData.MONSTER_SPRITE_PATH[name]).get_file().get_basename()
+		if not GameData.FOE_FACING.has(key) or not str(GameData.FOE_FACING[key]) in ["left", "right", "front"]:
+			unset.append(key)
+	check(unset.is_empty(), "every foe sprite has a reviewed facing (0.52) %s" % [unset])
 	for key in GameData.SPRITE_FACES_AWAY:
 		var known := GameData.MONSTER_SPRITE_PATH.has(key) or GameData.SUBCLASS_PORTRAIT_PATH.has(key) or ResourceLoader.exists("res://assets/heroes/%s.png" % key)
 		check(known, "%s is a real sprite" % key)

@@ -693,9 +693,24 @@ func _slot_row(children: Array) -> PanelContainer:
 
 ## Pixel-art icon at a fixed size, nearest-neighbor filtered to stay crisp
 ## (matches the HTML's image-rendering:pixelated).
+## The size to draw a small pixel-art icon (64 px or less) at so its pixels
+## stay even (0.52): the largest whole multiple of its own size that fits, or
+## its own size when asked for a little less (24-31 px for a 32 px icon).
+## Only much smaller requests, and bigger art, keep the size asked for.
+static func pixel_size(native: int, requested: int) -> int:
+	if native <= 0 or native > 64:
+		return requested
+	var m := float(requested) / float(native)
+	if m >= 1.0:
+		return native * int(floor(m))
+	return native if m >= 0.7 else requested
+
+
 func _icon(path: String, size: int = 24) -> TextureRect:
 	var t := TextureRect.new()
 	t.texture = load(path)
+	if t.texture:
+		size = pixel_size(maxi(t.texture.get_width(), t.texture.get_height()), size)
 	# Godot 4's default expand_mode (KEEP_SIZE) treats the texture's native
 	# resolution as a floor the moment `.size` is assigned — Control.size's
 	# setter clamps up to get_combined_minimum_size(), and under KEEP_SIZE that

@@ -38,15 +38,22 @@ func _await_or_timeout(sig: Signal, timeout_sec: float) -> void:
 ## Frame-swaps `rect.texture` through `frames` once, a short delay between each.
 ## No explicit reset to the resting pose needed — the render() call right after
 ## _run_combat_turns always rebuilds portraits from the static portrait path anyway.
-func _play_frames(rect: TextureRect, frames: Array[String], frame_time: float = 0.08) -> void:
-	for path in frames:
+## How long each of an action's 5 frames holds, as a multiple of frame_time:
+## a quick start, a held wind-up, the swing, a held strike (the hit lands on
+## it) and a quick recovery. Gives the 4 generated frames weight (0.52).
+const ACTION_BEAT := [0.6, 1.8, 1.0, 1.7, 0.7]
+
+
+func _play_frames(rect: TextureRect, frames: Array[String], frame_time: float = 0.08, beat := false) -> void:
+	for k in frames.size():
 		# A screen navigation (e.g. opening Settings mid-animation) can free
 		# `rect` out from under this still-awaiting coroutine — bail instead
 		# of writing to a freed node.
 		if not is_instance_valid(rect):
 			return
-		rect.texture = load(path)
-		await _await_or_timeout(get_tree().create_timer(frame_time).timeout, frame_time + 1.0)
+		rect.texture = load(frames[k])
+		var t: float = frame_time * (float(ACTION_BEAT[k]) if beat and frames.size() == ACTION_BEAT.size() else 1.0)
+		await _await_or_timeout(get_tree().create_timer(t).timeout, t + 1.0)
 
 
 ## Fallback for the two combos with no usable AI-generated motion (Warrior's
@@ -175,8 +182,7 @@ func _impact_beat(arena: Control, heavy: bool = false) -> void:
 	var base: Vector2 = arena.position
 	var mag: float = 8.0 if heavy else 3.0
 	var tween := create_tween()
-	if heavy:
-		tween.tween_interval(0.07)   # hit-stop: a beat of stillness before the shake
+	tween.tween_interval(0.07 if heavy else 0.04)   # hit-stop: a beat of stillness before the shake (every hit since 0.52)
 	for i in 4:
 		var off := Vector2(randf_range(-mag, mag), randf_range(-mag, mag))
 		tween.tween_property(arena, "position", base + off, 0.03)
@@ -638,9 +644,14 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 				var heavy: bool = dmg >= float(monsters[i]["max_hp"]) * 0.25
 				var burst_color: Color = Palette.ELEMENT_PARTICLE_COLOR.get(h.type, Color(1, 1, 1))
 				AudioManager.play_sfx(GameData.SFX_PATH["hit_heavy" if heavy else "hit"])
-				Fx.burst(arena, "impact", _center(mw), mw.custom_minimum_size.y * (0.7 if heavy else 0.45), burst_color.lerp(Color.WHITE, 0.4), 26.0)
+				var hit_role := GameData.hero_role(h)
+				if hit_role in MELEE_ROLES or action != "attack":
+					Fx.burst(arena, "impact", _center(mw), mw.custom_minimum_size.y * (0.7 if heavy else 0.45), burst_color.lerp(Color.WHITE, 0.4), 26.0)
+				else:   # an arrow or a spell lands with its own burst (0.52)
+					Fx.burst(arena, Fx.hero_hit(hit_role, h.type), _center(mw), mw.custom_minimum_size.y * (0.85 if heavy else 0.65), Color.WHITE, 18.0)
 				_spawn_impact_particles(mw, mw.custom_minimum_size * 0.5, burst_color, heavy)
 				_knockback(mw, 1.0, heavy)
+				_flash_white(mw)   # on contact, not after the hurt frames (0.52)
 				_plate_set_hp(_monster_plates.get(i), float(monsters[i]["hp"]))
 				if heavy:
 					_camera_punch(arena)
@@ -653,9 +664,6 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 					await _play_frames(monster_rects[i], GameData.monster_anim_frames(str(monsters[i]["name"]), "hurt"))
 					if not is_instance_valid(arena):
 						return
-				await _flash_white(mw)
-				if not is_instance_valid(arena):
-					return
 				await _spawn_damage_number(mw, "-%d" % int(round(dmg)), Palette.HAZARD, heavy)
 				if not is_instance_valid(arena):
 					return
@@ -705,15 +713,15 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 			var vw: Control = hero_wrappers[victims[0].id]
 			if _monster_is_ranged(str(m["name"])):
 				if monster_rects.has(i):
-					_play_frames(monster_rects[i], GameData.monster_anim_frames(str(m["name"]), "attack"))
+					_play_frames(monster_rects[i], GameData.monster_anim_frames(str(m["name"]), "attack"), 0.07, true)
 				await _await_or_timeout(Fx.projectile(arena, "bolt", _center(mw) - Vector2(mw.custom_minimum_size.x * 0.3, 10), _center(vw), 30.0, mtint.lerp(Color(1, 0.4, 0.5), 0.3), 0.26).finished, 1.0)
 			else:
 				dashed = true
 				await _dash(mw, vw.position.x + vw.custom_minimum_size.x * 0.85, 0.16 if not heavy_blow else 0.22)
 				if monster_rects.has(i) and is_instance_valid(arena):
-					await _play_frames(monster_rects[i], GameData.monster_anim_frames(str(m["name"]), "attack"), 0.06)
+					await _play_frames(monster_rects[i], GameData.monster_anim_frames(str(m["name"]), "attack"), 0.06, true)
 		elif monster_rects.has(i):
-			await _play_frames(monster_rects[i], GameData.monster_anim_frames(str(m["name"]), "attack"))
+			await _play_frames(monster_rects[i], GameData.monster_anim_frames(str(m["name"]), "attack"), 0.07, true)
 		if not is_instance_valid(arena):
 			return
 		if heavy_blow and not victims.is_empty():
@@ -734,9 +742,10 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 					AudioManager.cue("hit_heavy", tr("[Heavy blow on %s]") % tr(str(h.name.split(" the ")[0])), Palette.HAZARD)
 				else:
 					AudioManager.play_sfx(GameData.SFX_PATH["hit"])
-				Fx.burst(arena, "claw", _center(hwv), hwv.custom_minimum_size.y * (0.75 if heavy2 else 0.55), Color.WHITE, 24.0, 0.0, true)
+				Fx.burst(arena, Fx.foe_hit(_monster_is_ranged(str(m["name"])), str(m.get("type", ""))), _center(hwv), hwv.custom_minimum_size.y * (0.8 if heavy2 else 0.6), Color.WHITE, 18.0, 0.0, true)
 				_spawn_impact_particles(hwv, hwv.custom_minimum_size * 0.5, retaliation_color, heavy2)
 				_knockback(hwv, -1.0, heavy2)
+				_flash_white(hwv)
 				_plate_set_hp(_hero_plates.get(h.id), h.hp)
 				if not burn_before.has(h.id) and (state.get("hero_burn", {}) as Dictionary).has(h.id):
 					Fx.burst(arena, "flame", _center(hwv) + Vector2(0, hwv.custom_minimum_size.y * 0.2), hwv.custom_minimum_size.y * 0.45, Color.WHITE, 14.0)
@@ -830,7 +839,7 @@ func _anim_hero_attack(h: Hero, hw: Control, rect: TextureRect, tw: Control, tin
 	var role := GameData.hero_role(h)
 	if tw == null:
 		if not frames.is_empty() and rect:
-			await _play_frames(rect, frames)
+			await _play_frames(rect, frames, 0.07, true)
 		else:
 			await _tween_lunge(hw)
 		return
@@ -840,14 +849,14 @@ func _anim_hero_attack(h: Hero, hw: Control, rect: TextureRect, tw: Control, tin
 		if not is_instance_valid(arena):
 			return   # the screen was rebuilt mid-animation, freeing hw, rect and tw
 		if not frames.is_empty() and rect:
-			await _play_frames(rect, frames, 0.05)
+			await _play_frames(rect, frames, 0.05, true)
 			if not is_instance_valid(arena):
 				return
-		Fx.burst(arena, "slash", _center(tw), tw.custom_minimum_size.y * 0.95, tint.lerp(Color.WHITE, 0.55), 16.0, randf_range(-0.5, 0.3))
+		Fx.burst(arena, Fx.hero_hit(role, h.type), _center(tw), tw.custom_minimum_size.y * 0.95, Color.WHITE, 18.0, randf_range(-0.3, 0.2))
 		_dash(hw, sx, 0.18)
 	else:
 		if not frames.is_empty() and rect:
-			await _play_frames(rect, frames, 0.06)
+			await _play_frames(rect, frames, 0.06, true)
 		else:
 			await _tween_lunge(hw)
 		if not is_instance_valid(arena):
@@ -874,7 +883,7 @@ func _anim_hero_ability(h: Hero, action: String, hw: Control, rect: TextureRect,
 		return   # the screen was rebuilt mid-animation, freeing every node in it
 	var frames := GameData.hero_combat_frames(h.cls_id, h.pool_id, "skill")
 	if not frames.is_empty() and rect:
-		await _play_frames(rect, frames, 0.06)
+		await _play_frames(rect, frames, 0.07, true)
 	else:
 		await _tween_skill_flash(hw)
 	if not is_instance_valid(arena):

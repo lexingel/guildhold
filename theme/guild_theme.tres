@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=37 format=3 uid="uid://6cplcuy1r006"]
+[gd_resource type="Theme" load_steps=43 format=3 uid="uid://6cplcuy1r006"]
 
 [ext_resource type="Texture2D" uid="uid://3utet2fvfs8q" path="res://assets/ui/panel.png" id="1"]
 [ext_resource type="Texture2D" uid="uid://41dsrxtni81l" path="res://assets/ui/button_normal.png" id="2"]
@@ -18,6 +18,42 @@
 [ext_resource type="Texture2D" path="res://assets/ui/button_ember_hover.png" id="18"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_ember_pressed.png" id="19"]
 [ext_resource type="Texture2D" path="res://assets/ui/button_ember_disabled.png" id="20"]
+[ext_resource type="Texture2D" path="res://assets/ui/card_violet.png" id="card_violet"]
+[ext_resource type="Texture2D" path="res://assets/ui/card_ember.png" id="card_ember"]
+[ext_resource type="Texture2D" path="res://assets/ui/card_plain.png" id="card_plain"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_card_plain"]
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+texture = ExtResource("card_plain")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_card_violet"]
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+texture = ExtResource("card_violet")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_card_ember"]
+content_margin_left = 14.0
+content_margin_top = 12.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
+texture = ExtResource("card_ember")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_disabled"]
 content_margin_left = 14.0
@@ -301,10 +337,12 @@ LineEdit/colors/font_placeholder_color = Color(0.659, 0.608, 0.788, 1)
 LineEdit/styles/focus = SubResource("StyleBoxFlat_btn_hover")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_btn_normal")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_panel")
+CardPanel/base_type = &"PanelContainer"
+CardPanel/styles/panel = SubResource("StyleBoxTexture_card_plain")
 CardPanelViolet/base_type = &"PanelContainer"
-CardPanelViolet/styles/panel = SubResource("StyleBoxFlat_panel_violet")
+CardPanelViolet/styles/panel = SubResource("StyleBoxTexture_card_violet")
 CardPanelEmber/base_type = &"PanelContainer"
-CardPanelEmber/styles/panel = SubResource("StyleBoxFlat_panel_ember")
+CardPanelEmber/styles/panel = SubResource("StyleBoxTexture_card_ember")
 StatTileViolet/base_type = &"PanelContainer"
 StatTileViolet/styles/panel = SubResource("StyleBoxFlat_stat_tile_violet")
 StatTileEmber/base_type = &"PanelContainer"

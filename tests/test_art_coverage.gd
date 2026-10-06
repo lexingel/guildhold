@@ -41,3 +41,23 @@ func run() -> void:
 		if not ResourceLoader.exists("res://assets/relics/u_%s.png" % u["id"]):
 			gaps.append(str(u["id"]))
 	check(gaps.is_empty(), "every legendary relic has its own icon %s" % [gaps])
+
+	# Icons draw at whole multiples of their own size (0.52), so pixels stay even.
+	check(UiKit.pixel_size(32, 28) == 32 and UiKit.pixel_size(32, 40) == 32 and UiKit.pixel_size(32, 64) == 64 and UiKit.pixel_size(40, 48) == 40, "small icons snap to whole pixel multiples")
+	check(UiKit.pixel_size(32, 16) == 16 and UiKit.pixel_size(200, 78) == 78, "tiny requests and big art keep their size")
+
+	# Effects (0.52): every frame of every set exists; every role, element and foe kind has its own.
+	var fx_missing: Array[String] = []
+	for id in Fx.FRAMES:
+		for i in int(Fx.FRAMES[id]):
+			if not ResourceLoader.exists(Fx.frame_path(id, i)):
+				fx_missing.append("%s_%d" % [id, i])
+	check(fx_missing.is_empty(), "every effect frame exists %s" % [fx_missing])
+	var used := {}
+	for role in ["warrior", "rogue", "ranger", "cleric", "mage"]:
+		for el in ["Ember", "Frost", "Arcane", "Umbral", "Verdant"]:
+			used[Fx.hero_hit(role, el)] = true
+	for el in ["Ember", "Frost", "Arcane", "Umbral", "Verdant"]:
+		used[Fx.foe_hit(true, el)] = true
+	used[Fx.foe_hit(false, "")] = true
+	check(used.keys().all(func(k): return Fx.FRAMES.has(k)) and used.size() >= 11, "%d effect sets in use, all real" % used.size())

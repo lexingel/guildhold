@@ -8,7 +8,34 @@ extends RefCounted
 ## time return the Tween so a caller can await it (bounded) if it wants to.
 
 ## Frame-animated effects and their frame counts (frame 0 = the keyframe).
-const FRAMES := {"slash": 5, "impact": 5, "explosion": 9, "claw": 7, "holy": 9, "flame": 7}
+const FRAMES := {"slash": 5, "impact": 5, "explosion": 9, "claw": 7, "holy": 9, "flame": 7,
+	# 0.52: one set per way of fighting, drawn at 128 px so their pixels match the fighters'.
+	"cleave": 7, "twin_cut": 7, "arrow_hit": 7, "holy_strike": 7, "rake": 7, "acid": 7,
+	"fire_burst": 7, "frost_burst": 7, "arcane_burst": 7, "shadow_burst": 7, "thorn_burst": 7}
+## The sets that swell and fade as they play (their last frames can linger).
+const FADES := {"cleave": true, "twin_cut": true, "arrow_hit": true, "holy_strike": true, "rake": true, "acid": true,
+	"fire_burst": true, "frost_burst": true, "arcane_burst": true, "shadow_burst": true, "thorn_burst": true}
+## A spell's burst by its caster's element.
+const ELEMENT_BURST := {"Ember": "fire_burst", "Frost": "frost_burst", "Arcane": "arcane_burst", "Umbral": "shadow_burst", "Verdant": "thorn_burst"}
+
+
+## The effect a hero's hit lands with: the weapon for fighters, the element
+## for casters (0.52; was one slash and one impact for everyone).
+static func hero_hit(role: String, element: String) -> String:
+	match role:
+		"warrior": return "cleave"
+		"rogue": return "twin_cut"
+		"ranger": return "arrow_hit"
+		"cleric": return "holy_strike"
+	return ELEMENT_BURST.get(element, "arcane_burst")
+
+
+## The effect a foe's hit lands with: a rake up close, its element from range
+## (a Verdant spitter's is acid).
+static func foe_hit(ranged: bool, element: String) -> String:
+	if not ranged:
+		return "rake"
+	return "acid" if element == "Verdant" else ELEMENT_BURST.get(element, "arcane_burst")
 ## Single-image effects moved/scaled by tweens.
 const STATIC := ["bolt", "arrow", "shield", "shockwave", "sigil"]
 ## The arrow sprite points up-right; rotate by this to point along +x.
@@ -50,6 +77,12 @@ static func burst(parent: Node, id: String, center: Vector2, size: float, tint: 
 		tw.tween_callback(func(k=i): r.texture = load(frame_path(id, k)))
 	tw.tween_interval(1.0 / fps)
 	tw.tween_callback(r.queue_free)
+	if FADES.has(id):   # the 0.52 sets swell a little and fade out over their second half
+		var life := float(n) / fps
+		r.scale = Vector2.ONE * 0.9
+		var sw := r.create_tween()
+		sw.tween_property(r, "scale", Vector2.ONE * 1.15, life).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		sw.parallel().tween_property(r, "modulate:a", 0.0, life * 0.5).set_delay(life * 0.5)
 	return tw
 
 

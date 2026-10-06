@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Fights hit harder: every blow flashes and lands with a short pause, attacks wind up before they strike, and each way of fighting has its own effect: a cleave for warriors, a twin cut for rogues, an arrow strike, a holy strike, a burst for each mage element, and claws, spells or acid from foes. Cards have pixel corners, and icons stay crisp.",
 	"Foes face the right way: in Riftbreak they no longer walk backwards down the road, and Korrath, Captain Morrow, the Spire Oracle, the Rooftop Harrier and the Tideglass Moth turn toward your heroes. Founding a guild is calmer: name and crest up front, everything else under Founding options. Loot is mostly gear now (8 in 10 drops in Act I, 7 in 10 after), so fewer spare relics pile up.",
 	"Skip the opening and the narrator still reads the Night of Breaking to you, Hesper's version too for a guild founded on the old oath.",
 	"The Vale has voices: the narrator reads the story cards, Wen, Dobbs and Hesper talk at the pay table, and the rival leaders read out their letters, Brannoch his memory. Settings has a Voice volume and an on/off switch, and Listen plays a scene again. English only for now.",
@@ -633,14 +634,42 @@ static func monster_sprite_key(monster_name: String) -> String:
 	return keys[hash_sum % keys.size()]
 
 
-## Art drawn facing the wrong way for its side of a fight (heroes stand on
-## the left facing right, foes on the right facing left), by sprite name; the
-## arena and the Endless Rift mirror it. Front-facing art is left alone.
-const SPRITE_FACES_AWAY := {
-	"carrion_crier": true, "hedge_warden": true,
-	"lantern_wight": true, "tide_caller": true, "cinder_hound": true,
-	"korrath": true, "captain_morrow": true, "spire_oracle": true, "rooftop_harrier": true, "tideglass_moth": true,
+## Which way every foe sprite is drawn (0.52): reviewed by eye, battle sprite
+## and walk frames together. Foes stand on the right facing left, so a foe
+## drawn facing right is mirrored (the arena, the Endless Rift and Riftbreak).
+## Every foe sprite needs an entry (test_sprite_facing), so new art can't slip
+## in facing the wrong way unnoticed.
+const FOE_FACING := {
+	"company_sellsword": "front", "company_crossbowman": "left", "captain_morrow": "right", "ember_whelp": "front", "sable_fang": "left",
+	"marrow_crawler": "front", "hollow_reaver": "front", "husk_brute": "front", "cinder_moth": "front", "gloom_stalker": "left",
+	"rift_wisp": "front", "bog_wretch": "front", "silt_crawler": "front", "glass_wisp": "front", "mirror_fiend": "front",
+	"frost_stalker": "left", "ashclad_ghoul": "front", "deep_anchorite": "front", "voidling_sprite": "left", "warbound_elite": "front",
+	"blightfang_elite": "front", "rift_touched_colossus": "front", "iron_revenant": "front", "storm_called_elite": "front",
+	"ashen_broodlord": "front", "vaelith": "front", "korrath": "right", "nyxara": "front", "drevok": "front", "sythrane": "front",
+	"hedge_warden": "right", "carrion_crier": "right", "rootbound_thrall": "left", "leech_priest": "front", "mire_sniper": "left",
+	"drowned_bellringer": "left", "slag_golem": "front", "ember_oracle": "front", "ash_harrier": "left", "blight_hound": "left",
+	"lantern_wight": "right", "tide_caller": "right", "mudscale_brute": "left", "cinder_hound": "right", "obsidian_sentinel": "left",
+	"shell_wretch": "front", "pearl_wisp": "front", "tidewalker": "front", "brine_sniper": "left", "coral_brute": "front",
+	"mirror_crab": "left", "undertow_priest": "front", "shore_crier": "left", "pearl_colossus": "front", "glassback_elite": "left",
+	"the_tidewarden": "front", "saltmother": "left", "the_terms": "front", "falling_watchman": "left", "lamp_wight": "left",
+	"rooftop_harrier": "right", "bell_thrall": "left", "upside_hound": "left", "stair_golem": "front", "choir_sprite": "left",
+	"cord_reaver": "front", "skyfallen_sentinel": "left", "broodwarden": "left", "the_falling_sky": "left", "queens_herald": "left",
+	"salt_hound": "left", "pearl_thrall": "front", "tideglass_moth": "right", "cord_stalker": "left", "spire_oracle": "right",
+	"gate_sentinel": "front",
 }
+## Hero art drawn facing left (heroes stand on the left facing right). Every
+## hero and champion is drawn facing right or front since the 0.49-0.50 redo.
+const HERO_FACES_LEFT := {}
+## The sprites to mirror, from the two tables above.
+static var SPRITE_FACES_AWAY: Dictionary = _faces_away_table()
+
+
+static func _faces_away_table() -> Dictionary:
+	var out := HERO_FACES_LEFT.duplicate()
+	for k in FOE_FACING:
+		if FOE_FACING[k] == "right":
+			out[k] = true
+	return out
 
 
 ## `key_or_path`: a sprite path, a monster sprite key or an Endless walk key.
