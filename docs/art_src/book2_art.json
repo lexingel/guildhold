@@ -1,0 +1,83 @@
+{
+  "_about": "The 0.47 art pass (PixelLab, from 2026-10-06): Book II's stand-in recolours replaced in place, plus the story's missing portraits and the postgame's hall and tide art. Foes: create_image_pixflux 200x200 with the template below (1 gen), animate_image attack + hurt 5 frames (3 gens each), walk 8 frames from a 64px copy (1 gen); install with the scratchpad's install_monster.py (one shared crop box). Keys and names stay, so no code changes for foes.",
+  "foe_template": "dark fantasy pixel art monster, full body, standing, three-quarter view facing left: {look}, {palette}",
+  "palettes": {
+    "glass": "sea-glass and pearl palette, pale cyan, lilac and white, wet glossy highlights",
+    "city": "deep violet shadows with warm gold lamplight, tarnished brass"
+  },
+  "foes": {
+    "shell_wretch": {"name": "Shell Wretch", "region": "glass", "tier": "monster", "replaces": "bog_wretch recolour", "look": "hunched drowned humanoid crusted with barnacles and broken shells, glassy wet skin, dripping kelp"},
+    "pearl_wisp": {"name": "Pearl Wisp", "region": "glass", "tier": "monster", "replaces": "rift_wisp recolour", "look": "floating wisp of pearly light inside a cracked sea-glass shell, trailing glowing droplets"},
+    "tidewalker": {"name": "Tidewalker", "region": "glass", "tier": "monster", "replaces": "frost_stalker recolour", "look": "tall gaunt figure made of seawater held inside a thin glass skin, waves rolling inside its body, cold mist at its feet"},
+    "brine_sniper": {"name": "Brine Sniper", "region": "glass", "tier": "monster", "replaces": "mire_sniper recolour", "look": "crouching fish-like archer with fins on its head, a coral longbow and a quiver of sharpened shell arrows"},
+    "coral_brute": {"name": "Coral Brute", "region": "glass", "tier": "monster", "replaces": "mudscale_brute recolour", "look": "huge hulking brute with pink and white coral growing from its shoulders and fists, sea-glass shards in its back"},
+    "mirror_crab": {"name": "Mirror Crab", "region": "glass", "tier": "monster", "replaces": "silt_crawler recolour", "look": "large crab whose shell is polished mirror-glass reflecting the sky, one oversized claw raised"},
+    "undertow_priest": {"name": "Undertow Priest", "region": "glass", "tier": "monster", "replaces": "leech_priest recolour", "look": "robed priest of the deep in tattered sea-green vestments, shell mask over the face, staff topped with a glowing pearl"},
+    "shore_crier": {"name": "Shore Crier", "region": "glass", "tier": "monster", "replaces": "carrion_crier recolour", "look": "ragged gull-headed herald in a fishnet cloak, beak open mid-cry, holding a cracked bell of sea-glass"},
+    "salt_hound": {"name": "Salt Hound", "region": "glass", "tier": "monster", "replaces": "blight_hound recolour", "look": "lean pale hound crusted with salt crystals, glassy eyes, ribs showing"},
+    "pearl_thrall": {"name": "Pearl Thrall", "region": "glass", "tier": "monster", "replaces": "rootbound_thrall recolour", "look": "hulking thrall bound in kelp ropes and pearl chains, dragging a heavy iron anchor as a weapon"},
+    "tideglass_moth": {"name": "Tideglass Moth", "region": "glass", "tier": "monster", "replaces": "cinder_moth recolour", "look": "large moth with translucent sea-glass wings that split light into colours, glowing teal body"},
+    "pearl_colossus": {"name": "Pearl Colossus", "region": "glass", "tier": "elite", "replaces": "rift_touched_colossus recolour", "look": "towering colossus of fused sea-glass and pearl, light shining through its cracks, massive fists"},
+    "glassback_elite": {"name": "Glassback Elite", "region": "glass", "tier": "elite", "replaces": "blightfang_elite recolour", "look": "armoured beast with a ridge of jagged glass spines along its back, bared fangs, an elite war harness"},
+    "the_tidewarden": {"name": "The Tidewarden", "region": "glass", "tier": "boss", "replaces": "nyxara recolour", "look": "ancient guardian of the shore, tall figure in flowing robes of water and sea-glass armour, crown shaped like a breaking wave, holding a staff with a wave-shaped key"},
+    "saltmother": {"name": "Saltmother", "region": "glass", "tier": "boss", "replaces": "deep_anchorite recolour", "look": "enormous hunched matriarch encrusted with salt and barnacles, many thin arms, a lantern of glowing pearl, anchor chains around her"},
+    "falling_watchman": {"name": "Falling Watchman", "region": "city", "tier": "monster", "replaces": "hedge_warden recolour", "look": "city watchman in tarnished gold and violet armour, a lantern on a pole, his cape floating upward as if gravity were reversed"},
+    "lamp_wight": {"name": "Lamp Wight", "region": "city", "tier": "monster", "replaces": "lantern_wight recolour", "look": "gaunt ghost with an old street lamp for a head, a gold flame inside it, tattered violet robes"},
+    "rooftop_harrier": {"name": "Rooftop Harrier", "region": "city", "tier": "monster", "replaces": "ash_harrier recolour", "look": "winged gargoyle-like harrier with a crossbow, slate-violet wings trimmed in gold"},
+    "cord_bellringer": {"name": "Cord Bellringer", "region": "city", "tier": "monster", "replaces": "drowned_bellringer recolour", "look": "hunched bellringer wrapped in thick frayed ropes, carrying a huge bronze bell"},
+    "upside_hound": {"name": "Upside Hound", "region": "city", "tier": "monster", "replaces": "cinder_hound recolour", "look": "violet hound whose fur and ears float upward, glowing gold eyes, a collar of broken chain"},
+    "stair_golem": {"name": "Stair Golem", "region": "city", "tier": "monster", "replaces": "slag_golem recolour", "look": "golem built from stacked stone stairs and arches, lamplight glowing between the stones"},
+    "choir_sprite": {"name": "Choir Sprite", "region": "city", "tier": "monster", "replaces": "voidling_sprite recolour", "look": "small floating sprite with a gold choir ring around its head, mouth open singing, violet wisps for a body"},
+    "cord_reaver": {"name": "Cord Reaver", "region": "city", "tier": "monster", "replaces": "hollow_reaver recolour", "look": "tall reaver with a hooked blade, wrapped in severed tower cords, hollow eyes glowing gold"},
+    "cord_stalker": {"name": "Cord Stalker", "region": "city", "tier": "monster", "replaces": "gloom_stalker recolour", "look": "lean long-limbed stalker hanging from a rope, violet hooded cloak, a blank gold mask"},
+    "spire_oracle": {"name": "Spire Oracle", "region": "city", "tier": "monster", "replaces": "ember_oracle recolour", "look": "robed oracle with a tall spire-shaped headdress, holding a burning gold lantern-orb"},
+    "gate_sentinel": {"name": "Gate Sentinel", "region": "city", "tier": "monster", "replaces": "obsidian_sentinel recolour", "look": "heavy sentinel in violet stone armour shaped like a city gate, a tower shield with a gold sigil"},
+    "skyfallen_sentinel": {"name": "Skyfallen Sentinel", "region": "city", "tier": "elite", "replaces": "storm_called_elite recolour", "look": "armoured knight wreathed in falling stars, cracked violet and night-blue armour, a star-tipped spear"},
+    "broodwarden": {"name": "Broodwarden", "region": "city", "tier": "elite", "replaces": "ashen_broodlord recolour", "look": "bloated insect guardian with glowing gold egg sacs like hanging lanterns"},
+    "the_falling_sky": {"name": "The Falling Sky", "region": "city", "tier": "boss", "replaces": "sythrane recolour", "look": "colossal humanoid shape made of a shattered night sky, stars and violet clouds inside it, its edges breaking into light"},
+    "queens_herald": {"name": "The Queen's Herald", "region": "city", "tier": "boss", "replaces": "drevok recolour", "look": "tall herald in gilded violet regalia, an upside-down crown, a long brass trumpet and the Inverted City's banner"}
+  },
+  "backgrounds": {
+    "_template": "dark fantasy pixel art battle background, side view, wide landscape, no characters, ground along the bottom third: {scene}, {palette}",
+    "_size": [320, 200],
+    "assets/battle/bg_glass_shore.png": "a beach of sea-glass sand under a starry sky, tides rising upward into the air, broken pillars in the surf",
+    "assets/battle/bg_glass_caves.png": "a sea cave of glass formations, pools of light, water dripping upward from the floor",
+    "assets/battle/bg_glass_ruins.png": "ruined fishing village of the Hollow's people half buried in glass sand, empty doorways, nets of light",
+    "assets/battle/bg_city_spires.png": "towers hanging upside down from a falling sky, held by ropes as thick as towers, streets on the ceiling",
+    "assets/battle/bg_city_vault.png": "a grand inverted hall with gold chandeliers rising from the floor, violet stained glass, a staircase going up into nothing",
+    "assets/battle/bg_city_chasm.png": "an open chasm under the city, frayed cords dangling into darkness, lamplight far below"
+  },
+  "tiles": {
+    "assets/survivors/floor_glass.png": "seamless top-down ground tile, 64px, sea-glass sand with shells and small pools (upscaled and tiled to 256)",
+    "assets/survivors/floor_city.png": "seamless top-down ground tile, 64px, violet cobblestone street with gold lamplight cracks (upscaled and tiled to 256)",
+    "assets/defense/road_glass.png": "top-down road tile 128x64, a path of packed sea-glass sand",
+    "assets/defense/road_city.png": "top-down road tile 128x64, a violet cobbled street with brass inlays"
+  },
+  "portraits": {
+    "_note": "Champions: create_image_pro_flash 96x200 with the Brannoch portrait as style reference; walk + skill 8 frames each from a 64px copy (animate_image). Heroes: 82x200 like assets/heroes. Needs code: a unique portrait for Morrow and the First Signatory as heroes (today they use the class portrait).",
+    "hesper": {"kind": "champion (legacy_hesper)", "look": "old woman scribe with silver hair in a braid, ink-stained fingers, a worn Accord clerk's coat, a quill and a bundle of ledgers, kind tired eyes", "skill_anim": "writing a glowing line in the air with a quill"},
+    "vaelith": {"kind": "champion (lore)", "look": "Accord ranger in faded forest green with an oath badge scratched out, a longbow, a child's small cloak tied at her belt, alert listening pose", "skill_anim": "stepping forward and raising her bow to hold a door shut"},
+    "first_signatory": {"kind": "hero portrait (cleric, Hollow-born)", "look": "very old woman of the far side, sea-glass skin, pale eyes, a satchel held close, travel-worn robes"},
+    "morrow": {"kind": "hero portrait (rogue)", "look": "charming mercenary captain with a trimmed beard, long coat, the Hollow Crown Company's crown badge, a smile that doesn't reach his eyes"}
+  },
+  "hollowborn": {
+    "_note": "Hollow-born recruits today wear a sea-glass hue shift of their class portrait. Real art: one 82x200 portrait per class in the heroes' style (needs a small code change: a Hollow-born hero uses assets/heroes/hollow_<class>.png when it exists; battle sprites keep the tint).",
+    "warrior": "Hollow-born warrior from the far side, sea-glass skin, glass shards in their armour",
+    "ranger": "Hollow-born ranger from the far side, sea-glass skin, a bow of pale coral",
+    "mage": "Hollow-born mage from the far side, sea-glass skin, robes that shimmer like water",
+    "cleric": "Hollow-born cleric from the far side, sea-glass skin, a pearl holy symbol",
+    "rogue": "Hollow-born rogue from the far side, sea-glass skin, daggers of black glass"
+  },
+  "postgame": {
+    "_note": "Needs code: an image beside each hall on the Keepers of the Vale tab, and the tide image on the tide warning. create_image_pixflux, 128x80 vignettes.",
+    "hall_iron_oath": "empty drill yard marked out in white stones, an old shield wall rack",
+    "hall_green_hand": "healers' hall with shelves of dried herbs and empty cots",
+    "hall_quiet_coin": "counting room with ledgers, scales and a heavy strongbox",
+    "hall_ninth_lamp": "observatory hall with nine hanging lamps, some flickering alight",
+    "hall_long_roads": "travellers' hall with maps on the walls and boots by the door",
+    "hall_open_hand": "market hall with an old trading sign over the door and empty stalls",
+    "hall_grandmaster": "a long table with forty-one chairs, one dusted and ready",
+    "tide": "a green tide of the Hollow rolling over the Vale's fields toward a walled camp at night"
+  },
+  "budget_gens": {"foes": "30 x ~8 = 240, ~330 with re-rolls", "backgrounds": "~20", "tiles": "~12", "portraits": "4 portraits + 2 walk/skill sets, ~60", "hollowborn": "~40", "postgame": "~20", "total": "~480 of 4400"}
+}
