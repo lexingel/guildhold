@@ -849,7 +849,9 @@ func _close_rival_event() -> void:
 ## The rival's leader: {leader, portrait (path), crest (path)}.
 func rival_leader() -> Dictionary:
 	var d: Dictionary = GameData.RIVAL_LEADERS.get(rival_name, {"leader": "Their captain", "portrait": "footman", "crest": 1})
-	return {"leader": d["leader"], "portrait": GameData.portrait_for_hero("", str(d["portrait"])), "crest": GameData.CREST_PATH[int(d["crest"]) % GameData.CREST_PATH.size()]}
+	var art := str(GameData.RIVAL_ART.get(rival_name, ""))
+	var portrait := art if art != "" and ResourceLoader.exists(art) else GameData.portrait_for_hero("", str(d["portrait"]))
+	return {"leader": d["leader"], "portrait": portrait, "crest": GameData.CREST_PATH[int(d["crest"]) % GameData.CREST_PATH.size()]}
 
 
 ## This month's contest, Renown gained since it began: {ours, theirs, days_left}.

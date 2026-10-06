@@ -882,6 +882,14 @@ const RIVAL_LEADERS := {
 	"The Last Lantern": {"leader": "Mother Ilse", "portrait": "dawnkeeper", "crest": 4},
 	"The Hollow Crown Company": {"leader": "Captain Morrow", "portrait": "nightblade", "crest": 5},
 }
+## Each leader's own portrait (the class portrait above is the fallback).
+const RIVAL_ART := {
+	"The Iron Chorus": "res://assets/rivals/orla.png",
+	"The Ashen Wolves": "res://assets/rivals/kael.png",
+	"The Gilded Lance": "res://assets/rivals/aldric.png",
+	"The Last Lantern": "res://assets/rivals/ilse.png",
+	"The Hollow Crown Company": "res://assets/heroes/unique/morrow.png",
+}
 ## What the rival's leader says about you in the guild news (%s: your guild).
 const RIVAL_TAUNTS := [
 	"Seal the small rifts, %s. Leave the real ones to us.",

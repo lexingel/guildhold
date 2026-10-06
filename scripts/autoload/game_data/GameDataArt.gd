@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The Terms, Act IV's finale, has its own shape at last: the Grandmaster's, written in green ink. The rival guilds' leaders have their own portraits, Morrow included, and Wen, Dobbs and Hesper have faces at the pay table.",
 	"New art for the Sky Beneath: all 30 foes of the Glass Coast and the Inverted City, with their own attacks and walks, and six new battle backgrounds. Hesper and Vaelith have their own portraits as champions, with a walk and a signature move in the Endless Rift; Morrow and the First Signatory have theirs when they join your guild; and the seven Accord halls have pictures on the Keepers of the Vale tab.",
 	"When a guild is stuck on an act's objectives because its heroes are too weak, the Act panel now says what would help after a week, not only once the finale is open. And Act III's wardens stop hiding: while Korrath or Drevok is still to be beaten, a rift in his region always ends with him.",
 	"A new choice at the Drowned Spire: carry out the Accord's archive or save Hollin, the village down the hill. Every guild meets it, and both sides come back later. Choices you already make come back too: the crossings you let through and Brannoch's door change Book II's ending, keeping quiet or holding the Royal Charter changes Book II, and Vaelith, Ezra's lantern, Mother Ilse and Morrow each turn up again. Holding the Charter, the Crown pays double for turning crossings back.",
@@ -513,6 +514,7 @@ const MONSTER_SPRITE_PATH := {
 	"glassback_elite": "res://assets/monsters/glassback_elite.png",
 	"the_tidewarden": "res://assets/monsters/the_tidewarden.png",
 	"saltmother": "res://assets/monsters/saltmother.png",
+	"the_terms": "res://assets/monsters/the_terms.png",
 	"falling_watchman": "res://assets/monsters/falling_watchman.png",
 	"lamp_wight": "res://assets/monsters/lamp_wight.png",
 	"rooftop_harrier": "res://assets/monsters/rooftop_harrier.png",
@@ -544,7 +546,7 @@ const MONSTER_NAME_SPRITE := {
 	"Rift-Touched Colossus": "rift_touched_colossus", "Iron Revenant": "iron_revenant",
 	"Storm-Called Elite": "storm_called_elite", "Ashen Broodlord": "ashen_broodlord",
 	"Vaelith": "vaelith", "Korrath": "korrath", "Nyxara": "nyxara",
-	"Drevok": "drevok", "Sythrane": "sythrane", "The Terms": "sythrane",
+	"Drevok": "drevok", "Sythrane": "sythrane", "The Terms": "the_terms",
 	"Company Sellsword": "company_sellsword", "Company Crossbowman": "company_crossbowman", "Captain Morrow": "captain_morrow",
 	"Hedge Warden": "hedge_warden", "Carrion Crier": "carrion_crier", "Rootbound Thrall": "rootbound_thrall",
 	"Leech Priest": "leech_priest", "Mire Sniper": "mire_sniper", "Drowned Bellringer": "drowned_bellringer",

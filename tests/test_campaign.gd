@@ -88,7 +88,7 @@ func run() -> void:
 	GameState.start_finale(ids, null)
 	var d4 := GameState._diff()
 	check(str(d4.get("boss_name", "")).begins_with("The Terms"), "the Act IV finale is the Terms")
-	check(GameData.BOSS_PROFILES.has("The Terms") and GameData.sprite_for_monster("The Terms, in the Grandmaster's shape") == GameData.sprite_for_monster("Sythrane"), "with its own kit, in the Grandmaster's shape")
+	check(GameData.BOSS_PROFILES.has("The Terms") and GameData.sprite_for_monster("The Terms, in the Grandmaster's shape").ends_with("the_terms.png"), "with its own kit and its own sprite, the Grandmaster's shape")
 	GameState.pending_stories.clear()
 	GameState.seal_rift()
 	GameState.finish_run()
