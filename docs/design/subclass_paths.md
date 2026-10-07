@@ -340,6 +340,43 @@ Subclass trainings are unlocked for the whole guild by acts, Tower of Trials flo
 - Training stage 1 adds the **Path tree** (the kind package that fits the Path, e.g. Bloodrage → damage, Shieldwall → HP). Each later stage opens the Path tree's next tier.
 - Points learned in the role tree stay; changing Path refunds the old Path tree in full. This retires `Hero.prior_pool_id` and fixes the bug where a second evolution silently deleted skill points.
 
+## 6c. Costs: evolving and training as the mid-game sinks
+
+Sized against rift income (balance sim, per run: Rank D ~300 Gold / 110 Essence, B ~580 / 185, A ~850 / 270, S ~1,100 / 350; about a run a day; wages take 35–50% of Gold). Goal: from Act II on, raising and training the heroes you care about is the main use of spare Gold and Essence, and you can't afford to raise everyone at once.
+
+**Evolving (rank up at level 10):** Gold and Essence (today: Essence only, 1,500 for F→S).
+
+| To | E | D | C | B | A | S | F→S total |
+|---|---|---|---|---|---|---|---|
+| Gold | 60 | 150 | 300 | 600 | 1,100 | 1,800 | 4,010 |
+| Essence | 30 | 60 | 110 | 180 | 280 | 400 | 1,060 |
+
+**Subclass training (Training Yard):**
+
+| Training | Opens at | Gold | Essence | Days away |
+|---|---|---|---|---|
+| Stage 1 | D | 500 | 150 | 3 |
+| Stage 2 | B | 1,500 | 400 | 4 |
+| Stage 3 | S | 3,500 | 900 | 5 |
+| Legend (stage 3) | S | 5,000 | 1,300 | 5 |
+| Changing Path | at stage 2 or 3 | x2 | x2 | x2 |
+
+**What that adds up to:**
+- One hero raised F→S and trained to stage 3: ~9,500 Gold and ~2,500 Essence over the campaign.
+- The mid-game slice (to Rank B and stage 2): ~3,100 Gold and ~930 Essence per hero. Six heroes over Acts II–IV (about 3–4 weeks) is ~18,500 Gold and ~5,600 Essence: roughly 5,000 Gold and 1,500 Essence a week, a bit more than a B/A guild has spare after wages, so it competes with the Forge and Hall Works and you choose who to invest in.
+- Late game (Rank S, stage 3 and Legends) absorbs ~5,000 Gold and ~1,300 Essence per hero, where income is highest.
+
+**Recruit prices rise to match** (a hire skips the evolve costs below its rank, but arrives untrained and without the Seasoned bonus):
+
+| Rank | F | E | D | C | B | A | S |
+|---|---|---|---|---|---|---|---|
+| Now | 25 | 45 | 75 | 130 | 220 | 380 | 650 |
+| New | 25 | 60 | 150 | 330 | 700 | 1,350 | 2,500 |
+
+**Laurels (next guild):** carrying an unlock costs 3 / 5 / 8 / 12 (section 6).
+
+All of it feeds `power_advice`, so the Grow line names "Evolve X: N Gold, N Essence" and "Train X as a Berserker at the Training Yard" when there's spare money. The campaign sim sets the final numbers (targets: wages + these sinks take 70–90% of mid-game Gold income; Essence idle under ~1,000 at day 45 for guilds that follow the advice).
+
 ## 7. Resonance (party building)
 
 Heroes already carry an element. In a party:
@@ -398,5 +435,5 @@ Turkish: ~450 new lines across phases (names, rules, training, UI), translated a
 1. ~~The 15 Paths~~ — approved.
 2. ~~The unlock table~~ — approved.
 3. ~~Raised vs hired~~ — approved.
-4. Resonance: in, or leave party building to the Path combos alone?
+4. ~~Resonance~~ — in.
 5. ~~Unlocks across guilds~~ — decided: carried with Laurels (section 6).
