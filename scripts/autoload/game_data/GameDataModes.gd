@@ -468,18 +468,24 @@ var MEND_CAP := 0.4
 var DODGE_CAP := 0.6
 ## Where a run's danger sits (0.56): [hp, dmg] multipliers on a kind of fight.
 ## The sim showed ordinary fights won 99% from near-full HP and bosses 68%,
-## so a run was decided at the boss; ordinary fights now cost real HP.
+## so a run was decided at the boss. Left at 1.0: the 0.61 sweeps showed no
+## multiplier makes HP carry between fights (combat is burst).
 var FIGHT_THREAT := {"combat": [1.0, 1.0], "elite": [1.0, 1.0], "boss": [1.0, 1.0]}
+## Each act's finale as the Party screen reads it: the party power that seals
+## it about 2 times in 3 (0.61.1 calibration, 60 runs per party template).
+## A finale's boss stacks two mechanics and summons, so these sit 10-50% above
+## its rank's rec x mult; the foes themselves are unchanged.
+const FINALE_REC := [275, 675, 1280, 1575, 1820, 2525]
 const RIFT_RANKS := [
 	{"id": "F", "rec": 65, "base": "lesser", "hp": 0.8, "dmg": 0.85, "reward": 1.0},
-	{"id": "E", "rec": 160, "base": "lesser", "hp": 1.8, "dmg": 1.6, "reward": 1.4},
-	{"id": "D", "rec": 220, "base": "lesser", "hp": 2.4, "dmg": 2.0, "reward": 1.7},
-	{"id": "C", "rec": 480, "base": "greater", "hp": 1.0, "dmg": 1.0, "reward": 1.0},
-	{"id": "B", "rec": 740, "base": "greater", "hp": 1.4, "dmg": 1.3, "reward": 1.3, "elite_chance_up": true},
-	{"id": "A", "rec": 850, "base": "greater", "hp": 1.9, "dmg": 1.6, "reward": 1.7, "elite_chance_up": true, "hazard_severity_up": 1, "shop_chance_down": true},
-	{"id": "S", "rec": 1200, "base": "greater", "hp": 3.0, "dmg": 2.2, "reward": 2.2, "elite_chance_up": true, "hazard_severity_up": 1, "shop_chance_down": true, "relic_rarity_floor_down": true},
-	{"id": "SS", "rec": 1850, "base": "greater", "hp": 4.2, "dmg": 3.0, "reward": 2.8, "elite_chance_up": true, "hazard_severity_up": 1, "shop_chance_down": true, "relic_rarity_floor_down": true, "boss_double_mechanic": true},
-	{"id": "SSS", "rec": 2200, "base": "greater", "hp": 6.0, "dmg": 3.8, "reward": 3.5, "elite_chance_up": true, "hazard_severity_up": 2, "shop_chance_down": true, "relic_rarity_floor_down": true, "boss_double_mechanic": true},
+	{"id": "E", "rec": 210, "base": "lesser", "hp": 1.8, "dmg": 1.6, "reward": 1.4},
+	{"id": "D", "rec": 360, "base": "lesser", "hp": 2.4, "dmg": 2.0, "reward": 1.7},
+	{"id": "C", "rec": 510, "base": "greater", "hp": 1.0, "dmg": 1.0, "reward": 1.0},
+	{"id": "B", "rec": 780, "base": "greater", "hp": 1.4, "dmg": 1.3, "reward": 1.3, "elite_chance_up": true},
+	{"id": "A", "rec": 1060, "base": "greater", "hp": 1.9, "dmg": 1.6, "reward": 1.7, "elite_chance_up": true, "hazard_severity_up": 1, "shop_chance_down": true},
+	{"id": "S", "rec": 1500, "base": "greater", "hp": 3.0, "dmg": 2.2, "reward": 2.2, "elite_chance_up": true, "hazard_severity_up": 1, "shop_chance_down": true, "relic_rarity_floor_down": true},
+	{"id": "SS", "rec": 2190, "base": "greater", "hp": 4.2, "dmg": 3.0, "reward": 2.8, "elite_chance_up": true, "hazard_severity_up": 1, "shop_chance_down": true, "relic_rarity_floor_down": true, "boss_double_mechanic": true},
+	{"id": "SSS", "rec": 2830, "base": "greater", "hp": 6.0, "dmg": 3.8, "reward": 3.5, "elite_chance_up": true, "hazard_severity_up": 2, "shop_chance_down": true, "relic_rarity_floor_down": true, "boss_double_mechanic": true},
 ]
 
 ## What each rank's extra rules read as on the Rift Hall.

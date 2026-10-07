@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Recommended power now tells the truth: at Recommended a party seals a rift about 2 times in 3. Rank E and up, and especially the act finales, used to read Even when the odds were 1 in 5 to 1 in 2, so the numbers are higher now (fights themselves are unchanged).",
 	"Gold buys power now. The Forge tempers any item for Gold (up to 5 times, +6% to its stats each), from the item's pop-up or the gear slot a hero wears it in. Hall Works rebuild your guild hall wing by wing once Act I is done: War Room, Chapel, Smithy, Library, Healers' Wing and Reliquary, each a lasting bonus for the whole guild (Guild Hall > Hall Works). Your first party starts with your three heroes already in it.",
 	"The credits now have a Founding Testers section: play this test build and send your feedback to have your name there. A long guild name no longer pushes the top bar off the screen.",
 	"The opening's eight pictures are redrawn in the crisp new style, from the Accord's hall to the villagers waiting for a guild.",

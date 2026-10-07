@@ -137,7 +137,7 @@ func finale_recommended_power() -> int:
 	if act.is_empty():
 		return 0
 	var grow := (1.0 + (GameData.TERMS_PER_POST * posts_freed() if int(act["act"]) == 4 else 0.0)) * _terms_cut(int(act["act"]))   # as _apply_finale
-	return int(round(Combat.recommended_power(str(act["tier"]), str(act.get("rank", ""))) * float(act["mult"]) * grow))
+	return int(round(int(GameData.FINALE_REC[int(act["act"]) - 1]) * grow))
 
 
 ## A biome for a new rift: the Vale in Act I, the Vale or the Marshes in Act
@@ -183,6 +183,7 @@ func _apply_finale(diff: Dictionary) -> Dictionary:
 		out["monster_dmg"] = int(round(float(out["monster_dmg"]) * grow))
 	out["boss_name"] = str(act["boss"])
 	out["boss_double_mechanic"] = int(act["act"]) >= 3
+	out["rec_power"] = finale_recommended_power()   # the readout, for defeat reasons
 	return out
 
 
