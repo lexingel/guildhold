@@ -16,24 +16,26 @@ From reading the code (0.61.4):
 
 ## 2. The idea in one paragraph
 
-Group the 93 subclasses into **15 Paths**, 3 per role. A Path is a playstyle with one always-on **rule** that visibly changes how the hero fights (a Bloodrager hits harder the more hurt she is; a Marksman who isn't attacked lines up a heavier shot). Each **stage** of the Path adds a new move: a Technique at stage II, a once-a-fight Signature moment at stage III, the rule's limit lifted at S. Every subclass adds a **Twist** that bends the Path its own way, so a Berserker and a Bloodletter play the same Path differently. The Path and its skill tree stay with the hero for their whole career; staying on a Path builds **Mastery** (fed by XP after level 10), which strengthens the rule's numbers; switching Paths is allowed but starts Mastery over. Party building gets **Resonance**: heroes sharing an element light up a small party bonus. No new subclass art is needed.
+Heroes are hired as **base classes** that differ only in rank, and climb ranks by levelling: each rank is levels 1–10, evolving resets to level 1. At Ranks D, B and S they can **train a subclass** at the Training Yard, unlocked for the guild by acts, Tower of Trials floors and deeds. The 93 subclasses form **15 Paths**, 3 per role. A Path is a playstyle with one always-on **rule** that visibly changes how the hero fights; stage 2 adds a **Technique**, stage 3 a once-a-fight **Signature moment** (or the role's Legend, which lifts the rule's limit). Every subclass adds a **Twist** that bends the Path its own way. Raised heroes end up slightly stronger; hired high-rank heroes arrive with more skill points. Party building gets **Resonance** from shared elements. No new subclass art is needed.
 
 ## 3. How a Path grows: stages and Twists
 
-Each stage adds a **new move**, not a bigger number:
+Heroes start as base classes and gain their Path at the Training Yard (section 5). Each stage adds a **new move**, not a bigger number:
 
-| Stage | Ranks | What it adds |
+| Stage | When | What it adds |
 |---|---|---|
-| **I** | F–E | **The rule**: the Path's identity, always on. |
-| **II** | D–C | **A Technique**: an active skill only this Path has, built on the rule. It replaces the role's level-6 skill, so the action bar visibly changes. Costs 3 Momentum unless a Twist says otherwise. |
-| **III** | B–A | **A Signature moment**: once a fight, triggered by something that happens in the fight, with an aura on the hero's sprite. The fight's big beat. |
-| **Legend** | S | **The limit comes off**: the rule's cap or condition goes away. Each role's one S subclass is open to all three of its Paths and applies the Legend change of the Path the hero arrived on. |
+| **1** | trained at D | **The rule**: the Path's identity, always on. |
+| **2** | trained at B | **A Technique**: an active skill only this Path has, built on the rule. It replaces the role's second skill, so the action bar visibly changes. Costs 3 Momentum unless a Twist says otherwise. |
+| **3** | trained at S | **A Signature moment**: once a fight, triggered by something that happens in the fight, with an aura on the hero's sprite. The fight's big beat. |
+| **Legend** | trained at S | **The limit comes off**: a stage-3 choice. Each role's Legend subclass is open to all three of its Paths; instead of the Signature moment's variant Twist it lifts the rule's limit (each Path's "Legend" line). |
 
 Every subclass adds a **Twist**: one line that bends the rule, the Technique or the Signature moment, so two heroes at the same stage of the same Path still play differently. Subclass Abilities stay as they are for now; Phase 5 re-themes any that clash with their Path.
 
 Numbers below are first guesses; the sims set them (section 9).
 
 ## 3a. The 15 Paths in full
+
+In the tables, stage I/II/III = stage 1/2/3 (trained at D/B/S).
 
 ### Warrior
 
@@ -270,25 +272,72 @@ Numbers below are first guesses; the sims set them (section 9).
 
 **Count:** 15 rules, 15 Techniques, 15 Signature moments, 15 Legend changes, 88 Twists (every non-S subclass), all 93 subclasses placed.
 
-## 4. Ranks, stages and evolving
+## 4. Recruiting, ranks and levels
 
-- **Rank stays what it is** (F–S, stat multiplier, wages, recruit odds). A Path's **stage** follows rank (I = F–E, …).
-- **Evolving** (level 10, Essence, B/A/S rift gates as now) offers:
-  - **Stay on the Path:** the Path's subclasses at the next rank's stage (its next stage's variants, or the same subclass ranked up when the stage doesn't change). Mastery is kept.
-  - **Change Path:** any other Path of the role at that stage. Mastery restarts at 0; skill points in the old Path tree are refunded in full.
-- The picker shows the choice that way: "Stay a Bloodrager (Mastery 2 kept)" vs "Become a Weaponmaster (Mastery resets)".
+**Heroes are hired as base classes.** Every recruit is a plain Warrior, Ranger, Mage, Cleric or Rogue (the five base portraits already exist); only their rank differs. Rank odds and prices stay as they are.
 
-## 5. Mastery (and a use for XP after level 10)
+**Ranks and levels:**
+- Each rank has levels 1–10. At level 10 the hero can **evolve** to the next rank (Essence cost and the B/A/S rift gates as now).
+- Evolving **resets the level to 1** and gives **+20% XP for the next 2 rift runs**.
+- Power comes from rank: levels 1–10 climb from this rank's power toward the next rank's, and evolving starts the next climb. Power stays where foes and Recommended expect it.
+- XP now matters all career long (the Library wing, Barracks Lv5, training XP).
 
-- Mastery 0–3 per hero, for their current Path. XP past level 10 fills it (a meter on the hero page): Mastery 1 at 300 XP, 2 at +600, 3 at +900 (to tune).
-- Mastery strengthens the **numbers** of the rule, Technique and Signature moment (+20% of their effect per level). New **moves** come only from stages, so a switcher keeps their stage's moves but loses the Mastery bonus.
-- So XP keeps mattering (the Library wing, Barracks Lv5, training XP all count again), and staying on a Path is a real reward.
+**Raised vs hired:**
+- **Raised (Seasoned):** every rank a hero reaches by levelling and evolving adds **+2% permanent stats**. A hero raised from F to S has +12% over the same hero hired at S.
+- **Hired (Trained elsewhere):** a recruit above F arrives with the skill and attribute points of every rank below theirs, unspent, plus **1 extra skill point per rank above F**. A hired S hero has 6 more skill points than a raised one: flexibility now vs stats over time.
 
-## 6. Skill trees
+**Skills and Abilities by rank, not level** (levels now reset): the role's first skill from Rank F, its second from Rank E; a subclass's Ability comes with its stage-1 training (today: level 3).
 
-- Each Path owns one tree: the role's two starting nodes plus the kind package that fits the Path (e.g. Bloodrage → damage package, Shieldwall → HP package; 15 Paths over the 9 packages, a few shared).
-- Evolving on the same Path keeps the tree and every learned node. Changing Path refunds all its points.
-- This retires `Hero.prior_pool_id` / the "one prior tree" rule and fixes the bug where a second evolution silently deleted skill points.
+**Points per rank:** each rank gives **2 skill points** (at levels 5 and 10) and **2 attribute points** (at levels 3 and 8). A full F→S career totals 14 skill points (about 9 today) and 14 attribute points. Exact numbers are set in the sims.
+
+**XP curve:** one rank (levels 1→10) should take about 3–5 rift runs at that rank's rifts early on, and longer at the top. A fresh F hero should reach Rank D (their first subclass) around the end of Act I or early Act II. The current per-level XP table is replaced by one scaled per rank; the campaign sim sets it.
+
+## 5. Subclass training (the Training Yard)
+
+A new kind of program at the Training Yard, beside the attribute programs:
+
+| Stage | Opens at rank | What the hero gains | Training time |
+|---|---|---|---|
+| **Stage 1** | **D** | Chooses a Path and a stage-1 subclass of it: the rule, the subclass's Twist, name, portrait, Ability and main stat. | 3 days |
+| **Stage 2** | **B** | A stage-2 subclass of the same Path: adds the Technique and that subclass's Twist. | 4 days |
+| **Stage 3** | **S** | A stage-3 subclass of the same Path, or the role's Legend: adds the Signature moment (the Legend lifts the rule's limit instead). | 5 days |
+
+- Only subclasses the guild has **unlocked** appear (section 6). The hero is away for the training days, like attribute training; the fee is Gold and grows with the stage.
+- A hero who reaches D, B or S without training simply keeps what they have; they can train any time later. Evolving and training are separate: evolving is the rank, training is the subclass.
+- **Changing Path:** at a stage-2 or stage-3 training the hero may switch to another Path's subclass of that stage. It takes twice as long, and the old Path's tree is refunded in full. The hero then has the new Path's moves up to their stage.
+- The 5 Rank-S subclasses (Rift Sovereign, Rift-Eclipsed Warden, The Unbound, Last-Light Martyr, The Final Cut) become **Legends**: a stage-3 choice open to every Path of their role, keeping the Path's rule, Technique and Twists and lifting the rule's limit (the "Legend" line of each Path in section 3a).
+
+## 6. Unlocking subclasses
+
+Subclass trainings are unlocked for the whole guild by acts, Tower of Trials floors and deeds. The first subclass of every Path at each stage opens with the stage itself; the rest come from goals:
+
+| Path | Stage 1 (Rank D) | Stage 2 (Rank B) | Stage 3 (Rank S) |
+|---|---|---|---|
+| **Shieldwall** | Footman (open from the start); Fieldmender (Act I done); Bulwark (Tower of Trials floor 10); Frostguard (seal 10 rifts with heroes of this role) | Iron-Guard (Act II done); Aegis-Bearer (Tower of Trials floor 30) | Stormguard (Act III done); Rift Sovereign (Legend: Tower of Trials floor 100) |
+| **Bloodrage** | Squire (open from the start) | Berserker (Act II done); Bloodletter (Act III done) | Ashen Templar (Act III done); Rift Sovereign (Legend: Tower of Trials floor 100) |
+| **Weaponmaster** | Trailblazer (open from the start); Duelist (seal 10 rifts with heroes of this role); Featherguard (Tower of Trials floor 20) | Warbrand (Act II done) | Runeblade (Act III done); Rift-Breaker (hold a Riftbreak at Rank S); Rift Sovereign (Legend: Tower of Trials floor 100) |
+| **Marksman** | Fieldscout (open from the start); Slinger (Tower of Trials floor 20); Longshot (beat a rift boss by hand without anyone down) | Blade-Dancer (Act II done); Gale Marksman (Tower of Trials floor 45) | Rift-Piercer (Act III done); Rift-Eclipsed Warden (Legend: Act VI done) |
+| **Trapper** | Trapper (open from the start); Pathfinder (beat a rift boss by hand without anyone down); Sapling-Keeper (Act I done) | Warden (Act II done); Deadfall Hunter (seal a Rank A rift) | Wintertide Archer (Act III done); Rift-Eclipsed Warden (Legend: Act VI done) |
+| **Stalker** | Shadowtracker (open from the start); Nightwarden (Act I done) | Duskstalker (Act II done); Rift-Ranger (Tower of Trials floor 30); Stormtracker (Act III done) | Voidwalker (Act III done); Rift-Eclipsed Warden (Legend: Act VI done) |
+| **Evocation** | Apprentice (open from the start); Cinderling (Tower of Trials floor 10); Cinder-Adept (seal 10 rifts with heroes of this role) | Stormcaller (Act II done) | Ashbound Theorist (Act III done); Pyromancer (Tower of Trials floor 70); The Unbound (Legend: Tower of Trials floor 90 and Act IV done) |
+| **Warding** | Fledgling Seer (open from the start); Frost Scholar (seal 10 rifts with heroes of this role); Stoneward Mystic (Tower of Trials floor 20) | Wardweaver (Act II done) | Rift-Warden Magus (Act III done); The Unbound (Legend: Tower of Trials floor 90 and Act IV done) |
+| **Augury** | Shade-Adept (open from the start); Thornweaver (Tower of Trials floor 20); Grim Conjurer (beat a rift boss by hand without anyone down) | Verdant Oracle (Act II done); Duskglass Seer (Tower of Trials floor 45) | Archon of Storms (Act III done); The Unbound (Legend: Tower of Trials floor 90 and Act IV done) |
+| **Mercy** | Acolyte (open from the start); Peddler (beat a rift boss by hand without anyone down); Herbalist (Act I done) | Rift-Medic (Act II done); Frost Anchorite (seal a Rank A rift) | Dawnkeeper (Act III done); Alchemist (Tower of Trials floor 70); Last-Light Martyr (Legend: Act VI done) |
+| **Aegis** | Frostward Sister (open from the start); Hearth-Warden (Act I done) | Battle Chaplain (Act II done) | Sanctified Shield (Act III done); Last-Light Martyr (Legend: Act VI done) |
+| **Zeal** | Emberblessed Acolyte (open from the start); Lay Brother (Tower of Trials floor 10); Vanguard Chaplain (seal 10 rifts with heroes of this role) | Ember Confessor (Act II done); Zealot (Act III done) | Radiant Vanguard (Act III done); Sainted Ember (hold a Riftbreak at Rank S); Last-Light Martyr (Legend: Act VI done) |
+| **Assassin** | Cutpurse (open from the start); Arcane Pilferer (seal 10 rifts with heroes of this role) | Wraithstep (Act II done); Nightblade (free a lost champion) | The Unseen Hand (Act III done); The Final Cut (Legend: Tower of Trials floor 100) |
+| **Skirmisher** | Runaway (open from the start); Scavenger (Tower of Trials floor 20); Skirmisher (beat a rift boss by hand without anyone down); Glyphhand (Act I done); Footpad (Tower of Trials floor 10) | Shadowfoot (Act II done); Rift-Slipper (Tower of Trials floor 45) | Wraithblade Adept (Act III done); The Final Cut (Legend: Tower of Trials floor 100) |
+| **Scrapper** | Herbrunner (open from the start); Ironhide Footpad (beat a rift boss by hand without anyone down) | Bramblefoot (Act II done); Fleetblade (seal a Rank A rift) | Duskrunner (Act III done); The Final Cut (Legend: Tower of Trials floor 100) |
+
+- **Stage gates:** stage 1's first subclasses are open from the start (trainable once a hero reaches D); stage 2's open with Act II; stage 3's with Act III.
+- **The rest** rotate through Act completions, Tower of Trials floors (10–100), sealing rifts with heroes of the role, a boss beaten by hand with no one down, freeing a lost champion, a Rank A seal and holding a Rank S Riftbreak, so every Path has goals across the game's modes.
+- The Codex gets a **Subclasses** page: every subclass, locked or not, with what unlocks it. This is also a natural home for the mid/late-game goals you're designing (and, if you want, a Laurel sink: carrying an unlock to the next guild).
+
+## 6b. Skill trees and points
+
+- A **base class** uses the role tree: the role's two starting nodes and a small role package.
+- Training stage 1 adds the **Path tree** (the kind package that fits the Path, e.g. Bloodrage → damage, Shieldwall → HP). Each later stage opens the Path tree's next tier.
+- Points learned in the role tree stay; changing Path refunds the old Path tree in full. This retires `Hero.prior_pool_id` and fixes the bug where a second evolution silently deleted skill points.
 
 ## 7. Resonance (party building)
 
@@ -306,45 +355,47 @@ Shown on the Party screen as chips ("Ember ×2: +6% damage"), and in the power r
 
 ## 8. Identity
 
-- Every subclass shows its own name from Rank F: "Elowen the Squire", "Gara the Acolyte" (names from the ids; Turkish names to translate, ~75).
-- A Path line under the name everywhere a hero appears: emblem + "Bloodrage · Mastery 1".
-- Recruit cards lead with the Path and its rule in one line, so hiring is choosing a playstyle.
+- Base classes show the role ("Elowen the Warrior"); a trained hero takes the subclass name ("Elowen the Squire"), and its portrait. Every subclass gets its own name (from the ids; ~75 Turkish names to translate).
+- A Path line under the name everywhere a hero appears: emblem + "Bloodrage · stage 1", or "Base class · trains at Rank D".
+- Recruit cards show rank, points they bring, and which stages they can train right away (a B recruit can train stage 1 and 2).
 - In fights, the rule's state is visible on the hero's plate: Heat 3/5, Combo ×2, a mark over the marked foe, Steady Aim glow.
-- Barks: a line when a hero first joins a Path, and when Mastery rises (reuses the bark system).
+- Barks: a line when a hero finishes a subclass training and when they evolve (reuses the bark system); the B calling scene moves to the stage-2 training.
 
 ## 9. Balance and the readout
 
-- The party power formula (`CombatEffects`) gets a factor per rule tier so "Recommended" stays honest; re-run the 0.61.1 calibration probe after each phase.
+- The party power formula (`CombatEffects`) gets a factor per stage so "Recommended" stays honest; re-run the 0.61.1 calibration probe after each phase.
 - Auto and Quick fight must play the rules (target-switch rules for Combo and Mark; the rest are passive).
 - Campaign sim before/after: pacing within ±2 days per act, finale seal rates at Recommended ~65%, no Path more than ~10% above or below its role's average clear rate (a per-Path sim report is part of the work).
 
 ## 10. Save migration
 
-- Every existing hero gets the Path of their subclass (the table above), Mastery from their rank (stage − 1, capped 2) so veterans don't feel demoted, and a free full skill reset (old kind-keyed trees → Path trees). A one-time notice explains it.
-- Champions are untouched (they aren't subclass heroes in rifts).
+- Existing heroes keep their rank and level (level stays 1–10 in its rank).
+- Heroes with a subclass keep it as **trained**: they get its Path and the stage that matches their rank (F–C → stage 1, B–A → stage 2, S → stage 3), even below Rank D, so nobody loses an identity they already had. - Every hero gets a free full skill reset (old kind-keyed trees → role + Path trees) and the points of their rank budget. Seasoned bonus: +2% per rank above F for existing heroes (we can't tell raised from hired in old saves).
+- Subclasses existing heroes already have count as unlocked for the guild.
+- A one-time notice explains the change. Champions are untouched.
 
 ## 11. Art and budget
 
-- No new subclass portraits or animations: all 93 already have them.
-- New: 15 Path emblems (32 px, pixflux ~1 generation each ≈ 15) and in-fight state icons (reuse skill icons). Under 25 PixelLab generations.
+- No new subclass portraits or animations: all 93 already have them. The 5 base-class portraits exist but predate the crisp pass; redraw them to match (~30 generations, Pro Flash).
+- New: 15 Path emblems (32 px, pixflux ~1 generation each ≈ 15) and in-fight state icons (reuse skill icons). About 55 PixelLab generations in all.
 
 ## 12. Phases (each ships on its own)
 
 | Phase | What ships | Size |
 |---|---|---|
-| **1. Paths and identity** | Path data and mapping; subclass names from F; Path line on hero/recruit/party cards; evolution picker "Stay / Change"; Path trees with refund; save migration; fixes the lost-skill-points bug. No combat change yet. | 1 session |
-| **2a. Rules and Twists (stage I)** | 15 rules and the stage-I Twists in combat, state indicators on plates, Auto/Quick fight support, power factors, a test per rule, sims + readout recalibration. | 2 sessions |
-| **2b. Techniques and Signature moments** | 15 Techniques (replacing the role's level-6 skill from stage II), 15 Signature moments with sprite auras, the stage II/III Twists and Legend changes, tests, sims. | 2 sessions |
-| **3. Mastery** | XP past 10 → Mastery, +20% per level to the Path's numbers, hero-page meter, barks. | 1 session |
+| **1. Ranks and recruits** | Base-class recruits with per-rank points; level 1–10 per rank, evolve resets to 1 with the XP boost; rank-based power curve with the Seasoned bonus; points per rank; per-rank XP table; save migration (grandfathering subclasses); sims for pacing and the readout. No Paths yet. | 2 sessions |
+| **2. Paths and training** | Path data; subclass training at the Training Yard (stages at D/B/S, days, fees, switching); unlocks and the Codex Subclasses page; names, Path line, base portraits; role + Path trees; fixes the lost-skill-points bug. | 1–2 sessions |
+| **3a. Rules and Twists (stage 1)** | 15 rules and the stage-1 Twists in combat, state indicators on plates, Auto/Quick fight support, power factors, a test per rule, sims + readout recalibration. | 2 sessions |
+| **3b. Techniques and Signature moments** | 15 Techniques, 15 Signature moments with sprite auras, Legends, the stage 2/3 Twists, tests, sims. | 2 sessions |
 | **4. Resonance** | Element bonuses, Party screen chips, readout. | half a session |
-| **5. Tune and explain** | Per-Path sim report, numbers pass, Codex page "Paths", What's New, tester brief questions. | half a session |
+| **5. Tune and explain** | Per-Path sim report, numbers pass, Ability re-themes, What's New, tester brief questions. | half a session |
 
-Turkish: ~400 new lines across phases (names, rules, UI), translated as each phase ships.
+Turkish: ~450 new lines across phases (names, rules, training, UI), translated as each phase ships.
 
 ## 13. Questions for you
 
 1. The 15 Paths: rules, Techniques, Signature moments, Legend changes and Twists (section 3a): keep, swap, rename?
-2. Switching Paths: allowed with a Mastery reset (as above), or locked once chosen?
-3. Mastery from XP after level 10: good, or tie it to something else (rifts sealed on the Path, Essence)?
+2. The unlock table (section 6): right mix of acts, Tower floors and deeds?
+3. Raised vs hired: +2% stats per rank raised, and +1 skill point per rank for hires: about right?
 4. Resonance: in, or leave party building to the Path combos alone?
-5. Legends at S: shared per role (no new art), or later give each Path its own S (10 new subclasses, ~150 PixelLab generations)?
+5. Should unlocks carry to the next guild (with Laurels, or freely), or does each guild unlock its own?
