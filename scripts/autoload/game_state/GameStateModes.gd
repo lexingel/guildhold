@@ -1529,6 +1529,14 @@ func advice_due(best: int) -> bool:
 	return best < finale_recommended_power() * 0.8 and (finale_ready() or day - act_since >= GameData.ADVICE_STUCK_DAYS)
 
 
+## Gold or Essence sitting idle: over three weeks' bill in Gold, or 300+
+## Essence. The Grow goal then names something to spend it on even when the
+## guild isn't stuck (0.61.1 sim: casual guilds sat on 10-26k Gold and
+## 4-9k Essence because advice only showed when behind).
+func spare_wealth() -> bool:
+	return coins > 3 * (weekly_wages() + upkeep()) or crystals >= 300
+
+
 ## Act panel's advice when a finale is out of reach (casual guilds in the sim
 ## sat at 70-85% of a finale with 10-34k Gold and 5-15k Essence unspent).
 ## [{"kind", "text", "id", "choice"}], most useful first, at most three.

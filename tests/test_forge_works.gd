@@ -69,6 +69,10 @@ func run() -> void:
 	GameState.equip_item(h2.id, it3.slot_type(), 0, it3.id)
 	var kinds: Array = GameState.power_advice().map(func(a): return str(a["kind"]))
 	check(kinds.has("hall_work") and kinds.has("forge"), "power advice names a hall wing and the Forge (%s)" % str(kinds))
+	check(GameState.spare_wealth(), "idle Gold counts as spare wealth, so the Grow goal names the advice")
+	GameState.coins = 0
+	GameState.crystals = 0
+	check(not GameState.spare_wealth(), "an empty treasury isn't spare wealth")
 	GameState.reset()
 
 

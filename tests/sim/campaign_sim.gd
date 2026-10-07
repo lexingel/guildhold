@@ -442,7 +442,7 @@ func _idle_spend() -> void:
 	if GameState.feast_ready() and GameState.heroes.any(func(h): return h.morale < 45) and GameState.coins > bill + GameState.feast_cost():
 		GameState.hold_feast()
 	if advice:   # a casual player who reads the Act panel's advice when it shows
-		if GameState.advice_due(Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id)))):
+		if GameState.advice_due(Combat.party_power(_pick_party().map(func(id): return GameState.find_hero(id)))) or GameState.spare_wealth():
 			for i in 3:
 				var tips: Array = GameState.power_advice()
 				if tips.is_empty() or GameState.follow_advice(tips[0]) != "":
