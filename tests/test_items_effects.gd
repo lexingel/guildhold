@@ -53,19 +53,23 @@ func run() -> void:
 	var evo := Combat.gen_hero("E", 10)
 	GameState.heroes.append(evo)
 	GameState.crystals = 99999
-	var choices := GameData.evolution_choices(GameData.find_class(evo.pool_id))
-	check(GameState.evolve_hero(evo.id, "nope") != "", "bogus path rejected")
-	var want: String = str(choices[-1]["id"])
-	check(GameState.evolve_hero(evo.id, want) == "" and evo.pool_id == want, "evolves into chosen path")
-	print("evolved into %s: %s" % [want, evo.name])
+	GameState.coins = 0
+	check(GameState.evolve_hero(evo.id) != "" and evo.rank == "E", "evolving needs its Gold")
+	GameState.coins = 99999
+	var pool0 := evo.pool_id
+	var seas0 := evo.seasoned
+	check(GameState.evolve_hero(evo.id) == "" and evo.rank == "D" and evo.level == 1 and evo.pool_id == pool0, "evolves to the next rank, level 1, same subclass")
+	check(evo.seasoned == seas0 + 1 and evo.xp_boost_runs == GameData.XP_BOOST_RUNS, "evolving seasons the hero and boosts XP")
+	check(GameState.evolve_hero(evo.id) != "", "level 1 can't evolve again")
+	print("evolved: %s" % evo.name)
 	print("build: ", Combat.hero_archetype_counts(evo))
 	GameState.heroes.clear()
 	# --- phase 3: keystones + signatures ---
-	var kh := Combat.gen_hero("C", 10)
+	var kh := Combat.gen_hero("S", 10)   # 0.62: a keystone opens with the Path's stage 3
 	kh.skill_points = 20
 	GameState.heroes.append(kh)
 	GameState.coins = 99999
-	var kk: String = kh.innate_kind
+	var kk: String = str(GameData.hero_tree_summaries(kh)[-1]["kind"])
 	check(GameState.learn_skill(kh.id, kk, "keystone") != "", "keystone gated before a Path node")
 	var cap_node := GameData.find_skill_node(kk, "cap")
 	for sid in ["edge", "hide"] + cap_node["requires"] + ["cap"]:

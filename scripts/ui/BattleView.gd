@@ -621,7 +621,7 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 				"ability", "call":
 					await _anim_hero_ability(h, action, hw, hero_rects.get(h.id), tw, tint, arena, state, hero_wrappers, monster_wrappers, hp_before, shields_before, monster_hp_before)
 				_ when action.begins_with("skill:"):
-					var sk := GameData.find_role_skill(action.substr(6))
+					var sk := GameData.find_skill_def(action.substr(6))
 					if str(sk.get("target", "")) == "foe":
 						await _anim_hero_attack(h, hw, hero_rects.get(h.id), tw, tint, arena)
 					else:
@@ -1913,6 +1913,49 @@ func _hero_statuses(state: Dictionary, h: Hero) -> Array:
 		out.append({"icon": "res://assets/skills/helm.png", "tip": tr("Taunting — every foe's attacks come here this round, %d%% weaker") % int(float(state.get("_taunt_cut", 0.0)) * 100), "color": Palette.VIOLET_BRIGHT})
 	if Combat.qualifies_for_ability(h) and Combat.action_block(state, h, "ability") == "":
 		out.append({"icon": GameData.ability_icon(h.pool_id), "tip": tr("Enough Momentum for their Ability"), "color": Palette.EMBER_BRIGHT})
+	out.append_array(_path_statuses(state, h))
+	return out
+
+
+## The tint a hero's sprite takes while a Signature moment is active, else transparent.
+func _signature_aura(state: Dictionary, h: Hero) -> Color:
+	var p: Dictionary = state.get("_pp", {}).get(h.id, {})
+	if int(p.get("mist", 0)) > 0:
+		return Color(1.35, 0.8, 0.8)
+	if int(p.get("untouch", 0)) > 0 or int(p.get("vanish", 0)) > 0:
+		return Color(0.85, 0.9, 1.3, 0.75)
+	if int(p.get("sw_double", 0)) > 0:
+		return Color(0.9, 1.3, 0.9)
+	if int(p.get("perfect", 0)) > 0 or int(p.get("lastwall", 0)) > 0:
+		return Color(1.3, 1.2, 0.85)
+	return Color(1, 1, 1, 0)
+
+
+## A hero's Path state on their plate (0.62): Heat, Combo, Steady Aim, Red Mist...
+func _path_statuses(state: Dictionary, h: Hero) -> Array:
+	var out: Array = []
+	var p: Dictionary = state.get("_pp", {}).get(h.id, {})
+	if p.is_empty():
+		return out
+	match GameData.hero_path_id(h):
+		"evocation":
+			if int(p.get("heat", 0)) > 0:
+				out.append({"icon": "res://assets/relics/escalate_pct.png", "tip": tr("Heat %d — +%d%% damage; at %d the next skill detonates on every foe") % [int(p["heat"]), int(p["heat"]) * 8, 4 if h.pool_id == "pyromancer" else (7 if h.pool_id == "apprentice" else 5)], "color": Palette.EMBER_BRIGHT})
+		"weaponmaster":
+			if int(p.get("combo", 0)) > 0:
+				out.append({"icon": "res://assets/skills/sword_silver.png", "tip": tr("Combo %d — +%d%% on the same foe") % [int(p["combo"]), int(p["combo"]) * 12], "color": Palette.EMBER_BRIGHT})
+		"marksman":
+			if int(p.get("quiet", 0)) >= (2 if h.pool_id == "longshot" else 1):
+				out.append({"icon": "res://assets/skills/sk_trueshot_aim.png", "tip": tr("Steady Aim — the next shot hits harder"), "color": Palette.EMBER_BRIGHT})
+		"bloodrage":
+			if p.get("bp", false):
+				out.append({"icon": "res://assets/skills/sk_berserkers_peak.png", "tip": tr("Blood Price — the next hit does +50%"), "color": Palette.HAZARD})
+	if int(p.get("mist", 0)) > 0:
+		out.append({"icon": "res://assets/skills/gem_red.png", "tip": tr("Red Mist — hits every foe, can't be stunned or healed"), "color": Palette.HAZARD})
+	if int(p.get("untouch", 0)) > 0 or int(p.get("vanish", 0)) > 0:
+		out.append({"icon": "res://assets/skills/cloak_a.png", "tip": tr("Can't be targeted"), "color": Palette.CRYSTALS})
+	if int(p.get("sw_double", 0)) > 0:
+		out.append({"icon": "res://assets/skills/sk_second_wind.png", "tip": tr("Second Wind — the next %d attacks hit twice") % int(p["sw_double"]), "color": Palette.good()})
 	return out
 
 
@@ -1959,6 +2002,12 @@ func _monster_statuses(state: Dictionary, i: int) -> Array:
 	var ward := float(state.get("monster_shields", {}).get(i, 0.0))
 	if ward > 0.0:
 		out.append({"icon": "res://assets/skills/shield_blue.png", "tip": tr("Ward — absorbs the next %d damage") % int(round(ward)), "color": Palette.CRYSTALS})
+	for pp in state.get("_pp", {}).values():   # a Stalker's Mark (0.62)
+		if int(pp.get("mark", -1)) == i or int(pp.get("mark2", -1)) == i:
+			out.append({"icon": "res://assets/skills/sk_hunters_mark.png", "tip": tr("Marked — the whole party hits it 15% harder"), "color": Palette.HAZARD})
+			break
+	if int(m.get("_snared", 0)) > 0:
+		out.append({"icon": "res://assets/skills/sk_ambush_doctrine.png", "tip": tr("Snared — acts last"), "color": Palette.RANK_E})
 	return out
 
 
@@ -2072,6 +2121,12 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 		if (state.get("hero_burn", {}) as Dictionary).has(h.id):
 			var fl := Fx.loop(wrapper, "flame", Vector2(rect.custom_minimum_size.x * 0.5, size * 0.72), size * 0.34, Color(1, 1, 1, 0.85))
 			fl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var aura := _signature_aura(state, h)   # a Path's Signature moment (0.62)
+		if aura.a > 0.0:
+			rect.modulate = aura
+			var glow := _ground_ring(cx, feet, ring_w * 1.15, Color(aura.r, aura.g, aura.b, 0.8))
+			arena.add_child(glow)
+			_pulse(glow)
 		_start_idle_sway(wrapper)
 		hero_wrappers[h.id] = wrapper
 		hero_rects[h.id] = rect
@@ -2255,7 +2310,7 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 				rest = Color(1.15, 1.08, 1.0)
 				w.modulate = rest
 				hit.mouse_default_cursor_shape = Control.CURSOR_CROSS
-				hit.tooltip_text = tr("%s on %s") % [tr(str(GameData.find_role_skill(_ally_pick.substr(10)).get("name", ""))), tr(str(monsters[i]["name"]))]
+				hit.tooltip_text = tr("%s on %s") % [tr(str(GameData.find_skill_def(_ally_pick.substr(10)).get("name", ""))), tr(str(monsters[i]["name"]))]
 			hit.mouse_entered.connect(func(): if is_instance_valid(w): w.modulate = Color(1.35, 1.2, 1.2))
 			hit.mouse_exited.connect(func(): if is_instance_valid(w): w.modulate = rest)
 			hit.pressed.connect(pick_target.bind(i))
@@ -2343,7 +2398,7 @@ func _tutorial_step(state: Dictionary, h: Hero) -> Dictionary:
 	if not seen.has("tut_attack"):
 		return {"step": _tut_step_no(seen), "key": "1", "text": tr("Attack. It's %s's turn: press Attack (1) or click a foe. Every attack adds 1 Momentum — the pips under %s's name.") % [tr(str(who)), tr(str(who))]}
 	if not seen.has("tut_skill"):
-		for sk in GameData.hero_role_skills(h):
+		for sk in GameData.hero_skills(h):
 			if Combat.action_block(state, h, "skill:" + str(sk["id"])) == "":
 				return {"step": _tut_step_no(seen), "key": "2", "text": tr("Skills. You have %d Momentum. %s's skill %s (2) spends %d of it for a stronger move — hover it to read it, then use it.") % [int(state.get("momentum", 0)), tr(str(who)), tr(str(sk["name"])), int(sk["cost"])]}
 		return {"step": _tut_step_no(seen), "key": "", "text": tr("Skills cost Momentum. Keep attacking until a skill (2-4) lights up, then use it.")}
@@ -2615,7 +2670,7 @@ func _guard_picker(row: Container, state: Dictionary, current_hero: Hero, living
 ## target, Tab (D-pad) moves the mark, Esc (B) cancels.
 func _foe_picker(row: Container, state: Dictionary, current_hero: Hero, run_turns: Callable) -> void:
 	var act_id := _ally_pick.substr(4)
-	var ask := _label((tr("%s: tap a foe") if _compact() else tr("%s: click a foe")) % tr(str(GameData.find_role_skill(act_id.substr(6)).get("name", ""))), 15)
+	var ask := _label((tr("%s: tap a foe") if _compact() else tr("%s: click a foe")) % tr(str(GameData.find_skill_def(act_id.substr(6)).get("name", ""))), 15)
 	ask.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
 	ask.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(ask)
@@ -2723,7 +2778,7 @@ func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[He
 			_combat_hotkeys["Space"] = do_attack
 		# Role skills (2, 3) and the subclass Ability (4) spend Momentum.
 		var skill_defs: Array = []
-		for sk in GameData.hero_role_skills(current_hero):
+		for sk in GameData.hero_skills(current_hero):
 			var tw_arch := Combat.hero_main_arch(current_hero)
 			skill_defs.append(["skill:" + str(sk["id"]), str(sk["icon"]), tr(str(sk["name"])), "%s%s%s" % [tr(str(sk["desc"])), "" if str(sk["row"]) == "any" else tr("\n%s row.") % tr(str(sk["row"])).capitalize(), (tr("\n%s twist: %s.") % [tr(GameData.ARCHETYPES[tw_arch]), tr(GameData.ARCH_TWIST[tw_arch])]) if tw_arch != "" else ""], int(sk["cost"])])
 		while skill_defs.size() < 2 and GameData.ROLE_SKILLS.has(current_hero.cls_id) and skill_defs.size() < (GameData.ROLE_SKILLS[current_hero.cls_id] as Array).size():
@@ -2738,7 +2793,7 @@ func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[He
 			var act_id: String = d[0]
 			var key: String = keys[k] if act_id != "ability" else "4"
 			var block := Combat.action_block(state, current_hero, act_id)
-			var sk_target: bool = act_id == "ability" or str(GameData.find_role_skill(act_id.substr(6)).get("target", "")) == "foe"
+			var sk_target: bool = act_id == "ability" or str(GameData.find_skill_def(act_id.substr(6)).get("target", "")) == "foe"
 			var do_skill := func(): run_turns.call(func(): GameState.set_hero_action(hid, act_id, tgt if sk_target else 0))
 			# A skill aimed at one foe asks which (_foe_picker); Space repeating
 			# it keeps the marked target. Abilities pick their own.

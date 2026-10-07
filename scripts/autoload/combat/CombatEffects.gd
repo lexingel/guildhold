@@ -513,8 +513,10 @@ func _power(heroes: Array, party_terms: bool) -> int:
 	var hp := 0.0
 	for h in party:
 		# Turn speed is more turns, but not every turn is an attack: half weight.
-		dmg += dmg_of(h) * (1.0 + 0.3 * hero_skill_total(h, "ability_power")) * (1.0 + 0.5 * maxf(0.0, hero_skill_total(h, "speed_pct")))
-		hp += max_hp(h)
+		# A Path's moves (0.62): about +8% damage and +6% staying power a stage (sim-tuned: at +5/+4 "Even" parties sealed 88%).
+		var stage := 0 if h.is_champion else GameData.subclass_stage(h.pool_id)
+		dmg += dmg_of(h) * (1.0 + 0.3 * hero_skill_total(h, "ability_power")) * (1.0 + 0.5 * maxf(0.0, hero_skill_total(h, "speed_pct"))) * (1.0 + 0.08 * stage)
+		hp += max_hp(h) * (1.0 + 0.06 * stage)
 	dmg *= GameState.tactical_bonus()
 	var dodge := party_skill_total(party, "dodge_pct")
 	var mend := party_skill_total(party, "mend_pct")
@@ -529,6 +531,16 @@ func _power(heroes: Array, party_terms: bool) -> int:
 			mend = 0.0
 		for r in equipped_relics():
 			hp += r.hp
+		var els := {}   # Resonance (0.62): shared elements, as the fight applies them
+		for h in party:
+			if h.type != "":
+				els[h.type] = int(els.get(h.type, 0)) + 1
+		var n_e := int(els.get("Ember", 0))
+		dmg *= 1.12 if n_e >= 3 else (1.06 if n_e == 2 else 1.0)
+		var n_u := int(els.get("Umbral", 0))
+		dodge += 0.10 if n_u >= 3 else (0.05 if n_u == 2 else 0.0)
+		var n_v := int(els.get("Verdant", 0))
+		mend += 0.06 if n_v >= 3 else (0.03 if n_v == 2 else 0.0)
 	dmg *= 1.0 + maxf(ramp, -0.5)
 	# A party at the mend cap counts as it did at the old 0.4 cap, so the
 	# ranks' Recommended power keeps its scale (0.56).

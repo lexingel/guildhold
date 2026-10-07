@@ -387,6 +387,8 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 					break
 			if flawless:
 				flawless_wins += 1
+				if kind == "boss" and not state.get("auto_used", false):
+					flawless_bosses += 1
 				# Played by hand (no Auto) with no one down: a bonus on top.
 				if not state.get("auto_used", false) and hand_bonus_here(kind):
 					result["hand_bonus"] = maxi(1, int(round(int(result["coin"]) * GameData.HAND_BONUS)))
@@ -741,9 +743,13 @@ func _apply_hazard(dmg_scale: float, bonus_chance_override: float) -> void:
 		if absorbed > 0:
 			log.append(tr("Relic wards absorb %d of the hazard.") % absorbed)
 		var dmg: int = pv["total"]
+		if party.any(func(x): return x.pool_id == "pathfinder"):   # Twist (0.62): hazards 20% weaker
+			dmg = int(round(dmg * 0.8))
 		if dmg > 0 and party.size() > 0:
 			var per: float = float(dmg) / party.size()
 			for h in party:
+				if h.pool_id == "scavenger":   # Twist (0.62): hazards never hurt them
+					continue
 				h.hp = max(1 if hazards_nonlethal() else 0, int(round(h.hp - per)))
 				if h.hp <= 0:
 					knock_out(h)
@@ -893,6 +899,11 @@ func advance_node() -> void:
 
 func seal_rift() -> void:
 	note_milestone("first seal")
+	var roles_here := {}
+	for h in current_party():
+		roles_here[GameData.hero_role(h)] = true
+	for r in roles_here:
+		role_seals[r] = int(role_seals.get(r, 0)) + 1
 	_rescue_left_behind()
 	maybe_find_ledger_page(int(run.get("finale", 0)) > 0)
 	if not run.has("tower"):   # the story web: a fragment in the rift
@@ -1431,6 +1442,8 @@ func finish_run() -> void:
 		_drop_haul("fled")
 	_record_run(outcome)
 	_lose_left_behind()
+	for h in current_party():   # an evolution's XP boost lasts XP_BOOST_RUNS rift runs
+		h.xp_boost_runs = maxi(0, h.xp_boost_runs - 1)
 	run = {}
 	_clamp_hp_to_max()
 	pass_time()
@@ -1442,9 +1455,5 @@ func finish_run() -> void:
 ## (Rank F), so a player's first step is a rift, not the recruit board.
 func hire_starters() -> void:
 	for roles in [["warrior"], ["cleric"], ["ranger", "mage"]]:
-		for tries in 80:
-			var h := Combat.gen_hero("F", 1)
-			if GameData.hero_role(h) in roles:
-				heroes.append(h)
-				break
+		heroes.append(Combat.gen_recruit("F", str(roles[randi() % roles.size()])))
 	coins += weekly_wages()   # the founders pay their first week, so a new guild doesn't open in the red

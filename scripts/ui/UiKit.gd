@@ -45,7 +45,9 @@ var expanded_skill_tree_kind: String = ""   # "" = no tree section expanded, els
 var _skill_tree_closed := false   # the player hid the tree (it opens on its own otherwise)
 
 
-var evolve_picker_hero_id: String = ""   # "" = closed, else which hero's evolution-path picker is open
+var evolve_picker_hero_id: String = ""   # unused since 0.62 (evolving no longer picks a subclass)
+var _subclass_hero_id: String = ""       # the Training Yard's subclass panel: whose options are open
+var _codex_role: String = "warrior"      # Codex › Paths: which role's Paths are shown
 
 
 var expanded_slot: String = ""     #"<hero_id>:weapon:0"/"<hero_id>:gear:2" — which equip slot's picker is open (hero-scoped since the mid-rift Gear Up panel can show several heroes at once)
@@ -2044,3 +2046,8 @@ func _rarity_rank(rarity_id: String) -> int:
 ## can call it.
 func render() -> void:
 	pass
+
+
+## "abc" -> "Abc" (Path text is written to follow a label).
+func _cap(t: String) -> String:
+	return t.substr(0, 1).to_upper() + t.substr(1) if t != "" else t

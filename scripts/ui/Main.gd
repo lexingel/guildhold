@@ -331,6 +331,7 @@ func render() -> void:
 	if GameState.guild_name != "":
 		if not GameState.check_feature_unlocks().is_empty():
 			AudioManager.play_sfx(GameData.SFX_PATH["unlock"])
+		GameState.check_subclass_unlocks()
 	var newly_claimed := GameState.check_milestones()
 	if not newly_claimed.is_empty():
 		var ach := str(GameData.MILESTONES.filter(func(x): return str(x["id"]) == newly_claimed[0])[0]["label"]) if newly_claimed.size() == 1 else tr("%d achievements, see Records") % newly_claimed.size()
@@ -733,6 +734,7 @@ func _accord_choice(cv: VBoxContainer) -> void:
 var _retire_open := false
 var _legacy_pick: Array = []     # heroes picked to be remembered
 var _pending_gifts: Array = []   # founding gifts chosen with Laurels
+var _pending_carry: Array = []   # remembered subclass unlocks to carry, with Laurels (0.62)
 var _pending_colour := "crest"   # the banner colour picked at founding (BANNER_COLOURS)
 var _pending_founding := "free"  # the founding charter picked
 var _pending_oaths: Array = []   # oaths to swear at founding
@@ -966,6 +968,8 @@ func _founding_gifts() -> Control:
 	for g in GameData.LEGACY_GIFTS:
 		if _pending_gifts.has(g["id"]):
 			spent += int(g["cost"])
+	for sid in _pending_carry:
+		spent += GameData.carry_laurels(str(sid))
 	var head := _label(tr("Laurels: %d (from %d past guild%s)") % [have - spent, (GameState.legacy["guilds"] as Array).size(), _pl((GameState.legacy["guilds"] as Array).size())], 14)
 	head.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
 	col.add_child(head)
@@ -990,6 +994,28 @@ func _founding_gifts() -> Control:
 			render())
 		row.add_child(b)
 	col.add_child(row)
+	var carry: Array = GameState.carriable_subclasses()
+	if not carry.is_empty():
+		col.add_child(_label(tr("Subclasses past guilds unlocked: carry their training here"), 12, true))
+		var crow := HFlowContainer.new()
+		crow.add_theme_constant_override("h_separation", 6)
+		crow.add_theme_constant_override("v_separation", 6)
+		for sid in carry:
+			var cb := Button.new()
+			cb.toggle_mode = true
+			cb.button_pressed = _pending_carry.has(sid)
+			var cost := GameData.carry_laurels(str(sid))
+			cb.text = tr("%s · %d") % [tr(str(GameData.find_class(str(sid)).get("name", sid))), cost]
+			cb.disabled = not cb.button_pressed and cost > have - spent
+			cb.tooltip_text = tr("Twist: %s") % tr(str(GameData.SUBCLASS_TWIST.get(sid, ""))) if GameData.SUBCLASS_TWIST.has(sid) else tr("A Legend")
+			cb.pressed.connect(func(id=sid):
+				if _pending_carry.has(id):
+					_pending_carry.erase(id)
+				else:
+					_pending_carry.append(id)
+				render())
+			crow.add_child(cb)
+		col.add_child(crow)
 	return col
 
 
@@ -1892,6 +1918,8 @@ func _render_onboard(v: VBoxContainer) -> void:
 		GameState.refresh_recruit_pool()
 		GameState.apply_legacy_gifts(_pending_gifts)
 		_pending_gifts.clear()
+		GameState.carry_subclasses(_pending_carry)
+		_pending_carry.clear()
 		if _pending_skip:
 			GameState.skip_act_one()
 		_pending_skip = false
@@ -3219,6 +3247,15 @@ func _party_launch_bar() -> Control:
 	var pr := _power_readout(Combat.party_power(going), rec_power)
 	pr.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	info.add_child(pr)
+	var res_parts: Array[String] = []   # Resonance (0.62): shared elements
+	var counts := Combat.resonance_counts(going)
+	for el in counts:
+		if int(counts[el]) >= 2 and GameData.RESONANCE_TEXT.has(el):
+			res_parts.append(tr("%s ×%d: %s") % [tr(str(el)), int(counts[el]), tr(str(GameData.RESONANCE_TEXT[el][1 if int(counts[el]) >= 3 else 0]))])
+	if not res_parts.is_empty():
+		var rl := _wrap_label(tr("Resonance — %s") % " · ".join(res_parts), 12)
+		rl.add_theme_color_override("font_color", Palette.CRYSTALS)
+		info.add_child(rl)
 	var hurt: Array = going.filter(func(h): return h.hp < Combat.max_hp(h) * 0.5)
 	if pending_party.is_empty():
 		info.add_child(_label("Add at least one hero to the party.", 12, true))

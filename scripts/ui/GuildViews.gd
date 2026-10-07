@@ -490,7 +490,7 @@ func _guild_goals() -> Array:
 	var advice: Array = GameState.power_advice() if behind else []
 	if not advice.is_empty():
 		var a: Dictionary = advice[0]
-		var where: Callable = {"evolve": go_term.call("roster"), "recruit": go_term.call("recruits"), "drill": go_term.call("management"), "hall_work": go_term.call("management"), "forge": go_term.call("roster"), "relic": go_term.call("inventory"), "management": go_term.call("management"), "champion": go_term.call("champions")}.get(str(a["kind"]), go_term.call("roster"))
+		var where: Callable = {"evolve": go_term.call("roster"), "recruit": go_term.call("recruits"), "drill": go_term.call("management"), "hall_work": go_term.call("management"), "train": go_term.call("training"), "forge": go_term.call("roster"), "relic": go_term.call("inventory"), "management": go_term.call("management"), "champion": go_term.call("champions")}.get(str(a["kind"]), go_term.call("roster"))
 		out.append(["Grow", str(a["text"]), Palette.TEXT, where])
 	else:
 		out.append(["Grow", tr("Seal a Rank %s rift: better gear, more Essence") % tr(GameState.highest_open_rank()), Palette.TEXT, go_screen.call("rift_hall")])
@@ -1113,12 +1113,10 @@ func _camp_badges() -> Dictionary:
 		var reasons: Array[String] = []
 		if h.skill_points > 0:
 			reasons.append(tr("%d SP") % h.skill_points)
-		if h.level >= 10:
-			var choices := GameData.evolution_choices(GameData.find_class(h.pool_id))
-			if not choices.is_empty():
-				var nr := GameData.find_rank(str(choices[0]["rank"]))
-				if GameState.crystals >= int(nr["cost"]) and GameState.evolve_rank_gate(str(choices[0]["rank"])) == "":
-					reasons.append(tr("can evolve"))
+		if GameState.evolve_lock(h) == "":
+			reasons.append(tr("can evolve"))
+		if h.training.is_empty() and GameState.subclass_training_options(h).any(func(o): return str(o["lock"]) == ""):
+			reasons.append(tr("can train a subclass"))
 		for st in ["weapon", "gear"]:
 			if _first_free_slot(h, st) >= 0 and GameState.items.any(func(it): return it.equipped_to == "" and it.slot_type() == st and GameState.item_fits_hero(it, h)):
 				reasons.append(tr("empty %s slot") % tr(str(st)))
@@ -1348,7 +1346,15 @@ func _render_recruits(v: VBoxContainer) -> void:
 		mid.add_child(_label(h.name, 13))
 		mid.add_child(_label(tr("Rank %s %s · %d Gold · Power %d · %d HP · wage %d/week") % [tr(str(h.rank)), tr(str(h.cls_id.capitalize())), int(rank["cost"]), Combat.power_of(h), Combat.max_hp(h), GameState.wage_of(h)], 11, true))
 		mid.add_child(_recruit_traits(h))
-		mid.add_child(_rich_line(tr("Passive — ") + _passive_bb(h.pool_id), 10, true))
+		# 0.62: a base class; what a hire brings and which trainings it can start.
+		var brings := tr("Brings %d skill and %d attribute points") % [h.skill_points, h.attr_points] if h.skill_points + h.attr_points > 0 else tr("A fresh recruit")
+		var ri := GameData.rank_index(h.rank)
+		var ready_stages := 0
+		for st in range(1, 4):
+			if ri >= GameData.rank_index(str(GameData.STAGE_RANK[st])):
+				ready_stages = st
+		var trains := tr("trains a Path at Rank D") if ready_stages == 0 else tr("ready for stage %d training") % 1
+		mid.add_child(_label(tr("%s · %s") % [brings, trains], 10, true))
 		row.add_child(mid)
 		var left := GameState.offer_days_left(h)
 		var stay := _label(tr("Last day") if left <= 0 else (tr("Leaves tomorrow") if left == 1 else tr("Leaves in %d days") % left), 12, left > 1)
@@ -1503,7 +1509,9 @@ func _render_training_yard(v: VBoxContainer) -> void:
 			row.add_child(_hero_icon(h, 40))
 			col.add_child(_label(h.name.split(" the ")[0], 13))
 			var t: Dictionary = h.training
-			col.add_child(_label(tr("%s · day %d of %d") % [tr(str(GameData.ATTR_LABEL[str(t["program"])])), int(t["total"]) - int(t["left"]) + 1, int(t["total"])], 11, true))
+			var prog := str(t["program"])
+			var prog_name := tr(str(GameData.find_class(prog.trim_prefix("subclass:")).get("name", ""))) if prog.begins_with("subclass:") else tr(str(GameData.ATTR_LABEL.get(prog, prog)))
+			col.add_child(_label(tr("%s · day %d of %d") % [prog_name, int(t["total"]) - int(t["left"]) + 1, int(t["total"])], 11, true))
 			row.add_child(col)
 			var back := _button("Recall", func(id=h.id):
 				var refund := GameState.recall_training(id)
@@ -1523,6 +1531,7 @@ func _render_training_yard(v: VBoxContainer) -> void:
 	var free: Array = GameState.heroes.filter(func(h): return not h.is_champion and h.training.is_empty())
 	if free.is_empty():
 		return
+	_render_subclass_training(v, free)
 	v.add_child(_hsep())
 	v.add_child(_label(tr("Send a hero to train"), 14))
 	var room := GameState.training_free() > 0
@@ -1556,6 +1565,86 @@ func _render_training_yard(v: VBoxContainer) -> void:
 			db.tooltip_text = tr("%d day%s of %s: +%d point%s%s") % [d, tr(str(_pl(d))), tr(str(GameData.ATTR_LABEL[pick])), mini(d, GameData.ATTR_TRAIN_CAP - h.attr_trained), tr(str(_pl(mini(d, GameData.ATTR_TRAIN_CAP - h.attr_trained)))), tr(" and XP") if d >= 2 and h.level < GameState.train_level_cap() else ""]
 			row.add_child(db)
 		v.add_child(row)
+
+
+## Subclass training (0.62): heroes who've reached a stage's rank (D, B, S)
+## train into a subclass of a Path here. Pick a hero, then a subclass.
+func _render_subclass_training(v: VBoxContainer, free: Array) -> void:
+	var ready: Array = free.filter(func(h): return GameState.next_training_stage(h) > 0 and GameData.rank_index(h.rank) >= GameData.rank_index(str(GameData.STAGE_RANK[GameState.next_training_stage(h)])))
+	v.add_child(_hsep())
+	v.add_child(_label(tr("Subclass training"), 14))
+	v.add_child(_wrap_label(tr("At Rank D a hero can train into a Path's first subclass, at Rank B the second, at Rank S the third (or a Legend). New subclasses unlock with acts, Tower floors and deeds (Codex › Paths)."), 12, true))
+	if ready.is_empty():
+		v.add_child(_label(tr("No hero is ready yet: the first training opens at Rank D."), 12, true))
+		return
+	if not ready.any(func(h): return h.id == _subclass_hero_id):
+		_subclass_hero_id = ready[0].id
+	var pick_row := HFlowContainer.new()
+	pick_row.add_theme_constant_override("h_separation", 6)
+	pick_row.add_theme_constant_override("v_separation", 6)
+	for h in ready:
+		var hb := _button(tr("%s · Rank %s · stage %d") % [h.name.split(" the ")[0], tr(h.rank), GameState.next_training_stage(h)], func(id=h.id): _subclass_hero_id = id; render())
+		hb.toggle_mode = true
+		hb.button_pressed = h.id == _subclass_hero_id
+		pick_row.add_child(hb)
+	v.add_child(pick_row)
+	var hero: Hero = ready.filter(func(h): return h.id == _subclass_hero_id)[0]
+	var grid := GridContainer.new()
+	grid.columns = 1 if _narrow() else 2
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	for o in GameState.subclass_training_options(hero):
+		grid.add_child(_subclass_option_card(hero, o))
+	v.add_child(grid)
+
+
+func _subclass_option_card(h: Hero, o: Dictionary) -> PanelContainer:
+	var sid := str(o["id"])
+	var cls := GameData.find_class(sid)
+	var path: Dictionary = GameData.PATHS.get(str(o["path"]), {})
+	var lock := str(o["lock"])
+	var unlocked := GameState.subclass_unlocked(sid)
+	var card := PanelContainer.new()
+	card.theme_type_variation = &"CardPanel"
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var pic := _icon_trimmed(GameData.portrait_for_hero(str(cls.get("role", "")), sid), 48)
+	if not unlocked:
+		pic.modulate = Color(0.1, 0.08, 0.14, 0.9)
+	row.add_child(pic)
+	var col := _vbox(2)
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var title := tr("%s · %s") % [tr(str(cls.get("name", sid))), tr(str(path.get("name", "")))]
+	if GameData.is_legend(sid):
+		title = tr("%s · Legend") % tr(str(cls.get("name", sid)))
+	var nm := _label(title, 13)
+	if bool(o["change"]):
+		nm.text += tr(" (change Path)")
+	col.add_child(nm)
+	var what := ""
+	match int(o["stage"]):
+		1: what = tr("Rule, %s: %s") % [tr(str(path["rule"]["name"])), _cap(tr(str(path["rule"]["desc"])))]
+		2: what = tr("Technique, %s: %s") % [tr(str(path["technique"]["name"])), _cap(tr(str(path["technique"]["desc"])))]
+		3: what = (tr("Legend: %s") % _cap(tr(str(path.get("legend", ""))))) if GameData.is_legend(sid) else tr("Signature, %s: %s") % [tr(str(path["signature"]["name"])), _cap(tr(str(path["signature"]["desc"])))]
+	col.add_child(_wrap_label(what, 11, true))
+	if GameData.SUBCLASS_TWIST.has(sid):
+		var tw := _wrap_label(tr("Twist: %s") % tr(str(GameData.SUBCLASS_TWIST[sid])), 11)
+		tw.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+		col.add_child(tw)
+	var c: Dictionary = o["cost"]
+	var btn := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Train · %d Gold · %d Essence · %d days") % [int(c["gold"]), int(c["essence"]), int(c["days"])], func(id=h.id, pid=sid):
+		var err := GameState.start_subclass_training(id, pid)
+		_flavor_toast = err
+		render())
+	btn.disabled = lock != ""
+	btn.tooltip_text = lock
+	col.add_child(btn)
+	if lock != "":
+		col.add_child(_wrap_label(lock, 11, true))
+	row.add_child(col)
+	card.add_child(row)
+	return card
 
 
 ## "back in 2 runs" / "full after next run" — recovery in runs, not seconds.
@@ -1764,10 +1853,56 @@ func _bestiary_card(mname: String, tier: String) -> PanelContainer:
 	return card
 
 
+## Codex › Paths (0.62): every Path of a role with its moves, and every
+## subclass (open, or what unlocks its training). Twists on hover.
+func _render_compendium_paths(v: VBoxContainer) -> void:
+	v.add_child(_wrap_label("Heroes are hired as base classes and train into a Path at the Training Yard: stage 1 at Rank D, stage 2 at Rank B, stage 3 at Rank S. Each subclass is a stage of one Path with its own Twist. Unlocked subclasses are remembered; a new guild can carry them over with Laurels.", 12, true))
+	var role_row := HBoxContainer.new()
+	role_row.add_theme_constant_override("separation", 6)
+	for role in GameData.ROLE_KIND:
+		var rb := _button(tr(str(role).capitalize()), func(r=str(role)): _codex_role = r; render())
+		rb.toggle_mode = true
+		rb.button_pressed = _codex_role == role
+		role_row.add_child(rb)
+	v.add_child(role_row)
+	var known := 0
+	for sid in GameData.SUBCLASS_UNLOCK:
+		if GameState.subclass_unlocked(str(sid)):
+			known += 1
+	v.add_child(_label(tr("%d of %d subclasses unlocked") % [known, GameData.SUBCLASS_UNLOCK.size()], 12, true))
+	for pid in GameData.role_paths(_codex_role):
+		var p: Dictionary = GameData.PATHS[pid]
+		var card := PanelContainer.new()
+		card.theme_type_variation = &"CardPanel"
+		var col := _vbox(3)
+		var nm := _label(tr("%s — %s") % [tr(str(p["name"])), tr(str(p["blurb"]))], 15)
+		nm.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+		col.add_child(nm)
+		for ln in [["Rule", p["rule"], 1], ["Technique", p["technique"], 2], ["Signature", p["signature"], 3]]:
+			col.add_child(_wrap_label(tr("Stage %d · %s, %s: %s") % [int(ln[2]), tr(str(ln[0])), tr(str(ln[1]["name"])), _cap(tr(str(ln[1]["desc"])))], 11))
+		col.add_child(_wrap_label(tr("Legend (%s): %s") % [tr(str(GameData.find_class(str(GameData.LEGENDS[_codex_role]))["name"])), _cap(tr(str(p["legend"])))], 11, true))
+		var subs := HFlowContainer.new()
+		subs.add_theme_constant_override("h_separation", 6)
+		subs.add_theme_constant_override("v_separation", 4)
+		for st in 3:
+			for sid in p["stages"][st]:
+				var open := GameState.subclass_unlocked(str(sid))
+				var chip := _label(tr("%s %s") % [tr(str(GameData.find_class(str(sid))["name"])), "I".repeat(st + 1)] + ("" if open else tr(" (locked)")), 11, not open)
+				chip.tooltip_text = tr("Twist: %s") % tr(str(GameData.SUBCLASS_TWIST.get(sid, "")))
+				if not open:
+					chip.tooltip_text += "\n" + tr("Unlock: %s") % GameState.subclass_unlock_text(str(sid))
+				chip.mouse_filter = Control.MOUSE_FILTER_STOP
+				subs.add_child(chip)
+		col.add_child(subs)
+		card.add_child(col)
+		v.add_child(card)
+
+
 func _compendium_tab_row(v: VBoxContainer) -> void:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	for entry in [["chronicle", "Chronicle"], ["truths", "Truths"], ["accounts", "Accounts"], ["items", "Items"], ["relics", "Relics"], ["crafting", "Crafting"], ["systems", "Systems"]]:
+	var row := HFlowContainer.new()   # wraps on the phone canvas
+	row.add_theme_constant_override("h_separation", 8)
+	row.add_theme_constant_override("v_separation", 6)
+	for entry in [["chronicle", "Chronicle"], ["truths", "Truths"], ["accounts", "Accounts"], ["paths", "Paths"], ["items", "Items"], ["relics", "Relics"], ["crafting", "Crafting"], ["systems", "Systems"]]:
 		var tid: String = entry[0]
 		var tlabel: String = entry[1]
 		var btn := _icon_button("", tlabel, func(id=tid):
@@ -1790,6 +1925,7 @@ func _render_compendium(v: VBoxContainer) -> void:
 		"items": _render_compendium_items(v)
 		"relics": _render_compendium_relics(v)
 		"crafting": _render_compendium_crafting(v)
+		"paths": _render_compendium_paths(v)
 		_: _render_compendium_systems(v)
 
 

@@ -59,6 +59,79 @@ func _render_roster(v: VBoxContainer) -> void:
 	right.add_child(_hero_card(still_here[0]))
 
 
+## The hero's Path (0.62): its rule, Technique and Signature moment (dim
+## until their stage is trained) and the subclass's Twist; a base class says
+## where its Path comes from.
+func _path_panel(cv: VBoxContainer, h: Hero) -> void:
+	if h.is_champion:
+		return
+	cv.add_child(_hsep())
+	var pid := h.path if h.path != "" else GameData.path_of(h.pool_id)
+	if pid == "" or not GameData.PATHS.has(pid):
+		cv.add_child(_label(tr("Base class · no Path yet"), 13))
+		cv.add_child(_wrap_label(tr("At Rank D this hero can train into a Path at the Training Yard: a rule that changes how they fight, then a Technique at Rank B and a Signature moment at Rank S."), 11, true))
+		return
+	var p: Dictionary = GameData.PATHS[pid]
+	var stage := GameData.subclass_stage(h.pool_id)
+	var head := _label(tr("Path: %s — %s") % [tr(str(p["name"])), tr(str(p["blurb"]))], 13)
+	head.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+	cv.add_child(head)
+	var lines := [[1, "Rule", p["rule"]], [2, "Technique", p["technique"]], [3, "Signature", p["signature"]]]
+	for ln in lines:
+		var have: bool = stage >= int(ln[0])
+		var d: Dictionary = ln[2]
+		var t := _wrap_label(tr("%s, %s: %s") % [tr(str(ln[1])), tr(str(d["name"])), _cap(tr(str(d["desc"])))] + ("" if have else tr("  (stage %d, trained at Rank %s)") % [int(ln[0]), tr(str(GameData.STAGE_RANK[int(ln[0])]))]), 11, not have)
+		cv.add_child(t)
+	if GameData.is_legend(h.pool_id):
+		cv.add_child(_wrap_label(tr("Legend: %s") % _cap(tr(str(p["legend"]))), 11))
+	if GameData.SUBCLASS_TWIST.has(h.pool_id):
+		var tw := _wrap_label(tr("Twist (%s): %s") % [tr(str(GameData.find_class(h.pool_id).get("name", ""))), tr(str(GameData.SUBCLASS_TWIST[h.pool_id]))], 11)
+		tw.add_theme_color_override("font_color", Palette.COINS)
+		cv.add_child(tw)
+
+
+## Rank, level and evolving (0.62): XP to the next level, and at level 10 the
+## Evolve button with its Gold and Essence; a pointer to the Training Yard
+## when a subclass training is open for this hero.
+func _rank_panel(cv: VBoxContainer, h: Hero) -> void:
+	if h.is_champion:
+		return
+	cv.add_child(_hsep())
+	var nr := GameState.next_rank_of(h)
+	var xp_line := tr("Rank %s · Lv%d") % [tr(h.rank), h.level]
+	if h.level < 10:
+		xp_line += tr(" · %d/%d XP to Lv%d") % [h.xp, Combat.xp_to_next(h.level, h.rank), h.level + 1]
+	elif nr != "":
+		xp_line += tr(" · ready to evolve to Rank %s") % tr(nr)
+	if h.xp_boost_runs > 0:
+		xp_line += tr(" · +%d%% XP for %d more run%s") % [int(GameData.XP_BOOST * 100), h.xp_boost_runs, tr(str(_pl(h.xp_boost_runs)))]
+	cv.add_child(_label(xp_line, 12))
+	if h.seasoned > 0:
+		cv.add_child(_label(tr("Seasoned: +%d%% HP and damage for %d rank%s climbed") % [int(round(GameData.SEASONED_PER_RANK * 100 * h.seasoned)), h.seasoned, tr(str(_pl(h.seasoned)))], 11, true))
+	if nr != "" and h.level >= 10 and screen != "rift_run":
+		var c := GameState.evolve_cost(h)
+		var lock := GameState.evolve_lock(h)
+		var eb := _icon_button("res://assets/skills/star.png", tr("Evolve to Rank %s · %d Gold · %d Essence") % [tr(nr), int(c[0]), int(c[1])], func(id=h.id):
+			var err := GameState.evolve_hero(id)
+			if err != "":
+				_flavor_toast = err
+			else:
+				_flavor_toast = GameData.narrative_line("hero_evolved")
+			render())
+		eb.disabled = lock != ""
+		eb.tooltip_text = lock if lock != "" else tr("Back to level 1 at Rank %s: stronger for good, +%d%% XP for %d rift runs.") % [tr(nr), int(GameData.XP_BOOST * 100), GameData.XP_BOOST_RUNS]
+		cv.add_child(eb)
+		if lock != "":
+			cv.add_child(_label(lock, 11, true))
+	var st := GameState.next_training_stage(h)
+	if st > 0 and GameData.rank_index(h.rank) >= GameData.rank_index(str(GameData.STAGE_RANK[st])) and screen != "rift_run":
+		cv.add_child(_icon_button("res://assets/skills/sword_a.png", tr("Train stage %d at the Training Yard") % st, func(id=h.id):
+			_subclass_hero_id = id
+			screen = "camp"
+			term_tab = "training"
+			render()))
+
+
 ## A hero's page: header, tabs (Hero · Skills · History) and the open tab.
 ## The Roster shows it beside the list; a rift shows it for the party
 ## (see _render_rift_hero_page), where camp-only actions stay hidden.
@@ -87,22 +160,16 @@ func _hero_card(h: Hero) -> PanelContainer:
 	# Tabs (Overview · Gear · Skills · History) instead of one long card that
 	# stacked every section. A dot marks a tab with something to act on:
 	# unequipped gear that fits, or unspent SP / an available evolution.
-	var evolve_choices: Array = []
-	if h.level >= 10:
-		var cur_cls := GameData.find_class(h.pool_id)
-		if not cur_cls.is_empty():
-			evolve_choices = GameData.evolution_choices(cur_cls)
+	var can_grow := GameState.evolve_lock(h) == "" or GameState.subclass_training_options(h).any(func(o): return str(o["lock"]) == "")
 	var fitting_items: Array[Item] = []
 	fitting_items.assign(GameState.items.filter(func(it): return it.equipped_to == "" and GameState.item_fits_hero(it, h)))
 	if roster_tab in ["overview", "gear"]:
 		roster_tab = "hero"
 	if expanded_slot.begins_with(h.id + ":"):
 		roster_tab = "hero"
-	if evolve_picker_hero_id == h.id:
-		roster_tab = "skills"
 	var tab_defs := [
 		["hero", "Hero", h.attr_points > 0 or fitting_items.any(func(it): return _first_free_slot(h, it.slot_type()) >= 0 and GameState.attr_req_met(it, h))],
-		["skills", "Skills", h.skill_points > 0 or not evolve_choices.is_empty()],
+		["skills", "Skills", h.skill_points > 0 or can_grow],
 		["history", "History", false],
 	]
 	var tab_row := HBoxContainer.new()
@@ -111,7 +178,7 @@ func _hero_card(h: Hero) -> PanelContainer:
 		var tb := _button(tr(str(td[1])) + ("  •" if td[2] else ""), func(t=str(td[0])):
 			roster_tab = t
 			if t == "skills" and expanded_skill_tree_kind == "":
-				expanded_skill_tree_kind = h.innate_kind
+				expanded_skill_tree_kind = str(GameData.hero_tree_summaries(h)[-1]["kind"])
 			render()
 		)
 		tb.toggle_mode = true
@@ -130,20 +197,26 @@ func _hero_card(h: Hero) -> PanelContainer:
 				cv.add_child(_rich_line(tr("Build: ") + build, 12, true))
 			cv.add_child(_hsep())
 			var arch := Combat.hero_main_arch(h)
-			for sk in GameData.ROLE_SKILLS.get(h.cls_id, []):
+			var shown_skills: Array = (GameData.ROLE_SKILLS.get(h.cls_id, []) as Array).duplicate()
+			var tech := GameData.hero_technique(h)   # stage 2: the Path's Technique takes the second slot
+			if not tech.is_empty() and shown_skills.size() >= 2:
+				shown_skills[1] = tech
+			for sk in shown_skills:
 				var sk_row := HBoxContainer.new()
 				sk_row.add_theme_constant_override("separation", 8)
 				var sic := _icon(str(sk["icon"]), 28)
-				if h.level < int(sk["level"]):
+				var sk_rank := 1 if int(sk["level"]) > 1 else 0   # 0.62: the second skill comes at Rank E
+				if GameData.rank_index(h.rank) < sk_rank:
 					sic.modulate = Color(1, 1, 1, 0.4)
 				sk_row.add_child(sic)
 				var sk_mid := _vbox(0)
 				sk_mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				sk_mid.add_child(_label(tr("Skill: %s · %d Momentum%s") % [tr(str(sk["name"])), int(sk["cost"]), tr(str("" if str(sk["row"]) == "any" else tr(" · %s row") % tr(str(sk["row"]))))], 12))
+				var cost_txt := tr("costs HP") if int(sk["cost"]) == 0 else tr("%d Momentum") % int(sk["cost"])
+				sk_mid.add_child(_label(tr("%s: %s · %s%s") % [tr("Technique") if sk.get("technique", false) else tr("Skill"), tr(str(sk["name"])), cost_txt, tr(str("" if str(sk["row"]) == "any" else tr(" · %s row") % tr(str(sk["row"]))))], 12))
 				sk_mid.add_child(_wrap_label(tr(str(sk["desc"])) + (tr(" %s twist: %s.") % [tr(str(GameData.ARCHETYPES[arch])), tr(str(GameData.ARCH_TWIST[arch]))] if arch != "" else ""), 11, true))
 				sk_row.add_child(sk_mid)
-				if h.level < int(sk["level"]):
-					sk_row.add_child(_label(tr("Unlocks at Lv%d") % int(sk["level"]), 11, true))
+				if GameData.rank_index(h.rank) < sk_rank:
+					sk_row.add_child(_label(tr("Unlocks at Rank %s") % tr(str(GameData.RANKS[sk_rank]["id"])), 11, true))
 				cv.add_child(sk_row)
 			if GameData.SUBCLASS_ABILITIES.has(h.pool_id):
 				var ab: Dictionary = GameData.SUBCLASS_ABILITIES[h.pool_id]
@@ -155,9 +228,7 @@ func _hero_card(h: Hero) -> PanelContainer:
 				ab_mid.add_child(_label(tr("Ability: %s") % tr(str(ab["name"])), 12))
 				ab_mid.add_child(_wrap_label(GameData.ability_desc(h.pool_id), 11, true))
 				ab_row.add_child(ab_mid)
-				if h.level < 3:
-					ab_row.add_child(_label("Unlocks at Lv3", 11, true))
-				elif h.ability_awakened:
+				if h.ability_awakened:
 					ab_row.add_child(_label(tr("Awakened (%s)") % tr(str(GameData.awakening_bonus_text(h.pool_id))), 11, true))
 				else:
 					ab_row.add_child(_icon_button("res://assets/skills/gem_red.png", tr("Awaken (%d SP, %s)") % [GameData.ABILITY_AWAKENING_COST, tr(str(GameData.awakening_bonus_text(h.pool_id)))], func(id=h.id):
@@ -167,41 +238,8 @@ func _hero_card(h: Hero) -> PanelContainer:
 						render()
 					))
 				cv.add_child(ab_row)
-				if not evolve_choices.is_empty() or h.prior_pool_id != "":
-					cv.add_child(_label("Evolving replaces this Ability, but skill trees carry over.", 10, true))
-			# Evolving costs Crystals; the B/A/S jump also needs a rift of that rank
-			# sealed once. The player picks the path: "Evolve" opens every candidate
-			# with what it would change, each with its own confirm button.
-			if not evolve_choices.is_empty() and screen != "rift_run":   # evolving waits for camp
-				var next_rank_id: String = evolve_choices[0]["rank"]
-				var next_rank := GameData.find_rank(next_rank_id)
-				var gate := GameState.evolve_rank_gate(next_rank_id)
-				var evolve_label := tr("Evolve (%d Essence)") % int(next_rank["cost"]) if gate == "" else tr("Evolve — %s") % tr(str(gate))
-				var picking := evolve_picker_hero_id == h.id
-				cv.add_child(_icon_button("res://assets/skills/star.png", "Hide evolution paths" if picking else evolve_label, func(id=h.id):
-					evolve_picker_hero_id = "" if evolve_picker_hero_id == id else id
-					render()
-				))
-				if picking:
-					for c in evolve_choices:
-						var ab: Dictionary = GameData.SUBCLASS_ABILITIES.get(str(c["id"]), {})
-						var lines: Array[String] = [
-							tr("[b]%s[/b] — Rank %s, %s") % [tr(str(c["name"])), tr(str(c["rank"])), tr(str(c["type"]))],
-							tr("Main stat: %s") % tr(str(Combat.describe_skill(str(c["kind"]), Combat.hero_innate_value(c, GameData.rank_index(str(c["rank"])))))),
-							tr("Passive: %s") % tr(str(_passive_bb(str(c["id"])))),
-						]
-						if not ab.is_empty():
-							lines.append(tr("Ability: %s — %s") % [tr(str(ab["name"])), GameData.ability_desc(str(c["id"]))])
-						lines.append(str(c["flavor"]))
-						cv.add_child(_rich_info_row("\n".join(lines), 11, [_icon_button("res://assets/skills/star.png", "Choose", func(id=h.id, pid=str(c["id"])):
-							var err := GameState.evolve_hero(id, pid)
-							if err != "":
-								push_warning(err)
-							else:
-								evolve_picker_hero_id = ""
-								_flavor_toast = GameData.narrative_line("hero_evolved")
-							render()
-						)], _icon_trimmed(GameData.portrait_for_hero(str(c["role"]), str(c["id"])), 32) if GameData.portrait_for_hero(str(c["role"]), str(c["id"])) != "" else null))
+			_path_panel(cv, h)
+			_rank_panel(cv, h)
 
 			# One pill per tree the hero has unlocked — evolving keeps every past
 			# stage's tree reachable instead of replacing it, so a heavily-evolved

@@ -123,6 +123,7 @@ func start_combat(party: Array[Hero], kind: String, diff: Dictionary, floor_idx:
 		"round_num": 0, "log": log,
 		"pending_actions": pending_actions,
 	}
+	_pp_start(state)   # Paths (0.62): per-hero counters, Resonance
 	# Seed round 1's turn order immediately so the combat screen's very first
 	# render already knows whose turn it is, instead of needing a resolve_turn
 	# call just to find out.
@@ -130,10 +131,10 @@ func start_combat(party: Array[Hero], kind: String, diff: Dictionary, floor_idx:
 	return state
 
 
-## True if `h` has an Ability at all (subclass qualifies + level 3+) — used to
+## True if `h` has an Ability at all (a trained subclass, 0.62) — used to
 ## gate both the combat action-button row and the Ability's cooldown ticking.
 static func qualifies_for_ability(h: Hero) -> bool:
-	return GameData.SUBCLASS_ABILITIES.has(h.pool_id) and h.level >= 3
+	return GameData.SUBCLASS_ABILITIES.has(h.pool_id)   # 0.62: comes with the subclass (base classes have none)
 
 
 ## "tonic:<id>" -> id ("tonic" alone is a Healing Tonic).
@@ -151,7 +152,7 @@ func action_cost(action: String) -> Array:
 	if action == "ability":
 		return [GameData.ABILITY_MOMENTUM_COST, "any"]
 	if action.begins_with("skill:"):
-		var sk := GameData.find_role_skill(action.substr(6))
+		var sk := GameData.find_skill_def(action.substr(6))
 		return [int(sk.get("cost", 0)), str(sk.get("row", "any"))]
 	return [0, "any"]
 
@@ -160,14 +161,15 @@ func action_cost(action: String) -> Array:
 ## and the auto-player).
 func action_block(state: Dictionary, h: Hero, action: String) -> String:
 	if action == "ability" and not qualifies_for_ability(h):
-		return tr("Unlocks at level 3")
-	if action.begins_with("skill:") and not GameData.hero_role_skills(h).any(func(sk): return "skill:" + str(sk["id"]) == action):
+		return tr("Comes with a subclass")
+	if action.begins_with("skill:") and not GameData.hero_skills(h).any(func(sk): return "skill:" + str(sk["id"]) == action):
 		return tr("Not learned yet")
 	var c := action_cost(action)
 	if str(c[1]) != "any" and (str(c[1]) == "back") != (h.formation == "back"):
 		return tr("%s row only") % tr(str(c[1])).capitalize()
-	if int(state.get("momentum", 0)) < int(c[0]):
-		return tr("Needs %d Momentum") % int(c[0])
+	var need := int(c[0]) - (1 if action == "ability" and state.get("_res_arcane", false) else 0)   # Resonance: Arcane x3
+	if int(state.get("momentum", 0)) < need:
+		return tr("Needs %d Momentum") % need
 	return ""
 
 
@@ -286,6 +288,9 @@ func auto_action(state: Dictionary, h: Hero) -> Dictionary:
 		var at := _ability_target(state, h)
 		if at >= 0:
 			return {"action": "ability", "target": at}
+	var tech_act := _pp_auto(state, h)   # a Path's Technique when it fits the moment
+	if not tech_act.is_empty():
+		return tech_act
 	# A Healing Tonic for a badly hurt ally when no heal skill is ready.
 	if GameState.tonic_count("healing") > 0:
 		var worst: Hero = null
@@ -296,7 +301,7 @@ func auto_action(state: Dictionary, h: Hero) -> Dictionary:
 			return {"action": "tonic:healing", "target": 0, "ally": worst.id}
 	# Spend on a damage skill only with enough left over for someone's Ability.
 	if int(state.get("momentum", 0)) >= GameData.ABILITY_MOMENTUM_COST + 2:
-		for sk in GameData.hero_role_skills(h):
+		for sk in GameData.hero_skills(h):
 			if str(sk["effect"]) in ["pierce", "strike", "backstab", "volley"] and ok.call("skill:" + str(sk["id"])):
 				return {"action": "skill:" + str(sk["id"]), "target": tgt}
 	return {"action": "attack", "target": tgt}
@@ -469,11 +474,14 @@ func _compute_turn_order(state: Dictionary) -> Array:
 	var chilled: Dictionary = state.get("_chilled", {})
 	for h in state["party"]:
 		if h.hp > 0:
-			entries.append({"type": "hero", "id": h.id, "_spd": spd_of(h) * (0.5 if chilled.has(h.id) else 1.0) + randf() * 0.01})
+			entries.append({"type": "hero", "id": h.id, "_spd": (0.0 if _tw(h, "bulwark") and _pa(h) == "shieldwall" else spd_of(h)) * (0.5 if chilled.has(h.id) else 1.0) + randf() * 0.01})
 	var monsters: Array = state["monsters"]
 	for i in monsters.size():
 		if float(monsters[i]["hp"]) > 0:
-			entries.append({"type": "monster", "id": i, "_spd": float(monsters[i].get("spd", 10)) + randf() * 0.01})
+			var mspd := float(monsters[i].get("spd", 10)) * (1.0 - float(state.get("_res_frost", 0.0))) * (0.5 if int(monsters[i].get("_slow", 0)) > 0 else 1.0)
+			if int(monsters[i].get("_snared", 0)) > 0:
+				mspd = 0.0   # snared (Trapper): acts last
+			entries.append({"type": "monster", "id": i, "_spd": mspd + randf() * 0.01})
 			if (monsters[i].get("affixes", []) as Array).has("hasted"):
 				entries.append({"type": "monster", "id": i, "_spd": float(monsters[i].get("spd", 10)) * 0.4 + randf() * 0.01})
 	entries.sort_custom(func(a, b): return float(a["_spd"]) > float(b["_spd"]))
@@ -604,6 +612,7 @@ func _start_round(state: Dictionary) -> void:
 				intents[mi] = _roll_intent(state, mi, living)
 	state["intents"] = intents
 	state["turn_idx"] = 0
+	_pp_round_start(state)
 
 
 ## What monster `mi` will do this round: attack (or wind up / land a heavy
@@ -660,7 +669,7 @@ func _hit_base(state: Dictionary, h: Hero, ti: int, mult: float) -> float:
 		"opener":
 			if not state.get("_opened", {}).has(h.id):
 				mult *= 1.0 + GameData.TWIST_OPENER
-	return dmg_of(h) / float(state["raw_sum"]) * float(state["team_dmg_base"]) * float(state.get("_attack_mult", 1.0)) * formation_mult * mult * weaken * marked * (1.0 + hero_cond_stat(h, "dmg_pct", state, {"target": monsters[ti]}))
+	return dmg_of(h) / float(state["raw_sum"]) * float(state["team_dmg_base"]) * float(state.get("_attack_mult", 1.0)) * formation_mult * mult * weaken * marked * (1.0 + hero_cond_stat(h, "dmg_pct", state, {"target": monsters[ti]})) * _pp_dmg_mult(state, h, ti)
 
 
 ## Whether a plain Attack from `h` would bring foe `ti` down, before chance
@@ -680,6 +689,11 @@ func attack_would_kill(state: Dictionary, h: Hero, ti: int) -> bool:
 func _hero_hit(state: Dictionary, h: Hero, ti: int, mult: float, pierce: bool = false) -> float:
 	var log: Array[String] = state["log"]
 	var monsters: Array = state["monsters"]
+	var was_alive := float(monsters[ti]["hp"]) > 0.0
+	pierce = pierce or _pp_pierce(state, h, ti)
+	if state.get("_res_frost_first", false) and not state.get("_res_frost_used", false):
+		state["_res_frost_used"] = true
+		monsters[ti]["_slow"] = 2   # Resonance: Frost x3 chills the fight's first foe hit
 	var hit := {"target": monsters[ti]}
 	hit["dealt"] = _hit_base(state, h, ti, mult)
 	_fire("before_hit", state, h, hit)
@@ -709,6 +723,7 @@ func _hero_hit(state: Dictionary, h: Hero, ti: int, mult: float, pierce: bool = 
 	if steal > 0.0 and dealt > 0.0 and h.hp > 0:
 		h.hp = mini(max_hp(h), h.hp + int(round(dealt * steal)))
 	_fire("after_hit", state, h, hit)
+	_pp_after_hit(state, h, ti, dealt, was_alive)
 	return dealt
 
 
@@ -718,7 +733,8 @@ func _use_role_skill(state: Dictionary, h: Hero, sk: Dictionary, target_idx: int
 	var party: Array[Hero] = state["party"]
 	var monsters: Array = state["monsters"]
 	var val := float(sk["value"])
-	log.append(tr("%s uses %s!") % [tr(str(h.name)), tr(str(sk["name"]))])
+	if not sk.get("technique", false):   # a Technique logs its own line
+		log.append(tr("%s uses %s!") % [tr(str(h.name)), tr(str(sk["name"]))])
 	_tally(state, "skills")
 	if target_idx < 0 or target_idx >= monsters.size() or float(monsters[target_idx]["hp"]) <= 0:
 		target_idx = _first_living_monster_idx(monsters)
@@ -760,6 +776,9 @@ func _burn_foe(state: Dictionary, i: int, per_round: float, rounds: int) -> void
 func _role_skill_effect(state: Dictionary, h: Hero, sk: Dictionary, target_idx: int, val: float, living: Array[Hero]) -> void:
 	var log: Array[String] = state["log"]
 	var monsters: Array = state["monsters"]
+	if str(sk["effect"]).begins_with("tech:"):   # a Path's Technique (0.62)
+		_pp_technique(state, h, str(sk["effect"]).substr(5), target_idx)
+		return
 	match str(sk["effect"]):
 		"bash":
 			if target_idx >= 0:
@@ -805,8 +824,7 @@ func _role_skill_effect(state: Dictionary, h: Hero, sk: Dictionary, target_idx: 
 				for x in living:
 					if float(x.hp) / max_hp(x) < float(low.hp) / max_hp(low):
 						low = x
-				var healed: int = mini(max_hp(low) - low.hp, int(round(max_hp(low) * val)))
-				low.hp += healed
+				var healed: int = _pp_heal(state, low, int(round(max_hp(low) * val)))
 				log.append(tr("%s is healed for %d.") % [tr(str(low.name)), healed])
 		"sanctuary":
 			var shields: Dictionary = state["hero_shields"]
@@ -848,10 +866,15 @@ func _resolve_hero_action(state: Dictionary, h: Hero) -> void:
 		if target_idx >= 0:
 			var reach := GameData.BACK_ROW_MELEE_MULT if h.formation == "back" and GameData.MELEE_ROLES.has(h.cls_id) else 1.0
 			_hero_hit(state, h, target_idx, reach)
+			var pp := _pp(state, h)
+			if int(pp.get("sw_double", 0)) > 0:   # Second Wind (Scrapper): attacks hit twice
+				pp["sw_double"] = int(pp["sw_double"]) - 1
+				if float(monsters[target_idx]["hp"]) > 0:
+					_hero_hit(state, h, target_idx, reach)
 			gain_momentum(state, 1)
 	elif action.begins_with("skill:"):
 		gain_momentum(state, -int(action_cost(action)[0]))
-		_use_role_skill(state, h, GameData.find_role_skill(action.substr(6)), int(act.get("target", 0)))
+		_use_role_skill(state, h, GameData.find_skill_def(action.substr(6)), int(act.get("target", 0)))
 	elif action == "defend":
 		state["_defending"][h.id] = true
 	elif action == "swap":
@@ -896,7 +919,7 @@ func _resolve_hero_action(state: Dictionary, h: Hero) -> void:
 			GameState.run["champion_calls"] = int(GameState.run.get("champion_calls", 0)) + 1
 			GameState.run["champion_call_used"] = true
 		else:
-			gain_momentum(state, -GameData.ABILITY_MOMENTUM_COST)
+			gain_momentum(state, -(GameData.ABILITY_MOMENTUM_COST - (1 if state.get("_res_arcane", false) else 0)))
 			ab = GameData.SUBCLASS_ABILITIES[h.pool_id]
 		var eff: String = ab["effect"]
 		var val: float = float(ab["value"])
@@ -921,7 +944,7 @@ func _resolve_hero_action(state: Dictionary, h: Hero) -> void:
 			"mend_burst":
 				for h2 in party:
 					if h2.hp > 0:
-						h2.hp = min(max_hp(h2), h2.hp + int(round(max_hp(h2) * val)))
+						_pp_heal(state, h2, int(round(max_hp(h2) * val)))
 				log.append(tr("The party mends."))
 			"monster_dmg_mult":
 				for m in monsters:
@@ -1172,6 +1195,7 @@ func _resolve_hero_action(state: Dictionary, h: Hero) -> void:
 	var kill_map: Dictionary = state.get("_kills", {})
 	kill_map[h.id] = int(kill_map.get(h.id, 0)) + kills
 	state["_kills"] = kill_map
+	_pp_after_action(state, h, action)
 
 
 ## One living monster's retaliation — the per-monster body of the old batched
@@ -1355,11 +1379,17 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 				log.append(tr("%s takes the blow meant for %s!") % [tr(str(guard.name)), tr(str(target.name))])
 				_proc(state, guard, "Guard!")
 				target = guard
+			else:
+				target = _pp_retarget(state, m, target)   # Paths: Feint, Vanish, Untouchable
 	var mech: Dictionary = m.get("mechanic", {})
 	var mech2: Dictionary = m.get("mechanic2", {})
 	var ability: Dictionary = m.get("ability", {})
 	var back: float = _monster_hit(m, round_num) * mult
 	var heavy_blow: bool = m.get("_charged", false)
+	if heavy_blow and not m.get("_prophesied", false) and _pp_cancel_heavy(state, m):   # Augury's Foresight
+		m["_charged"] = false
+		m["_windup_cd"] = 1
+		return
 	if heavy_blow:
 		m["_charged"] = false
 		m["_windup_cd"] = 1
@@ -1371,14 +1401,15 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 		back *= 1.0 - float(state.get("_taunt_cut", 0.0))
 	if state.get("_branded", {}).has(target.id):
 		back *= 1.0 + GameData.BRAND_TAKEN
-	var undying: bool = state.get("_undying", {}).has(target.id)
+	var undying: bool = state.get("_undying", {}).has(target.id) or (int(_pp(state, target).get("mist", 0)) > 0 and _tw(target, "ashen-templar"))
 	if undying:
 		back *= 0.5
+	back *= _pp_taken_mult(state, m, target)
 	var warded: bool = (mech.get("id") == "warded" or mech2.get("id") == "warded") and round_num <= 2
 	if state["_defending"].has(target.id):
 		back *= 0.5
 		gain_momentum(state, 2 if heavy_blow else 1)
-	var effective_dodge: float = float(state["dodge"]) + float(state.get("_smoke", 0.0)) + hero_cond_stat(target, "dodge_pct", state, {"attacker": m})
+	var effective_dodge: float = float(state["dodge"]) + float(state.get("_smoke", 0.0)) + hero_cond_stat(target, "dodge_pct", state, {"attacker": m}) + _pp_dodge(state, target, m)
 	var evaded := false
 	if state.get("_evade_next", {}).has(target.id):
 		state["_evade_next"].erase(target.id)
@@ -1392,6 +1423,12 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 		back = 0.0
 	if evaded or heavy_hit:
 		_fire("evade_or_heavy", state, target, {"attacker": m})
+	if back > 0.0 and aimed:
+		back = _pp_guardian_share(state, m, target, back)   # Shieldwall's Guardian takes a share
+	if back > 0.0:
+		var lw := _pp_last_wall(state, target, int(round(back - float(state["hero_shields"].get(target.id, 0.0)))))
+		if lw != target:
+			target = lw   # Last Wall: the guardian takes the blow that would have felled an ally
 	var shields: Dictionary = state["hero_shields"]
 	if back > 0.0 and float(shields.get(target.id, 0.0)) > 0.0:
 		var have: float = float(shields[target.id])
@@ -1399,8 +1436,11 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 		shields[target.id] = have - absorbed
 		back -= absorbed
 		log.append(tr("%s's shield absorbs %d damage.") % [tr(str(target.name)), int(round(absorbed))])
+		_pp_ward_struck(state, i, absorbed, have - absorbed <= 0.0)
+	var landed := 0
 	if back > 0.0:
 		var dealt_back: int = int(round(back))
+		landed = dealt_back
 		var is_last_hero := alive_now.size() == 1
 		if dealt_back >= target.hp and is_last_hero and not state["wipe_guard_used"] and float(state["wipe_guard"]) > 0.0:
 			state["wipe_guard_used"] = true
@@ -1435,6 +1475,7 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 			if target.hp <= 0:
 				log.append(tr("%s is knocked out!") % tr(str(target.name)))
 				_fire("ally_down", state, target)
+	_pp_after_struck(state, i, target, landed, evaded)
 	var rip: Dictionary = state.get("_riposte", {}).get(target.id, {})
 	if not rip.is_empty() and target.hp > 0 and float(m["hp"]) > 0:
 		m["hp"] = float(m["hp"]) - round(float(rip["dmg"]))
@@ -1686,12 +1727,13 @@ func _end_round_effects(state: Dictionary) -> void:
 		for h in living:
 			if h.hp > 0 and h.hp < max_hp(h):
 				var heal: int = max(1, int(round(max_hp(h) * float(state["mend"]))))
-				h.hp = min(max_hp(h), h.hp + heal)
+				_pp_heal(state, h, heal)
 				mended = true
 		if mended:
 			log.append(tr("The party mends its wounds."))
 			for h4 in living:
 				_fire("party_mend", state, h4)
+	_pp_round_end(state)
 
 
 ## {} if the fight isn't over; otherwise the {"done":true,...} outcome from
@@ -1766,6 +1808,8 @@ func resolve_turn(state: Dictionary) -> Dictionary:
 	if turn["type"] == "hero":
 		var h := _find_party_hero(state["party"], str(turn["id"]))
 		var stunned: Dictionary = state.get("_stunned", {})
+		if h and h.hp > 0 and stunned.has(h.id) and _pp_stun_immune(state, h):
+			stunned.erase(h.id)   # Red Mist / a Scrapper Legend shrugs it off
 		if h and h.hp > 0 and stunned.has(h.id):
 			stunned.erase(h.id)
 			(state["log"] as Array).append(tr("%s is stunned and loses the turn.") % tr(str(h.name)))
@@ -1875,14 +1919,14 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 				if randf() < GameState.energy_extract_chance():
 					bonus_crystal += randi() % 4 + 2
 			result["bonus_crystal"] = bonus_crystal
-		var xp_gain: int = 30 if is_boss else (20 if is_elite else 12)
+		var xp_gain: int = int(round((30 if is_boss else (20 if is_elite else 12)) * float(GameData.RIFT_XP_MULT[clampi(GameData.rift_rank_index(GameState.loot_rank()), 0, GameData.RIFT_XP_MULT.size() - 1)])))
 		var summary: Array = []
 		for h in party:
 			var lv0 := h.level
 			var xp0 := h.xp
 			gain_xp(h, xp_gain)
 			summary.append({"id": h.id, "name": h.name, "cls_id": h.cls_id, "pool_id": h.pool_id, "alive": h.hp > 0,
-				"lv0": lv0, "xp0": xp0, "next0": xp_to_next(lv0), "lv1": h.level, "xp1": h.xp, "next1": xp_to_next(h.level),
+				"lv0": lv0, "xp0": xp0, "next0": xp_to_next(lv0, h.rank), "lv1": h.level, "xp1": h.xp, "next1": xp_to_next(h.level, h.rank),
 				"dealt": int(round(float(state.get("_dealt", {}).get(h.id, 0.0)))), "kills": int(state.get("_kills", {}).get(h.id, 0))})
 		result["heroes"] = summary
 		result["xp_gain"] = xp_gain
@@ -1906,3 +1950,953 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 				options.append(gen_loot(weighted_rarity()))
 			result["reward_options"] = options
 	return {"done": true, "result": result}
+
+
+# ======================================================================
+## Paths (0.62). Each trained hero brings their Path's rule
+## (stage 1), Technique (stage 2, a skill: see GameData.hero_skills) and
+## Signature moment (stage 3), bent by their subclass's Twist; a Legend lifts
+## the rule's limit. The fight engine (Combat.gd) calls the _pp_* hooks below;
+## per-hero counters live in state["_pp"][hero id], per-foe ones on the foe.
+## Text for every rule: GameData.PATHS / SUBCLASS_TWIST.
+
+const BLOODRAGE_CAP := 0.4
+const COMBO_STEP := 0.12
+const STEADY_BONUS := 0.35
+const MARK_BONUS := 0.15
+const HEAT_STEP := 0.08
+const EXECUTE_BELOW := 0.35
+const EXECUTE_BONUS := 0.5
+const SANCTUARY := 0.06
+const FERVOR := 0.25
+const SCRAPPY := 0.15
+const EVASION := 0.15
+
+
+# ---------------- Who has what ----------------
+func _pa(h: Hero) -> String:
+	return "" if h == null or h.is_champion else GameData.hero_path_id(h)
+
+
+func _st(h: Hero) -> int:
+	return 0 if h == null or h.is_champion else GameData.subclass_stage(h.pool_id)
+
+
+func _tw(h: Hero, pool_id: String) -> bool:
+	return h != null and h.pool_id == pool_id
+
+
+func _legend(h: Hero) -> bool:
+	return h != null and GameData.is_legend(h.pool_id)
+
+
+func _pp(state: Dictionary, h: Hero) -> Dictionary:
+	var all: Dictionary = state.get_or_add("_pp", {})
+	return all.get_or_add(h.id, {})
+
+
+## Living party heroes on Path `pid` at stage >= `stage`.
+func _on_path(state: Dictionary, pid: String, stage: int = 1) -> Array:
+	return (state["party"] as Array).filter(func(x): return x.hp > 0 and _pa(x) == pid and _st(x) >= stage)
+
+
+func _pp_log(state: Dictionary, line: String) -> void:
+	(state["log"] as Array).append(line)
+
+
+# ---------------- Fight start ----------------
+func _pp_start(state: Dictionary) -> void:
+	state["_pp"] = {}
+	for h in state["party"]:
+		var p := _pp(state, h)
+		p["mark"] = -1
+		p["combo_t"] = -1
+		p["combo"] = 1 if _tw(h, "trailblazer") and _pa(h) == "weaponmaster" else 0
+		p["heat"] = 2 if _tw(h, "cinder-adept") else 0
+		p["quiet"] = 1   # Steady Aim: the opening shot counts as unhurried
+		p["hit_round"] = -9
+	state["_pf"] = {"cancels": (2 if _on_path(state, "augury").any(func(x): return _legend(x)) else 1) if not _on_path(state, "augury").is_empty() else 0,
+		"miracles": (2 if _on_path(state, "mercy", 3).any(func(x): return _legend(x)) else 1) if not _on_path(state, "mercy", 3).is_empty() else 0,
+		"conjures": 1 if (state["party"] as Array).any(func(x): return _tw(x, "grim-conjurer")) else 0}
+	_resonance_start(state)
+
+
+# ---------------- Round start (after the turn order is rolled) ----------------
+func _pp_round_start(state: Dictionary) -> void:
+	var monsters: Array = state["monsters"]
+	var living: Array = (state["party"] as Array).filter(func(x): return x.hp > 0)
+	var rn := int(state["round_num"])
+	for h in living:
+		var p := _pp(state, h)
+		# Steady Aim: count quiet rounds (not hit last round).
+		var hits_last := int(p.get("hits_last", 0))
+		p["quiet"] = int(p.get("quiet", 0)) + 1 if hits_last <= (1 if _tw(h, "slinger") else 0) or (_legend(h) and _pa(h) == "marksman") else 0
+		p["hits_last"] = 0
+		for k in ["mist", "untouch", "vanish", "lastwall", "perfect"]:
+			if int(p.get(k, 0)) > 0:
+				p[k] = int(p[k]) - 1
+	# Warding: Ward Weave on the most-hurt ally (Fledgling Seer: the one a foe is aiming at).
+	for w in _on_path(state, "warding"):
+		var pick: Hero = null
+		if _tw(w, "fledgling-seer"):
+			for mi in state.get("intents", {}):
+				var aim := _find_party_hero(state["party"], str(state["intents"][mi].get("target", "")))
+				if aim and aim.hp > 0:
+					pick = aim
+					break
+		var pool: Array = living.filter(func(x): return x.formation != "back") if _tw(w, "stoneward-mystic") else living
+		if pool.is_empty():
+			pool = living
+		var targets: Array = pool if _legend(w) else []
+		if targets.is_empty():
+			if pick == null:
+				for x in pool:
+					if pick == null or float(x.hp) / max_hp(x) < float(pick.hp) / max_hp(pick):
+						pick = x
+			targets = [pick] if pick else []
+		var frac := 0.12 if _tw(w, "stoneward-mystic") else 0.08
+		var sh: Dictionary = state["hero_shields"]
+		for t in targets:
+			sh[t.id] = float(sh.get(t.id, 0.0)) + max_hp(t) * frac
+		if not targets.is_empty():
+			_proc(state, w, tr("Ward Weave"))
+	# Trapper: the first foe to act steps in a snare.
+	for t in _on_path(state, "trapper"):
+		for e in state["turn_order"]:
+			if e["type"] == "monster" and float(monsters[int(e["id"])]["hp"]) > 0 and int(monsters[int(e["id"])].get("_snared", 0)) <= 0:
+				_snare(state, t, int(e["id"]))
+				break
+	# Augury Prophecy (stage 3): the first wind-up of the fight is dodged by everyone.
+	for a in _on_path(state, "augury", 3):
+		var pa := _pp(state, a)
+		if pa.get("prophecy_used", false):
+			break
+		for mi in monsters.size():
+			var mw: Dictionary = monsters[mi]
+			if float(mw["hp"]) > 0 and mw.get("_winding", false):
+				pa["prophecy_used"] = true
+				mw["_prophesied"] = true
+				gain_momentum(state, 2)
+				_pp_log(state, tr("Prophecy: %s saw %s's blow before it began.") % [tr(str(a.name)), tr(str(mw["name"]))])
+				_proc(state, a, tr("Prophecy"))
+				if _tw(a, "archon-of-storms"):
+					var bolt := dmg_of(a) / float(state["raw_sum"]) * float(state["team_dmg_base"]) * 1.2
+					mw["hp"] = float(mw["hp"]) - round(bolt)
+					_pp_log(state, tr("Lightning strikes %s for %d.") % [tr(str(mw["name"])), int(round(bolt))])
+				break
+	# Shieldwall: Last Wall's taunt holds for its rounds.
+	for g in _on_path(state, "shieldwall", 3):
+		if int(_pp(state, g).get("lastwall", 0)) > 0:
+			state["_taunt"] = g.id
+			state["_taunt_cut"] = 0.0
+	# Marksman Overwatch: the held shot fires at the first foe to act.
+	for mk in _on_path(state, "marksman", 3):
+		var p2 := _pp(state, mk)
+		if p2.get("overwatch", false):
+			p2["overwatch"] = false
+			for e in state["turn_order"]:
+				if e["type"] == "monster" and float(monsters[int(e["id"])]["hp"]) > 0:
+					p2["ow_shot"] = true
+					_pp_log(state, tr("%s fires from overwatch!") % tr(str(mk.name)))
+					_hero_hit(state, mk, int(e["id"]), 1.0, _tw(mk, "rift-piercer"))
+					p2["ow_shot"] = false
+					break
+	# Scrapper: front-row heroes patch themselves up.
+	for s in _on_path(state, "scrapper"):
+		if s.formation != "back" and rn > 1:
+			_pp_heal(state, s, int(round(max_hp(s) * 0.05)))
+
+
+func _snare(state: Dictionary, trapper: Hero, i: int) -> void:
+	var m: Dictionary = state["monsters"][i]
+	var base := dmg_of(trapper) / float(state["raw_sum"]) * float(state["team_dmg_base"])
+	var dmg := base * (1.0 if _tw(trapper, "deadfall-hunter") else 0.3) * (2.0 if _tw(trapper, "trapper") else 1.0)
+	m["hp"] = float(m["hp"]) - round(dmg)
+	m["_snared"] = 2   # through this round's end, so it acts last next round
+	m["_snared_ever"] = true
+	var pf: Dictionary = state["_pf"]
+	pf["snared"] = int(pf.get("snared", 0)) + 1
+	_pp_log(state, tr("%s steps in %s's snare (%d) and will act last.") % [tr(str(m["name"])), tr(str(trapper.name)), int(round(dmg))])
+	if _tw(trapper, "wintertide-archer"):
+		stun_monster(state, i, 1)
+	if _legend(trapper) or _tw(trapper, "wintertide-archer"):
+		m["_winding"] = false
+		m["_charged"] = false
+	if _tw(trapper, "sapling-keeper"):
+		var low := _most_hurt(state)
+		if low:
+			_pp_heal(state, low, int(round(max_hp(low) * 0.04)))
+	if _st(trapper) >= 3 and int(pf.get("snared", 0)) >= 3 and not pf.get("kg_used", false):
+		pf["kg_used"] = true
+		pf["kg"] = 2
+		_pp_log(state, tr("Killing Ground! Every snared foe takes 30% more damage."))
+		_proc(state, trapper, tr("Killing Ground"))
+
+
+func _most_hurt(state: Dictionary) -> Hero:
+	var low: Hero = null
+	for x in state["party"]:
+		if x.hp > 0 and (low == null or float(x.hp) / max_hp(x) < float(low.hp) / max_hp(low)):
+			low = x
+	return low
+
+
+# ---------------- A hero's hit ----------------
+## The Path multiplier on `h`'s hit on foe `ti` (pure: also used by previews).
+func _pp_dmg_mult(state: Dictionary, h: Hero, ti: int) -> float:
+	var pid := _pa(h)
+	var all: Dictionary = state.get("_pp", {})
+	var mult := 1.0
+	var m: Dictionary = state["monsters"][ti]
+	if int(state.get("_pf", {}).get("kg", 0)) > 0 and m.get("_snared_ever", false):
+		mult *= 1.3
+	for other in state["party"]:   # the party's shared Marks (Stalker)
+		var op: Dictionary = all.get(other.id, {})
+		if other.hp > 0 and _pa(other) == "stalker" and (int(op.get("mark", -1)) == ti or int(op.get("mark2", -1)) == ti):
+			mult *= 1.0 + MARK_BONUS
+			break
+	if pid == "" or not all.has(h.id):
+		return mult
+	var p: Dictionary = all[h.id]
+	match pid:
+		"bloodrage":
+			var missing := 1.0 - float(h.hp) / maxf(1.0, max_hp(h))
+			mult *= 1.0 + minf(BLOODRAGE_CAP, missing * 0.5)
+			if p.get("bp", false):
+				mult *= 1.5
+			if _tw(h, "squire"):
+				mult *= 1.1
+		"weaponmaster":
+			if int(p.get("combo_t", -1)) == ti or (_legend(h) and int(p.get("combo", 0)) > 0):
+				mult *= 1.0 + COMBO_STEP * int(p.get("combo", 0))
+		"marksman":
+			var need := 2 if _tw(h, "longshot") else 1
+			if int(p.get("quiet", 0)) >= need:
+				mult *= 1.0 + STEADY_BONUS * (2.0 if _tw(h, "longshot") else 1.0) * (2.0 if p.get("ow_shot", false) else 1.0)
+		"stalker":
+			if p.get("hunt", false) and int(p.get("mark", -1)) == ti:
+				mult *= 1.6
+			if p.get("vanish_shot", false) and int(p.get("mark", -1)) == ti:
+				mult *= 3.0
+		"evocation":
+			mult *= 1.0 + HEAT_STEP * int(p.get("heat", 0))
+		"assassin":
+			var below := 0.5 if _legend(h) else EXECUTE_BELOW
+			if float(m["hp"]) < float(m["max_hp"]) * below:
+				mult *= 1.0 + EXECUTE_BONUS
+		"zeal":
+			if _tw(h, "vanguard-chaplain") and not p.get("first_done", false):
+				mult *= 1.5
+	if int(p.get("blessed", -1)) == int(state.get("round_num", 0)):
+		mult *= 1.05
+	return mult
+
+
+## Whether `h`'s hit on `ti` ignores armor and wards (a Path's reach).
+func _pp_pierce(state: Dictionary, h: Hero, ti: int) -> bool:
+	var p: Dictionary = state.get("_pp", {}).get(h.id, {})
+	match _pa(h):
+		"weaponmaster":
+			return _tw(h, "rift-breaker") and int(p.get("combo", 0)) >= 4 and int(p.get("combo_t", -1)) == ti
+		"marksman":
+			return (_tw(h, "fieldscout") and int(p.get("quiet", 0)) >= 1) or (_tw(h, "rift-piercer") and p.get("ow_shot", false))
+	return false
+
+
+## After `h`'s hit on foe `ti` landed for `dealt` (`was_alive`: it stood before).
+func _pp_after_hit(state: Dictionary, h: Hero, ti: int, dealt: float, was_alive: bool) -> void:
+	var pid := _pa(h)
+	var monsters: Array = state["monsters"]
+	var m: Dictionary = monsters[ti]
+	var p := _pp(state, h)
+	var killed: bool = was_alive and float(m["hp"]) <= 0.0
+	if _tw(h, "arcane-pilferer"):
+		(state["monster_shields"] as Dictionary).erase(ti)
+	match pid:
+		"bloodrage":
+			if p.get("bp", false):
+				p["bp"] = false
+				if _tw(h, "berserker"):
+					for j in monsters.size():
+						if j != ti and float(monsters[j]["hp"]) > 0:
+							monsters[j]["hp"] = float(monsters[j]["hp"]) - round(dealt * 0.5)
+					_pp_log(state, tr("%s's blow cleaves through every foe!") % tr(str(h.name)))
+			if _tw(h, "bloodletter") and dealt > 0:
+				var missing := 1.0 - float(h.hp) / maxf(1.0, max_hp(h))
+				_pp_heal(state, h, int(round(dealt * 0.01 * floorf(missing * 100.0 / 4.0))))
+			if int(p.get("mist", 0)) > 0 and not p.get("cleaving", false):
+				p["cleaving"] = true
+				for j in monsters.size():
+					if j != ti and float(monsters[j]["hp"]) > 0:
+						monsters[j]["hp"] = float(monsters[j]["hp"]) - round(dealt * 0.6)
+				p["cleaving"] = false
+		"weaponmaster":
+			var cap := 6 if _tw(h, "warbrand") else 4
+			if int(p.get("combo_t", -1)) == ti or _legend(h):
+				p["combo"] = mini(cap, int(p.get("combo", 0)) + 1)
+			else:
+				p["combo"] = 1
+			p["combo_t"] = ti
+			if _st(h) >= 3 and int(p["combo"]) >= 4 and not p.get("perfect_used", false):
+				p["perfect_used"] = true
+				p["perfect"] = 2
+				_pp_log(state, tr("%s finds Perfect Form: they act twice next round!") % tr(str(h.name)))
+				_proc(state, h, tr("Perfect Form"))
+		"marksman":
+			if int(p.get("called", -1)) == ti and int(p.get("quiet", 0)) >= 1:
+				m["_winding"] = false
+				m["_charged"] = false
+				p["called"] = -1
+				_pp_log(state, tr("%s's called shot breaks %s's wind-up!") % [tr(str(h.name)), tr(str(m["name"]))])
+				if _tw(h, "blade-dancer"):
+					for j in monsters.size():
+						if j != ti and float(monsters[j]["hp"]) > 0 and float(monsters[j]["hp"]) < float(monsters[j]["max_hp"]) * 0.4:
+							monsters[j]["hp"] = float(monsters[j]["hp"]) - round(dealt * 0.5)
+			if not p.get("ow_shot", false):
+				p["quiet"] = 0   # the steady shot is spent
+		"stalker":
+			p["hunt"] = false
+			p["vanish_shot"] = false
+			if int(p.get("mark", -1)) < 0 or float(monsters[int(p["mark"])]["hp"]) <= 0:
+				p["mark"] = ti if not killed else _next_living(monsters, ti)
+				if _legend(h):
+					p["mark2"] = _next_living(monsters, int(p["mark"]))
+			if _tw(h, "stormtracker") and int(p.get("mark", -1)) == ti and dealt > 0:
+				var other := _next_living(monsters, ti)
+				if other >= 0 and other != ti:
+					monsters[other]["hp"] = float(monsters[other]["hp"]) - round(dealt * 0.3)
+		"zeal":
+			p["first_done"] = true
+			if dealt > 0:
+				var heal_frac := FERVOR * (2.0 if p.get("smiting", false) else 1.0)
+				if _legend(h):
+					for x in state["party"]:
+						if x.hp > 0:
+							_pp_heal(state, x, int(round(dealt * 0.1)))
+				else:
+					var low := _most_hurt(state)
+					if low:
+						_pp_heal(state, low, int(round(dealt * heal_frac)))
+						if _tw(h, "emberblessed-acolyte"):
+							_pp(state, low)["blessed"] = int(state["round_num"]) + 1
+			if _tw(h, "lay-brother") and (m.get("_winding", false) or m.get("_charged", false)) and float(m["hp"]) > 0:
+				m["_winding"] = false
+				m["_charged"] = false
+				_pp_log(state, tr("%s breaks %s's wind-up!") % [tr(str(h.name)), tr(str(m["name"]))])
+		"scrapper":
+			if dealt > 0:
+				var steal := SCRAPPY * (2.0 if _legend(h) else 1.0)
+				var got := int(round(dealt * steal))
+				_pp_heal(state, h, got)
+				if _tw(h, "herbrunner"):
+					var low2 := _most_hurt(state)
+					if low2 and low2 != h:
+						_pp_heal(state, low2, int(round(got * 0.5)))
+	# Kills: Assassin's refund and Deathmark, Zeal's Judgment, Ashbound fire, the Cutpurse's purse.
+	if killed:
+		_pp_on_kill(state, h, ti)
+
+
+func _next_living(monsters: Array, from: int) -> int:
+	for k in monsters.size():
+		var j := (from + 1 + k) % monsters.size()
+		if float(monsters[j]["hp"]) > 0:
+			return j
+	return -1
+
+
+func _pp_on_kill(state: Dictionary, h: Hero, ti: int) -> void:
+	var monsters: Array = state["monsters"]
+	var pid := _pa(h)
+	var p := _pp(state, h)
+	if pid == "assassin":
+		gain_momentum(state, 2)
+		if _tw(h, "cutpurse") and not GameState.run.is_empty():
+			GameState.coins += 10
+		if _st(h) >= 3:
+			var chain := int(p.get("deathmarks", 0))
+			if chain < (3 if _tw(h, "the-unseen-hand") else 1):
+				p["deathmarks"] = chain + 1
+				state["turn_order"].insert(int(state["turn_idx"]), {"type": "hero", "id": h.id, "_spd": 0.0})
+				_pp_log(state, tr("Deathmark! %s strikes again.") % tr(str(h.name)))
+				_proc(state, h, tr("Deathmark"))
+	if monsters[ti].has("_burn_mark") or (state.get("_m_burn", {}) as Dictionary).has(ti):
+		for ash in state["party"]:
+			if ash.hp > 0 and _tw(ash, "ashbound-theorist"):
+				for j in monsters.size():
+					if float(monsters[j]["hp"]) > 0:
+						_burn_foe(state, j, float(state["team_dmg_base"]) * 0.08, 2)
+				_pp_log(state, tr("The fire spreads from the fallen foe."))
+				break
+	if state.get("_res_ember", false):   # Resonance: Ember x3 sets the fallen's neighbours alight
+		for j in monsters.size():
+			if float(monsters[j]["hp"]) > 0:
+				_burn_foe(state, j, float(state["team_dmg_base"]) * 0.05, 2)
+	var pf: Dictionary = state["_pf"]
+	if not pf.get("judged", false):
+		for z in _on_path(state, "zeal", 3):
+			if z == h or _tw(z, "radiant-vanguard"):
+				pf["judged"] = true
+				var j_dmg := dmg_of(z) / float(state["raw_sum"]) * float(state["team_dmg_base"]) * 0.5
+				for j in monsters.size():
+					if float(monsters[j]["hp"]) > 0:
+						monsters[j]["hp"] = float(monsters[j]["hp"]) - round(j_dmg)
+						if _tw(z, "sainted-ember"):
+							_burn_foe(state, j, j_dmg * 0.3, 2)
+				for x in state["party"]:
+					if x.hp > 0:
+						_pp_heal(state, x, int(round(max_hp(x) * 0.1)))
+				_pp_log(state, tr("Judgment! Holy light strikes every foe and mends the party."))
+				_proc(state, z, tr("Judgment"))
+				break
+
+
+# ---------------- After a hero's action ----------------
+func _pp_after_action(state: Dictionary, h: Hero, action: String) -> void:
+	var p := _pp(state, h)
+	if _pa(h) == "evocation" and (action == "attack" or action == "ability" or action.begins_with("skill:")):
+		var cap := 7 if _tw(h, "apprentice") else 5
+		var at := 4 if _tw(h, "pyromancer") else cap
+		var is_skill: bool = action == "ability" or action.begins_with("skill:")
+		if is_skill and int(p.get("heat", 0)) >= at:
+			_detonate(state, h)
+		else:
+			p["heat"] = mini(cap, int(p.get("heat", 0)) + 1)
+	if _tw(h, "cinderling") and action == "attack":
+		var t := int(state["pending_actions"].get(h.id, {}).get("target", 0))
+		if t >= 0 and t < (state["monsters"] as Array).size() and float(state["monsters"][t]["hp"]) > 0:
+			_burn_foe(state, t, dmg_of(h) / float(state["raw_sum"]) * float(state["team_dmg_base"]) * 0.1, 2)
+	if int(p.get("perfect", 0)) == 1 and not p.get("perfect_extra", false):
+		p["perfect_extra"] = true
+		state["turn_order"].insert(int(state["turn_idx"]), {"type": "hero", "id": h.id, "_spd": 0.0})
+		if _tw(h, "runeblade"):
+			state["_attack_mult"] = float(state.get("_attack_mult", 1.0)) * 1.15
+
+
+func _detonate(state: Dictionary, h: Hero) -> void:
+	var p := _pp(state, h)
+	var monsters: Array = state["monsters"]
+	var heat := int(p.get("heat", 0))
+	var base := dmg_of(h) / float(state["raw_sum"]) * float(state["team_dmg_base"]) * (0.25 + 0.1 * heat)
+	if _tw(h, "apprentice"):
+		var t := _lowest_hp_living_monster_idx(monsters)
+		if t >= 0:
+			monsters[t]["hp"] = float(monsters[t]["hp"]) - round(base * 2.0)
+	else:
+		for j in monsters.size():
+			if float(monsters[j]["hp"]) > 0:
+				monsters[j]["hp"] = float(monsters[j]["hp"]) - round(base)
+				if _st(h) >= 3 and not p.get("inferno", false):
+					_burn_foe(state, j, base * 0.3, 3)
+	if _st(h) >= 3 and not p.get("inferno", false):
+		p["inferno"] = true
+		_pp_log(state, tr("Inferno! Every foe is left burning."))
+		_proc(state, h, tr("Inferno"))
+	p["heat"] = 3 if _legend(h) else 0
+	_pp_log(state, tr("%s's heat detonates!") % tr(str(h.name)))
+	_proc(state, h, tr("Detonate!"))
+
+
+# ---------------- Techniques ----------------
+func _pp_technique(state: Dictionary, h: Hero, pid: String, target_idx: int) -> void:
+	var monsters: Array = state["monsters"]
+	var party: Array = state["party"]
+	var p := _pp(state, h)
+	var sh: Dictionary = state["hero_shields"]
+	var name := tr(str(GameData.PATHS[pid]["technique"]["name"]))
+	_pp_log(state, tr("%s uses %s!") % [tr(str(h.name)), name])
+	var tgt := target_idx if target_idx >= 0 and target_idx < monsters.size() and float(monsters[target_idx]["hp"]) > 0 else _first_living_monster_idx(monsters)
+	match pid:
+		"shieldwall":
+			p["hold"] = int(state["round_num"])
+			if _tw(h, "iron-guard"):
+				for x in party:
+					if x.hp > 0 and x.formation == "back":
+						sh[x.id] = float(sh.get(x.id, 0.0)) + max_hp(x) * 0.1
+		"bloodrage":
+			var cost := int(round(max_hp(h) * (0.10 if _tw(h, "berserker") else 0.15)))
+			h.hp = maxi(1, h.hp - cost)
+			gain_momentum(state, 2)
+			p["bp"] = true
+			_pp_after_damage(state, h)
+		"weaponmaster":
+			if tgt >= 0:
+				for k in 3:
+					if float(monsters[tgt]["hp"]) > 0:
+						_hero_hit(state, h, tgt, 0.5)
+		"marksman":
+			p["called"] = tgt
+			p["quiet"] = maxi(1, int(p.get("quiet", 0)))
+			if tgt >= 0:
+				_hero_hit(state, h, tgt, 1.0, _tw(h, "fieldscout"))
+			if _st(h) >= 3 and not p.get("ow_used", false):
+				p["ow_used"] = true
+				p["overwatch"] = true
+				_pp_log(state, tr("%s settles into overwatch.") % tr(str(h.name)))
+		"trapper":
+			state["_trap"] = dmg_of(h) / float(state["raw_sum"]) * float(state["team_dmg_base"]) * 0.6
+			state["_trap_by"] = h.id
+			if _tw(h, "warden"):
+				for x in party:
+					if x.hp > 0:
+						sh[x.id] = float(sh.get(x.id, 0.0)) + max_hp(x) * 0.08
+		"stalker":
+			if tgt >= 0:
+				p["mark"] = tgt
+				p["hunt"] = true
+				_hero_hit(state, h, tgt, 1.0)
+		"evocation":
+			p["heat"] = mini(7 if _tw(h, "apprentice") else 5, int(p.get("heat", 0)) + 3)
+		"warding":
+			for x in party:
+				if x.hp > 0:
+					sh[x.id] = float(sh.get(x.id, 0.0)) + max_hp(x) * 0.12
+		"augury":
+			if tgt >= 0:
+				monsters[tgt]["_winding"] = false
+				monsters[tgt]["_charged"] = false
+				var living: Array[Hero] = []
+				living.assign(party.filter(func(x): return x.hp > 0))
+				if not living.is_empty():
+					state["intents"][tgt] = _roll_intent(state, tgt, living)
+				_pp_log(state, tr("%s twists %s's fate.") % [tr(str(h.name)), tr(str(monsters[tgt]["name"]))])
+			if _tw(h, "verdant-oracle"):
+				for x in party:
+					if x.hp > 0:
+						_pp_heal(state, x, int(round(max_hp(x) * 0.06)))
+			if _tw(h, "duskglass-seer"):
+				gain_momentum(state, 2)
+		"mercy":
+			for x in party:
+				if x.hp > 0:
+					_pp_heal(state, x, int(round(max_hp(x) * 0.15)))
+					if _tw(h, "frost-anchorite"):
+						for key in ["hero_poison", "hero_burn", "_chilled", "_stunned", "_weakened", "_branded"]:
+							state.get(key, {}).erase(x.id)
+		"aegis":
+			var low := _most_hurt(state)
+			if low:
+				state.get_or_add("_consecrated", {})[low.id] = int(state["round_num"])
+				if _tw(h, "battle-chaplain"):
+					_pp(state, low)["dodge_round"] = int(state["round_num"]) + 1
+				_pp_log(state, tr("%s is consecrated: no harm this round.") % tr(str(low.name)))
+		"zeal":
+			if _tw(h, "zealot"):
+				h.hp = maxi(1, h.hp - int(round(max_hp(h) * 0.1)))
+			if tgt >= 0:
+				p["smiting"] = true
+				_hero_hit(state, h, tgt, 1.5)
+				p["smiting"] = false
+				if _tw(h, "ember-confessor") and float(monsters[tgt]["hp"]) > 0 and float(monsters[tgt]["hp"]) < float(monsters[tgt]["max_hp"]) * 0.2:
+					monsters[tgt]["hp"] = 0.0
+					_pp_log(state, tr("%s's smite finishes %s.") % [tr(str(h.name)), tr(str(monsters[tgt]["name"]))])
+					_pp_on_kill(state, h, tgt)
+		"assassin":
+			if tgt >= 0:
+				_hero_hit(state, h, tgt, 1.3)
+			if _tw(h, "wraithstep"):
+				p["vanish"] = 1
+		"skirmisher":
+			p["feint"] = int(state["round_num"])
+			if _tw(h, "rift-slipper") and not state.get("wipe_guard_used", false):
+				state["wipe_guard"] = maxf(float(state["wipe_guard"]), 0.25)
+		"scrapper":
+			if tgt >= 0:
+				for k in (2 if _tw(h, "fleetblade") else 1):
+					if float(monsters[tgt]["hp"]) > 0:
+						_hero_hit(state, h, tgt, 1.0)
+				if float(monsters[tgt]["hp"]) > 0 and str(monsters[tgt].get("tier", "")) != "boss":
+					stun_monster(state, tgt, 1)
+				gain_momentum(state, 2)
+
+
+# ---------------- Incoming blows ----------------
+## Who a foe's aimed blow really lands on: a Vanished hero can't be picked,
+## a Skirmisher's Feint draws half of them.
+func _pp_retarget(state: Dictionary, m: Dictionary, target: Hero) -> Hero:
+	var living: Array = (state["party"] as Array).filter(func(x): return x.hp > 0)
+	var rn := int(state["round_num"])
+	for s in living:
+		if s != target and _pa(s) == "skirmisher" and int(_pp(state, s).get("feint", -1)) == rn and randf() < 0.5:
+			return s
+	if int(_pp(state, target).get("vanish", 0)) > 0 or int(_pp(state, target).get("untouch", 0)) > 0:
+		var others: Array = living.filter(func(x): return x != target and int(_pp(state, x).get("vanish", 0)) <= 0)
+		if not others.is_empty():
+			return others[randi() % others.size()]
+	return target
+
+
+## Multiplier on a blow `back` aimed at `target` from foe `m`.
+func _pp_taken_mult(state: Dictionary, m: Dictionary, target: Hero) -> float:
+	var mult := 1.0
+	var rn := int(state["round_num"])
+	if int(state.get("_consecrated", {}).get(target.id, -9)) == rn:
+		return 0.0
+	if int(_pp(state, target).get("untouch", 0)) > 0 or int(_pp(state, target).get("vanish", 0)) > 0:
+		return 0.0
+	for a in _on_path(state, "aegis"):
+		var cut := SANCTUARY * (2.0 if _legend(a) else 1.0)
+		if _tw(a, "frostward-sister") and target.formation != "back":
+			cut += 0.04
+		mult *= 1.0 - cut
+		break
+	if int(state.get("_pf", {}).get("hallowed", 0)) > 0:
+		mult *= 0.5
+	if _tw(target, "squire"):
+		mult *= 1.1
+	if _tw(target, "ironhide-footpad") and target.formation != "back":
+		mult *= 0.9
+	if m.get("_snared", 0) and (state["party"] as Array).any(func(x): return x.hp > 0 and _tw(x, "pathfinder")):
+		mult *= 0.9
+	for s in (state["party"] as Array):
+		if s.hp > 0 and _tw(s, "shadowtracker") and (state["monsters"] as Array).find(m) == int(_pp(state, s).get("mark", -2)):
+			mult *= 0.9
+			break
+	return mult
+
+
+## Extra dodge `target` has against foe `m` from Paths.
+func _pp_dodge(state: Dictionary, target: Hero, m: Dictionary) -> float:
+	var d := 0.0
+	var p := _pp(state, target)
+	match _pa(target):
+		"skirmisher":
+			d += EVASION
+			if int(p.get("feint", -1)) == int(state["round_num"]):
+				d += 0.25
+		"weaponmaster":
+			if _tw(target, "featherguard"):
+				d += 0.03 * int(p.get("combo", 0))
+		"stalker":
+			if _tw(target, "duskstalker") and int(p.get("mark", -1)) >= 0:
+				d += 0.15
+	if int(p.get("dodge_round", -9)) == int(state["round_num"]):
+		d += 0.2
+	for s in (state["party"] as Array):
+		if s.hp > 0 and _tw(s, "nightwarden") and (state["monsters"] as Array).find(m) == int(_pp(state, s).get("mark", -2)):
+			d += 0.15
+			break
+	if m.get("_charged", false) and m.get("_prophesied", false):
+		d += 1.0   # Prophecy: everyone saw this one coming
+	return d
+
+
+## A foe's heavy blow about to land: Augury's Foresight cancels the first one.
+func _pp_cancel_heavy(state: Dictionary, m: Dictionary) -> bool:
+	var pf: Dictionary = state.get("_pf", {})
+	if int(pf.get("cancels", 0)) <= 0:
+		return false
+	pf["cancels"] = int(pf["cancels"]) - 1
+	_pp_log(state, tr("Foresight: the party saw %s's blow coming and it comes to nothing.") % tr(str(m["name"])))
+	for a in _on_path(state, "augury"):
+		_proc(state, a, tr("Foresight"))
+		if _tw(a, "shade-adept"):
+			m["_marked"] = float(m.get("_marked", 0.0)) + 0.15
+		break
+	return true
+
+
+## A blow aimed at a back-row hero: Shieldwall's Guardian takes a share.
+## Returns the part left for `target`; the rest lands on the guardian.
+func _pp_guardian_share(state: Dictionary, m: Dictionary, target: Hero, back: float) -> float:
+	if back <= 0.0:
+		return back
+	for g in _on_path(state, "shieldwall"):
+		if g == target or g.formation == "back":
+			continue
+		if target.formation != "back" and not _legend(g):
+			continue
+		var hold: bool = int(_pp(state, g).get("hold", -9)) == int(state["round_num"]) and target.formation == "back"
+		var share := 1.0 if hold else (0.4 if _tw(g, "bulwark") else 0.25)
+		var taken := back * share * (0.7 if hold else 1.0)
+		var sh: Dictionary = state["hero_shields"]
+		var absorbed: float = minf(float(sh.get(g.id, 0.0)), taken)
+		sh[g.id] = float(sh.get(g.id, 0.0)) - absorbed
+		g.hp = maxi(0, g.hp - int(round(taken - absorbed)))
+		_pp_log(state, tr("%s takes %d of the blow meant for %s.") % [tr(str(g.name)), int(round(taken)), tr(str(target.name))])
+		if _tw(g, "footman") and not m.get("_shoved", false):
+			m["_shoved"] = true
+			m["dmg"] = float(m["dmg"]) * 0.9
+		if _tw(g, "fieldmender"):
+			_pp_heal(state, target, int(round(max_hp(target) * 0.05)))
+		if _tw(g, "frostguard"):
+			m["_slow"] = 2
+		_pp_after_damage(state, g)
+		return back * (1.0 - share)
+	return back
+
+
+## A blow that would fell `target`: Last Wall (Shieldwall stage 3) takes it.
+func _pp_last_wall(state: Dictionary, target: Hero, dmg: int) -> Hero:
+	if dmg < target.hp:
+		return target
+	for g in _on_path(state, "shieldwall", 3):
+		var p := _pp(state, g)
+		if g != target and not p.get("lastwall_used", false):
+			p["lastwall_used"] = true
+			p["lastwall"] = 2
+			state["hero_shields"][g.id] = float(state["hero_shields"].get(g.id, 0.0)) + max_hp(g) * 0.3
+			state["_taunt"] = g.id
+			_pp_log(state, tr("Last Wall! %s throws themself in front of %s.") % [tr(str(g.name)), tr(str(target.name))])
+			_proc(state, g, tr("Last Wall"))
+			return g
+	return target
+
+
+## After foe `i`'s blow on `target` (dealt > 0) or a dodge (`evaded`).
+func _pp_after_struck(state: Dictionary, i: int, target: Hero, dealt: int, evaded: bool) -> void:
+	var m: Dictionary = state["monsters"][i]
+	var p := _pp(state, target)
+	p["hits_last"] = int(p.get("hits_last", 0)) + (0 if evaded else 1)
+	if evaded and _pa(target) == "skirmisher":
+		gain_momentum(state, 1)
+		var jab := float(state["team_dmg_base"]) * (1.0 if _legend(target) else (0.6 if _tw(target, "skirmisher") else 0.3)) * dmg_of(target) / maxf(1.0, float(state["raw_sum"])) * 2.0
+		m["hp"] = float(m["hp"]) - round(jab)
+		if _tw(target, "glyphhand"):
+			(state["monster_shields"] as Dictionary).erase(i)
+		_pp_log(state, tr("%s dodges and jabs back for %d.") % [tr(str(target.name)), int(round(jab))])
+		if _tw(target, "runaway"):
+			var low := _most_hurt(state)
+			if low:
+				state["hero_shields"][low.id] = float(state["hero_shields"].get(low.id, 0.0)) + max_hp(low) * 0.05
+		if _tw(target, "footpad") and not p.get("first_dodge", false):
+			gain_momentum(state, 3)
+		p["first_dodge"] = true
+		p["dodges"] = int(p.get("dodges", 0)) + 1
+		if _st(target) >= 3 and int(p["dodges"]) >= (2 if _tw(target, "wraithblade-adept") else 3) and not p.get("untouch_used", false):
+			p["untouch_used"] = true
+			p["untouch"] = 3
+			_pp_log(state, tr("%s is untouchable!") % tr(str(target.name)))
+			_proc(state, target, tr("Untouchable"))
+	if evaded:
+		return
+	if _tw(target, "stormcaller") and _pa(target) == "evocation":
+		p["heat"] = mini(5, int(p.get("heat", 0)) + 1)
+	if _tw(target, "stormguard") and int(p.get("lastwall", 0)) > 0 and float(m["hp"]) > 0:
+		stun_monster(state, i, 1)
+	if _tw(target, "bramblefoot") and dealt > 0:
+		m["hp"] = float(m["hp"]) - round(dealt * 0.1)
+	if _tw(target, "duelist") and int(p.get("combo_t", -1)) == i and target.hp > 0:
+		var counter := dmg_of(target) / maxf(1.0, float(state["raw_sum"])) * float(state["team_dmg_base"]) * 0.35
+		m["hp"] = float(m["hp"]) - round(counter)
+		_pp_log(state, tr("%s counters %s for %d.") % [tr(str(target.name)), tr(str(m["name"])), int(round(counter))])
+	if target.hp > 0 and (state["party"] as Array).any(func(x): return x.hp > 0 and _tw(x, "thornweaver")) and not p.get("thorn_round", -1) == int(state["round_num"]):
+		p["thorn_round"] = int(state["round_num"])
+		_pp_heal(state, target, int(round(max_hp(target) * 0.04)))
+	if _st(target) >= 3 and _pa(target) == "stalker" and not p.get("vanish_used", false) and target.hp > 0:
+		p["vanish_used"] = true
+		p["vanish"] = 3 if _tw(target, "voidwalker") else 2
+		p["vanish_shot"] = true
+		_pp_log(state, tr("%s vanishes!") % tr(str(target.name)))
+		_proc(state, target, tr("Vanish"))
+	_pp_after_damage(state, target)
+
+
+## HP thresholds after damage: Red Mist, Second Wind, Hallowed Ground; a fall
+## caught by Miracle or the Grim Conjurer.
+func _pp_after_damage(state: Dictionary, h: Hero) -> void:
+	var p := _pp(state, h)
+	var frac := float(h.hp) / maxf(1.0, max_hp(h))
+	if h.hp > 0 and _pa(h) == "bloodrage" and _st(h) >= 3 and not p.get("mist_used", false) and frac < (0.5 if _legend(h) else 0.3):
+		p["mist_used"] = true
+		p["mist"] = 4
+		_pp_log(state, tr("Red Mist! %s's attacks hit every foe.") % tr(str(h.name)))
+		_proc(state, h, tr("Red Mist"))
+	if h.hp > 0 and _pa(h) == "scrapper" and _st(h) >= 3 and not p.get("sw_used", false) and frac < (0.4 if _tw(h, "duskrunner") else 0.25):
+		p["sw_used"] = true
+		p["sw_double"] = 2
+		_pp_heal(state, h, int(round(max_hp(h) * 0.5)))
+		_pp_log(state, tr("Second Wind! %s gets back up swinging.") % tr(str(h.name)))
+		_proc(state, h, tr("Second Wind"))
+	var pf: Dictionary = state.get("_pf", {})
+	if not pf.get("hallowed_used", false):
+		for a in _on_path(state, "aegis", 3):
+			var cur := 0.0
+			var mx := 0.0
+			for x in state["party"]:
+				cur += maxf(0, x.hp)
+				mx += max_hp(x)
+			if mx > 0.0 and cur / mx < (0.7 if _tw(a, "sanctified-shield") else 0.5):
+				pf["hallowed_used"] = true
+				pf["hallowed"] = 2
+				_pp_log(state, tr("Hallowed Ground! Damage to the party is halved."))
+				_proc(state, a, tr("Hallowed Ground"))
+			break
+	if h.hp <= 0:
+		if int(pf.get("miracles", 0)) > 0 and not _on_path(state, "mercy", 3).is_empty():
+			pf["miracles"] = int(pf["miracles"]) - 1
+			var healer: Hero = _on_path(state, "mercy", 3)[0]
+			h.hp = maxi(1, int(round(max_hp(h) * (0.5 if _tw(healer, "alchemist") else 0.3))))
+			_pp_log(state, tr("Miracle! %s rises again.") % tr(str(h.name)))
+			_proc(state, healer, tr("Miracle"))
+			if _tw(healer, "dawnkeeper"):
+				for x in state["party"]:
+					if x.hp > 0:
+						state["hero_shields"][x.id] = float(state["hero_shields"].get(x.id, 0.0)) + max_hp(x) * 0.15
+		elif int(pf.get("conjures", 0)) > 0:
+			pf["conjures"] = int(pf["conjures"]) - 1
+			h.hp = maxi(1, int(round(max_hp(h) * 0.15)))
+			_pp_log(state, tr("The Grim Conjurer pulls %s back from the dark.") % tr(str(h.name)))
+
+
+## A stun on `h` that a Path shrugs off (Red Mist, a Scrapper Legend).
+func _pp_stun_immune(state: Dictionary, h: Hero) -> bool:
+	return int(_pp(state, h).get("mist", 0)) > 0 or (_legend(h) and _pa(h) == "scrapper")
+
+
+# ---------------- Healing ----------------
+## Heals `h` by `amount`: Mercy's Overflow turns the excess into a ward,
+## Red Mist refuses it. Returns the HP restored.
+func _pp_heal(state: Dictionary, h: Hero, amount: int) -> int:
+	if amount <= 0 or h.hp <= 0 or int(_pp(state, h).get("mist", 0)) > 0:
+		return 0
+	var room := max_hp(h) - h.hp
+	var healed := mini(room, amount)
+	h.hp += healed
+	var over := amount - healed
+	if over > 0:
+		for c in _on_path(state, "mercy"):
+			var ward := float(over) * (1.5 if _tw(c, "peddler") else 1.0)
+			var sh: Dictionary = state["hero_shields"]
+			sh[h.id] = minf(float(sh.get(h.id, 0.0)) + ward, max_hp(h) * 0.3)
+			break
+	if healed > 0 and (state["party"] as Array).any(func(x): return x.hp > 0 and _tw(x, "acolyte")):
+		for key in ["hero_poison", "hero_burn", "_weakened"]:
+			if state.get(key, {}).has(h.id):
+				state[key].erase(h.id)
+				break
+	if healed > 0 and (state["party"] as Array).any(func(x): return x.hp > 0 and _tw(x, "herbalist")):
+		_pp(state, h)["regen"] = 2
+	return healed
+
+
+# ---------------- Round end ----------------
+func _pp_round_end(state: Dictionary) -> void:
+	var pf: Dictionary = state.get("_pf", {})
+	for k in ["hallowed", "kg", "mirror"]:
+		if int(pf.get(k, 0)) > 0:
+			pf[k] = int(pf[k]) - 1
+	for m in state["monsters"]:
+		for k in ["_snared", "_slow"]:
+			if int(m.get(k, 0)) > 0:
+				m[k] = int(m[k]) - 1
+	for h in state["party"]:
+		if h.hp <= 0:
+			continue
+		var p := _pp(state, h)
+		if int(p.get("regen", 0)) > 0:
+			p["regen"] = int(p["regen"]) - 1
+			h.hp = mini(max_hp(h), h.hp + int(round(max_hp(h) * 0.03)))
+		if _tw(h, "hearth-warden"):
+			for x in state["party"]:
+				if x.hp > 0:
+					_pp_heal(state, x, int(round(max_hp(x) * 0.02)))
+
+
+# ---------------- Auto (Quick fight, Auto, the sims) ----------------
+## A Technique worth using now, or {} (Momentum and row already checked by the caller).
+func _pp_auto(state: Dictionary, h: Hero) -> Dictionary:
+	var tech := GameData.hero_technique(h)
+	if tech.is_empty() or action_block(state, h, "skill:" + str(tech["id"])) != "":
+		return {}
+	var act := "skill:" + str(tech["id"])
+	var monsters: Array = state["monsters"]
+	var tgt: int = maxi(0, _lowest_hp_living_monster_idx(monsters))
+	var hurt: Array = (state["party"] as Array).filter(func(x): return x.hp > 0 and x.hp < max_hp(x) * 0.5)
+	var winding := -1
+	for mi in monsters.size():
+		if float(monsters[mi]["hp"]) > 0 and (monsters[mi].get("_winding", false) or monsters[mi].get("_charged", false)):
+			winding = mi
+	match _pa(h):
+		"bloodrage":
+			if h.hp > max_hp(h) * 0.5:
+				return {"action": act, "target": tgt}
+		"mercy":
+			if hurt.size() >= 2:
+				return {"action": act, "target": 0}
+		"aegis":
+			if not hurt.is_empty() or winding >= 0:
+				return {"action": act, "target": 0}
+		"shieldwall", "skirmisher":
+			if winding >= 0:
+				return {"action": act, "target": 0}
+		"augury", "marksman":
+			if winding >= 0:
+				return {"action": act, "target": winding}
+		"warding", "trapper":
+			if int(state.get("momentum", 0)) >= 6:
+				return {"action": act, "target": 0}
+		"evocation":
+			if int(_pp(state, h).get("heat", 0)) <= 2:
+				return {"action": act, "target": 0}
+		_:
+			if int(state.get("momentum", 0)) >= int(tech["cost"]) + 2:
+				return {"action": act, "target": tgt}
+	return {}
+
+
+# ---------------- Resonance (shared elements) ----------------
+## Two or more living heroes of one element in the party light up a bonus
+## (GameData.RESONANCE): applied once at the fight's start.
+func _resonance_start(state: Dictionary) -> void:
+	var counts := resonance_counts(state["party"])
+	var log: Array = state["log"]
+	for el in counts:
+		var n := int(counts[el])
+		if n < 2:
+			continue
+		var big := n >= 3
+		match str(el):
+			"Ember":
+				state["team_dmg_base"] = float(state["team_dmg_base"]) * (1.12 if big else 1.06)
+				state["_res_ember"] = big
+			"Frost":
+				state["_res_frost"] = 0.10 if big else 0.05
+				state["_res_frost_first"] = big
+			"Verdant":
+				state["mend"] = float(state["mend"]) + (0.06 if big else 0.03)
+			"Umbral":
+				state["dodge"] = minf(GameData.DODGE_CAP, float(state["dodge"]) + (0.10 if big else 0.05))
+			"Arcane":
+				gain_momentum(state, 2 if big else 1)
+				state["_res_arcane"] = big
+		log.append(tr("Resonance: %s ×%d") % [tr(str(el)), n])
+
+
+## Living heroes per element.
+func resonance_counts(party: Array) -> Dictionary:
+	var out := {}
+	for h in party:
+		if h.hp > 0 and h.type != "":
+			out[h.type] = int(out.get(h.type, 0)) + 1
+	return out
+
+
+## A hero's ward soaked part of foe `i`'s blow (`broke`: it's gone now):
+## Warding's Mirror Ward (stage 3) and the Frost Scholar's chill.
+func _pp_ward_struck(state: Dictionary, i: int, absorbed: float, broke: bool) -> void:
+	var m: Dictionary = state["monsters"][i]
+	var pf: Dictionary = state.get("_pf", {})
+	var wards: Array = _on_path(state, "warding")
+	if wards.is_empty():
+		return
+	if int(pf.get("mirror", 0)) > 0 and absorbed > 0.0:
+		m["hp"] = float(m["hp"]) - round(absorbed)
+		_pp_log(state, tr("The ward reflects %d back at %s.") % [int(round(absorbed)), tr(str(m["name"]))])
+	if not broke:
+		return
+	for w in wards:
+		if _tw(w, "frost-scholar"):
+			m["_slow"] = 2
+		if _st(w) >= 3 and not pf.get("mirror_used", false):
+			pf["mirror_used"] = true
+			pf["mirror"] = 2
+			_pp_log(state, tr("Mirror Ward! Every ward reflects damage for 2 rounds."))
+			_proc(state, w, tr("Mirror Ward"))
+			if _tw(w, "rift-warden-magus"):
+				for mm in state["monsters"]:
+					if mm.get("_winding", false) or mm.get("_charged", false):
+						mm["_winding"] = false
+						mm["_charged"] = false
+						_pp_log(state, tr("%s's wind-up shatters on the ward.") % tr(str(mm["name"])))
+						break

@@ -48,6 +48,11 @@ func reset() -> void:
 	session = {}
 	boon_set4_reached = false
 	tower_best = 0
+	role_seals = {}
+	flawless_bosses = 0
+	riftbreak_best = -1
+	subclass_known = []
+	subclass_carried = []
 	tower_week = 0
 	tower_week_cleared = 0
 	rifts_sealed = 0
@@ -142,7 +147,12 @@ func _migrate_save(data: Dictionary) -> Dictionary:
 		if refund > 0:
 			data["_mgmt_refund"] = refund
 		v = 3
-	# if v < 4: ...next migration goes here, then v = 4
+	if v < 4:
+		# Paths (0.62): levels 1-10 per rank, points per rank, Path trees.
+		# Heroes are converted after they load (migrate_hero_to_paths).
+		data["_paths_migrate"] = true
+		v = 4
+	# if v < 5: ...next migration goes here, then v = 5
 	data["save_version"] = max(v, SAVE_VERSION)
 	return data
 
@@ -178,6 +188,13 @@ func load_save() -> bool:
 		migrate_hero_skill_keys(h)
 	for h in recruit_pool:
 		migrate_hero_skill_keys(h)
+	if data.get("_paths_migrate", false):
+		for h in heroes:
+			migrate_hero_to_paths(h)
+		recruit_pool.clear()   # the board refills with base-class recruits below
+		data.erase("recruit_until")
+		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("Heroes have Paths now"),
+			"text": tr("Every rank is levels 1-10 now; evolve at 10. Subclasses are trained at the Training Yard at Ranks D, B and S, and your heroes keep the ones they have. Skill points were refunded to spend again.")})
 	recruit_until = (data.get("recruit_until", {}) as Dictionary).duplicate()
 	recruit_rerolls = int(data.get("recruit_rerolls", 0))
 	for h in recruit_pool:   # from before offers had a stay: spread their leaving
@@ -234,6 +251,11 @@ func load_save() -> bool:
 	else:
 		roll_champions()
 	tower_best = int(data.get("tower_best", 0))
+	role_seals = (data.get("role_seals", {}) as Dictionary).duplicate()
+	flawless_bosses = int(data.get("flawless_bosses", 0))
+	riftbreak_best = int(data.get("riftbreak_best", -1))
+	subclass_known = (data.get("subclass_known", []) as Array).duplicate()
+	subclass_carried = (data.get("subclass_carried", []) as Array).duplicate()
 	daily_attempt_day = int(data.get("daily_attempt_day", -1))
 	daily_clears = int(data.get("daily_clears", 0))
 	daily_streak = int(data.get("daily_streak", 0))

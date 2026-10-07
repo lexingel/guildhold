@@ -48,6 +48,7 @@ var endless_mode := "descent"   # how the sim frees champions: descent (turn-bas
 var year := ""           # "The Vale this year": year=dry,restless or year=random
 var spire := ""          # the Spire's fall: spire=archive or spire=hollin ("" = either, at random)
 var hand_bonus := 0      # fights that paid the flawless-by-hand bonus
+var train_count := 0     # subclass trainings started (0.62)
 var curve := {}          # power/recommended bucket -> [sealed, lost], ladder runs only
 # Per guild:
 var gross_gold := {}     # week -> Gold earned (runs, quests, defenses)
@@ -257,6 +258,10 @@ func _guild(p: String, s: int) -> void:
 			act_day[act] = GameState.day
 	GameState.active_slot = 9
 	var last := (GameState.day - 1) / GameData.PAYDAY_DAYS
+	var top: Array = GameState.heroes.filter(func(h): return not h.is_champion)
+	top.sort_custom(func(a, b): return GameData.rank_index(a.rank) * 10 + a.level > GameData.rank_index(b.rank) * 10 + b.level)
+	print("   [%s seed %d] heroes: %s · subclass trainings %d" % [p, s, " ".join(top.slice(0, 6).map(func(h): return "%s%d/%d" % [h.rank, h.level, GameData.subclass_stage(h.pool_id)])), train_count])
+	train_count = 0
 	print("   [%s seed %d] training yard: %d hero-days, attribute points trained %d" % [p, s, GameState.heroes.reduce(func(t, h): return t + int(h.history.get("trained_days", 0)), 0), GameState.heroes.reduce(func(t, h): return t + h.attr_trained, 0)])
 	print("   [%s seed %d] day %d act %d · %d Gold %d Essence · roster %d · week %d bill %d of income %d · Renown %d vs rival %d · charter %s/%s · echoes %d (%d back) · ambushes %d/%d won · Endless %d runs, %s · Morrow %s%s" % [p, s, GameState.day, GameState.campaign_act, GameState.coins, GameState.crystals, GameState.heroes.size(),
 		last - 1, int(bill_paid.get(last - 1, 0)), int(gross_gold.get(last - 1, 0)), GameState.reputation, GameState.rival_renown,
@@ -313,6 +318,7 @@ var tides: Array = []      # [tide, held] for each tide of the Open Hollow
 
 func _day(p: String) -> void:
 	GameState.check_feature_unlocks()
+	GameState.check_subclass_unlocks()
 	GameState.check_milestones()
 	_answer_stories()
 	GameState.pending_stories.clear()
@@ -435,6 +441,7 @@ func _idle_spend() -> void:
 		_learn_all(h)
 		GameState.equip_best(h.id)
 	var bill := GameState.weekly_wages() + GameState.upkeep()
+	_grow_heroes(bill + 100)
 	if GameState.heroes.size() < mini(6, GameState.hero_slot_cap()) and not GameState.recruit_pool.is_empty():
 		var offer: Hero = GameState.recruit_pool[0]
 		if GameState.coins - int(GameData.find_rank(offer.rank)["cost"]) > bill + 60:
@@ -466,12 +473,8 @@ func _invest() -> void:
 	for h in GameState.heroes:
 		_spend_attrs(h)
 		_learn_all(h)
-		if h.level >= 10:
-			var cls := GameData.find_class(h.pool_id)
-			var choices: Array = GameData.evolution_choices(cls) if not cls.is_empty() else []
-			if not choices.is_empty():
-				GameState.evolve_hero(h.id, str(choices[0]["id"]))
 	var bill := GameState.weekly_wages() + GameState.upkeep()
+	_grow_heroes(bill + 200)
 	for round_i in 3:
 		var best_key := ""
 		var best_cost := 1 << 30
@@ -531,6 +534,25 @@ func _invest() -> void:
 		var nxt: Array = worn.filter(func(it): return GameState.forge_cost(it) > 0)
 		if nxt.is_empty() or GameState.coins - GameState.forge_cost(nxt[0]) <= bill + 300 or GameState.forge_item(nxt[0].id) != "":
 			break
+
+
+## Evolve every hero at level 10 and send heroes to subclass training (0.62),
+## keeping `reserve` Gold for payday and four heroes free for runs. The Path:
+## the hero's own, else (stage 1) a random unlocked one.
+func _grow_heroes(reserve: int) -> void:
+	for h in GameState.heroes:
+		var c := GameState.evolve_cost(h)
+		if not c.is_empty() and GameState.evolve_lock(h) == "" and GameState.coins - int(c[0]) > reserve:
+			GameState.evolve_hero(h.id)
+	for h in GameState.heroes:
+		if GameState.heroes.filter(func(x): return x.is_available() and not x.is_champion).size() <= 4 or GameState.training_free() <= 0:
+			break
+		var opts: Array = GameState.subclass_training_options(h).filter(func(o): return str(o["lock"]) == "" and not bool(o["change"]))
+		if opts.is_empty() or GameState.coins - int(opts[0]["cost"]["gold"]) <= reserve:
+			continue
+		var pick: Dictionary = opts[0] if h.path != "" else opts[randi() % opts.size()]
+		if GameState.start_subclass_training(h.id, str(pick["id"])) == "":
+			train_count += 1
 
 
 func _spend_attrs(h: Hero) -> void:

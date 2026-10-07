@@ -674,132 +674,197 @@ const ITEM_COND_AFFIXES := [
 # multiplier, and hero rank progression via evolution.
 const RANKS := [
 	{"id": "F", "weight": 100, "mult": 0.9, "cost": 25},
-	{"id": "E", "weight": 60, "mult": 1.0, "cost": 45},
-	{"id": "D", "weight": 35, "mult": 1.15, "cost": 75},
-	{"id": "C", "weight": 20, "mult": 1.35, "cost": 130},
-	{"id": "B", "weight": 10, "mult": 1.6, "cost": 220},
-	{"id": "A", "weight": 4, "mult": 2.0, "cost": 380},
-	{"id": "S", "weight": 1, "mult": 2.6, "cost": 650},
+	{"id": "E", "weight": 60, "mult": 1.0, "cost": 60},
+	{"id": "D", "weight": 35, "mult": 1.15, "cost": 150},
+	{"id": "C", "weight": 20, "mult": 1.35, "cost": 330},
+	{"id": "B", "weight": 10, "mult": 1.6, "cost": 700},
+	{"id": "A", "weight": 4, "mult": 2.0, "cost": 1350},
+	{"id": "S", "weight": 1, "mult": 2.6, "cost": 2500},
 ]
+## "cost" is a recruit's price in Gold (0.62: a hire skips the evolve costs below
+## its rank). "mult" scales speed and the innate stat; HP and damage come from
+## RANK_POWER and the level within the rank (rank_power).
 
-# Classes across the 5 roles. Ranks F-C are a shared, un-named identity per
-# role (`name` is just "Warrior"/"Ranger"/etc — no subclass to speak of yet);
-# a real named subclass only forks off starting at rank B, then again at A
-# and S — see evolve_hero()/GameData.evolution_choices() and the Evolution
-# Stone constants below. `role` picks the Ability/anim assets; `kind` picks
-# the skill-tree package (KIND_SKILL_PACKAGE, reached via hero_tree_summaries)
-# and the id itself picks the unique Ability (SUBCLASS_ABILITIES); rank/flavor
-# are the same F-S vocabulary the Champion pool uses.
+# ---------------- Ranks and levels (0.62) ----------------
+## Each rank is levels 1-10; at 10 a hero evolves to the next rank and starts
+## again at level 1. Power comes from rank: levels climb LEVEL_CLIMB of the way
+## to the next rank's power, so evolving adds the last step. Calibrated so a hero
+## at a campaign stage is about as strong as the old model's (rank, level 10).
+const RANK_POWER := [0.9, 1.2, 1.6, 1.95, 2.3, 2.9, 3.6]
+const LEVEL_CLIMB := 0.9
+const TOP_RANK_CLIMB := 1.25        # S has no next rank: its levels climb toward this x S
+## Raised, not hired: every rank reached by levelling and evolving adds this
+## much to HP and damage for good.
+const SEASONED_PER_RANK := 0.02
+## XP to the next level = the old table x this, by the hero's rank.
+const RANK_XP_NEED := [0.3, 0.45, 0.65, 0.9, 1.2, 1.6, 2.0]
+## Fight XP x this, by the rift's rank (F..SSS): higher rifts teach faster.
+const RIFT_XP_MULT := [1.0, 1.2, 1.4, 1.6, 1.9, 2.2, 2.6, 3.0, 3.5]
+## Points come per rank: at these levels of every rank, +1 skill point and
+## +ATTR_PER_STEP attribute points (3 SP and 9 attribute points a rank).
+const POINT_LEVELS := [4, 7, 10]
+const ATTR_PER_STEP := 3
+## A hire above F arrives with every lower rank's points unspent, plus this
+## many skill points per rank above F (trained elsewhere).
+const HIRED_SP_PER_RANK := 1
+## Evolving to a rank: [Gold, Essence].
+const EVOLVE_COST := {"E": [60, 60], "D": [150, 120], "C": [300, 220], "B": [600, 360], "A": [1100, 560], "S": [1800, 800]}
+## After evolving: +XP_BOOST XP for the next XP_BOOST_RUNS rift runs.
+const XP_BOOST := 0.2
+const XP_BOOST_RUNS := 2
+## A base class's main stat, and its own role tree's package.
+const ROLE_KIND := {"warrior": "dmg_pct", "ranger": "first_round_pct", "mage": "escalate_pct", "cleric": "mend_pct", "rogue": "dodge_pct"}
+const BASE_FLAVOR := {
+	"warrior": "Fresh off the recruiting table, with a borrowed sword and big plans.",
+	"ranger": "Good with a bow, better with a trail, untested in a rift.",
+	"mage": "Knows enough spells to be dangerous, mostly to foes.",
+	"cleric": "Carries a prayer book and a bag of bandages, in that order.",
+	"rogue": "Light on their feet and lighter-fingered; nobody asks too closely.",
+}
+
+
+## HP/damage multiplier for a hero at `rank_idx`, `level` (1-10).
+static func rank_power(rank_idx: int, level: int) -> float:
+	var ri := clampi(rank_idx, 0, RANK_POWER.size() - 1)
+	var cur: float = RANK_POWER[ri]
+	var nxt: float = RANK_POWER[ri + 1] if ri + 1 < RANK_POWER.size() else cur * TOP_RANK_CLIMB
+	return cur + (nxt - cur) * LEVEL_CLIMB * float(clampi(level, 1, 10) - 1) / 9.0
+
+
+## Skill and attribute points a hero has earned by `rank_idx`, `level`.
+static func sp_budget(rank_idx: int, level: int) -> int:
+	return rank_idx * POINT_LEVELS.size() + POINT_LEVELS.filter(func(l): return level >= l).size()
+
+
+static func attr_budget(rank_idx: int, level: int) -> int:
+	return sp_budget(rank_idx, level) * ATTR_PER_STEP
+
+
+static func is_base_class(pool_id: String) -> bool:
+	return ROLE_KIND.has(pool_id)
+
+
+## A base class as a CLASS_POOL-shaped entry (id = the role).
+static func base_class(role: String) -> Dictionary:
+	return {"id": role, "name": role.capitalize(), "role": role, "rank": "F", "type": "", "hp_ratio": 1.0, "dmg_ratio": 1.0,
+		"kind": str(ROLE_KIND.get(role, "dmg_pct")), "flavor": str(BASE_FLAVOR.get(role, "")), "base": true}
+
+# Subclasses across the 5 roles (0.62: every one is a stage of a Path, see
+# GameDataPaths; heroes are hired as base classes and train into these at the
+# Training Yard). `rank` is the rank the subclass was first designed for and
+# only picks gen_hero()'s pool for developed heroes (tests, story characters).
+# `role` picks the Ability/anim assets; `kind` is the main stat; the id picks
+# the unique Ability (SUBCLASS_ABILITIES).
 const CLASS_POOL := [
 	# -- Warrior (melee bruisers & tanks) --
 	# F-C rows below share the un-named "Warrior" identity (see the doc
 	# comment above CLASS_POOL) — only `name` changed from the original
 	# per-row titles; kind/type/flavor/ratios are untouched so existing saves
 	# and skill-tree investment aren't disturbed.
-	{"id": "squire", "name": "Warrior", "role": "warrior", "rank": "F", "type": "Ember", "hp_ratio": 1.0, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "A guild recruit swinging a borrowed blade."},
-	{"id": "footman", "name": "Warrior", "role": "warrior", "rank": "F", "type": "Umbral", "hp_ratio": 1.2, "dmg_ratio": 0.8, "kind": "hazard_guard_pct", "flavor": "Slow, sturdy, and hard to put down."},
-	{"id": "duelist", "name": "Warrior", "role": "warrior", "rank": "E", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "Wins the exchange before it starts."},
-	{"id": "bulwark", "name": "Warrior", "role": "warrior", "rank": "E", "type": "Umbral", "hp_ratio": 1.3, "dmg_ratio": 0.7, "kind": "hp_pct", "flavor": "A wall with opinions."},
-	{"id": "berserker", "name": "Warrior", "role": "warrior", "rank": "D", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.3, "kind": "dmg_pct", "flavor": "Considers armor a personal insult."},
-	{"id": "iron-guard", "name": "Warrior", "role": "warrior", "rank": "C", "type": "Umbral", "hp_ratio": 1.4, "dmg_ratio": 0.8, "kind": "hp_pct", "flavor": "Rift-forged plate, dented and unbothered."},
-	{"id": "bloodletter", "name": "Warrior", "role": "warrior", "rank": "C", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.3, "kind": "escalate_pct", "flavor": "Trades wounds and wins the trade."},
+	{"id": "squire", "name": "Squire", "role": "warrior", "rank": "F", "type": "Ember", "hp_ratio": 1.0, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "A guild recruit swinging a borrowed blade."},
+	{"id": "footman", "name": "Footman", "role": "warrior", "rank": "F", "type": "Umbral", "hp_ratio": 1.2, "dmg_ratio": 0.8, "kind": "hazard_guard_pct", "flavor": "Slow, sturdy, and hard to put down."},
+	{"id": "duelist", "name": "Duelist", "role": "warrior", "rank": "E", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "Wins the exchange before it starts."},
+	{"id": "bulwark", "name": "Bulwark", "role": "warrior", "rank": "E", "type": "Umbral", "hp_ratio": 1.3, "dmg_ratio": 0.7, "kind": "hp_pct", "flavor": "A wall with opinions."},
+	{"id": "berserker", "name": "Berserker", "role": "warrior", "rank": "D", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.3, "kind": "dmg_pct", "flavor": "Considers armor a personal insult."},
+	{"id": "iron-guard", "name": "Iron-Guard", "role": "warrior", "rank": "C", "type": "Umbral", "hp_ratio": 1.4, "dmg_ratio": 0.8, "kind": "hp_pct", "flavor": "Rift-forged plate, dented and unbothered."},
+	{"id": "bloodletter", "name": "Bloodletter", "role": "warrior", "rank": "C", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.3, "kind": "escalate_pct", "flavor": "Trades wounds and wins the trade."},
 	{"id": "runeblade", "name": "Runeblade", "role": "warrior", "rank": "B", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 1.2, "kind": "first_round_pct", "flavor": "Every strike is already inscribed."},
 	{"id": "ashen-templar", "name": "Ashen Templar", "role": "warrior", "rank": "A", "type": "Umbral", "hp_ratio": 1.3, "dmg_ratio": 1.0, "kind": "wipe_guard", "flavor": "Has died before. Didn't care for it."},
 	{"id": "rift-sovereign", "name": "Rift Sovereign", "role": "warrior", "rank": "S", "type": "Arcane", "hp_ratio": 1.1, "dmg_ratio": 1.4, "kind": "boss_alpha_strike", "flavor": "The Rift answers to almost nothing. Almost."},
 	# -- Warrior (content-pass additions — fills the role's missing mend_pct/
 	# dodge_pct kinds and Verdant/Frost types) --
-	{"id": "fieldmender", "name": "Warrior", "role": "warrior", "rank": "F", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Patches the party between swings."},
-	{"id": "featherguard", "name": "Warrior", "role": "warrior", "rank": "E", "type": "Frost", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dodge_pct", "flavor": "Heavy armor, light feet."},
-	{"id": "trailblazer", "name": "Warrior", "role": "warrior", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dmg_pct", "flavor": "First through the door, first to swing."},
-	{"id": "frostguard", "name": "Warrior", "role": "warrior", "rank": "E", "type": "Frost", "hp_ratio": 1.3, "dmg_ratio": 0.7, "kind": "hp_pct", "flavor": "The cold never bothered the plate much."},
-	{"id": "warbrand", "name": "Warrior", "role": "warrior", "rank": "D", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.2, "kind": "escalate_pct", "flavor": "Gets angrier, not slower."},
-	{"id": "aegis-bearer", "name": "Warrior", "role": "warrior", "rank": "C", "type": "Frost", "hp_ratio": 1.3, "dmg_ratio": 0.8, "kind": "wipe_guard", "flavor": "The last thing standing, on principle."},
+	{"id": "fieldmender", "name": "Fieldmender", "role": "warrior", "rank": "F", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Patches the party between swings."},
+	{"id": "featherguard", "name": "Featherguard", "role": "warrior", "rank": "E", "type": "Frost", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dodge_pct", "flavor": "Heavy armor, light feet."},
+	{"id": "trailblazer", "name": "Trailblazer", "role": "warrior", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dmg_pct", "flavor": "First through the door, first to swing."},
+	{"id": "frostguard", "name": "Frostguard", "role": "warrior", "rank": "E", "type": "Frost", "hp_ratio": 1.3, "dmg_ratio": 0.7, "kind": "hp_pct", "flavor": "The cold never bothered the plate much."},
+	{"id": "warbrand", "name": "Warbrand", "role": "warrior", "rank": "D", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.2, "kind": "escalate_pct", "flavor": "Gets angrier, not slower."},
+	{"id": "aegis-bearer", "name": "Aegis-Bearer", "role": "warrior", "rank": "C", "type": "Frost", "hp_ratio": 1.3, "dmg_ratio": 0.8, "kind": "wipe_guard", "flavor": "The last thing standing, on principle."},
 	{"id": "stormguard", "name": "Stormguard", "role": "warrior", "rank": "B", "type": "Frost", "hp_ratio": 1.0, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "Meets the charge before it lands."},
 	{"id": "rift-breaker", "name": "Rift-Breaker", "role": "warrior", "rank": "A", "type": "Verdant", "hp_ratio": 1.2, "dmg_ratio": 1.1, "kind": "boss_alpha_strike", "flavor": "Puts the first crack in anything."},
 	# -- Ranger (precision & terrain reading) --
-	{"id": "trapper", "name": "Ranger", "role": "ranger", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Sets more snares than the Rift can spring."},
-	{"id": "slinger", "name": "Ranger", "role": "ranger", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Improvises a weapon out of whatever's at hand."},
-	{"id": "pathfinder", "name": "Ranger", "role": "ranger", "rank": "E", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Already knows where the floor gives way."},
-	{"id": "longshot", "name": "Ranger", "role": "ranger", "rank": "E", "type": "Frost", "hp_ratio": 0.8, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "One arrow. Rarely needs a second."},
-	{"id": "blade-dancer", "name": "Ranger", "role": "ranger", "rank": "D", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "The opening strike is the whole performance."},
-	{"id": "warden", "name": "Ranger", "role": "ranger", "rank": "D", "type": "Verdant", "hp_ratio": 1.1, "dmg_ratio": 0.9, "kind": "hp_pct", "flavor": "Has walked through worse hallways than this."},
-	{"id": "stormtracker", "name": "Ranger", "role": "ranger", "rank": "D", "type": "Frost", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "escalate_pct", "flavor": "Follows the lightning instead of waiting for thunder."},
-	{"id": "rift-ranger", "name": "Ranger", "role": "ranger", "rank": "C", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 1.1, "kind": "dodge_pct", "flavor": "Reads a hallway before it reads back."},
-	{"id": "deadfall-hunter", "name": "Ranger", "role": "ranger", "rank": "C", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "hazard_guard_pct", "flavor": "Sets the trap the Rift walks into instead."},
+	{"id": "trapper", "name": "Trapper", "role": "ranger", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Sets more snares than the Rift can spring."},
+	{"id": "slinger", "name": "Slinger", "role": "ranger", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Improvises a weapon out of whatever's at hand."},
+	{"id": "pathfinder", "name": "Pathfinder", "role": "ranger", "rank": "E", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Already knows where the floor gives way."},
+	{"id": "longshot", "name": "Longshot", "role": "ranger", "rank": "E", "type": "Frost", "hp_ratio": 0.8, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "One arrow. Rarely needs a second."},
+	{"id": "blade-dancer", "name": "Blade-Dancer", "role": "ranger", "rank": "D", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "The opening strike is the whole performance."},
+	{"id": "warden", "name": "Warden", "role": "ranger", "rank": "D", "type": "Verdant", "hp_ratio": 1.1, "dmg_ratio": 0.9, "kind": "hp_pct", "flavor": "Has walked through worse hallways than this."},
+	{"id": "stormtracker", "name": "Stormtracker", "role": "ranger", "rank": "D", "type": "Frost", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "escalate_pct", "flavor": "Follows the lightning instead of waiting for thunder."},
+	{"id": "rift-ranger", "name": "Rift-Ranger", "role": "ranger", "rank": "C", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 1.1, "kind": "dodge_pct", "flavor": "Reads a hallway before it reads back."},
+	{"id": "deadfall-hunter", "name": "Deadfall Hunter", "role": "ranger", "rank": "C", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "hazard_guard_pct", "flavor": "Sets the trap the Rift walks into instead."},
 	{"id": "voidwalker", "name": "Voidwalker", "role": "ranger", "rank": "A", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 1.2, "kind": "dodge_pct", "flavor": "Half-stepped out of the fight before it began."},
 	# -- Ranger (content-pass additions — fills the role's missing mend_pct/
 	# wipe_guard/boss_alpha_strike kinds and Umbral type) --
-	{"id": "shadowtracker", "name": "Ranger", "role": "ranger", "rank": "F", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Tracks by scent when the light gives out."},
-	{"id": "fieldscout", "name": "Ranger", "role": "ranger", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Knows exactly where to put an arrow."},
-	{"id": "nightwarden", "name": "Ranger", "role": "ranger", "rank": "E", "type": "Umbral", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "wipe_guard", "flavor": "Watches the dark so the party doesn't have to."},
-	{"id": "sapling-keeper", "name": "Ranger", "role": "ranger", "rank": "E", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Field dressings from whatever's growing nearby."},
-	{"id": "duskstalker", "name": "Ranger", "role": "ranger", "rank": "D", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dodge_pct", "flavor": "Gone before the echo catches up."},
-	{"id": "gale-marksman", "name": "Ranger", "role": "ranger", "rank": "C", "type": "Frost", "hp_ratio": 0.8, "dmg_ratio": 1.2, "kind": "first_round_pct", "flavor": "The wind carries the first shot true."},
+	{"id": "shadowtracker", "name": "Shadowtracker", "role": "ranger", "rank": "F", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Tracks by scent when the light gives out."},
+	{"id": "fieldscout", "name": "Fieldscout", "role": "ranger", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Knows exactly where to put an arrow."},
+	{"id": "nightwarden", "name": "Nightwarden", "role": "ranger", "rank": "E", "type": "Umbral", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "wipe_guard", "flavor": "Watches the dark so the party doesn't have to."},
+	{"id": "sapling-keeper", "name": "Sapling-Keeper", "role": "ranger", "rank": "E", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Field dressings from whatever's growing nearby."},
+	{"id": "duskstalker", "name": "Duskstalker", "role": "ranger", "rank": "D", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dodge_pct", "flavor": "Gone before the echo catches up."},
+	{"id": "gale-marksman", "name": "Gale Marksman", "role": "ranger", "rank": "C", "type": "Frost", "hp_ratio": 0.8, "dmg_ratio": 1.2, "kind": "first_round_pct", "flavor": "The wind carries the first shot true."},
 	{"id": "rift-piercer", "name": "Rift-Piercer", "role": "ranger", "rank": "B", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 1.2, "kind": "boss_alpha_strike", "flavor": "Finds the one seam every ward has."},
 	{"id": "wintertide-archer", "name": "Wintertide Archer", "role": "ranger", "rank": "A", "type": "Frost", "hp_ratio": 1.0, "dmg_ratio": 1.2, "kind": "escalate_pct", "flavor": "Colder with every arrow loosed."},
 	{"id": "rift-eclipsed-warden", "name": "Rift-Eclipsed Warden", "role": "ranger", "rank": "S", "type": "Umbral", "hp_ratio": 1.0, "dmg_ratio": 1.3, "kind": "boss_alpha_strike", "flavor": "Every shadow in the Rift owes her an arrow."},
 	# -- Mage (escalating & warding casters) --
-	{"id": "apprentice", "name": "Mage", "role": "mage", "rank": "F", "type": "Arcane", "hp_ratio": 0.8, "dmg_ratio": 0.9, "kind": "escalate_pct", "flavor": "Still learning to hold a spark steady."},
-	{"id": "cinderling", "name": "Mage", "role": "mage", "rank": "F", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 0.9, "kind": "dmg_pct", "flavor": "Sparks first, thinks second."},
-	{"id": "fledgling-seer", "name": "Mage", "role": "mage", "rank": "F", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 0.8, "kind": "hazard_guard_pct", "flavor": "Sees the trap a half-second before it triggers."},
-	{"id": "cinder-adept", "name": "Mage", "role": "mage", "rank": "E", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "escalate_pct", "flavor": "Every spell warms up the next."},
-	{"id": "frost-scholar", "name": "Mage", "role": "mage", "rank": "E", "type": "Frost", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Studies the Rift's cold so it can't study back."},
-	{"id": "wardweaver", "name": "Mage", "role": "mage", "rank": "D", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Weaves a ward faster than the Rift can break it."},
-	{"id": "stormcaller", "name": "Mage", "role": "mage", "rank": "C", "type": "Frost", "hp_ratio": 0.8, "dmg_ratio": 1.1, "kind": "escalate_pct", "flavor": "Calls down more with every passing second."},
+	{"id": "apprentice", "name": "Apprentice", "role": "mage", "rank": "F", "type": "Arcane", "hp_ratio": 0.8, "dmg_ratio": 0.9, "kind": "escalate_pct", "flavor": "Still learning to hold a spark steady."},
+	{"id": "cinderling", "name": "Cinderling", "role": "mage", "rank": "F", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 0.9, "kind": "dmg_pct", "flavor": "Sparks first, thinks second."},
+	{"id": "fledgling-seer", "name": "Fledgling Seer", "role": "mage", "rank": "F", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 0.8, "kind": "hazard_guard_pct", "flavor": "Sees the trap a half-second before it triggers."},
+	{"id": "cinder-adept", "name": "Cinder-Adept", "role": "mage", "rank": "E", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "escalate_pct", "flavor": "Every spell warms up the next."},
+	{"id": "frost-scholar", "name": "Frost Scholar", "role": "mage", "rank": "E", "type": "Frost", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Studies the Rift's cold so it can't study back."},
+	{"id": "wardweaver", "name": "Wardweaver", "role": "mage", "rank": "D", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Weaves a ward faster than the Rift can break it."},
+	{"id": "stormcaller", "name": "Stormcaller", "role": "mage", "rank": "C", "type": "Frost", "hp_ratio": 0.8, "dmg_ratio": 1.1, "kind": "escalate_pct", "flavor": "Calls down more with every passing second."},
 	{"id": "pyromancer", "name": "Pyromancer", "role": "mage", "rank": "B", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.2, "kind": "dodge_pct", "flavor": "The Rift itself seems to lean away."},
 	{"id": "archon-of-storms", "name": "Archon of Storms", "role": "mage", "rank": "A", "type": "Frost", "hp_ratio": 1.0, "dmg_ratio": 1.2, "kind": "boss_alpha_strike", "flavor": "Opens every Warden's door with thunder."},
 	{"id": "the-unbound", "name": "The Unbound", "role": "mage", "rank": "S", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 1.3, "kind": "escalate_pct", "flavor": "No name holds it. No floor stops it."},
 	# -- Mage (content-pass additions — fills the role's missing hp_pct/
 	# first_round_pct/mend_pct/wipe_guard kinds and Verdant/Umbral types) --
-	{"id": "thornweaver", "name": "Mage", "role": "mage", "rank": "F", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Grows a ward out of nothing but will."},
-	{"id": "shade-adept", "name": "Mage", "role": "mage", "rank": "F", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "first_round_pct", "flavor": "The first spell is always the quiet one."},
-	{"id": "stoneward-mystic", "name": "Mage", "role": "mage", "rank": "E", "type": "Verdant", "hp_ratio": 1.2, "dmg_ratio": 0.7, "kind": "hp_pct", "flavor": "Turns skin to something closer to bark."},
-	{"id": "grim-conjurer", "name": "Mage", "role": "mage", "rank": "E", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "wipe_guard", "flavor": "Bargains with the dark for one more round."},
-	{"id": "verdant-oracle", "name": "Mage", "role": "mage", "rank": "D", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "mend_pct", "flavor": "Reads the future in root and leaf."},
-	{"id": "duskglass-seer", "name": "Mage", "role": "mage", "rank": "C", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dodge_pct", "flavor": "Sees the strike land before it's thrown."},
+	{"id": "thornweaver", "name": "Thornweaver", "role": "mage", "rank": "F", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Grows a ward out of nothing but will."},
+	{"id": "shade-adept", "name": "Shade-Adept", "role": "mage", "rank": "F", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "first_round_pct", "flavor": "The first spell is always the quiet one."},
+	{"id": "stoneward-mystic", "name": "Stoneward Mystic", "role": "mage", "rank": "E", "type": "Verdant", "hp_ratio": 1.2, "dmg_ratio": 0.7, "kind": "hp_pct", "flavor": "Turns skin to something closer to bark."},
+	{"id": "grim-conjurer", "name": "Grim Conjurer", "role": "mage", "rank": "E", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "wipe_guard", "flavor": "Bargains with the dark for one more round."},
+	{"id": "verdant-oracle", "name": "Verdant Oracle", "role": "mage", "rank": "D", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "mend_pct", "flavor": "Reads the future in root and leaf."},
+	{"id": "duskglass-seer", "name": "Duskglass Seer", "role": "mage", "rank": "C", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dodge_pct", "flavor": "Sees the strike land before it's thrown."},
 	{"id": "ashbound-theorist", "name": "Ashbound Theorist", "role": "mage", "rank": "B", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.2, "kind": "escalate_pct", "flavor": "Every equation ends in fire."},
 	{"id": "rift-warden-magus", "name": "Rift-Warden Magus", "role": "mage", "rank": "A", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 1.2, "kind": "hazard_guard_pct", "flavor": "Wards the floor before the Rift finishes forming it."},
 	# -- Cleric (sustain & support) --
-	{"id": "peddler", "name": "Cleric", "role": "cleric", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Sells bandages. Uses them too."},
-	{"id": "acolyte", "name": "Cleric", "role": "cleric", "rank": "F", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Prays quietly, heals quietly."},
-	{"id": "herbalist", "name": "Cleric", "role": "cleric", "rank": "E", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Carries a field kit for every wound."},
-	{"id": "lay-brother", "name": "Cleric", "role": "cleric", "rank": "E", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "dmg_pct", "flavor": "Swings a censer like it owes him money."},
-	{"id": "battle-chaplain", "name": "Cleric", "role": "cleric", "rank": "D", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "dodge_pct", "flavor": "Prays loudly enough to keep the party moving."},
-	{"id": "zealot", "name": "Cleric", "role": "cleric", "rank": "D", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dmg_pct", "flavor": "Faith, mostly. A blade, occasionally."},
-	{"id": "rift-medic", "name": "Cleric", "role": "cleric", "rank": "C", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "mend_pct", "flavor": "Faster hands than the Rift has wounds to give."},
+	{"id": "peddler", "name": "Peddler", "role": "cleric", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Sells bandages. Uses them too."},
+	{"id": "acolyte", "name": "Acolyte", "role": "cleric", "rank": "F", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Prays quietly, heals quietly."},
+	{"id": "herbalist", "name": "Herbalist", "role": "cleric", "rank": "E", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "mend_pct", "flavor": "Carries a field kit for every wound."},
+	{"id": "lay-brother", "name": "Lay Brother", "role": "cleric", "rank": "E", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "dmg_pct", "flavor": "Swings a censer like it owes him money."},
+	{"id": "battle-chaplain", "name": "Battle Chaplain", "role": "cleric", "rank": "D", "type": "Arcane", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "dodge_pct", "flavor": "Prays loudly enough to keep the party moving."},
+	{"id": "zealot", "name": "Zealot", "role": "cleric", "rank": "D", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dmg_pct", "flavor": "Faith, mostly. A blade, occasionally."},
+	{"id": "rift-medic", "name": "Rift-Medic", "role": "cleric", "rank": "C", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "mend_pct", "flavor": "Faster hands than the Rift has wounds to give."},
 	{"id": "dawnkeeper", "name": "Dawnkeeper", "role": "cleric", "rank": "B", "type": "Arcane", "hp_ratio": 1.1, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Carries first light into the deepest floor."},
 	{"id": "sanctified-shield", "name": "Sanctified Shield", "role": "cleric", "rank": "B", "type": "Arcane", "hp_ratio": 1.3, "dmg_ratio": 0.9, "kind": "wipe_guard", "flavor": "Swears the party will not fall today."},
 	{"id": "alchemist", "name": "Alchemist", "role": "cleric", "rank": "B", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 1.0, "kind": "escalate_pct", "flavor": "Brews faster than the Rift can wound."},
 	# -- Cleric (content-pass additions — fills the role's missing hp_pct/
 	# first_round_pct/boss_alpha_strike kinds and Ember/Frost types) --
-	{"id": "emberblessed-acolyte", "name": "Cleric", "role": "cleric", "rank": "F", "type": "Ember", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "dmg_pct", "flavor": "Prays with a lit candle, not a cold one."},
-	{"id": "frostward-sister", "name": "Cleric", "role": "cleric", "rank": "F", "type": "Frost", "hp_ratio": 1.1, "dmg_ratio": 0.7, "kind": "hp_pct", "flavor": "Keeps the chill out of everyone but herself."},
-	{"id": "vanguard-chaplain", "name": "Cleric", "role": "cleric", "rank": "E", "type": "Ember", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "first_round_pct", "flavor": "Blesses the blade before it's needed."},
-	{"id": "hearth-warden", "name": "Cleric", "role": "cleric", "rank": "E", "type": "Frost", "hp_ratio": 1.1, "dmg_ratio": 0.8, "kind": "hp_pct", "flavor": "A fire that doesn't go out in the cold."},
-	{"id": "ember-confessor", "name": "Cleric", "role": "cleric", "rank": "D", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Absolves the Rift of its sins, briefly."},
-	{"id": "frost-anchorite", "name": "Cleric", "role": "cleric", "rank": "C", "type": "Frost", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "mend_pct", "flavor": "Fasts, prays, and somehow still heals faster."},
+	{"id": "emberblessed-acolyte", "name": "Emberblessed Acolyte", "role": "cleric", "rank": "F", "type": "Ember", "hp_ratio": 1.0, "dmg_ratio": 0.8, "kind": "dmg_pct", "flavor": "Prays with a lit candle, not a cold one."},
+	{"id": "frostward-sister", "name": "Frostward Sister", "role": "cleric", "rank": "F", "type": "Frost", "hp_ratio": 1.1, "dmg_ratio": 0.7, "kind": "hp_pct", "flavor": "Keeps the chill out of everyone but herself."},
+	{"id": "vanguard-chaplain", "name": "Vanguard Chaplain", "role": "cleric", "rank": "E", "type": "Ember", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "first_round_pct", "flavor": "Blesses the blade before it's needed."},
+	{"id": "hearth-warden", "name": "Hearth-Warden", "role": "cleric", "rank": "E", "type": "Frost", "hp_ratio": 1.1, "dmg_ratio": 0.8, "kind": "hp_pct", "flavor": "A fire that doesn't go out in the cold."},
+	{"id": "ember-confessor", "name": "Ember Confessor", "role": "cleric", "rank": "D", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Absolves the Rift of its sins, briefly."},
+	{"id": "frost-anchorite", "name": "Frost Anchorite", "role": "cleric", "rank": "C", "type": "Frost", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "mend_pct", "flavor": "Fasts, prays, and somehow still heals faster."},
 	{"id": "radiant-vanguard", "name": "Radiant Vanguard", "role": "cleric", "rank": "B", "type": "Ember", "hp_ratio": 1.1, "dmg_ratio": 1.0, "kind": "first_round_pct", "flavor": "Leads with light, not caution."},
 	{"id": "sainted-ember", "name": "Sainted Ember", "role": "cleric", "rank": "A", "type": "Ember", "hp_ratio": 1.1, "dmg_ratio": 1.0, "kind": "boss_alpha_strike", "flavor": "The Rift's worst still flinches from her first word."},
 	{"id": "last-light-martyr", "name": "Last-Light Martyr", "role": "cleric", "rank": "S", "type": "Arcane", "hp_ratio": 1.2, "dmg_ratio": 0.9, "kind": "wipe_guard", "flavor": "The party has never seen the floor she stood between them and."},
 	# -- Rogue (evasion & burst) --
-	{"id": "scavenger", "name": "Rogue", "role": "rogue", "rank": "F", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Knows which puddles not to step in."},
-	{"id": "runaway", "name": "Rogue", "role": "rogue", "rank": "F", "type": "Umbral", "hp_ratio": 0.8, "dmg_ratio": 0.9, "kind": "dodge_pct", "flavor": "Has never once stood and fought fair."},
-	{"id": "cutpurse", "name": "Rogue", "role": "rogue", "rank": "F", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Leaves with more than they came with."},
-	{"id": "skirmisher", "name": "Rogue", "role": "rogue", "rank": "E", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dodge_pct", "flavor": "Never where the last swing landed."},
-	{"id": "footpad", "name": "Rogue", "role": "rogue", "rank": "E", "type": "Frost", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "hazard_guard_pct", "flavor": "Nobody's ever heard them arrive."},
-	{"id": "shadowfoot", "name": "Rogue", "role": "rogue", "rank": "D", "type": "Umbral", "hp_ratio": 0.8, "dmg_ratio": 1.1, "kind": "dodge_pct", "flavor": "The Rift barely notices it was there."},
-	{"id": "fleetblade", "name": "Rogue", "role": "rogue", "rank": "D", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "escalate_pct", "flavor": "Gets faster the longer no one catches them."},
-	{"id": "nightblade", "name": "Rogue", "role": "rogue", "rank": "C", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dmg_pct", "flavor": "Strikes from the dark and returns to it."},
-	{"id": "wraithstep", "name": "Rogue", "role": "rogue", "rank": "C", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "Leaves two footprints and no explanation."},
+	{"id": "scavenger", "name": "Scavenger", "role": "rogue", "rank": "F", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "hazard_guard_pct", "flavor": "Knows which puddles not to step in."},
+	{"id": "runaway", "name": "Runaway", "role": "rogue", "rank": "F", "type": "Umbral", "hp_ratio": 0.8, "dmg_ratio": 0.9, "kind": "dodge_pct", "flavor": "Has never once stood and fought fair."},
+	{"id": "cutpurse", "name": "Cutpurse", "role": "rogue", "rank": "F", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Leaves with more than they came with."},
+	{"id": "skirmisher", "name": "Skirmisher", "role": "rogue", "rank": "E", "type": "Ember", "hp_ratio": 0.9, "dmg_ratio": 1.0, "kind": "dodge_pct", "flavor": "Never where the last swing landed."},
+	{"id": "footpad", "name": "Footpad", "role": "rogue", "rank": "E", "type": "Frost", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "hazard_guard_pct", "flavor": "Nobody's ever heard them arrive."},
+	{"id": "shadowfoot", "name": "Shadowfoot", "role": "rogue", "rank": "D", "type": "Umbral", "hp_ratio": 0.8, "dmg_ratio": 1.1, "kind": "dodge_pct", "flavor": "The Rift barely notices it was there."},
+	{"id": "fleetblade", "name": "Fleetblade", "role": "rogue", "rank": "D", "type": "Ember", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "escalate_pct", "flavor": "Gets faster the longer no one catches them."},
+	{"id": "nightblade", "name": "Nightblade", "role": "rogue", "rank": "C", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "dmg_pct", "flavor": "Strikes from the dark and returns to it."},
+	{"id": "wraithstep", "name": "Wraithstep", "role": "rogue", "rank": "C", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "first_round_pct", "flavor": "Leaves two footprints and no explanation."},
 	{"id": "duskrunner", "name": "Duskrunner", "role": "rogue", "rank": "B", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.2, "kind": "first_round_pct", "flavor": "Moves like the space between two heartbeats."},
 	# -- Rogue (content-pass additions — fills the role's missing hp_pct/
 	# mend_pct/wipe_guard/boss_alpha_strike kinds and Verdant/Arcane types) --
-	{"id": "herbrunner", "name": "Rogue", "role": "rogue", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "mend_pct", "flavor": "Knows every plant the Rift hasn't poisoned yet."},
-	{"id": "arcane-pilferer", "name": "Rogue", "role": "rogue", "rank": "F", "type": "Arcane", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Steals more than coin from a warded vault."},
-	{"id": "ironhide-footpad", "name": "Rogue", "role": "rogue", "rank": "E", "type": "Verdant", "hp_ratio": 1.1, "dmg_ratio": 0.8, "kind": "hp_pct", "flavor": "Tougher than a rogue has any right to be."},
-	{"id": "glyphhand", "name": "Rogue", "role": "rogue", "rank": "E", "type": "Arcane", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "dodge_pct", "flavor": "Reads a ward's seams like a lockpick reads a door."},
-	{"id": "bramblefoot", "name": "Rogue", "role": "rogue", "rank": "D", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "hp_pct", "flavor": "The undergrowth hides more than it seems to."},
-	{"id": "rift-slipper", "name": "Rogue", "role": "rogue", "rank": "C", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "wipe_guard", "flavor": "Steps half out of reality when it matters."},
+	{"id": "herbrunner", "name": "Herbrunner", "role": "rogue", "rank": "F", "type": "Verdant", "hp_ratio": 0.9, "dmg_ratio": 0.9, "kind": "mend_pct", "flavor": "Knows every plant the Rift hasn't poisoned yet."},
+	{"id": "arcane-pilferer", "name": "Arcane Pilferer", "role": "rogue", "rank": "F", "type": "Arcane", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "dmg_pct", "flavor": "Steals more than coin from a warded vault."},
+	{"id": "ironhide-footpad", "name": "Ironhide Footpad", "role": "rogue", "rank": "E", "type": "Verdant", "hp_ratio": 1.1, "dmg_ratio": 0.8, "kind": "hp_pct", "flavor": "Tougher than a rogue has any right to be."},
+	{"id": "glyphhand", "name": "Glyphhand", "role": "rogue", "rank": "E", "type": "Arcane", "hp_ratio": 0.8, "dmg_ratio": 1.0, "kind": "dodge_pct", "flavor": "Reads a ward's seams like a lockpick reads a door."},
+	{"id": "bramblefoot", "name": "Bramblefoot", "role": "rogue", "rank": "D", "type": "Verdant", "hp_ratio": 1.0, "dmg_ratio": 0.9, "kind": "hp_pct", "flavor": "The undergrowth hides more than it seems to."},
+	{"id": "rift-slipper", "name": "Rift-Slipper", "role": "rogue", "rank": "C", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 1.1, "kind": "wipe_guard", "flavor": "Steps half out of reality when it matters."},
 	{"id": "wraithblade-adept", "name": "Wraithblade Adept", "role": "rogue", "rank": "B", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.2, "kind": "escalate_pct", "flavor": "Every strike thinner than the last, and faster."},
 	{"id": "the-unseen-hand", "name": "The Unseen Hand", "role": "rogue", "rank": "A", "type": "Arcane", "hp_ratio": 0.9, "dmg_ratio": 1.3, "kind": "boss_alpha_strike", "flavor": "Already struck before the boss noticed it arrive."},
 	{"id": "the-final-cut", "name": "The Final Cut", "role": "rogue", "rank": "S", "type": "Umbral", "hp_ratio": 0.9, "dmg_ratio": 1.2, "kind": "dodge_pct", "flavor": "Nothing has landed a hit since the Rift learned her name."},
@@ -807,6 +872,8 @@ const CLASS_POOL := [
 
 
 static func find_class(pool_id: String) -> Dictionary:
+	if ROLE_KIND.has(pool_id):
+		return base_class(pool_id)
 	for c in CLASS_POOL:
 		if c["id"] == pool_id:
 			return c

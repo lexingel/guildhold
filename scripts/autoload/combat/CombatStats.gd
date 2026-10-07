@@ -165,19 +165,42 @@ func recommended_power(diff_id: String, rift_rank: String = "") -> int:
 	return int(diff["rec_power"])
 
 
-func xp_to_next(level: int) -> int:
-	return 40 + (level - 1) * 25
+## XP from `level` to the next, for a hero of `rank` (0.62: each rank is
+## levels 1-10, and higher ranks need more).
+func xp_to_next(level: int, rank: String = "F") -> int:
+	return int(round((40 + (level - 1) * 25) * float(GameData.RANK_XP_NEED[GameData.rank_index(rank)])))
 
 
 func gain_xp(h: Hero, amount: int) -> void:
-	h.xp += int(round(amount * GameState.xp_mult()))
-	while h.level < 10 and h.xp >= xp_to_next(h.level):
-		h.xp -= xp_to_next(h.level)
+	var boost := 1.0 + (GameData.XP_BOOST if h.xp_boost_runs > 0 else 0.0)
+	h.xp += int(round(amount * GameState.xp_mult() * boost))
+	while h.level < 10 and h.xp >= xp_to_next(h.level, h.rank):
+		h.xp -= xp_to_next(h.level, h.rank)
 		h.level += 1
-		h.base_hp = round(h.base_hp * (1.0 + GameData.LEVEL_GROWTH))
-		h.base_dmg = round(h.base_dmg * (1.0 + GameData.LEVEL_GROWTH))
-		h.skill_points += 1
-		h.attr_points += GameData.ATTR_POINTS_PER_LEVEL
+		if GameData.POINT_LEVELS.has(h.level):
+			h.skill_points += 1
+			h.attr_points += GameData.ATTR_PER_STEP
+		refresh_stats(h)
+	if h.level >= 10:
+		h.xp = mini(h.xp, xp_to_next(10, h.rank))   # banked toward nothing: evolving starts the next rank at 0
+
+
+## Base HP and damage from the hero's role, class, rank, level and Seasoned
+## ranks (0.62). Champions keep their own numbers.
+func refresh_stats(h: Hero) -> void:
+	if h.is_champion:
+		return
+	var cls := GameData.find_class(h.pool_id)
+	var role := GameData.find_role(str(cls.get("role", h.cls_id)))
+	if cls.is_empty() or role.is_empty():
+		return
+	var p := GameData.rank_power(GameData.rank_index(h.rank), h.level) * (1.0 + GameData.SEASONED_PER_RANK * h.seasoned)
+	var was_full := h.hp >= max_hp(h)
+	h.base_hp = maxi(1, int(round(float(role["base_hp"]) * float(cls["hp_ratio"]) * p)))
+	h.base_dmg = maxi(1, int(round(float(role["base_dmg"]) * float(cls["dmg_ratio"]) * p)))
+	h.base_spd = int(round(float(role["base_spd"]) * float(GameData.find_rank(h.rank)["mult"])))
+	if was_full:
+		h.hp = max_hp(h)
 
 
 ## Negative values (traits like Frail, scars, drawbacks) read as a penalty —

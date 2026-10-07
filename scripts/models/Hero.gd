@@ -51,6 +51,9 @@ var unpaid_weeks: int = 0       # paydays missed in a row
 var last_rift_day: int = 0      # day this hero last went on a rift (idle heroes grow restless)
 var look: int = 0               # colour variant (0 = the art as drawn), see GameState.refresh_looks
 var look_of: String = ""        # the portrait `look` was picked for; a new one (an evolution) picks again
+var path: String = ""          # GameData.PATHS id once trained (0.62); "" = base class
+var seasoned: int = 0          # ranks reached by levelling and evolving (0.62): +SEASONED_PER_RANK HP/damage each
+var xp_boost_runs: int = 0      # rift runs left at +XP_BOOST XP after an evolution
 var history: Dictionary = {}              # lifetime counters: kills/boss_kills/elite_kills/knockouts/rifts_cleared — feeds earned quirks (GameData.QUIRKS)
 
 
@@ -82,6 +85,7 @@ func to_dict() -> Dictionary:
 		"formation": formation, "prior_pool_id": prior_pool_id,
 		"prior_innate_kind": prior_innate_kind, "prior_innate_value": prior_innate_value,
 "ability_awakened": ability_awakened, "look": look, "look_of": look_of,
+		"path": path, "seasoned": seasoned, "xp_boost_runs": xp_boost_runs,
 		"history": history, "morale": morale, "unpaid_weeks": unpaid_weeks, "last_rift_day": last_rift_day,
 	}
 
@@ -122,6 +126,9 @@ static func from_dict(d: Dictionary) -> Hero:
 	h.skills = d.get("skills", {})
 	h.ability_awakened = d.get("ability_awakened", false)
 	h.history = d.get("history", {})
+	h.path = str(d.get("path", ""))
+	h.seasoned = int(d.get("seasoned", 0))
+	h.xp_boost_runs = int(d.get("xp_boost_runs", 0))
 	h.morale = int(d.get("morale", 60))
 	h.unpaid_weeks = int(d.get("unpaid_weeks", 0))
 	h.last_rift_day = int(d.get("last_rift_day", 0))

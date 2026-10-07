@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Paths: heroes are hired as base classes and grow into one of 15 Paths (3 per role). Every rank is levels 1-10 now, and evolving at 10 starts the next rank at level 1 with +20% XP for two runs; raised heroes end up a little stronger than hired ones, hired ones bring more skill points. At Ranks D, B and S a hero trains at the Training Yard: stage 1 brings the Path's rule (a Bloodrager hits harder the more hurt they are, a Marksman lines up a steady shot), stage 2 a Technique in place of the role's second skill, stage 3 a once-a-fight Signature moment or the role's Legend. Every subclass bends its Path with its own Twist. New subclasses unlock with acts, Tower floors and deeds (Codex › Paths), and a new guild can carry them over with Laurels. Heroes sharing an element now Resonate in a party. Your heroes keep their subclasses; their skill points were refunded to spend again.",
 	"Before each fight the room now shows your party's health and the foes waiting there (the same ones you'll fight), so Engage or Retreat is an informed choice.",
 	"When Essence piles up, the Grow line now also names a relic level on the Relic Altar or a Guild Management level that strengthens the party (Arcane Lab, Relic Vault, Wardstones).",
 	"The Guild status board's Grow line now speaks up whenever Gold or Essence is piling up, not only when the guild is stuck: it names a Forge temper, a hall wing, an evolution or a stronger recruit you can afford.",

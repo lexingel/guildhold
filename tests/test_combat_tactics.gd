@@ -5,6 +5,9 @@ extends "res://tests/base_test.gd"
 func _hero(role: String, level: int, row: String) -> Hero:
 	var h := Combat.gen_hero("C", level)
 	h.cls_id = role
+	h.pool_id = role   # a base class: core tactics without a Path's rules (0.62)
+	h.path = ""
+	h.type = ""
 	h.id = "h%d" % GameState.next_id
 	GameState.next_id += 1
 	h.formation = row

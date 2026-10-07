@@ -1,4 +1,4 @@
-extends "res://scripts/autoload/game_data/GameDataSkills.gd"
+extends "res://scripts/autoload/game_data/GameDataPaths.gd"
 ## GameData, part 6: run boons, Tower of Trials, difficulties, rift events, rift ranks, Guild Management and Orders, the hamlet, features, campaign, quests, milestones, the Daily Rift.
 
 ## ---------------- Run boons ----------------

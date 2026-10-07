@@ -11,13 +11,15 @@ func run() -> void:
 	GameState.heroes.append(h)
 	check(h.attrs.size() == 3 and h.attr_points == 0, "recruit has 3 attrs, no loose points %s" % [h.attrs])
 
-	# Level-up: 3 points, 5% growth.
+	# Level-ups (0.62): points at levels 4, 7 and 10; HP climbs toward the next rank.
 	var hp0 := h.base_hp
+	var sp0 := h.skill_points
 	h.level = 1
 	h.xp = 0
-	Combat.gain_xp(h, Combat.xp_to_next(1))
-	check(h.level == 2 and h.attr_points == 3, "level-up grants 3 points (%d)" % h.attr_points)
-	check(h.base_hp == int(round(hp0 * 1.05)), "base HP grows 5%% (%d -> %d)" % [hp0, h.base_hp])
+	while h.level < 4:
+		Combat.gain_xp(h, Combat.xp_to_next(h.level, h.rank))
+	check(h.level == 4 and h.attr_points == GameData.ATTR_PER_STEP and h.skill_points == sp0 + 1, "level 4 grants %d attribute points and a skill point (%d)" % [GameData.ATTR_PER_STEP, h.attr_points])
+	check(h.base_hp > hp0, "base HP climbs with level (%d -> %d)" % [hp0, h.base_hp])
 
 	# Derived bonuses.
 	var dmg0 := Combat.dmg_of(h)

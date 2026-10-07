@@ -1329,7 +1329,7 @@ func apply_legacy_gifts(ids: Array) -> Array:
 			"gold":
 				coins += 300
 			"hero":
-				heroes.append(Combat.gen_hero("D", 1))
+				heroes.append(Combat.gen_recruit("D"))
 			"relic":
 				var r := Combat.gen_relic("rare")
 				r.id = "rl" + str(next_id)
@@ -1340,7 +1340,7 @@ func apply_legacy_gifts(ids: Array) -> Array:
 				upgrades["ops.barracks"] = maxi(1, int(upgrades.get("ops.barracks", 0)))
 			"contacts":
 				for i in 2:
-					var c := Combat.gen_hero("C", 1)
+					var c := Combat.gen_recruit("C")
 					_post_offer(c, int(GameData.RECRUIT_STAY[1]), 0)
 			"veteran":
 				_veteran_start()
@@ -1374,9 +1374,9 @@ func _veteran_start() -> void:
 	_in_veteran = true
 	for h in heroes:
 		while h.level < GameData.VETERAN_LEVEL:
-			Combat.gain_xp(h, Combat.xp_to_next(h.level))
+			Combat.gain_xp(h, Combat.xp_to_next(h.level, h.rank))
 	for r in GameData.VETERAN_RECRUITS:
-		heroes.append(Combat.gen_hero(str(r), 2))
+		heroes.append(Combat.gen_recruit(str(r)))
 	for i in GameData.VETERAN_GEAR:
 		var it := Combat.gen_item("rare")
 		it.id = "i%d" % next_id
@@ -1543,18 +1543,22 @@ func spare_wealth() -> bool:
 func power_advice() -> Array:
 	var out: Array = []
 	var bill := weekly_wages() + upkeep()
-	for h in heroes:   # evolutions
+	for h in heroes:   # evolutions (0.62: a rank up at level 10, Gold and Essence)
 		if h.is_champion or h.level < 10:
 			continue
-		var cls := GameData.find_class(h.pool_id)
-		var choices: Array = GameData.evolution_choices(cls) if not cls.is_empty() else []
-		if choices.is_empty():
+		var c := evolve_cost(h)
+		if not c.is_empty() and evolve_lock(h) == "" and coins - int(c[0]) > bill:
+			out.append({"kind": "evolve", "id": h.id, "choice": "",
+				"text": tr("Evolve %s to Rank %s: %d Gold, %d Essence.") % [tr(str(h.name.split(" the ")[0])), tr(next_rank_of(h)), int(c[0]), int(c[1])]})
+			break
+	for h in heroes:   # a subclass training (0.62), the hero's own Path first
+		if h.is_champion or not h.training.is_empty():
 			continue
-		var nr := str(choices[0]["rank"])
-		var cost := int(GameData.find_rank(nr)["cost"])
-		if crystals >= cost and evolve_rank_gate(nr) == "":
-			out.append({"kind": "evolve", "id": h.id, "choice": str(choices[0]["id"]),
-				"text": tr("Evolve %s to Rank %s: %d Essence (you have %d).") % [tr(str(h.name.split(" the ")[0])), tr(nr), cost, crystals]})
+		var opts: Array = subclass_training_options(h).filter(func(o): return str(o["lock"]) == "" and not bool(o["change"]))
+		if not opts.is_empty() and coins - int(opts[0]["cost"]["gold"]) > bill:
+			var cls := GameData.find_class(str(opts[0]["id"]))
+			out.append({"kind": "train", "id": h.id, "choice": str(opts[0]["id"]),
+				"text": tr("Train %s as a %s at the Training Yard (stage %d): %d Gold, %d Essence.") % [tr(str(h.name.split(" the ")[0])), tr(str(cls.get("name", ""))), int(opts[0]["stage"]), int(opts[0]["cost"]["gold"]), int(opts[0]["cost"]["essence"])]})
 			break
 	var weakest := 99
 	for h in heroes:
@@ -1635,6 +1639,8 @@ func follow_advice(a: Dictionary) -> String:
 			return recruit_hero(str(a["id"]))
 		"drill":
 			return upgrade_node("ops.drill")
+		"train":
+			return start_subclass_training(str(a["id"]), str(a["choice"]))
 		"hall_work":
 			return build_hall_work(str(a["id"]))
 		"relic":
@@ -1711,3 +1717,184 @@ func check_completion_board() -> void:
 			_add_postgame_laurels(GameData.BOARD_LAURELS)
 			pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("The Chronicle grows"),
 				"text": tr("%s: +%d Laurels.") % [tr(str(l["label"])), GameData.BOARD_LAURELS]})
+
+
+# ---------------- Paths: subclass unlocks and training (0.62) ----------------
+## Whether `pool_id`'s unlock (GameData.SUBCLASS_UNLOCK) is met by this guild.
+func subclass_gate_met(pool_id: String) -> bool:
+	var g: Dictionary = GameData.SUBCLASS_UNLOCK.get(pool_id, {})
+	var role := str(GameData.find_class(pool_id).get("role", ""))
+	for k in g:
+		var v = g[k]
+		match str(k):
+			"act":
+				if campaign_act <= int(v):
+					return false
+			"tower":
+				if tower_best < int(v):
+					return false
+			"role_seals":
+				if int(role_seals.get(role, 0)) < int(v):
+					return false
+			"flawless_boss":
+				if flawless_bosses < int(v):
+					return false
+			"freed":
+				if posts_freed() < int(v):
+					return false
+			"seal_rank":
+				if best_rift_rank_sealed < GameData.rift_rank_index(str(v)):
+					return false
+			"riftbreak_rank":
+				if riftbreak_best < GameData.rift_rank_index(str(v)):
+					return false
+	return true
+
+
+func subclass_unlocked(pool_id: String) -> bool:
+	return subclass_known.has(pool_id) or subclass_carried.has(pool_id) or subclass_gate_met(pool_id)
+
+
+## What unlocks `pool_id`, in words ("" when it's open from the start).
+func subclass_unlock_text(pool_id: String) -> String:
+	var g: Dictionary = GameData.SUBCLASS_UNLOCK.get(pool_id, {})
+	var role := str(GameData.find_class(pool_id).get("role", ""))
+	var parts: Array[String] = []
+	for k in g:
+		var v = g[k]
+		match str(k):
+			"act": parts.append(tr("Act %s done") % tr(str(_roman(int(v)))))
+			"tower": parts.append(tr("Tower of Trials floor %d") % int(v))
+			"role_seals": parts.append(tr("seal %d rifts with a %s in the party (%d/%d)") % [int(v), tr(role.capitalize()), mini(int(role_seals.get(role, 0)), int(v)), int(v)])
+			"flawless_boss": parts.append(tr("beat a rift boss by hand with no one down"))
+			"freed": parts.append(tr("free a lost champion"))
+			"seal_rank": parts.append(tr("seal a Rank %s rift") % tr(str(v)))
+			"riftbreak_rank": parts.append(tr("hold a Rank %s Riftbreak") % tr(str(v)))
+	return tr(" and ").join(parts)
+
+
+## Notes every subclass training newly unlocked (a toast each, quiet for a
+## new guild's starting set) and remembers it in the legacy for later guilds.
+## Returns the newly unlocked ids.
+func check_subclass_unlocks() -> Array:
+	if guild_name == "":
+		return []
+	var fresh: Array = []
+	var quiet := subclass_known.is_empty()
+	var all_ids: Array = GameData.SUBCLASS_UNLOCK.keys()
+	for pid in all_ids:
+		if subclass_known.has(pid) or not (subclass_carried.has(pid) or subclass_gate_met(pid)):
+			continue
+		subclass_known.append(pid)
+		fresh.append(pid)
+		var remembered: Array = legacy.get("subclasses", [])
+		if not remembered.has(pid):
+			remembered.append(pid)
+			legacy["subclasses"] = remembered
+	if fresh.is_empty():
+		return fresh
+	save_legacy()
+	if not quiet:
+		for pid in fresh:
+			var cls := GameData.find_class(pid)
+			var path := GameData.path_of(pid)
+			pending_toasts.append({"cls_id": str(cls.get("role", "")), "pool_id": pid, "title": tr("New training: %s") % tr(str(cls.get("name", pid))),
+				"text": (tr("A Legend for every %s Path, trained at Rank S.") % tr(str(cls.get("role", "")).capitalize())) if path == "" else tr("%s, stage %d, at the Training Yard.") % [tr(str(GameData.PATHS[path]["name"])), GameData.subclass_stage(pid)]})
+	return fresh
+
+
+## The stage a hero would train next (1 for a base class), or 0 when done.
+func next_training_stage(h: Hero) -> int:
+	var st := GameData.subclass_stage(h.pool_id) + 1
+	return st if st <= 3 else 0
+
+
+## Every subclass `h` could train next: [{id, stage, change, cost, lock}],
+## the hero's own Path first. Stage 1 offers every Path of the role.
+func subclass_training_options(h: Hero) -> Array:
+	var out: Array = []
+	if h.is_champion:
+		return out
+	var st := next_training_stage(h)
+	if st == 0:
+		return out
+	var role := GameData.hero_role(h)
+	var own := h.path if h.path != "" else GameData.path_of(h.pool_id)
+	var paths: Array = GameData.role_paths(role)
+	if own != "":
+		paths.erase(own)
+		paths.push_front(own)
+	for pid in paths:
+		for sid in GameData.stage_options(str(pid), st):
+			if GameData.is_legend(str(sid)) and str(pid) != own and own != "":
+				continue   # a Legend keeps the hero's Path: listed once, under it
+			var change: bool = st > 1 and str(pid) != own
+			out.append({"id": str(sid), "path": str(pid), "stage": st, "change": change,
+				"cost": GameData.training_cost(str(sid), change), "lock": subclass_training_lock(h, str(sid), change)})
+	return out
+
+
+## "" if `h` can start training `pool_id` now, else why not.
+func subclass_training_lock(h: Hero, pool_id: String, change: bool = false) -> String:
+	var st := GameData.subclass_stage(pool_id)
+	if st != next_training_stage(h):
+		return tr("Not the next stage")
+	if GameData.rank_index(h.rank) < GameData.rank_index(str(GameData.STAGE_RANK[st])):
+		return tr("Opens at Rank %s") % tr(str(GameData.STAGE_RANK[st]))
+	if not subclass_unlocked(pool_id):
+		return tr("Locked: %s") % subclass_unlock_text(pool_id)
+	if not h.training.is_empty():
+		return tr("Already training")
+	if not h.is_available() or (run.get("hero_ids", []) as Array).has(h.id):
+		return tr("Not here to train")
+	if training_free() <= 0:
+		return tr("Every station is taken")
+	var c := GameData.training_cost(pool_id, change)
+	if coins < int(c["gold"]) or crystals < int(c["essence"]):
+		return tr("Needs %d Gold and %d Essence") % [int(c["gold"]), int(c["essence"])]
+	return ""
+
+
+## Sends `h` to the Training Yard to become `pool_id`: Gold and Essence up
+## front, back in its days with the new subclass (_train_day finishes it).
+func start_subclass_training(hero_id: String, pool_id: String) -> String:
+	var h := find_hero(hero_id)
+	if not h:
+		return tr("No such hero")
+	var opts: Array = subclass_training_options(h).filter(func(o): return str(o["id"]) == pool_id)
+	if opts.is_empty():
+		return tr("Not a training this hero can take")
+	var o: Dictionary = opts[0]
+	var lock := str(o["lock"])
+	if lock != "":
+		return lock
+	var c: Dictionary = o["cost"]
+	coins -= int(c["gold"])
+	crystals -= int(c["essence"])
+	var days := int(c["days"])
+	h.training = {"program": "subclass:" + pool_id, "path": str(o["path"]), "left": days, "total": days,
+		"fee": int(c["gold"]) / days, "essence": int(c["essence"]) / days}
+	save()
+	state_changed.emit()
+	return ""
+
+
+## Remembered unlocks a new guild can carry (legacy, not open from the start).
+func carriable_subclasses() -> Array:
+	return (legacy.get("subclasses", []) as Array).filter(func(sid): return GameData.carry_laurels(str(sid)) > 0)
+
+
+## Founding: carries remembered subclass unlocks into this guild for Laurels
+## (one it can't afford is skipped). Returns the ones carried.
+func carry_subclasses(ids: Array) -> Array:
+	var done: Array = []
+	for sid in ids:
+		var cost := GameData.carry_laurels(str(sid))
+		if cost <= 0 or not carriable_subclasses().has(sid) or int(legacy.get("laurels", 0)) < cost:
+			continue
+		legacy["laurels"] = int(legacy["laurels"]) - cost
+		subclass_carried.append(str(sid))
+		done.append(sid)
+	if not done.is_empty():
+		save_legacy()
+	return done

@@ -228,6 +228,7 @@ func resolve_breach(result: Dictionary) -> Dictionary:
 			_add_postgame_laurels(GameData.TIDE_LAURELS, {"best_tide": tides_held})
 			out["laurels"] = GameData.TIDE_LAURELS
 		_news(tr("The guild held against a Rank %s Riftbreak.") % tr(breach_rank_id()))
+		riftbreak_best = maxi(riftbreak_best, GameData.rift_rank_index(breach_rank_id()))
 	else:
 		# Never the coming payday's wages: the loss comes out of what's above the bill.
 		var share: float = GameData.TIDE_LOSS_SHARE if breach.has("tide") else GameData.BREACH_LOSS_SHARE
@@ -300,3 +301,4 @@ func day_preview() -> Array[String]:
 	if breach_active() and not breach_broken() and breach_days_left() <= 1:
 		out.append(tr("The rift near %s breaks open") % breach_place())
 	return out
+

@@ -44,7 +44,7 @@ the walls. The recommended power is fit to those numbers
 
 | Currency | Sink | Cost |
 |---|---|---|
-| Coins | Recruit a hero | F 25 · E 45 · D 75 · C 130 · B 220 · A 380 · S 650 |
+| Coins | Recruit a hero (0.62: a base class) | F 25 · E 60 · D 150 · C 330 · B 700 · A 1,350 · S 2,500 |
 | | Reroll a recruit / Champion offers | 20 / 60 |
 | | Train an attribute point | 50 × n, up to 8 per hero (1,800 per hero) |
 | | Skill respec | 20 + 10 per SP spent |
@@ -53,8 +53,12 @@ the walls. The recommended power is fit to those numbers
 | | Shop item/relic | ~25–40, reroll 8 + 6 per reroll |
 | | Forge: temper an item (0.61) | 40 × rarity mult × drop rank reward mult × level reached, 5 levels (Common F 600 in all, Epic S ~3,300); +6% stats per level |
 | | Hall Works (0.61, after Act I) | 800 + 600 per wing built, 6 wings (13,800 in all) |
+| | Evolving (0.62, at level 10) | E 60 · D 150 · C 300 · B 600 · A 1,100 · S 1,800 (plus Essence below) |
+| | Subclass training (0.62) | stage 1 500 · stage 2 1,000 · stage 3 2,500 · Legend 3,500; x2 when changing Path |
 | Crystals | Guild Management | 50 × next level per step; 750 per upgrade, 6,750 for all 9 (perks included) |
 | | Relic upgrade to Lv5 | 15 × rarity mult × level per step (epic ≈ 285) |
+| | Evolving (0.62) | E 60 · D 120 · C 220 · B 360 · A 560 · S 800 |
+| | Subclass training (0.62) | stage 1 200 · stage 2 600 · stage 3 1,200 · Legend 1,800; x2 when changing Path |
 | | Relic effect reroll / item reforge | 10 × mult × n / 8 × mult × n |
 | Seal Tokens | Attribute reset | 5 × hero level |
 | Evolution Stones | Evolution, Stonebound skill node | 1 each |

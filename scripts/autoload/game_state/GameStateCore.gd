@@ -13,7 +13,7 @@ const SLOT_COUNT := 3
 ## _migrate_save() on anything older before reading it. (Older, per-field
 ## fallbacks still live in the model from_dicts: Hero attrs, Item attrs,
 ## Relic specials, the Guild Board's old contract/daily format.)
-const SAVE_VERSION := 3
+const SAVE_VERSION := 4
 const ACTIVE_SLOT_PATH := "user://active_slot.cfg"
 const SETTINGS_PATH := "user://settings.json"
 var active_slot: int = 0
@@ -64,6 +64,11 @@ var endless_best := {}             # region id -> best seconds there
 var endless_milestones: Array = []   # ENDLESS_MILESTONES "at" values already paid
 var boon_set4_reached: bool = false
 var tower_best: int = 0          # highest Tower of Trials floor ever cleared
+var role_seals: Dictionary = {}     # role -> rifts sealed with a hero of that role in the party (0.62, subclass unlocks)
+var flawless_bosses := 0            # bosses beaten by hand with no one down (0.62, subclass unlocks)
+var riftbreak_best := -1            # highest Riftbreak rank held (RIFT_RANKS index; 0.62, subclass unlocks)
+var subclass_known: Array = []      # subclass trainings this guild has unlocked (0.62); also kept in the legacy
+var subclass_carried: Array = []    # unlocks a past guild's legacy carried here (bought with Laurels at founding)
 var tower_week: int = 0          # tower_week_id() the weekly ladder progress belongs to
 var tower_week_cleared: int = 0  # ladder floors (91+) cleared this week
 var rifts_sealed: int = 0   # any rift, lesser/greater/endless — gates greater_rift_unlocked()
@@ -836,7 +841,8 @@ func save() -> void:
 		"tonics": tonics,
 		"upgrades": upgrades, "caps": caps,
 		"champion_roll": champion_roll, "champions": champions, "overseer": overseer,
-		"tower_best": tower_best, "tower_week": tower_week, "tower_week_cleared": tower_week_cleared,
+		"tower_best": tower_best, "role_seals": role_seals, "flawless_bosses": flawless_bosses, "riftbreak_best": riftbreak_best,
+		"subclass_known": subclass_known, "subclass_carried": subclass_carried, "tower_week": tower_week, "tower_week_cleared": tower_week_cleared,
 		"daily_attempt_day": daily_attempt_day, "daily_clears": daily_clears, "daily_streak": daily_streak, "daily_last_clear": daily_last_clear,
 		"run_history": run_history, "runs_finished": runs_finished, "fallen": fallen, "heroes_lost_total": heroes_lost_total, "best_endless_time": best_endless_time, "endless_runs": endless_runs, "endless_best": endless_best, "endless_milestones": endless_milestones, "boon_set4_reached": boon_set4_reached,
 		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
@@ -919,7 +925,7 @@ func merge_legacy(other: Dictionary) -> void:
 		if not have.has(str(g["id"])):
 			(legacy["guilds"] as Array).append(g)
 	(legacy["champions"] as Dictionary).merge(other.get("champions", {}))
-	for key in ["fragments", "truths", "claims"]:
+	for key in ["fragments", "truths", "claims", "subclasses"]:
 		for x in other.get(key, []):
 			if not (legacy.get(key, []) as Array).has(x):
 				legacy[key] = (legacy.get(key, []) as Array) + [x]

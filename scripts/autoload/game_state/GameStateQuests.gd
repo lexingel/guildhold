@@ -469,7 +469,7 @@ func run_payday() -> void:
 			_release(h)
 	var volunteers: Array[String] = []
 	while heroes.size() < GameData.VOLUNTEER_FLOOR and coins < int(GameData.find_rank("F")["cost"]):
-		var vh := Combat.gen_hero("F", 1)
+		var vh := Combat.gen_recruit("F")
 		heroes.append(vh)
 		volunteers.append(vh.name.split(" the ")[0])
 	if not volunteers.is_empty():

@@ -143,7 +143,7 @@ func run() -> void:
 	_guild("Advised")
 	var h0: Hero = GameState.heroes[0]
 	while h0.level < 10:
-		Combat.gain_xp(h0, Combat.xp_to_next(h0.level))
+		Combat.gain_xp(h0, Combat.xp_to_next(h0.level, h0.rank))
 	GameState.crystals = 5000
 	var tips: Array = GameState.power_advice()
 	check(not tips.is_empty() and str(tips[0]["kind"]) == "evolve" and str(tips[0]["text"]).contains("Essence"), "a level-10 hero and spare Essence: evolve (%s)" % (str(tips[0]["text"]) if not tips.is_empty() else "none"))

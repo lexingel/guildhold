@@ -474,29 +474,6 @@ static func skill_storage_key(kind: String, node_id: String) -> String:
 	return node_id if node_id in ["edge", "hide", "signature"] else "%s:%s" % [kind, node_id]
 
 
-## Every distinct tree a hero currently has access to: their current class's
-## kind plus their one retained prior stage's kind (Hero.prior_pool_id) —
-## de-duplicated, since evolving into a same-kind class would otherwise show
-## the identical tree twice. Each entry
-## is {"kind": kind, "label": the subclass name that tree came from}.
-static func hero_tree_summaries(h: Hero) -> Array:
-	var history: Array = [h.pool_id]
-	if h.prior_pool_id != "":
-		history.append(h.prior_pool_id)
-	var seen: Array = []
-	var out: Array = []
-	for pid in history:
-		var cls := find_class(pid)
-		if cls.is_empty():
-			continue
-		var kind: String = cls.get("kind", "dmg_pct")
-		if seen.has(kind):
-			continue
-		seen.append(kind)
-		out.append({"kind": kind, "label": cls["name"]})
-	return out
-
-
 ## Every subclass a hero at `cls`'s rank could evolve into — every CLASS_POOL
 ## entry sharing `cls`'s role at the next rank up, not just the first match
 ## (CLASS_POOL's array order shouldn't matter). The player picks one of these
@@ -638,8 +615,9 @@ const ROLE_SKILLS := {
 
 
 ## The role skills `h` has learned by level.
+## 0.62: levels reset every rank, so the second skill ("level" 6) comes at Rank E.
 static func hero_role_skills(h: Hero) -> Array:
-	return (ROLE_SKILLS.get(h.cls_id, []) as Array).filter(func(sk): return h.level >= int(sk["level"]))
+	return (ROLE_SKILLS.get(h.cls_id, []) as Array).filter(func(sk): return rank_index(h.rank) >= (1 if int(sk["level"]) > 1 else 0))
 
 
 static func find_role_skill(id: String) -> Dictionary:

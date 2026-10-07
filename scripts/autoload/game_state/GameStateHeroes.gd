@@ -140,7 +140,7 @@ func load_party_preset(i: int, cap: int) -> Dictionary:
 
 
 func gen_recruit_offer(force_rank: String = "") -> Hero:
-	var h := Combat.gen_hero(force_rank if force_rank != "" else Combat.weighted_rank(), 1)
+	var h := Combat.gen_recruit(force_rank if force_rank != "" else Combat.weighted_rank())
 	if hollowborn_open() and randf() < GameData.HOLLOWBORN_CHANCE:   # the Sky Beneath: the doors are open
 		h.quirks = h.quirks.filter(func(q): return GameData.QUIRKS.get(q, {}).get("origin", "") != "born")
 		h.quirks.append("Hollow-born")
@@ -258,12 +258,7 @@ func commission_recruit(role: String) -> String:
 	if coins < cost:
 		return tr("Not enough Gold.")
 	var rank := Combat.weighted_rank()
-	var h: Hero = null
-	for i in 200:
-		var c := Combat.gen_hero(rank, 1)
-		if GameData.hero_role(c) == role:
-			h = c
-			break
+	var h := Combat.gen_recruit(rank, role)
 	if h == null:
 		return tr("No %s answered; try another role") % tr(role)
 	coins -= cost
@@ -296,11 +291,9 @@ func recruit_hero(offer_id: String) -> String:
 		return tr("Not enough Gold.")
 	coins -= int(rank["cost"])
 	var is_dupe := heroes.any(func(h): return h.pool_id == offer.pool_id)
-	if guild_mentor():
+	if guild_mentor():   # Barracks Lv3: recruits join a level higher
 		offer.level = 2
-		offer.skill_points += 1
-		offer.base_hp = int(round(offer.base_hp * 1.08))
-		offer.base_dmg = int(round(offer.base_dmg * 1.08))
+		Combat.refresh_stats(offer)
 		offer.hp = Combat.max_hp(offer)
 	heroes.append(offer)
 	_drop_offer(offer)   # the next face arrives tomorrow (it used to be replaced on the spot)
@@ -524,63 +517,63 @@ func current_party() -> Array[Hero]:
 	return out
 
 
-## The B/A/S jump (a real named subclass forking off — see the CLASS_POOL doc
-## comment) additionally needs a sealed rift of that rank; the earlier
-## F-E-D-C climb (still the same un-named identity throughout) doesn't need
-## one, same as before this system existed. The player picks which candidate
-## (`target_pool_id`, one of GameData.evolution_choices) — the biggest build
-## decision a hero gets, so it's a choice, not a roll.
-func evolve_hero(hero_id: String, target_pool_id: String) -> String:
+## The next rank for a hero ("" at S).
+func next_rank_of(h: Hero) -> String:
+	var ri := GameData.rank_index(h.rank)
+	return str(GameData.RANKS[ri + 1]["id"]) if ri + 1 < GameData.RANKS.size() else ""
+
+
+## [Gold, Essence] to evolve `h` to the next rank, or [] at S.
+func evolve_cost(h: Hero) -> Array:
+	var nr := next_rank_of(h)
+	return (GameData.EVOLVE_COST.get(nr, []) as Array) if nr != "" else []
+
+
+## "" if `h` can evolve now, else why not.
+func evolve_lock(h: Hero) -> String:
+	if h.is_champion:
+		return tr("Champions don't evolve")
+	var nr := next_rank_of(h)
+	if nr == "":
+		return tr("Already Rank S")
+	if h.level < 10:
+		return tr("Must be Level 10 to evolve")
+	var gate := evolve_rank_gate(nr)
+	if gate != "":
+		return gate
+	var c := evolve_cost(h)
+	if coins < int(c[0]) or crystals < int(c[1]):
+		return tr("Needs %d Gold and %d Essence") % [int(c[0]), int(c[1])]
+	return ""
+
+
+## Evolving (0.62): the next rank, back to level 1 with +XP_BOOST XP for the
+## next XP_BOOST_RUNS rift runs, and a Seasoned rank (+2% HP and damage for
+## good). The subclass doesn't change: that's trained at the Training Yard.
+## `_unused` keeps the old (hero, subclass) call shape working.
+func evolve_hero(hero_id: String, _unused: String = "") -> String:
 	var h := find_hero(hero_id)
 	if not h:
 		return ""
-	if h.level < 10:
-		return tr("Must be Level 10 to evolve")
-	var cur_cls := GameData.find_class(h.pool_id)
-	if cur_cls.is_empty():
-		return tr("This hero predates the evolution system")
-	var choices := GameData.evolution_choices(cur_cls)
-	if choices.is_empty():
-		return tr("No further evolution available")
-	var next_rank_id: String = choices[0]["rank"]
-	var next_rank := GameData.find_rank(next_rank_id)
-	if crystals < int(next_rank["cost"]):
-		return tr("Not enough Essence")
-	var gate := evolve_rank_gate(next_rank_id)
-	if gate != "":
-		return gate
-	var picked: Array = choices.filter(func(c): return c["id"] == target_pool_id)
-	if picked.is_empty():
-		return tr("Pick an evolution path")
-	var next: Dictionary = picked[0]
-	var cur_rank := GameData.find_rank(cur_cls["rank"])
-	crystals -= int(next_rank["cost"])
-	# Keeps exactly the one stage being left behind reachable — see the doc
-	# comment on Hero.prior_pool_id for why this isn't an unbounded history.
-	h.prior_pool_id = h.pool_id
-	h.prior_innate_kind = h.innate_kind
-	h.prior_innate_value = h.innate_value
-	var ratio_mult: float = (float(next["hp_ratio"]) / float(cur_cls["hp_ratio"])) * (float(next_rank["mult"]) / float(cur_rank["mult"]))
-	var dmg_ratio_mult: float = (float(next["dmg_ratio"]) / float(cur_cls["dmg_ratio"])) * (float(next_rank["mult"]) / float(cur_rank["mult"]))
-	h.base_hp = int(round(h.base_hp * ratio_mult))
-	h.base_dmg = int(round(h.base_dmg * dmg_ratio_mult))
-	h.pool_id = next["id"]
-	h.rank = next["rank"]
-	h.type = next["type"]
-	h.flavor = next["flavor"]
-	h.innate_kind = next["kind"]
-	var rank_idx := GameData.rank_index(next["rank"])
-	h.innate_value = Combat.hero_innate_value(next, rank_idx)
-	h.name = "%s the %s" % [h.name.split(" the ")[0], str(next["name"]).trim_prefix("The ")]
+	var lock := evolve_lock(h)
+	if lock != "":
+		return lock
+	var c := evolve_cost(h)
+	coins -= int(c[0])
+	crystals -= int(c[1])
+	h.rank = next_rank_of(h)
+	h.level = 1
+	h.xp = 0
+	h.seasoned += 1
+	h.xp_boost_runs = GameData.XP_BOOST_RUNS
+	h.innate_value = Combat.hero_innate_value(GameData.find_class(h.pool_id), GameData.rank_index(h.rank))
+	Combat.refresh_stats(h)
 	h.hp = Combat.max_hp(h)
-	var passive := GameData.subclass_passive(h.pool_id)
-	push_toast(h, tr("Evolved — Rank %s") % tr(str(h.rank)), tr("%s · new passive: %s") % [tr(str(h.name)), tr(str(passive.get("name", "none")))])
-	if h.rank == "B":   # the Path's first fork into a calling: a scene (the Guildhold Chronicle)
-		var scene := str(GameData.CALLING_SCENES.get(GameData.hero_voice(h), GameData.CALLING_SCENES["stoic"]))
-		if hesper_posted() and scene.contains("Hesper"):   # she's at the forty-first post
-			scene = str(GameData.CALLING_SCENES["stoic"])
-		pending_stories.append({"title": tr("A calling: %s") % tr(str(next["name"])), "subtitle": tr(str(h.name)),
-			"text": tr(scene) % [tr(str(h.name.split(" the ")[0])), tr(str(next["name"]))]})
+	var opens := ""
+	for st in range(1, 4):
+		if GameData.STAGE_RANK[st] == h.rank:
+			opens = tr(" · stage %d training opens") % st
+	push_toast(h, tr("Evolved — Rank %s") % tr(str(h.rank)), tr("%s is level 1 again, with +%d%% XP for %d rift runs%s.") % [tr(str(h.name.split(" the ")[0])), int(GameData.XP_BOOST * 100), GameData.XP_BOOST_RUNS, opens])
 	save()
 	state_changed.emit()
 	return ""
@@ -601,6 +594,85 @@ func _clamp_hp_to_max() -> void:
 		h.hp = min(h.hp, Combat.max_hp(h))
 
 
+## The skill points `h` has spent in the tree of `kind` (keys "<kind>:<node>").
+func tree_points_spent(h: Hero, kind: String) -> int:
+	var total := 0
+	for n in GameData.KIND_SKILL_PACKAGE.get(kind, []) + GameData.rift_nodes(kind) + ([GameData.keystone_node(kind)] if not GameData.keystone_node(kind).is_empty() else []):
+		if h.skills.get(GameData.skill_storage_key(kind, str(n["id"])), false):
+			total += skill_node_cost(h, kind, n)
+	return total
+
+
+## A finished subclass training (0.62): the hero becomes `pool_id` on `path`
+## (a Legend keeps the hero's Path). Changing Path refunds the old Path
+## tree's skill points when it isn't also the role tree.
+func apply_subclass(h: Hero, pool_id: String, path: String = "") -> void:
+	var cls := GameData.find_class(pool_id)
+	if cls.is_empty():
+		return
+	var new_path := GameData.path_of(pool_id)
+	if new_path == "":
+		new_path = path if path != "" else h.path
+	var role := GameData.hero_role(h)
+	var role_kind := str(GameData.ROLE_KIND.get(role, ""))
+	if h.path != "" and new_path != h.path:
+		var old_kind := str(GameData.PATHS.get(h.path, {}).get("kind", ""))
+		if old_kind != "" and old_kind != role_kind and old_kind != str(GameData.PATHS[new_path]["kind"]):
+			h.skill_points += tree_points_spent(h, old_kind)
+			for key in h.skills.keys():
+				if str(key).begins_with(old_kind + ":"):
+					h.skills.erase(key)
+	h.pool_id = pool_id
+	h.path = new_path
+	h.type = str(cls["type"])
+	h.flavor = str(cls["flavor"])
+	h.innate_kind = str(cls["kind"])
+	h.innate_value = Combat.hero_innate_value(cls, GameData.rank_index(h.rank))
+	h.name = "%s the %s" % [h.name.split(" the ")[0], str(cls["name"]).trim_prefix("The ")]
+	Combat.refresh_stats(h)
+	h.hp = Combat.max_hp(h)
+	var st := GameData.subclass_stage(pool_id)
+	push_toast(h, tr("Trained: %s") % tr(str(cls["name"])), tr("%s is a %s now (%s, stage %d).") % [tr(str(h.name.split(" the ")[0])), tr(str(cls["name"])), tr(str(GameData.PATHS[new_path]["name"])), st])
+	if st == 2:   # the Path's first fork into a calling: a scene (the Guildhold Chronicle)
+		var scene := str(GameData.CALLING_SCENES.get(GameData.hero_voice(h), GameData.CALLING_SCENES["stoic"]))
+		if hesper_posted() and scene.contains("Hesper"):   # she's at the forty-first post
+			scene = str(GameData.CALLING_SCENES["stoic"])
+		pending_stories.append({"title": tr("A calling: %s") % tr(str(cls["name"])), "subtitle": tr(str(h.name)),
+			"text": tr(scene) % [tr(str(h.name.split(" the ")[0])), tr(str(cls["name"]))]})
+
+
+## A hero from before Paths (save version < 4): their subclass becomes a
+## trained stage of its Path, level 1-10 within their rank, Seasoned for every
+## rank above F, skill points refunded at the new per-rank budget, and any
+## attribute points the new budget adds over what they already spent.
+func migrate_hero_to_paths(h: Hero) -> void:
+	if h.is_champion:
+		return
+	var ri := GameData.rank_index(h.rank)
+	h.level = clampi(h.level, 1, 10)
+	h.seasoned = ri
+	var role := GameData.hero_role(h)
+	if not GameData.is_base_class(h.pool_id):
+		h.path = GameData.path_of(h.pool_id)
+		if h.path == "":   # a Legend: the role's first Path
+			h.path = str(GameData.role_paths(role)[0])
+		var cls := GameData.find_class(h.pool_id)
+		h.name = "%s the %s" % [h.name.split(" the ")[0], str(cls.get("name", role.capitalize())).trim_prefix("The ")]
+	h.prior_pool_id = ""
+	h.prior_innate_kind = ""
+	h.prior_innate_value = 0.0
+	h.skills = {}
+	h.skill_points = maxi(0, GameData.sp_budget(ri, h.level) - (GameData.ABILITY_AWAKENING_COST if h.ability_awakened else 0))
+	var base := GameData.role_attrs(role)
+	var spent := 0
+	for a in GameData.ATTRIBUTES:
+		spent += int(h.attrs.get(a, base[a])) - int(base[a])
+	spent -= h.attr_trained
+	h.attr_points = maxi(h.attr_points, GameData.attr_budget(ri, h.level) - spent)
+	Combat.refresh_stats(h)
+	h.hp = mini(maxi(h.hp, 1), Combat.max_hp(h))
+
+
 ## `kind` identifies which of the hero's unlocked trees `skill_id` belongs
 ## to (a bare node id — "cap", "mastery", ...) — ignored for the universal
 ## Tier-1 roots ("edge"/"hide"), which are shared across every tree.
@@ -612,8 +684,9 @@ func learn_skill(hero_id: String, kind: String, skill_id: String) -> String:
 	var key := GameData.skill_storage_key(kind, skill_id)
 	if n.is_empty() or h.skills.get(key, false):
 		return ""
-	if h.level < int(n["req_level"]):
-		return tr("Requires Level %d") % n["req_level"]
+	var gate := GameData.node_lock(h, kind, n)
+	if gate != "":
+		return gate
 	for req in n["requires"]:
 		if not h.skills.get(GameData.skill_storage_key(kind, req), false):
 			return tr("Learn the prerequisite skill(s) first")
@@ -873,6 +946,7 @@ func recall_training(hero_id: String) -> int:
 		return 0
 	var refund := int(h.training["fee"]) * maxi(0, int(h.training["left"]) - 1)
 	coins += refund
+	crystals += int(h.training.get("essence", 0)) * maxi(0, int(h.training["left"]) - 1)   # a subclass course's Essence too
 	h.training = {}
 	save()
 	state_changed.emit()
@@ -886,15 +960,19 @@ func _train_day() -> void:
 	for h in trainees():
 		var t: Dictionary = h.training
 		var a := str(t["program"])
-		if h.attr_trained < GameData.ATTR_TRAIN_CAP:
+		var subclass := a.begins_with("subclass:")
+		if not subclass and h.attr_trained < GameData.ATTR_TRAIN_CAP:
 			h.attrs[a] = int(h.attrs.get(a, GameData.ATTR_BASELINE)) + 1
 			h.attr_trained += 1
 		if int(t["total"]) >= 2 and h.level < cap:
-			Combat.gain_xp(h, int(ceil(Combat.xp_to_next(h.level) * GameData.TRAIN_XP_SHARE)))
+			Combat.gain_xp(h, int(ceil(Combat.xp_to_next(h.level, h.rank) * GameData.TRAIN_XP_SHARE)))
 		t["left"] = int(t["left"]) - 1
 		if int(t["left"]) <= 0:
 			h.training = {}
-			push_toast(h, tr("Training done"), tr("%s is back from the Training Yard.") % tr(str(h.name.split(" the ")[0])))
+			if subclass:
+				apply_subclass(h, a.trim_prefix("subclass:"), str(t.get("path", "")))
+			else:
+				push_toast(h, tr("Training done"), tr("%s is back from the Training Yard.") % tr(str(h.name.split(" the ")[0])))
 		h.history["trained_days"] = int(h.history.get("trained_days", 0)) + 1
 
 

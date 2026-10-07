@@ -1,6 +1,6 @@
 # Paths: making subclasses matter
 
-Status: **plan for review** (2026-10-07). Nothing is built yet.
+Status: **built in 0.62.0** (2026-10-08). What changed while building is listed in section 14.
 
 ## 1. Why subclasses don't land today
 
@@ -349,19 +349,21 @@ Sized against rift income (balance sim, per run: Rank D ~300 Gold / 110 Essence,
 | To | E | D | C | B | A | S | F→S total |
 |---|---|---|---|---|---|---|---|
 | Gold | 60 | 150 | 300 | 600 | 1,100 | 1,800 | 4,010 |
-| Essence | 30 | 60 | 110 | 180 | 280 | 400 | 1,060 |
+| Essence | 60 | 120 | 220 | 360 | 560 | 800 | 2,120 |
 
 **Subclass training (Training Yard):**
 
 | Training | Opens at | Gold | Essence | Days away |
 |---|---|---|---|---|
-| Stage 1 | D | 500 | 150 | 3 |
-| Stage 2 | B | 1,500 | 400 | 4 |
-| Stage 3 | S | 3,500 | 900 | 5 |
-| Legend (stage 3) | S | 5,000 | 1,300 | 5 |
+| Stage 1 | D | 500 | 200 | 3 |
+| Stage 2 | B | 1,000 | 600 | 4 |
+| Stage 3 | S | 2,500 | 1,200 | 5 |
+| Legend (stage 3) | S | 3,500 | 1,800 | 5 |
 | Changing Path | at stage 2 or 3 | x2 | x2 | x2 |
 
-**What that adds up to:**
+**Tuned after the first sim (0.62):** stage-2 training at 1,500 Gold was rarely affordable for large rosters while Essence piled up, so the prices lean on Essence (the table above is the tuned one).
+
+**What that adds up to (first draft numbers):**
 - One hero raised F→S and trained to stage 3: ~9,500 Gold and ~2,500 Essence over the campaign.
 - The mid-game slice (to Rank B and stage 2): ~3,100 Gold and ~930 Essence per hero. Six heroes over Acts II–IV (about 3–4 weeks) is ~18,500 Gold and ~5,600 Essence: roughly 5,000 Gold and 1,500 Essence a week, a bit more than a B/A guild has spare after wages, so it competes with the Forge and Hall Works and you choose who to invest in.
 - Late game (Rank S, stage 3 and Legends) absorbs ~5,000 Gold and ~1,300 Essence per hero, where income is highest.
@@ -437,3 +439,14 @@ Turkish: ~450 new lines across phases (names, rules, training, UI), translated a
 3. ~~Raised vs hired~~ — approved.
 4. ~~Resonance~~ — in.
 5. ~~Unlocks across guilds~~ — decided: carried with Laurels (section 6).
+
+## 14. Built: what changed from the plan
+
+- **Points per rank:** 3 skill points and 9 attribute points a rank (at levels 4, 7 and 10), not "e.g. 2 + 2": heroes used to have 27 attribute points by level 10, so 2 a rank would have gutted them. A full career is 21 skill and 63 attribute points.
+- **Power curve:** RANK_POWER [0.9, 1.2, 1.6, 1.95, 2.3, 2.9, 3.6] for HP/damage; levels climb 90% of the way to the next rank; Seasoned +2% a rank raised. XP needed per rank x[0.3 .. 2.0] and fight XP x the rift's rank [1.0 .. 3.5]: a main-party hero goes F→S in about 30 runs; act pacing matches 0.61 in the sim.
+- **Costs (sim-tuned):** training stage 1/2/3/Legend = 500/1,000/2,500/3,500 Gold and 200/600/1,200/1,800 Essence; evolving Essence about doubled (60 .. 800).
+- **Role skills by rank** (the second at Rank E); a subclass's Ability comes with its stage-1 training; base classes have none.
+- **Path trees:** a role tree (the role's own package: warrior damage, ranger first strike, mage escalation, cleric mending, rogue dodge) plus the Path's package; node gates by rank (role tree) and stage (Path tree).
+- **Twists adjusted to how fights work:** Augury's rule is "once a fight, the first heavy blow aimed at the party comes to nothing" (foes' moves are already shown a round ahead); Nightwarden: the party dodges the marked foe's attacks 15% more often; Rift-Warden Magus: Mirror Ward also shatters a foe's wind-up (no hazard part). Consecrate goes to the most-hurt ally (no picker); Shadowstep is a plain 130% strike.
+- **A Legend keeps the hero's Path** (Hero.path).
+- **Art:** the five base classes have new portraits (PixelLab, 30 generations); they walk with the role sprites and fight with tweens (no frames yet).

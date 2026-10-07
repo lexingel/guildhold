@@ -18,7 +18,6 @@ func gen_hero(rank_id: String, level_hint: int) -> Hero:
 	var rank_idx := GameData.rank_index(rank_id)
 	var pool: Array = GameData.CLASS_POOL.filter(func(c): return c["rank"] == rank_id)
 	var cls: Dictionary = pool[randi() % pool.size()]
-	var role_cls := GameData.find_role(cls["role"])
 	var h := Hero.new()
 	h.id = "h" + str(GameState.next_id)
 	GameState.next_id += 1
@@ -37,19 +36,57 @@ func gen_hero(rank_id: String, level_hint: int) -> Hero:
 	h.rank = rank["id"]
 	h.innate_kind = cls["kind"]
 	h.innate_value = hero_innate_value(cls, rank_idx)
-	h.level = level_hint
-	var s := 1.0 + GameData.LEVEL_GROWTH * (level_hint - 1)
-	h.base_hp = round(role_cls["base_hp"] * cls["hp_ratio"] * rank["mult"] * s)
-	h.base_dmg = round(role_cls["base_dmg"] * cls["dmg_ratio"] * rank["mult"] * s)
-	h.base_spd = round(float(role_cls["base_spd"]) * float(rank["mult"]))
+	h.level = clampi(level_hint, 1, 10)
+	h.seasoned = rank_idx   # a developed hero: raised through every rank below
+	h.path = GameData.path_of(str(cls["id"]))
+	if h.path == "":   # a Legend: the role's first Path
+		h.path = str(GameData.role_paths(str(cls["role"]))[0])
+	refresh_stats(h)
 	var born := roll_born_quirk(cls["role"])
 	if born != "":
 		h.quirks.append(born)
 	h.formation = str(GameData.ROLE_POSITION.get(cls["role"], {}).get("row", "front"))
-	# Recruits arrive with their levels' points already spent by role.
+	# A developed hero (sims, tests, story characters): its points already spent by role.
 	h.attrs = GameData.role_attrs(cls["role"])
-	h.attr_points = (level_hint - 1) * GameData.ATTR_POINTS_PER_LEVEL
+	h.attr_points = GameData.attr_budget(rank_idx, h.level)
 	auto_spend_attrs(h)
+	h.hp = max_hp(h)
+	return h
+
+
+## A recruit (0.62): always a base class (a plain Warrior, Ranger, ...) at
+## `rank_id`, level 1, with every lower rank's skill and attribute points
+## unspent plus HIRED_SP_PER_RANK skill points a rank above F. `role` "" = any.
+func gen_recruit(rank_id: String, role: String = "") -> Hero:
+	var rank_idx := GameData.rank_index(rank_id)
+	var roles: Array = GameData.CLASSES.map(func(c): return str(c["id"]))
+	var r: String = role if role != "" else str(roles[randi() % roles.size()])
+	var cls := GameData.base_class(r)
+	var h := Hero.new()
+	h.id = "h" + str(GameState.next_id)
+	GameState.next_id += 1
+	var taken := {}
+	for other in GameState.heroes + GameState.recruit_pool:
+		taken[other.name.split(" the ")[0]] = true
+	var free_names: Array = GameData.FIRST_NAMES.filter(func(n): return not taken.has(n))
+	var names: Array = free_names if not free_names.is_empty() else GameData.FIRST_NAMES
+	h.name = "%s the %s" % [names[randi() % names.size()], str(cls["name"])]
+	h.cls_id = r
+	h.pool_id = r
+	h.type = str(GameData.RELIC_TYPES[randi() % GameData.RELIC_TYPES.size()])
+	h.flavor = str(cls["flavor"])
+	h.rank = rank_id
+	h.innate_kind = str(cls["kind"])
+	h.innate_value = hero_innate_value(cls, rank_idx)
+	h.level = 1
+	refresh_stats(h)
+	var born := roll_born_quirk(r)
+	if born != "":
+		h.quirks.append(born)
+	h.formation = str(GameData.ROLE_POSITION.get(r, {}).get("row", "front"))
+	h.attrs = GameData.role_attrs(r)
+	h.attr_points = GameData.attr_budget(rank_idx, 1)
+	h.skill_points = GameData.sp_budget(rank_idx, 1) + GameData.HIRED_SP_PER_RANK * rank_idx
 	h.hp = max_hp(h)
 	return h
 
