@@ -1411,6 +1411,13 @@ func _topbar(container: Control, breadcrumb: String = "") -> void:
 		var name_lbl := _label(GameState.guild_name, 16)
 		name_lbl.add_theme_font_override("font", DISPLAY_FONT)
 		name_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		# A long guild name shortens with an ellipsis instead of widening the bar
+		# past the window (0.60.3: "The Silver Blades" pushed the hamlet off-screen).
+		name_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		name_lbl.clip_text = true
+		name_lbl.custom_minimum_size.x = minf(190.0, 11.0 * GameState.guild_name.length())   # the whole name when it can fit
+		name_lbl.tooltip_text = GameState.guild_name
+		name_lbl.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(name_lbl)
 		if not _narrow() and not _compact():
 			# The guild tier lives here (it was a third panel floating over the camp).
@@ -1422,12 +1429,18 @@ func _topbar(container: Control, breadcrumb: String = "") -> void:
 				row.add_child(ti)
 			var tl := _label(tr(str(tier["name"])), 12, true)
 			tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			# A long guild name keeps the room: the tier shows as its icon (tooltip has it all).
+			tl.visible = GameState.guild_name.length() <= 12
 			var tip := tr("%d Guild Management levels") % int(tier["total"])
 			if not (tier["next"] as Dictionary).is_empty():
 				tip += tr(" · %d more to %s") % [int(tier["next"]["min"]) - int(tier["total"]), tr(str(tier["next"]["name"]))]
 			tl.tooltip_text = tip + tr(". The tier grows with Guild Management levels; the Guild Hall grows with it.")
 			tl.mouse_filter = Control.MOUSE_FILTER_STOP
 			row.add_child(tl)
+			if ticon != "":   # the icon says it too, for when the words are hidden
+				var tier_icon: Control = row.get_child(row.get_child_count() - 2)
+				tier_icon.tooltip_text = tr(str(tier["name"])) + " · " + tl.tooltip_text
+				tier_icon.mouse_filter = Control.MOUSE_FILTER_STOP
 	elif breadcrumb != "":
 		# No room for the guild's name: say where you are instead.
 		var here := _label(tr(breadcrumb), 15)
@@ -1776,6 +1789,12 @@ func _render_credits(v: VBoxContainer) -> void:
 	v.add_child(_label("Built with Godot Engine 4.7", 13))
 	v.add_child(_label("Pixel art generated with PixelLab", 13))
 	v.add_child(_label("Sound effects by Kenney, rubberduck and artisticdude (CC0)", 13))
+	v.add_child(_hsep())
+	v.add_child(_label(tr("Founding testers"), 15))
+	if GameData.FOUNDING_TESTERS.is_empty():
+		v.add_child(_wrap_label(tr("Play this test build and send your feedback (Feedback on the title screen) to have your name here."), 13, true))
+	else:
+		v.add_child(_wrap_label(" · ".join(GameData.FOUNDING_TESTERS), 13))
 	v.add_child(_hsep())
 	v.add_child(_icon_button(GameData.BUTTON_ICON_PATH["back"], "Back", func():
 		screen = "title"

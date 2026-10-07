@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The credits now have a Founding Testers section: play this test build and send your feedback to have your name there. A long guild name no longer pushes the top bar off the screen.",
 	"The opening's eight pictures are redrawn in the crisp new style, from the Accord's hall to the villagers waiting for a guild.",
 	"The title screen, the Rift Hall, the Roster, Items, Management, Medical Bay and Crafting backdrops, the rift shop and every hazard are redrawn in the crisp new style. Spoken lines now dip the music while they play, and the opening's narration is never interrupted by the camp's music or a story card.",
 	"A hero can now be dismissed from their own page in the Roster, as well as from the payroll on the Ledger.",
@@ -223,6 +224,9 @@ const WHATS_NEW := [
 const TRANSFER_URL := "https://guildhold-transfer.lexingel.workers.dev"
 const TRANSFER_PLAY_URL := "https://lexingel.github.io/guildhold/"
 const FEEDBACK_DISCORD_URL := "https://discord.gg/85XrXjBUmk"   # the playtest Discord (the Feedback panel opens it)
+## The players who tested the early builds and sent feedback, as they want to be
+## credited (0.60.3). Until there are some, the credits invite players to join.
+const FOUNDING_TESTERS: Array[String] = []
 
 ## Looping background music (AudioManager.play_music loops it).
 ## The pools the game picks from: a new camp track each time you come home,
