@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The opening's eight pictures are redrawn in the crisp new style, from the Accord's hall to the villagers waiting for a guild.",
 	"The title screen, the Rift Hall, the Roster, Items, Management, Medical Bay and Crafting backdrops, the rift shop and every hazard are redrawn in the crisp new style. Spoken lines now dip the music while they play, and the opening's narration is never interrupted by the camp's music or a story card.",
 	"A hero can now be dismissed from their own page in the Roster, as well as from the payroll on the Ledger.",
 	"Music: every region now has its own theme. The Shattered Vale, the Drowned Marches, the Ashen Wastes, the Glass Coast and the Inverted City each play theirs for the whole rift run, and the Endless Rift and the Descent play the Accord Hall's.",
