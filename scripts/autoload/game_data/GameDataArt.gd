@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Pixel-perfect fights: heroes and foes are now drawn at a whole number of screen pixels per art pixel at any window size, so no pixel comes out wider than its neighbours. Heroes use their full art canvas like the foes, so they no longer change size when they attack, and Morrow and the First Signatory fight in their own portraits.",
 	"Playtest build. The Feedback report now notes when you reached each milestone (founding, first seal, first payday, each act), still only on your screen until you paste it. The Grow goal only suggests hiring or drilling once a guild is really stuck, the founding options' toggle draws properly, and narrow desktop windows no longer ask you to turn your phone.",
 	"The guild status board now opens on three goals: the story's next step, the best way to grow stronger, and one thing worth doing on the side. New item icons for every weapon, armour and legendary, the Pearl Colossus and the Ember Whelp redrawn, and a smaller download: the game loads about a fifth faster.",
 	"Fights hit harder: every blow flashes and lands with a short pause, attacks wind up before they strike, and each way of fighting has its own effect: a cleave for warriors, a twin cut for rogues, an arrow strike, a holy strike, a burst for each mage element, and claws, spells or acid from foes. Cards have pixel corners, and icons stay crisp.",

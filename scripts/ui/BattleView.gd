@@ -1990,7 +1990,14 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 	for k in line.size():
 		var h: Hero = line[k]
 		var is_back := h.formation == "back"
-		var size: float = roundf(200.0 * px)
+		# The whole 96 x 200 canvas at the fight's pixel scale, like the foes
+		# (0.55: the trimmed still was fitted to a box, so heroes sat at odd
+		# scales and shrank a little when their untrimmed frames played).
+		var rect := _sprite_fit(GameData.hero_portrait(h), px, INF, true)
+		_hero_look(rect, h)
+		var size: float = rect.custom_minimum_size.y
+		rect.custom_minimum_size.x = size * 0.48   # every frame is 96 wide; an 84-wide still fits by height
+		rect.size = rect.custom_minimum_size
 		var feet: float = ground - (H * 0.06 if is_back else 0.0)
 		var cx: float = h_start + h_slot * (k + 0.5) + (10.0 if h == current_hero else 0.0)
 		var ring_w: float = size * 0.8
@@ -2002,14 +2009,13 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 			var ring := _ground_ring(cx, feet, ring_w, Palette.EMBER_BRIGHT)
 			arena.add_child(ring)
 			_pulse(ring)
-		var rect := _hero_icon(h, int(size))
 		rect.flip_h = GameData.faces_away(GameData.hero_portrait(h))
 		var wrapper := _wrap_icon(rect)
-		wrapper.position = Vector2(cx - size * 0.5, feet - size)
-		_add_ground_shadow(arena, wrapper.position, size)
+		wrapper.position = Vector2(cx - rect.custom_minimum_size.x * 0.5, feet - size)
+		_add_ground_shadow(arena, Vector2(cx - size * 0.5, feet - size), size)
 		arena.add_child(wrapper)
 		if (state.get("hero_burn", {}) as Dictionary).has(h.id):
-			var fl := Fx.loop(wrapper, "flame", Vector2(size * 0.5, size * 0.72), size * 0.34, Color(1, 1, 1, 0.85))
+			var fl := Fx.loop(wrapper, "flame", Vector2(rect.custom_minimum_size.x * 0.5, size * 0.72), size * 0.34, Color(1, 1, 1, 0.85))
 			fl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_start_idle_sway(wrapper)
 		hero_wrappers[h.id] = wrapper
@@ -2045,7 +2051,7 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 		# Monster art is drawn on the same 200px canvas as the heroes, so one
 		# scale for all keeps every sprite at the heroes' pixel size (and a
 		# small creature small); the boss/elite is drawn a size class up.
-		var m_rect := _sprite_fit(GameData.sprite_for_monster(str(m["name"])), minf(1.0, px + 0.25) if i == big_i else px, m_slot * 1.1)
+		var m_rect := _sprite_fit(GameData.sprite_for_monster(str(m["name"])), minf(1.0, px + 0.25) if i == big_i else px, m_slot * 1.1, true)
 		m_rect.flip_h = GameData.faces_away(GameData.sprite_for_monster(str(m["name"])))
 		var msz: Vector2 = m_rect.custom_minimum_size
 		var ring_w: float = minf(msz.x, msz.y * 1.2) * 0.8

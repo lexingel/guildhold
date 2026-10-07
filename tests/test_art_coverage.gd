@@ -45,6 +45,14 @@ func run() -> void:
 	# Icons draw at whole multiples of their own size (0.52), so pixels stay even.
 	check(UiKit.pixel_size(32, 28) == 32 and UiKit.pixel_size(32, 40) == 32 and UiKit.pixel_size(32, 64) == 64 and UiKit.pixel_size(40, 48) == 40, "small icons snap to whole pixel multiples")
 	check(UiKit.pixel_size(32, 16) == 16 and UiKit.pixel_size(200, 78) == 78, "tiny requests and big art keep their size")
+	# Fight sprites (0.55): a whole number of screen pixels per art pixel.
+	var kit := UiKit.new()
+	add_child(kit)
+	var s := float(get_tree().root.size.y) / get_viewport().get_visible_rect().size.y
+	for k in [0.5, 0.75, 1.0]:
+		var n: float = kit.screen_px(k) * s
+		check(k * s < 0.8 or (absf(n - roundf(n)) < 0.001 and n >= 1.0 and n <= k * s * 1.25), "a fight sprite at %.2f draws %.3f screen pixels per art pixel" % [k, n])
+	kit.queue_free()
 
 	# Effects (0.52): every frame of every set exists; every role, element and foe kind has its own.
 	var fx_missing: Array[String] = []

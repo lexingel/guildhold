@@ -786,19 +786,38 @@ func _draggable_item_icon(it: Item, size: int = 32, compare_for: Hero = null) ->
 
 ## A sprite drawn at `scale` (width capped at `max_w`), with the rect sized
 ## to the sprite itself rather than a square — so it can stand on a ground
-## line instead of floating in a centered box.
-func _sprite_fit(path: String, scale: float, max_w: float = INF) -> TextureRect:
+## line instead of floating in a centered box. `snap` makes the scale a whole
+## number of screen pixels (screen_px), for fights.
+func _sprite_fit(path: String, scale: float, max_w: float = INF, snap := false) -> TextureRect:
 	var tex: Texture2D = load(path)
 	var sz := tex.get_size()
 	var k := minf(scale, max_w / sz.x)
+	if snap:
+		k = screen_px(k)
 	var t := TextureRect.new()
 	t.texture = tex
 	t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	t.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	t.custom_minimum_size = (sz * k).round()
+	t.custom_minimum_size = sz * k if snap else (sz * k).round()
 	t.size = t.custom_minimum_size
 	return t
+
+
+## The canvas is stretched to the window by a fractional factor (1.35 in a
+## 1728 x 1080 window), so a sprite at a "clean" canvas scale still drew some
+## pixels a screen pixel wider than others. This rounds an art scale to a
+## whole number of screen pixels per art pixel, 0.55. It grows a sprite by at
+## most a quarter; under one screen pixel per art pixel (a small window) no
+## scale is exact, so it keeps the scale it was given.
+func screen_px(k: float) -> float:
+	if not is_inside_tree():
+		return k
+	var s := float(get_tree().root.size.y) / maxf(1.0, get_viewport().get_visible_rect().size.y)
+	var n := roundf(k * s)
+	if n > k * s * 1.25:
+		n = floorf(k * s)
+	return n / s if n >= 1.0 else k
 
 
 ## Same as _icon(), but for hero portrait art specifically: crops the texture
