@@ -331,7 +331,8 @@ Subclass trainings are unlocked for the whole guild by acts, Tower of Trials flo
 
 - **Stage gates:** stage 1's first subclasses are open from the start (trainable once a hero reaches D); stage 2's open with Act II; stage 3's with Act III.
 - **The rest** rotate through Act completions, Tower of Trials floors (10–100), sealing rifts with heroes of the role, a boss beaten by hand with no one down, freeing a lost champion, a Rank A seal and holding a Rank S Riftbreak, so every Path has goals across the game's modes.
-- The Codex gets a **Subclasses** page: every subclass, locked or not, with what unlocks it. This is also a natural home for the mid/late-game goals you're designing (and, if you want, a Laurel sink: carrying an unlock to the next guild).
+- The Codex gets a **Subclasses** page: every subclass, locked or not, with what unlocks it.
+- **Carrying unlocks to the next guild (Laurels):** a guild's unlocks are remembered in the legacy. On the founding screen, beside the founding gifts, each remembered unlock can be bought for the new guild with Laurels: **stage 1: 3, stage 2: 5, stage 3: 8, a Legend: 12**. Unbought ones must be earned again. The stage gates (the first subclass of each Path per stage) are free as always. This is the lasting Laurel sink the economy list was missing.
 
 ## 6b. Skill trees and points
 
@@ -394,8 +395,8 @@ Turkish: ~450 new lines across phases (names, rules, training, UI), translated a
 
 ## 13. Questions for you
 
-1. The 15 Paths: rules, Techniques, Signature moments, Legend changes and Twists (section 3a): keep, swap, rename?
-2. The unlock table (section 6): right mix of acts, Tower floors and deeds?
-3. Raised vs hired: +2% stats per rank raised, and +1 skill point per rank for hires: about right?
+1. ~~The 15 Paths~~ — approved.
+2. ~~The unlock table~~ — approved.
+3. ~~Raised vs hired~~ — approved.
 4. Resonance: in, or leave party building to the Path combos alone?
-5. Should unlocks carry to the next guild (with Laurels, or freely), or does each guild unlock its own?
+5. ~~Unlocks across guilds~~ — decided: carried with Laurels (section 6).
