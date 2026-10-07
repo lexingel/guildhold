@@ -58,7 +58,7 @@ func run() -> void:
 		if not (s is AudioStream) or s.get_length() < (0.02 if "/sfx/" in str(p) else 0.2):   # a click is short; a line or a track isn't
 			bad_snd.append(str(p))
 	check(sounds.size() > 180 and bad_snd.is_empty(), "%d sounds load and have length %s" % [sounds.size(), bad_snd])
-	for track in GameData.CAMP_MUSIC + GameData.COMBAT_MUSIC:
+	for track in GameData.CAMP_MUSIC + GameData.COMBAT_MUSIC + GameData.REGION_MUSIC.values() + [GameData.ACCORD_MUSIC]:
 		check((load(track) as AudioStream).get_length() > 30.0, "%s is a full track" % str(track).get_file())
 	for key in GameData.SFX_PATH:
 		check(ResourceLoader.exists(str(GameData.SFX_PATH[key])), "sound %s exists" % key)
@@ -160,7 +160,7 @@ func run() -> void:
 	main.screen = "rift_run"
 	main.render()
 	await _frames()
-	check(AudioManager._current_music_path in GameData.COMBAT_MUSIC, "a fight plays a combat track")
+	check(AudioManager._current_music_path == GameData.REGION_MUSIC[GameState.run_biome()], "a rift run plays its region's theme (%s)" % GameState.run_biome())
 	GameState.run = {}
 	main.screen = "camp"
 	main.term_tab = "camp"
@@ -172,7 +172,7 @@ func run() -> void:
 	sv.setup(GameState.heroes.slice(0, 3), "vale")
 	add_child(sv)
 	await _frames()
-	check(AudioManager._current_music_path in GameData.COMBAT_MUSIC, "the Endless Rift plays a combat track")
+	check(AudioManager._current_music_path == GameData.ACCORD_MUSIC, "the Endless Rift plays the Accord Hall's theme")
 	sv.queue_free()
 	var dv := DefenseView.new()
 	dv.setup("vale", 0, GameState.heroes.slice(0, 2), null, GameState.defense_opts())

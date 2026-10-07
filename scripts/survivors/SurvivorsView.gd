@@ -107,7 +107,7 @@ func _ready() -> void:
 		_world.add_child(n)
 		_hero_nodes[h["hero"].id] = n
 	_build_hud()
-	AudioManager.play_music(GameData.pick_track(GameData.COMBAT_MUSIC))
+	AudioManager.play_music(GameData.ACCORD_MUSIC)   # the Endless Rift lies over the Accord Hall
 
 
 # ---------------- Sprites ----------------

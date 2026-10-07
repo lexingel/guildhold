@@ -1030,7 +1030,12 @@ func _update_screen_music() -> void:
 	elif screen == "rift_run":
 		var kind := GameState.current_node_kind()
 		var ns: Dictionary = GameState.run.get("node_state", {})
-		if kind in ["combat", "boss", "elite", "pillar"] and ns.has("combat_state"):
+		var theme := GameData.run_track(GameState.run)
+		if theme != "":   # a region's theme carries the whole run, map and fights
+			_combat_track = theme
+			_camp_track = ""
+			AudioManager.play_music(theme)
+		elif kind in ["combat", "boss", "elite", "pillar"] and ns.has("combat_state"):
 			if _combat_track == "":
 				_combat_track = GameData.pick_track(GameData.COMBAT_MUSIC, _last_combat_track)
 				_last_combat_track = _combat_track

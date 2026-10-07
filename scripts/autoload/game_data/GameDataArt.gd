@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Music: every region now has its own theme. The Shattered Vale, the Drowned Marches, the Ashen Wastes, the Glass Coast and the Inverted City each play theirs for the whole rift run, and the Endless Rift and the Descent play the Accord Hall's.",
 	"End day: a campfire button in the top bar ends the day from any camp screen, without a run. Hover it to see what tomorrow brings: payday and whether you can pay, who finishes training, who is back on their feet, and a rift about to break.",
 	"The Training Yard: send heroes to train Might, Agility or Focus for 1, 2 or 3 days. Each day gives +1 attribute point, longer courses also give XP (up to your best hero's level), and you can watch them drill in the camp's courtyard. Trainees sit out runs; the yard has 2 stations and grows to 4 with the Drill Yard. It replaces buying points with Gold.",
 	"A new look: every fight now has a crisp, detailed backdrop drawn to match the heroes and foes, and the camp has become the ruins of an old Accord guild hall that your guild rebuilds as it grows, from scaffolding to a restored hall. Long sealing reports no longer stretch the screen.",
@@ -225,6 +226,26 @@ const FEEDBACK_DISCORD_URL := "https://discord.gg/85XrXjBUmk"   # the playtest D
 ## a combat track per rift or Endless run (not the last one's).
 const COMBAT_MUSIC := ["res://assets/audio/music/combat.ogg", "res://assets/audio/music/metal_deep.ogg", "res://assets/audio/music/iron_deep_2.ogg"]
 const CAMP_MUSIC := ["res://assets/audio/music/camp.ogg", "res://assets/audio/music/nocturnal_dread.ogg", "res://assets/audio/music/nocturnal_dread_2.ogg"]
+
+
+## Each region's theme (0.59.1): a rift run plays its region's for the whole
+## run; the Descent, the real-time Endless Rift and Act IV's finale (beneath
+## the posts) play the Accord Hall's. The Tower keeps the combat pool.
+const REGION_MUSIC := {
+	"vale": "res://assets/audio/music/region_vale.ogg", "marsh": "res://assets/audio/music/region_marsh.ogg",
+	"ashen": "res://assets/audio/music/region_ashen.ogg", "glass": "res://assets/audio/music/region_glass.ogg",
+	"city": "res://assets/audio/music/region_city.ogg",
+}
+const ACCORD_MUSIC := "res://assets/audio/music/accord_hall.ogg"
+
+
+## The theme a run plays, or "" for the combat pool (the Tower).
+static func run_track(run: Dictionary) -> String:
+	if run.is_empty() or run.has("tower"):
+		return ""
+	if run.has("descent") or int(run.get("finale", 0)) == 4:
+		return ACCORD_MUSIC
+	return str(REGION_MUSIC.get(str(run.get("biome", "vale")), ""))
 
 
 ## A track from `pool`, not `last` when there's another to choose.

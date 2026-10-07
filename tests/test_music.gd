@@ -15,3 +15,7 @@ func run() -> void:
 		last = t
 	check(repeats == 0, "coming home never replays the same camp track")
 	check(GameData.pick_track(["only"], "only") == "only", "a single-track pool still plays")
+	# Region themes (0.59.1): one per region; the Descent and Act IV's finale play the Accord Hall's; the Tower the pool.
+	for b in GameData.BIOMES:
+		check(GameData.REGION_MUSIC.has(b), "%s has a theme" % b)
+	check(GameData.run_track({"biome": "marsh"}) == GameData.REGION_MUSIC["marsh"] and GameData.run_track({"biome": "vale", "descent": 2}) == GameData.ACCORD_MUSIC 		and GameData.run_track({"biome": "glass", "finale": 4}) == GameData.ACCORD_MUSIC and GameData.run_track({"tower": 3}) == "", "which run plays which theme")
