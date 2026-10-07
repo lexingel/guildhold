@@ -375,6 +375,8 @@ func load_save() -> bool:
 			"finale": int(run_data.get("finale", 0)), "momentum_bonus": int(run_data.get("momentum_bonus", 0)), "training": bool(run_data.get("training", false)), "biome": str(run_data.get("biome", "vale")),
 			"orders_used": int(run_data.get("orders_used", 0)), "boons": run_data.get("boons", []), "events_seen": run_data.get("events_seen", []),
 		}
+		if run_data.get("haul_lost") is Array:   # the haul already dropped once (0.56)
+			run["haul_lost"] = run_data["haul_lost"]
 		if int(run_data.get("daily", -1)) >= 0:
 			run["daily"] = int(run_data["daily"])
 		if run_data.has("tower"):

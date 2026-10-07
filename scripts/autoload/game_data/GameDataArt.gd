@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The haul: what a rift run earns is only safe once the party is home. If the party falls, half of it is lost; fleeing a fight drops a quarter; sealing the rift or leaving between floors keeps it all. The run bar shows the haul, and at a boss's door you see what's at stake and can still retreat. A guild's first three seals are spared.",
 	"Pixel-perfect fights: heroes and foes are now drawn at a whole number of screen pixels per art pixel at any window size, so no pixel comes out wider than its neighbours. Heroes use their full art canvas like the foes, so they no longer change size when they attack, and Morrow and the First Signatory fight in their own portraits.",
 	"Playtest build. The Feedback report now notes when you reached each milestone (founding, first seal, first payday, each act), still only on your screen until you paste it. The Grow goal only suggests hiring or drilling once a guild is really stuck, the founding options' toggle draws properly, and narrow desktop windows no longer ask you to turn your phone.",
 	"The guild status board now opens on three goals: the story's next step, the best way to grow stronger, and one thing worth doing on the side. New item icons for every weapon, armour and legendary, the Pearl Colossus and the Ember Whelp redrawn, and a smaller download: the game loads about a fifth faster.",

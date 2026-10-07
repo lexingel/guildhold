@@ -53,6 +53,9 @@ var curve := {}          # power/recommended bucket -> [sealed, lost], ladder ru
 var gross_gold := {}     # week -> Gold earned (runs, quests, defenses)
 var bill_paid := {}      # week -> wages + upkeep paid
 var fights := {}         # rank -> [won, lost]
+var left_with_haul := 0
+var sustain := [0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0]   # mend/round sum, start hp sum, end hp sum, won fights
+var by_kind := {}        # fight kind -> [won, lost, start hp % sum of lost, of won] (all guilds)
 var runs := {}           # rank -> [sealed, lost]
 var rounds := {}         # rank -> [fights, total rounds, fights over in round 1]
 var act_day := {}        # act finished -> day
@@ -74,6 +77,14 @@ func _ready() -> void:
 			GameData.RANK_THREAT_HP = float(a.substr(3))
 		elif a.begins_with("dmg="):
 			GameData.RANK_THREAT_DMG = float(a.substr(4))
+		elif a.begins_with("threat="):   # threat=combat:1.3:1.5,boss:0.9:0.9
+			for part in a.substr(7).split(","):
+				var bits := part.split(":")
+				GameData.FIGHT_THREAT[bits[0]] = [float(bits[1]), float(bits[2])]
+		elif a.begins_with("haul="):   # haul=0 turns the haul loss off
+			GameData.HAUL_LOSS = {"fell": float(a.substr(5)), "fled": float(a.substr(5)) * 0.5}
+		elif a.begins_with("mendcap="):
+			GameData.MEND_CAP = float(a.substr(8))
 		elif a.begins_with("mend="):
 			GameData.POST_FIGHT_MEND = float(a.substr(5))
 		elif a.begins_with("attr="):
@@ -121,7 +132,7 @@ func _ready() -> void:
 	var keep_legacy := FileAccess.get_file_as_bytes(GameState.LEGACY_PATH) if FileAccess.file_exists(GameState.LEGACY_PATH) else PackedByteArray()
 	FileAccess.open(bak, FileAccess.WRITE).store_buffer(keep_legacy)
 	print(TARGETS % [])
-	print("Rank threat: hp x%.2f, dmg x%.2f, mend %.2f" % [GameData.RANK_THREAT_HP, GameData.RANK_THREAT_DMG, GameData.POST_FIGHT_MEND])
+	print("Rank threat: hp x%.2f, dmg x%.2f, mend %.2f, mend cap %.2f, fights %s, haul %s" % [GameData.RANK_THREAT_HP, GameData.RANK_THREAT_DMG, GameData.POST_FIGHT_MEND, GameData.MEND_CAP, str(GameData.FIGHT_THREAT), str(GameData.HAUL_LOSS)])
 	for p in (["investor", "casual"] if profile == "" else [profile]):
 		var all_fights := {}
 		var all_runs := {}
@@ -155,6 +166,12 @@ func _ready() -> void:
 		if hand:
 			print("   flawless-by-hand bonus paid in %d fights" % hand_bonus)
 		print("   fight length (avg rounds, %% over in round 1): %s" % "  ".join(ranks.filter(func(r): return all_rounds.has(r)).map(func(r): return "%s %.1f/%d%%" % [r, float(all_rounds[r][1]) / maxf(1.0, all_rounds[r][0]), int(100.0 * all_rounds[r][2] / maxf(1.0, all_rounds[r][0]))])))
+		print("   by fight kind (won/all, party HP at the start: lost vs won): %s" % "  ".join(by_kind.keys().map(func(k): return "%s %d/%d (%d%% vs %d%%)" % [k, by_kind[k][0], by_kind[k][0] + by_kind[k][1], int(100.0 * by_kind[k][2] / maxf(1.0, by_kind[k][1])), int(100.0 * by_kind[k][3] / maxf(1.0, by_kind[k][0]))])))
+		by_kind = {}
+		print("   left a run early to keep the haul: %d times" % left_with_haul)
+		print("   won fights: party mend %.1f%%/round, dodge %d%%, wipe guard %d%%, %.1f rounds, party HP %d%% before, %d%% after" % [100.0 * sustain[0] / maxf(1, sustain[3]), int(100.0 * sustain[4] / maxf(1, sustain[3])), int(100.0 * sustain[5] / maxf(1, sustain[3])), sustain[6] / maxf(1, sustain[3]), int(100.0 * sustain[1] / maxf(1, sustain[3])), int(100.0 * sustain[2] / maxf(1, sustain[3]))])
+		sustain = [0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0]
+		left_with_haul = 0
 		print("   runs sealed: %s" % "  ".join(ranks.filter(func(r): return all_runs.has(r)).map(func(r): return "%s %d/%d" % [r, all_runs[r][0], all_runs[r][0] + all_runs[r][1]])))
 	var ks := curve.keys()
 	ks.sort()
@@ -558,6 +575,11 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 					GameState.injury_carry(hid)
 			continue
 		var kind := GameState.current_node_kind()
+		if kind == "" and GameState.haul_at_risk() and _party_hp() < 0.35:
+			# Badly hurt with a haul to lose: take it home (0.56).
+			GameState.retreat_now()
+			left_with_haul += 1
+			return "left with the haul"
 		if kind == "":
 			var opts := GameState.current_layer_options()
 			var prefs := ["boss", "pillar", "combat", "event", "shop", "elite", "treasure", "campfire", "hazard"]
@@ -584,6 +606,20 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 				if not ns.get("tallied", false):
 					ns["tallied"] = true
 					_tally(rank, bool(result.get("won", false)))
+					var bk: Array = by_kind.get(kind, [0, 0, 0.0, 0.0])
+					var won_now := bool(result.get("won", false))
+					bk[0 if won_now else 1] += 1
+					bk[3 if won_now else 2] += float(ns.get("combat_state", {}).get("_start_hp_pct", 1.0))
+					by_kind[kind] = bk
+					if won_now:
+						sustain[0] += float(ns.get("combat_state", {}).get("mend", 0.0))
+						sustain[1] += float(ns.get("combat_state", {}).get("_start_hp_pct", 1.0))
+						sustain[2] += _party_hp()
+						sustain[3] += 1
+						var cst: Dictionary = ns.get("combat_state", {})
+						sustain[4] += float(cst.get("dodge", 0.0))
+						sustain[5] += float(cst.get("wipe_guard", 0.0))
+						sustain[6] += float(cst.get("round_num", 0))
 					var ms: Array = ns.get("combat_state", {}).get("monsters", [])
 					if ms.any(func(m): return str(m["name"]) == "Company Crossbowman"):
 						ambush[0 if result.get("won", false) else 1] += 1

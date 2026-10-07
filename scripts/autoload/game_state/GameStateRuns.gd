@@ -304,6 +304,8 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 		session[tally] = int(session.get(tally, 0)) + 1
 		if not result["won"] and not bool(result.get("retreated", false)):
 			result["defeat_reasons"] = Combat.defeat_reasons(state)
+		if not result["won"]:
+			_drop_haul("fled" if bool(result.get("retreated", false)) else "fell")
 		if run.has("tower"):
 			# The Tower pays per floor (first clear), not per fight.
 			result["reward_options"] = []
@@ -1063,12 +1065,31 @@ func _descent_layers(depth: int) -> Array:
 
 
 ## A Descent that ends in defeat loses part of what it earned.
-func _descent_fall() -> void:
-	var lost_c := int(maxi(0, coins - int(run.get("start_coins", coins))) * GameData.DESCENT_DEFEAT_LOSS)
-	var lost_e := int(maxi(0, crystals - int(run.get("start_crystals", crystals))) * GameData.DESCENT_DEFEAT_LOSS)
-	coins -= lost_c
-	crystals -= lost_e
-	_news(tr("The party fell at depth %d of the Descent and lost %d Gold and %d Essence on the way out.") % [int(run["descent"]), lost_c, lost_e])
+## The Gold and Essence this run has earned so far (never below zero).
+func haul() -> Vector2i:
+	return Vector2i(maxi(0, coins - int(run.get("start_coins", coins))), maxi(0, crystals - int(run.get("start_crystals", crystals))))
+
+
+## Whether a lost or fled fight costs part of the haul (GameData.HAUL_LOSS).
+func haul_at_risk() -> bool:
+	return not run.is_empty() and not run.has("tower") and not run.get("training", false) 		and (run.has("descent") or rifts_sealed >= GameData.HAUL_GRACE_SEALS)
+
+
+## A lost ("fell") or fled fight drops its share of the haul, once per run.
+func _drop_haul(why: String) -> void:
+	if not haul_at_risk() or run.has("haul_lost"):
+		return
+	var h := haul()
+	var lost := Vector2i(int(h.x * float(GameData.HAUL_LOSS[why])), int(h.y * float(GameData.HAUL_LOSS[why])))
+	coins -= lost.x
+	crystals -= lost.y
+	run["haul_lost"] = [lost.x, lost.y]
+	if lost == Vector2i.ZERO:
+		return
+	if run.has("descent"):
+		_news(tr("The party fell at depth %d of the Descent and lost %d Gold and %d Essence on the way out.") % [int(run["descent"]), lost.x, lost.y])
+	else:
+		_news((tr("The party fell and lost %d Gold and %d Essence on the way out.") if why == "fell" else tr("The party fled and dropped %d Gold and %d Essence on the way out.")) % [lost.x, lost.y])
 
 
 ## Whether a ladder rift of `rank_id` may hold a lost champion's pillar.
@@ -1381,8 +1402,9 @@ func finish_run() -> void:
 	if outcome == "Defeated":
 		for h in current_party():
 			change_morale(h, GameData.MORALE_DEFEAT)
-		if run.has("descent"):
-			_descent_fall()
+		_drop_haul("fell")   # usually already dropped when the fight ended
+	elif outcome == "Retreated":
+		_drop_haul("fled")
 	_record_run(outcome)
 	_lose_left_behind()
 	run = {}

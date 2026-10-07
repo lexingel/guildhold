@@ -459,6 +459,15 @@ var RANK_THREAT_DMG := 1.3
 ## (not the Tower). Trades run-long attrition for fights that matter on their
 ## own (0.53, sim-tuned with RANK_THREAT_*). A var so the sim can sweep it.
 var POST_FIGHT_MEND := 0.0
+## Most of a party's HP mended per round in a fight (skills, gear, relics,
+## bonds together). At 0.4 a typical party mended a third of its HP every
+## round, so ordinary fights never hurt and HP never carried (0.56 sim: 98%
+## before a won fight, 95% after). A var so the sim can sweep it.
+var MEND_CAP := 0.4
+## Where a run's danger sits (0.56): [hp, dmg] multipliers on a kind of fight.
+## The sim showed ordinary fights won 99% from near-full HP and bosses 68%,
+## so a run was decided at the boss; ordinary fights now cost real HP.
+var FIGHT_THREAT := {"combat": [1.0, 1.0], "elite": [1.0, 1.0], "boss": [1.0, 1.0]}
 const RIFT_RANKS := [
 	{"id": "F", "rec": 65, "base": "lesser", "hp": 0.8, "dmg": 0.85, "reward": 1.0},
 	{"id": "E", "rec": 160, "base": "lesser", "hp": 1.8, "dmg": 1.6, "reward": 1.4},
@@ -637,13 +646,19 @@ const BANNER_CLOTH := [Color("7a2e2e"), Color("2e3f7a"), Color("2f6a3f"), Color(
 ## (an elite) or, every DESCENT_PILLAR_EVERY depths while a lost champion
 ## waits, a pillar (its keeper fights as a rift warden; winning frees the
 ## champion). Each depth is DESCENT_GROWTH harder and pays DESCENT_PAY_GROWTH
-## more. Climbing out keeps everything; falling loses DESCENT_DEFEAT_LOSS of
-## what the Descent earned. It costs a day, like any run.
+## more. Climbing out keeps everything; falling loses HAUL_LOSS["fell"] of
+## what the Descent earned, like any run. It costs a day, like any run.
 const DESCENT_FLOORS := 4
 const DESCENT_PILLAR_EVERY := 2
 const DESCENT_GROWTH := 0.15
 const DESCENT_PAY_GROWTH := 0.10
-const DESCENT_DEFEAT_LOSS := 0.5
+## The haul (0.56): what a run has earned is only safe once the party is
+## home. Sealing or leaving between floors keeps it all; fleeing a fight drops
+## HAUL_LOSS["fled"] of it, falling HAUL_LOSS["fell"]. Spared until the guild
+## has sealed HAUL_GRACE_SEALS rifts, in the training rift and in the Tower.
+## A var so the sim can sweep it.
+var HAUL_LOSS := {"fell": 0.5, "fled": 0.25}
+const HAUL_GRACE_SEALS := 3
 ## Pillars on the ladder: a rift of PILLAR_MIN_RANK or higher sometimes offers
 ## a lost champion's pillar as a fork (once the Endless Rift is open).
 const PILLAR_CHANCE := 0.15

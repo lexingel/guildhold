@@ -589,7 +589,7 @@ func _run_for_save() -> Dictionary:
 		"heroes_lost": run.get("heroes_lost", 0), "start_snap": run.get("start_snap", {}),
 		"rift_rank": run.get("rift_rank", ""), "champion_call_used": run.get("champion_call_used", false),
 		"injured": run.get("injured", []), "left_behind": run.get("left_behind", []), "heal_used": run.get("heal_used", false),
-		"any_ko": run.get("any_ko", false),
+		"any_ko": run.get("any_ko", false), "haul_lost": run.get("haul_lost", null),
 		"champion_calls": run.get("champion_calls", 0), "overseer": run.get("overseer", ""), "phoenix_used": run.get("phoenix_used", false),
 		"finale": run.get("finale", 0), "momentum_bonus": run.get("momentum_bonus", 0), "training": run.get("training", false), "biome": run.get("biome", "vale"),
 		"orders_used": run.get("orders_used", 0), "boons": run.get("boons", []), "events_seen": run.get("events_seen", []), "daily": run.get("daily", -1),

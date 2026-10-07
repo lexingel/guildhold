@@ -1119,6 +1119,12 @@ func _render_combat_node(v: VBoxContainer) -> void:
 				v.add_child(qrow)
 			if lock == "":
 				_combat_hotkeys["Q"] = func(): GameState.quick_fight()
+		# The boss door (0.56): what falling here costs, and the party's odds.
+		var haul := GameState.haul()
+		if is_boss and GameState.haul_at_risk() and haul != Vector2i.ZERO:
+			var stake := _wrap_label(tr("At stake: if the party falls, %d Gold and %d Essence of this run's haul are lost. Party power %d of %d recommended. Retreat keeps it all.") % [int(haul.x * float(GameData.HAUL_LOSS["fell"])), int(haul.y * float(GameData.HAUL_LOSS["fell"])), Combat.party_power(GameState.current_party()), Combat.recommended_power(str(GameState.run.get("diff_id", "")), str(GameState.run.get("rift_rank", "")))], 13)
+			stake.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+			v.add_child(stake)
 		_combat_hotkeys["Space"] = func(): GameState.engage_node()
 		v.add_child(_icon_domain_button("ember", "res://assets/skills/sword_a.png", _no_keys(tr("Engage  (Space)")), func():
 			# engage_node() already emits state_changed, which render() is
@@ -1668,6 +1674,9 @@ func _run_summary_lines() -> Array[String]:
 	var coin_delta := GameState.coins - int(GameState.run.get("start_coins", GameState.coins))
 	var crystal_delta := GameState.crystals - int(GameState.run.get("start_crystals", GameState.crystals))
 	lines.append(tr("%+d Gold, %+d Essence this run") % [coin_delta, crystal_delta])
+	var dropped: Array = GameState.run.get("haul_lost", [0, 0])
+	if int(dropped[0]) + int(dropped[1]) > 0:
+		lines.append(tr("Lost on the way out: %d Gold, %d Essence") % [int(dropped[0]), int(dropped[1])])
 	var lost := int(GameState.run.get("heroes_lost", 0))
 	if lost > 0:
 		lines.append(tr("%d hero%s lost") % [lost, tr(str(_pl(lost, "es")))])
@@ -2821,7 +2830,7 @@ func _battle_tools(living_heroes: Array[Hero], hero_wrappers: Dictionary) -> HBo
 		if not _combat_animating:
 			render()
 	))
-	tools.add_child(_tool_button("res://assets/skills/wing.png", "", "Retreat — leave the fight (the run ends)", func():
+	tools.add_child(_tool_button("res://assets/skills/wing.png", "", tr("Retreat — leave the fight (the run ends and %d%% of the haul is dropped)") % int(GameData.HAUL_LOSS["fled"] * 100) if GameState.haul_at_risk() and GameState.haul() != Vector2i.ZERO else "Retreat — leave the fight (the run ends)", func():
 		if _combat_animating:
 			return
 		_combat_animating = true

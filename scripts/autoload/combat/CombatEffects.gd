@@ -530,6 +530,8 @@ func _power(heroes: Array, party_terms: bool) -> int:
 		for r in equipped_relics():
 			hp += r.hp
 	dmg *= 1.0 + maxf(ramp, -0.5)
-	hp = hp / (1.0 - clampf(dodge, 0.0, 0.6)) * (1.0 + 6.0 * clampf(mend, 0.0, 0.4))
+	# A party at the mend cap counts as it did at the old 0.4 cap, so the
+	# ranks' Recommended power keeps its scale (0.56).
+	hp = hp / (1.0 - clampf(dodge, 0.0, 0.6)) * (1.0 + 2.4 / GameData.MEND_CAP * clampf(mend, 0.0, GameData.MEND_CAP))
 	return int(round(dmg * 2.0 + hp / 3.0))
 

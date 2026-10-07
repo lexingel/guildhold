@@ -317,8 +317,9 @@ func gen_monster(diff: Dictionary, floor_idx: int, kind: String) -> Dictionary:
 	var scale := 1.0 + floor_idx * MONSTER_FLOOR_SCALE
 	var hp_mult := BOSS_HP_MULT if kind == "boss" else (ELITE_HP_MULT if kind == "elite" else 1.0)
 	var dmg_mult := BOSS_DMG_MULT if kind == "boss" else (ELITE_DMG_MULT if kind == "elite" else 1.0)
-	var hp: int = round(diff["monster_hp"] * scale * hp_mult * (1.15 if GameState.sworn("hollow_touched") else 1.0))
-	var dmg: int = round(diff["monster_dmg"] * scale * dmg_mult)
+	var threat: Array = GameData.FIGHT_THREAT.get(kind, [1.0, 1.0])
+	var hp: int = round(diff["monster_hp"] * scale * hp_mult * float(threat[0]) * (1.15 if GameState.sworn("hollow_touched") else 1.0))
+	var dmg: int = round(diff["monster_dmg"] * scale * dmg_mult * float(threat[1]))
 	var name: String
 	if kind == "boss" and diff.has("boss_name"):
 		name = str(diff["boss_name"])   # a campaign finale's named foe

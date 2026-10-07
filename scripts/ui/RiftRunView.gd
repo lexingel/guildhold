@@ -209,7 +209,7 @@ func _render_rift_map(v: VBoxContainer) -> void:
 ## member's portrait with an HP bar, and the equipped relics (hover for
 ## what each does). HP carries across nodes, so this is the number that
 ## decides whether to take the elite or the shop.
-func _run_bar(in_combat: bool) -> Control:
+func _run_bar(in_combat: bool, at_door := false) -> Control:
 	var panel := PanelContainer.new()
 	var style := StyleBoxFlat.new()
 	style.bg_color = Palette.SURFACE2
@@ -253,10 +253,19 @@ func _run_bar(in_combat: bool) -> Control:
 		tags.append(tr("Relic ward %d") % int(GameState.run["shield"]))
 	if not tags.is_empty():
 		top.add_child(_label(" · ".join(tags), 12, true))
+	var haul := GameState.haul()
+	if GameState.haul_at_risk() and haul != Vector2i.ZERO and GameState.run.get("sealed") == null:
+		var hl := _label(tr("Haul %d Gold · %d Essence") % [haul.x, haul.y], 12)
+		hl.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+		hl.tooltip_text = tr("Yours once the party is home. If the party falls, %d%% of it is lost; fleeing a fight drops %d%%. Leaving between floors keeps it all.") % [int(GameData.HAUL_LOSS["fell"] * 100), int(GameData.HAUL_LOSS["fled"] * 100)]
+		hl.mouse_filter = Control.MOUSE_FILTER_STOP
+		hl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		top.add_child(hl)
 	# Retreat lives up here, out of the way, and asks once before ending the
 	# run (it used to be a big button at the bottom of every node). In combat
 	# the command bar has its own.
-	if not in_combat and GameState.run.get("sealed") == null:
+	# Before Engage (a boss's door above all) the party can still leave with its haul (0.56).
+	if (not in_combat or at_door) and GameState.run.get("sealed") == null:
 		var spacer := Control.new()
 		spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		top.add_child(spacer)
@@ -392,7 +401,7 @@ func _render_rift_run(v: VBoxContainer) -> void:
 	var ns_now: Dictionary = GameState.run.get("node_state", {})
 	var slim := _compact() and fighting and ns_now.has("combat_state") and not ns_now.has("result")
 	if not slim:
-		v.add_child(_run_bar(fighting))
+		v.add_child(_run_bar(fighting, fighting and not ns_now.has("combat_state") and not ns_now.has("result")))
 	elif _has_orders_row():
 		v.add_child(_orders_bar())
 	if rift_hero_id != "":
@@ -425,6 +434,8 @@ func _render_rift_run(v: VBoxContainer) -> void:
 	var ns_tip: Dictionary = GameState.run.get("node_state", {})
 	if kind == "":
 		_coach(v, "path", "Choosing a path", "Each floor offers a choice. Fights give gold and loot; elites hit harder and pay more; shops, campfires, events and treasure help in other ways. The last floor is the boss.")
+		if GameState.haul_at_risk():
+			_coach(v, "haul", "The haul", "What this run has earned is only safe once the party is home. If the party falls, half of it is lost; fleeing a fight drops a quarter. Leaving between floors keeps it all, so a hurt party can take its haul home instead of facing the boss.")
 	elif kind in ["combat", "elite", "boss"] and ns_tip.has("combat_state") and not ns_tip.has("result") and not GameState.run.get("training", false):
 		_coach(v, "battle", "How fights work", "Heroes and foes act in the turn order shown under the arena. The tag above each foe shows its next move: who it hits, or a Sweep, Snipe, Curse, Ward, Mend or Roar. Attacks build Momentum (the pips under the hero's name); skills (2-4) spend it. Defend (5) halves damage and Guard (6) takes a hit for an ally, both earning Momentum. Foes \"winding up\" land a heavy blow next round: Defend, or break it with Shield Bash or Frost Nova. Melee heroes hit at half strength from the back row.")
 	elif ns_tip.has("result") and bool(ns_tip["result"].get("won", false)) and not ns_tip.get("reward_chosen", false):
