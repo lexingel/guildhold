@@ -111,7 +111,36 @@ func play_sfx(path: String) -> void:
 ## `linear` is 0.0-1.0 (what a settings slider would hand in) — converted to
 ## the dB scale AudioServer actually uses.
 func set_music_volume(linear: float) -> void:
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), linear_to_db(clampf(linear, 0.0001, 1.0)))
+	_music_user_db = linear_to_db(clampf(linear, 0.0001, 1.0))
+	_apply_music_bus()
+
+
+## Music dips under a spoken line (0.59.3): voice and music were mixed at the
+## same loudness, so lines were lost under a loud track. The dip holds
+## through the short gaps between one scene's lines and lifts when it ends.
+const DUCK_DB := -9.0
+const DUCK_TIME := 0.25
+var _music_user_db := 0.0
+var _duck_db := 0.0
+var _duck_tween: Tween
+
+
+func _apply_music_bus() -> void:
+	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Music"), _music_user_db + _duck_db)
+
+
+func _duck(on: bool) -> void:
+	var target := DUCK_DB if on else 0.0
+	if is_equal_approx(_duck_db, target) and (_duck_tween == null or not _duck_tween.is_running()):
+		return
+	if _duck_tween != null:
+		_duck_tween.kill()
+	_duck_tween = create_tween()
+	_duck_tween.tween_method(func(db: float): _duck_db = db; _apply_music_bus(), _duck_db, target, DUCK_TIME)
+
+
+func music_ducked() -> bool:
+	return _duck_db < -0.5
 
 
 func set_sfx_volume(linear: float) -> void:
@@ -174,6 +203,7 @@ func stop_voice(key_prefix := "") -> void:
 		_voice_player.stop()
 		_voice_queue.clear()
 		_voice_key = ""
+		_duck(false)
 
 
 func voice_speaking(key_prefix := "") -> bool:
@@ -186,8 +216,10 @@ func _voice_next() -> void:
 		if ResourceLoader.exists(path):
 			_voice_player.stream = load(path)
 			_voice_player.play()
+			_duck(true)
 			return
 	_voice_key = ""
+	_duck(false)
 
 
 # ---------------- Hearing aid ----------------

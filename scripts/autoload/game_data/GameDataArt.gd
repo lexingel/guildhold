@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"The title screen, the Rift Hall, the Roster, Items, Management, Medical Bay and Crafting backdrops, the rift shop and every hazard are redrawn in the crisp new style. Spoken lines now dip the music while they play, and the opening's narration is never interrupted by the camp's music or a story card.",
 	"A hero can now be dismissed from their own page in the Roster, as well as from the payroll on the Ledger.",
 	"Music: every region now has its own theme. The Shattered Vale, the Drowned Marches, the Ashen Wastes, the Glass Coast and the Inverted City each play theirs for the whole rift run, and the Endless Rift and the Descent play the Accord Hall's.",
 	"End day: a campfire button in the top bar ends the day from any camp screen, without a run. Hover it to see what tomorrow brings: payday and whether you can pay, who finishes training, who is back on their feet, and a rift about to break.",

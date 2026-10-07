@@ -19,3 +19,25 @@ func run() -> void:
 	for b in GameData.BIOMES:
 		check(GameData.REGION_MUSIC.has(b), "%s has a theme" % b)
 	check(GameData.run_track({"biome": "marsh"}) == GameData.REGION_MUSIC["marsh"] and GameData.run_track({"biome": "vale", "descent": 2}) == GameData.ACCORD_MUSIC 		and GameData.run_track({"biome": "glass", "finale": 4}) == GameData.ACCORD_MUSIC and GameData.run_track({"tower": 3}) == "", "which run plays which theme")
+	# Ducking (0.59.3): music dips while a line is spoken and comes back after.
+	var clip := ""
+	for f in DirAccess.get_files_at("res://assets/voice"):
+		if f.ends_with(".ogg"):
+			clip = f
+			break
+	var was_on: bool = GameState.voice_on
+	var was_lang: String = GameState.language
+	GameState.voice_on = true
+	GameState.language = "en"
+	AudioManager.set_music_volume(0.5)
+	var bus := AudioServer.get_bus_index("Music")
+	var user_db := AudioServer.get_bus_volume_db(bus)
+	AudioManager.play_voice("test:duck", [clip], true)
+	await get_tree().create_timer(0.5).timeout
+	check(AudioManager.music_ducked() and AudioServer.get_bus_volume_db(bus) < user_db - 6.0, "a spoken line ducks the music (%.1f dB vs %.1f)" % [AudioServer.get_bus_volume_db(bus), user_db])
+	AudioManager.stop_voice()
+	await get_tree().create_timer(0.5).timeout
+	check(not AudioManager.music_ducked() and absf(AudioServer.get_bus_volume_db(bus) - user_db) < 0.1, "and it comes back to the player's volume when the line stops")
+	GameState.voice_on = was_on
+	GameState.language = was_lang
+	AudioManager.set_music_volume(GameState.music_volume)

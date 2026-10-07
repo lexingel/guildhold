@@ -440,7 +440,8 @@ func render() -> void:
 				_locked_feature(v, "crafting")
 		"settings": _render_settings(v)
 		"camp": _render_camp_screen(v)
-	_update_screen_music()
+	if not _cinematic_on:   # the opening's narrated track plays on under any re-render
+		_update_screen_music()
 
 	# A real navigation (not an in-place data refresh — see is_navigation
 	# above) fades the new screen in from transparent instead of just
@@ -454,7 +455,7 @@ func render() -> void:
 		_rotate_overlay()
 	elif _retire_open and GameState.can_retire():
 		_legacy_overlay(true)
-	elif not GameState.pending_stories.is_empty() and GameState.guild_name != "" and screen not in ["title", "load_game", "credits", "onboard"]:
+	elif not GameState.pending_stories.is_empty() and GameState.guild_name != "" and screen not in ["title", "load_game", "credits", "onboard"] and not _cinematic_on:
 		var card_key := "story:" + str(GameState.pending_stories[0].get("title", ""))
 		if not _sfx_seen.has(card_key):
 			_sfx_seen[card_key] = true
@@ -1781,11 +1782,17 @@ func _render_credits(v: VBoxContainer) -> void:
 ## The opening cinematic (Cinematic.gd) over everything. `founding`: a new
 ## guild's first time; watched through, it stands in for the prologue card
 ## (skipped early, the card still tells it).
+var _cinematic_on := false   # the opening is up: no screen music or story card underneath it
+
+
 func _play_cinematic(founding: bool) -> void:
+	AudioManager.stop_voice()   # the opening is narrated: nothing else speaks over it
+	_cinematic_on = true
 	var c := Cinematic.new()
 	c.guild_name = GameState.guild_name
 	c.crest_path = GameData.CREST_PATH[clampi(GameState.guild_crest - 1, 0, GameData.CREST_PATH.size() - 1)] if GameState.guild_name != "" else ""
 	c.on_done = func(skipped: bool):
+		_cinematic_on = false
 		if founding and not skipped:
 			GameState.pending_stories = GameState.pending_stories.filter(func(st): return str(st.get("title", "")) != str(GameData.PROLOGUE["title"]))
 			GameState.save()

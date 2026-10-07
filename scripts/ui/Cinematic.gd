@@ -340,6 +340,8 @@ func _finish(skipped: bool) -> void:
 	if not is_inside_tree():
 		return
 	_kill_tweens()
+	if skipped and _track != "":
+		AudioManager.stop_music(0.3)   # its narration mustn't run on under the prologue card's
 	var cb := on_done
 	queue_free()
 	if cb.is_valid():
