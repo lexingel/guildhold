@@ -583,10 +583,19 @@ const ATTUNE_WINS := 8
 const ATTUNE_STEP := 0.04
 const ATTUNE_MAX := 5
 
-## Camp training: buy up to ATTR_TRAIN_CAP extra attribute points per hero,
-## each costing ATTR_TRAIN_COST more Coins than the last.
+## The Training Yard (0.58): a hero trains one attribute (a program) for
+## TRAIN_DAYS days. Each day passing gives +1 point in it, up to ATTR_TRAIN_CAP
+## points trained per hero; courses of 2+ days also give TRAIN_XP_SHARE of a
+## level per day, never past the guild's best hero. The fee, TRAIN_FEE +
+## TRAIN_FEE_PER_LEVEL x level per day, is paid up front; a hero recalled
+## early gets back the days not yet started. Stations by yard tier (the
+## Drill Yard upgrade): TRAIN_SLOTS_BY_TIER.
 const ATTR_TRAIN_CAP := 8
-const ATTR_TRAIN_COST := 50
+const TRAIN_DAYS := [1, 2, 3]
+const TRAIN_FEE := 10
+const TRAIN_FEE_PER_LEVEL := 4
+const TRAIN_XP_SHARE := 0.34
+const TRAIN_SLOTS_BY_TIER := [2, 3, 4]
 
 
 static func role_attrs(role: String) -> Dictionary:

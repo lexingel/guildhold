@@ -114,8 +114,8 @@ const HERO_REQUESTS := {
 		"yes": "Raise their wage %d%%: +20 morale" % int(REQUEST_RAISE * 100), "no": "Refuse: -12 morale", "yes_morale": 20, "no_morale": -12},
 	"gear": {"title": "%s wants better kit", "text": "%s says their gear is falling apart and asks for Gold for repairs.",
 		"yes": "Pay %d Gold: +15 morale" % REQUEST_GEAR_COST, "no": "Refuse: -8 morale", "yes_morale": 15, "no_morale": -8},
-	"train": {"title": "%s wants extra drills", "text": "%s asks for a spot in the Training Yard this week.",
-		"yes": "Give them a slot: +1 attribute point, +5 morale", "no": "Not this week: -6 morale", "yes_morale": 5, "no_morale": -6},
+	"train": {"title": "%s wants extra drills", "text": "%s asks for a free day at the Training Yard.",
+		"yes": "Give them a station: a free day of training, +5 morale", "no": "Not this week: -6 morale", "yes_morale": 5, "no_morale": -6},
 	"feud": {"title": "%s and %s are feuding", "text": "An argument over the last rift's spoils has turned sour. Each wants you on their side.",
 		"yes": "Side with %s", "no": "Side with %s", "yes_morale": 10, "no_morale": -12},
 }
@@ -627,22 +627,22 @@ const HAMLET_ART_SCALE := 1.6
 ## The backdrop's night sky, continued above it when the village fills the window.
 const HAMLET_SKY := Color(0.1495, 0.1081, 0.296)
 const HAMLET_BUILDINGS := [
-	{"id": "drill", "name": "Skills", "building": "Drill Yard", "tier": "node", "node": "ops.drill", "pos": Vector2(78, 154), "row": "back"},
 	{"id": "hall", "name": "Guild Hall", "tier": "guild", "pos": Vector2(200, 124), "row": "back"},
+	{"id": "campfire", "name": "", "tier": "", "pos": Vector2(200, 142), "row": "back"},
 	{"id": "scouts", "name": "Recruits", "building": "Scouts' Lodge", "tier": "node", "node": "log.scouts", "pos": Vector2(266, 146), "row": "back"},
 	{"id": "market", "name": "Items", "building": "Market", "tier": "node", "node": "log.trade", "pos": Vector2(318, 150), "row": "back"},
 	{"id": "lab", "name": "Arcane Lab", "tier": "node", "node": "res.lab", "pos": Vector2(382, 146), "row": "back"},
 	{"id": "barracks", "name": "Heroes", "building": "Barracks", "tier": "node", "node": "ops.barracks", "pos": Vector2(32, 178), "row": "front"},
-	{"id": "infirmary", "name": "Medical Bay", "building": "Infirmary", "tier": "node", "node": "ops.infirmary", "pos": Vector2(100, 178), "row": "front"},
-	{"id": "campfire", "name": "", "tier": "", "pos": Vector2(170, 178), "row": "front"},
-	{"id": "board", "name": "Quests", "building": "Quest Board", "tier": "", "pos": Vector2(212, 177), "row": "front"},
-	{"id": "gate", "name": "Rift Hall", "building": "Rift Gate", "tier": "act", "pos": Vector2(264, 178), "row": "front"},
-	{"id": "vault", "name": "Relics", "building": "Relic Vault", "tier": "node", "node": "res.vault", "pos": Vector2(350, 178), "row": "front"},
+	{"id": "infirmary", "name": "Medical Bay", "building": "Infirmary", "tier": "node", "node": "ops.infirmary", "pos": Vector2(94, 178), "row": "front"},
+	{"id": "drill", "name": "Training", "building": "Training Yard", "tier": "node", "node": "ops.drill", "pos": Vector2(172, 178), "row": "front"},
+	{"id": "board", "name": "Quests", "building": "Quest Board", "tier": "", "pos": Vector2(240, 177), "row": "front"},
+	{"id": "gate", "name": "Rift Hall", "building": "Rift Gate", "tier": "act", "pos": Vector2(288, 178), "row": "front"},
+	{"id": "vault", "name": "Relics", "building": "Relic Vault", "tier": "node", "node": "res.vault", "pos": Vector2(356, 178), "row": "front"},
 ]
 ## Past guilds' banners in the camp ("The Vale Remembers"): pole x on the
-## native backdrop, in the courtyard below the Guild Hall, oldest first.
+## native backdrop, either side of the Guild Hall, oldest first.
 ## The cloth colour goes with the crest.
-const BANNER_X := [126, 140, 154, 168, 182, 112]   # the courtyard gap left of the campfire (0.57 layout)
+const BANNER_X := [128, 116, 104, 272, 284, 296]   # flanking the Guild Hall's hill (0.58 layout)
 const BANNER_CLOTH := [Color("7a2e2e"), Color("2e3f7a"), Color("2f6a3f"), Color("5b2e7a"),
 	Color("8a6a24"), Color("24666a"), Color("6a2448"), Color("4a5260")]
 ## The Descent: the Endless Rift turn-based, with the guild's heroes, at its
@@ -853,9 +853,6 @@ const PAY_RATES := {"half": [0.5, -10], "full": [1.0, 0], "bonus": [1.5, 10]}
 ## Upkeep is paid after wages; unpaid upkeep costs Renown.
 const UPKEEP_PER_LEVEL := 12
 const UPKEEP_UNPAID_RENOWN := 3
-## The Training Yard trains this many attribute points a week (+1 per two
-## Drill Yard levels).
-const TRAINING_SLOTS := 2
 ## Unpaid twice running, or paid while at rock-bottom morale, a hero walks out.
 const UNPAID_WEEKS_TO_LEAVE := 2
 ## A guild below this many heroes with no Gold for a Rank F recruit gets free

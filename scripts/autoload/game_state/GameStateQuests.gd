@@ -344,7 +344,7 @@ func maybe_hero_request() -> void:
 		return
 	pool.shuffle()
 	var types: Array = ["week_off", "raise", "gear"]
-	if training_left() > 0:
+	if training_free() > 0:
 		types.append("train")
 	if pool.size() >= 2:
 		types.append("feud")
@@ -408,13 +408,11 @@ func answer_request(yes: bool) -> String:
 					return tr("Not enough Gold.")
 				coins -= GameData.REQUEST_GEAR_COST
 			"train":
-				if training_left() <= 0:
-					return tr("The Training Yard is full this week.")
-				if training_week != day / GameData.PAYDAY_DAYS:
-					training_week = day / GameData.PAYDAY_DAYS
-					trained_this_week = 0
-				trained_this_week += 1
-				h.attr_points += 1
+				# A free day at the yard, in the hero's strongest attribute.
+				var best: String = GameData.ATTRIBUTES.reduce(func(a, b): return a if int(h.attrs.get(a, 0)) >= int(h.attrs.get(b, 0)) else b)
+				var why := start_training(h.id, best, 1, true)
+				if why != "":
+					return why
 		change_morale(h, int(def["yes_morale"]))
 	else:
 		change_morale(h, int(def["no_morale"]))

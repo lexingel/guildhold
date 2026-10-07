@@ -80,7 +80,7 @@ func run() -> void:
 
 	# Upkeep: every Guild Management level costs Gold at payday; unpaid, Renown.
 	GameState.upgrades = {"ops.drill": 2, "log.trade": 1}
-	check(GameState.upkeep() == 3 * GameData.UPKEEP_PER_LEVEL and GameState.training_slots() == GameData.TRAINING_SLOTS + 1 and GameState.feast_seats() == GameData.FEAST_SEATS + 1, "upkeep, training slots and feast seats follow the upgrades")
+	check(GameState.upkeep() == 3 * GameData.UPKEEP_PER_LEVEL and GameState.training_slots() == GameData.TRAIN_SLOTS_BY_TIER[0] and GameState.feast_seats() == GameData.FEAST_SEATS + 1, "upkeep, training slots and feast seats follow the upgrades")
 	GameState.coins = GameState.weekly_wages() + GameState.upkeep()
 	GameState.day = 30 * GameData.PAYDAY_DAYS - 1
 	GameState.pass_time()

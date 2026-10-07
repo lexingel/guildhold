@@ -458,23 +458,16 @@ func _attr_panel(h: Hero) -> PanelContainer:
 		plus.disabled = h.attr_points <= 0
 		row.add_child(plus)
 		v.add_child(row)
-	# Camp training (Gold) and a full reset (Essence).
+	# The Training Yard (0.58) and a full reset (Essence).
 	var foot := HBoxContainer.new()
 	foot.add_theme_constant_override("separation", 8)
 	if not h.is_champion and screen != "rift_run":   # training and resets wait for camp
-		var tcost := GameState.attr_train_cost(h)
-		var maxed := h.attr_trained >= GameData.ATTR_TRAIN_CAP
-		var train := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Trained %d/%d") % [h.attr_trained, GameData.ATTR_TRAIN_CAP] if maxed else tr("Train +1 — %d") % tcost, func(id=h.id):
-			var err := GameState.train_attr(id)
-			if err != "":
-				push_warning(err)
+		var yard := _icon_button("res://assets/skills/sword_slash.png", _training_tag(h) if not h.training.is_empty() else tr("Training Yard (%d/%d trained)") % [h.attr_trained, GameData.ATTR_TRAIN_CAP], func():
+			term_tab = "training"
 			render()
 		)
-		train.disabled = maxed or GameState.coins < tcost or GameState.training_left() <= 0
-		train.tooltip_text = tr("Buy an attribute point with Gold (%d/%d trained; each costs %d more). Training Yard: %d of %d left this week.") % [h.attr_trained, GameData.ATTR_TRAIN_CAP, GameData.ATTR_TRAIN_COST, GameState.training_left(), GameState.training_slots()]
-		if not maxed and GameState.training_left() <= 0:
-			train.text = "Yard full this week"
-		foot.add_child(train)
+		yard.tooltip_text = tr("Send heroes to the Training Yard for 1-3 days: +1 attribute point a day, and XP on longer courses.")
+		foot.add_child(yard)
 	var fsp := Control.new()
 	fsp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	foot.add_child(fsp)
@@ -782,7 +775,7 @@ func _roster_row(h: Hero) -> Control:
 		chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(chip)
 	col.add_child(top)
-	col.add_child(_label(tr("Lv%d %s (%s) · %d/%d HP%s") % [h.level, tr(str(h.cls_id.capitalize())), tr(str(h.rank)), h.hp, Combat.max_hp(h), tr(str((tr(" · away %d run%s") % [h.busy_runs, tr(str(_pl(h.busy_runs)))]) if h.busy_runs > 0 else ""))], 12, true))
+	col.add_child(_label(tr("Lv%d %s (%s) · %d/%d HP%s") % [h.level, tr(str(h.cls_id.capitalize())), tr(str(h.rank)), h.hp, Combat.max_hp(h), tr(str((tr(" · away %d run%s") % [h.busy_runs, tr(str(_pl(h.busy_runs)))]) if h.busy_runs > 0 else (" · " + _training_tag(h) if not h.training.is_empty() else "")))], 12, true))
 	col.add_child(_flat_bar(Combat.max_hp(h), h.hp, 170, 4, _hp_color(float(h.hp) / float(max(1, Combat.max_hp(h))))))
 	row.add_child(col)
 	var needs := h.skill_points > 0

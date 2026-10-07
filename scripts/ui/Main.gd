@@ -141,7 +141,7 @@ func _ambient_path() -> String:
 				"medical": return GameData.MEDICAL_BG
 				"management": return GameData.MANAGEMENT_BG
 				"quests": return GameData.QUEST_BOARD_BG
-				"roster", "recruits", "champions": return "res://assets/screens/roster_bg.png"
+				"roster", "recruits", "champions", "training": return "res://assets/screens/roster_bg.png"
 			return GameData.HAMLET_BG
 		"crafting_hall": return GameData.CRAFTING_BG
 		"rift_hall", "party_assembly", "tower": return GameData.RIFTHALL_BG
@@ -1040,7 +1040,7 @@ func _update_screen_music() -> void:
 
 ## Pinned HUD stays outside the ScrollContainer, so the guild identity,
 ## currencies, and "where am I" breadcrumb never scroll out of view.
-const TAB_TITLE := {"roster": "Heroes", "management": "Management", "quests": "Quests", "compendium": "Codex", "medical": "Medical Bay", "inventory": "Items"}
+const TAB_TITLE := {"roster": "Heroes", "management": "Management", "quests": "Quests", "compendium": "Codex", "medical": "Medical Bay", "training": "Training Yard", "inventory": "Items"}
 
 
 func _breadcrumb_for_screen() -> String:
@@ -1163,7 +1163,7 @@ func _count_label(key: String, value: int, size: int) -> Label:
 ## than one shows them as sub-tabs underneath.
 ## [label, icon id, [[screen id, sub-tab label, camp building whose attention badge it shares], ...]]
 const NAV_GROUPS := [
-	["Roster", "roster", [["roster", "Heroes"], ["recruits", "Recruits"], ["medical", "Medical Bay"], ["champions", "Champions"]]],
+	["Roster", "roster", [["roster", "Heroes"], ["recruits", "Recruits"], ["medical", "Medical Bay"], ["training", "Training Yard"], ["champions", "Champions"]]],
 	["Inventory", "inventory", [["inventory", "Items"], ["crafting", "Crafting"]]],
 	["Rift Hall", "rift", [["rift", "Rift Hall"]]],
 	["Guild", "management", [["management", "Management"], ["ledger", "Ledger"], ["quests", "Quests"], ["records", "Records"], ["memorial", "Memorial"]]],
@@ -2574,7 +2574,7 @@ func _render_party_assembly(v: VBoxContainer) -> void:
 		if not _pending_endless:
 			for id in GameState.last_party:
 				var lh := GameState.find_hero(id)
-				if lh and not lh.is_champion and not lh.is_downed() and lh.busy_runs <= 0 and not pending_party.has(id) and pending_party.size() < _party_cap():
+				if lh and not lh.is_champion and not lh.is_downed() and not lh.is_away() and not pending_party.has(id) and pending_party.size() < _party_cap():
 					pending_party.append(id)
 	if GameState.breach_blocks_runs():
 		screen = "defense"   # a broken rift comes first
@@ -2616,7 +2616,7 @@ func _render_party_assembly(v: VBoxContainer) -> void:
 		bl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bench_head.add_child(bl)
 		# One click to a full party: the strongest ready heroes.
-		var ready: Array = GameState.heroes.filter(func(x): return not pending_party.has(x.id) and not x.is_champion and not x.is_downed() and x.busy_runs <= 0)
+		var ready: Array = GameState.heroes.filter(func(x): return not pending_party.has(x.id) and not x.is_champion and not x.is_downed() and not x.is_away())
 		ready.sort_custom(func(a, b): return Combat.power_of(a) > Combat.power_of(b))
 		var fill := _button("Add strongest", func():
 			for x in ready:
@@ -2838,7 +2838,7 @@ func _party_slot(index: int, hid: String, w: float, small: bool) -> Control:
 ## drag onto a slot; those in the party are marked with their row.
 func _bench_tile(h: Hero) -> Control:
 	var in_party := pending_party.has(h.id)
-	var away := h.is_downed() or h.busy_runs > 0
+	var away := h.is_downed() or h.is_away()
 	var card := PanelContainer.new()
 	var st := StyleBoxFlat.new()
 	st.bg_color = Palette.SURFACE3 if in_party else Palette.SURFACE
@@ -2894,7 +2894,7 @@ func _bench_tile(h: Hero) -> Control:
 	col.add_child(_label(h.name.split(" the ")[0], 12))
 	var sub := tr("Lv%d %s · Power %d") % [h.level, tr(str(GameData.hero_role(h).capitalize())), Combat.power_of(h)]
 	if away:
-		sub = tr("Out %d run%s") % [h.down_runs, tr(str(_pl(h.down_runs)))] if h.down_runs > 0 else tr("Away %d run%s") % [h.busy_runs, tr(str(_pl(h.busy_runs)))]
+		sub = tr("Out %d run%s") % [h.down_runs, tr(str(_pl(h.down_runs)))] if h.down_runs > 0 else (_training_tag(h) if not h.training.is_empty() else tr("Away %d run%s") % [h.busy_runs, tr(str(_pl(h.busy_runs)))])
 	elif in_party:
 		sub = tr("In the party · Front") if h.formation == "front" else tr("In the party · Back")
 	col.add_child(_label(sub, 10, true))
@@ -2944,7 +2944,7 @@ func _slot_picker_overlay() -> void:
 	head.add_theme_color_override("font_color", Palette.RANK_S)
 	col.add_child(head)
 	# An empty slot lists the bench; a filled one also offers the party (a swap).
-	var pool: Array = GameState.heroes.filter(func(x): return not x.is_champion and not x.is_downed() and x.busy_runs <= 0 and x.id != here and (here != "" or not pending_party.has(x.id)))
+	var pool: Array = GameState.heroes.filter(func(x): return not x.is_champion and not x.is_downed() and not x.is_away() and x.id != here and (here != "" or not pending_party.has(x.id)))
 	pool.sort_custom(func(a, b): return Combat.power_of(a) > Combat.power_of(b))
 	var grid := HFlowContainer.new()
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL

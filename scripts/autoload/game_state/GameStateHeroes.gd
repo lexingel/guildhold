@@ -131,7 +131,7 @@ func load_party_preset(i: int, cap: int) -> Dictionary:
 		var h := find_hero(str(entry[0]))
 		if h == null:
 			continue
-		if h.is_downed() or h.busy_runs > 0 or ids.size() >= cap:
+		if h.is_downed() or h.is_away() or ids.size() >= cap:
 			missing.append(h.name.split(" the ")[0])
 			continue
 		h.formation = str(entry[1])
@@ -815,33 +815,87 @@ func respec_attrs(hero_id: String) -> String:
 	return ""
 
 
-func attr_train_cost(h: Hero) -> int:
-	return GameData.ATTR_TRAIN_COST * (h.attr_trained + 1)
+## Heroes on a Training Yard course.
+func trainees() -> Array[Hero]:
+	var out: Array[Hero] = []
+	out.assign(heroes.filter(func(h): return not h.training.is_empty()))
+	return out
 
 
-## Buys one attribute point with Coins (see ATTR_TRAIN_CAP).
-func train_attr(hero_id: String) -> String:
+func training_free() -> int:
+	return maxi(0, training_slots() - trainees().size())
+
+
+## The Gold a course costs, all days paid up front.
+func train_fee(h: Hero, days: int) -> int:
+	return (GameData.TRAIN_FEE + GameData.TRAIN_FEE_PER_LEVEL * h.level) * days
+
+
+## The level training XP stops at: the guild's best (non-champion) hero.
+func train_level_cap() -> int:
+	var best := 1
+	for h in heroes:
+		if not h.is_champion:
+			best = maxi(best, h.level)
+	return best
+
+
+## Sends a hero to the Training Yard: `program` is an attribute, `days` one
+## of TRAIN_DAYS. "" on success, else why not. `free` waives the fee (a
+## hero's own request).
+func start_training(hero_id: String, program: String, days: int, free := false) -> String:
 	var h := find_hero(hero_id)
-	if not h:
+	if not h or h.is_champion:
 		return tr("Can't train this hero")
-	if h.attr_trained >= GameData.ATTR_TRAIN_CAP:
-		return tr("Fully trained")
-	if training_left() <= 0:
-		return tr("The Training Yard is full this week")
-	var cost := attr_train_cost(h)
-	if coins < cost:
+	if not h.training.is_empty():
+		return tr("Already training")
+	if not GameData.ATTRIBUTES.has(program) or not GameData.TRAIN_DAYS.has(days):
+		return tr("Pick a program and a length")
+	if not h.is_available() or (run.get("hero_ids", []) as Array).has(h.id):
+		return tr("Not here to train")
+	if training_free() <= 0:
+		return tr("Every station is taken")
+	var fee := 0 if free else train_fee(h, days)
+	if coins < fee:
 		return tr("Not enough Gold")
-	coins -= cost
-	var week := day / GameData.PAYDAY_DAYS
-	if training_week != week:
-		training_week = week
-		trained_this_week = 0
-	trained_this_week += 1
-	h.attr_trained += 1
-	h.attr_points += 1
+	coins -= fee
+	h.training = {"program": program, "left": days, "total": days, "fee": fee / days}
 	save()
 	state_changed.emit()
 	return ""
+
+
+## Calls a hero back early: the days already done are kept, the day in
+## progress and its fee are lost, the days not started are refunded.
+func recall_training(hero_id: String) -> int:
+	var h := find_hero(hero_id)
+	if not h or h.training.is_empty():
+		return 0
+	var refund := int(h.training["fee"]) * maxi(0, int(h.training["left"]) - 1)
+	coins += refund
+	h.training = {}
+	save()
+	state_changed.emit()
+	return refund
+
+
+## A day passes at the yard (from pass_time): +1 point in each trainee's
+## program while under the cap, XP on longer courses, and the course ends.
+func _train_day() -> void:
+	var cap := train_level_cap()
+	for h in trainees():
+		var t: Dictionary = h.training
+		var a := str(t["program"])
+		if h.attr_trained < GameData.ATTR_TRAIN_CAP:
+			h.attrs[a] = int(h.attrs.get(a, GameData.ATTR_BASELINE)) + 1
+			h.attr_trained += 1
+		if int(t["total"]) >= 2 and h.level < cap:
+			Combat.gain_xp(h, int(ceil(Combat.xp_to_next(h.level) * GameData.TRAIN_XP_SHARE)))
+		t["left"] = int(t["left"]) - 1
+		if int(t["left"]) <= 0:
+			h.training = {}
+			push_toast(h, tr("Training done"), tr("%s is back from the Training Yard.") % tr(str(h.name.split(" the ")[0])))
+		h.history["trained_days"] = int(h.history.get("trained_days", 0)) + 1
 
 
 func spend_attr_point(hero_id: String, a: String) -> void:

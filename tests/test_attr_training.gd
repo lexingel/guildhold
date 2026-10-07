@@ -1,5 +1,5 @@
 extends "res://tests/base_test.gd"
-## Attribute training for Coins, reset unequipping, new-guild recovery.
+## The Training Yard (0.58), reset unequipping, new-guild recovery.
 
 func run() -> void:
 	seed(5)
@@ -11,20 +11,50 @@ func run() -> void:
 	GameState.guild_name = "T"
 	GameState.heroes.clear()
 	GameState.heroes.append(h)
-	GameState.coins = 120
-	check(GameState.train_attr("h1") == "" and h.attr_points == 1 and GameState.coins == 70, "train costs 50, gives 1 point")
-	check(GameState.train_attr("h1") == "Not enough Gold" and h.attr_trained == 1, "second costs 100")
+	GameState.upgrades = {}
+	var b := Combat.gen_hero("D", 6)
+	b.id = "h2"
+	var c2 := Combat.gen_hero("D", 6)
+	c2.id = "h3"
+	GameState.heroes.append(b)
+	GameState.heroes.append(c2)
+	check(GameState.training_slots() == GameData.TRAIN_SLOTS_BY_TIER[0], "%d stations to start" % GameData.TRAIN_SLOTS_BY_TIER[0])
+	GameState.upgrades = {"ops.drill": 5}
+	check(GameState.training_slots() == GameData.TRAIN_SLOTS_BY_TIER[2], "%d at the yard's top tier" % GameData.TRAIN_SLOTS_BY_TIER[2])
+	GameState.upgrades = {}
+	var fee := GameState.train_fee(h, 3)
+	GameState.coins = fee - 1
+	check(GameState.start_training("h1", "might", 3) == "Not enough Gold", "the fee is paid up front")
 	GameState.coins = 10000
-	# The Training Yard trains a few points a week; spread it over weeks.
-	GameState.day = 0
-	GameState.train_attr("h1")
-	check(GameState.training_left() == GameData.TRAINING_SLOTS - 2 and GameState.train_attr("h1") == "The Training Yard is full this week", "the Training Yard has %d slots a week" % GameData.TRAINING_SLOTS)
-	for i in GameData.ATTR_TRAIN_CAP + 2:
-		GameState.day += GameData.PAYDAY_DAYS
-		GameState.train_attr("h1")
-	check(h.attr_trained == GameData.ATTR_TRAIN_CAP and h.attr_points == GameData.ATTR_TRAIN_CAP, "capped at %d trained" % GameData.ATTR_TRAIN_CAP)
+	var m0 := int(h.attrs["might"])
+	check(GameState.start_training("h1", "might", 3) == "" and GameState.coins == 10000 - fee and not h.is_available(), "a 3-day Might course: paid, and the hero sits out runs")
+	check(GameState.start_training("h2", "focus", 1) == "" and GameState.start_training("h3", "agility", 1) == "Every station is taken", "two stations, both in use")
+	b.level = 9
+	var lv0 := h.level
+	GameState.pass_time()
+	check(int(h.attrs["might"]) == m0 + 1 and h.attr_trained == 1 and (h.level > lv0 or h.xp > 0), "a day: +1 Might and some XP")
+	check(b.training.is_empty() and b.attr_trained == 1, "a 1-day course ends after a day")
+	var back0 := Hero.from_dict(JSON.parse_string(JSON.stringify(h.to_dict())))
+	check(int(back0.training.get("left", 0)) == 2, "a course in progress is saved")
+	var c0 := GameState.coins
+	var refund := GameState.recall_training("h1")
+	check(refund == fee / 3 and GameState.coins == c0 + refund and h.training.is_empty() and h.is_available(), "recalled with 2 days left: the day under way is lost, the last one refunded (%d)" % refund)
+	# The cap: past ATTR_TRAIN_CAP trained points a course gives XP only.
+	h.attr_trained = GameData.ATTR_TRAIN_CAP
+	var m1 := int(h.attrs["might"])
+	GameState.start_training("h1", "might", 2)
+	GameState.pass_time()
+	check(int(h.attrs["might"]) == m1, "capped at %d trained points" % GameData.ATTR_TRAIN_CAP)
+	# XP never takes a hero past the guild's best.
+	GameState.recall_training("h1")
+	b.level = h.level
+	var xp0 := h.xp
+	GameState.start_training("h1", "might", 2)
+	GameState.pass_time()
+	check(h.xp == xp0, "no XP once level with the best hero")
+	GameState.recall_training("h1")
 	var back := Hero.from_dict(JSON.parse_string(JSON.stringify(h.to_dict())))
-	check(back.attr_trained == GameData.ATTR_TRAIN_CAP, "attr_trained saved")
+	check(back.attr_trained == h.attr_trained, "attr_trained saved")
 	# Reset unequips gear that no longer qualifies.
 	GameState.auto_assign_attrs("h1")
 	var it := Combat.gen_item("epic", "weapon")

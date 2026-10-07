@@ -143,8 +143,6 @@ var rival_name: String = ""      # the rival guild (GameData.RIVAL_NAMES)
 var rival_renown: int = 0
 var rival_ahead: int = 0          # set at payday: 1 = we lead (better recruits), -1 = they lead, 0 = not compared yet
 var feast_week: int = -1          # the payday week a feast was last held
-var training_week: int = -1       # the week the Training Yard count below belongs to
-var trained_this_week: int = 0
 ## What the Feedback report says about how the guild was played: seconds
 ## in the game ("secs") and fights won and lost by hand and on Auto
 ## ("hand_w", "hand_l", "auto_w", "auto_l").
@@ -799,7 +797,7 @@ func save() -> void:
 		"tower_best": tower_best, "tower_week": tower_week, "tower_week_cleared": tower_week_cleared,
 		"daily_attempt_day": daily_attempt_day, "daily_clears": daily_clears, "daily_streak": daily_streak, "daily_last_clear": daily_last_clear,
 		"run_history": run_history, "runs_finished": runs_finished, "fallen": fallen, "heroes_lost_total": heroes_lost_total, "best_endless_time": best_endless_time, "endless_runs": endless_runs, "endless_best": endless_best, "endless_milestones": endless_milestones, "boon_set4_reached": boon_set4_reached,
-		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "training_week": training_week, "trained_this_week": trained_this_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
+		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
 		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
@@ -949,12 +947,9 @@ func upkeep() -> int:
 	return levels * GameData.UPKEEP_PER_LEVEL
 
 
+## Training Yard stations: one more per yard tier (the Drill Yard's art tier).
 func training_slots() -> int:
-	return GameData.TRAINING_SLOTS + lvl("ops.drill") / 2
-
-
-func training_left() -> int:
-	return training_slots() - (trained_this_week if training_week == day / GameData.PAYDAY_DAYS else 0)
+	return int(GameData.TRAIN_SLOTS_BY_TIER[hamlet_tier({"tier": "node", "node": "ops.drill"}) - 1])
 
 
 func feast_seats() -> int:

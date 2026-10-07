@@ -56,8 +56,6 @@ func reset() -> void:
 	rival_renown = 0
 	rival_ahead = 0
 	feast_week = -1
-	training_week = -1
-	trained_this_week = 0
 	payday_report = {}
 	guild_news = []
 	triage_used_this_cycle = false
@@ -266,8 +264,6 @@ func load_save() -> bool:
 	rival_renown = int(data.get("rival_renown", 0))
 	rival_ahead = int(data.get("rival_ahead", 0))
 	feast_week = int(data.get("feast_week", -1))
-	training_week = int(data.get("training_week", -1))
-	trained_this_week = int(data.get("trained_this_week", 0))
 	payday_report = data.get("payday_report", {})
 	guild_news = data.get("guild_news", [])
 	runs_started = int(data.get("runs_started", 0 if rifts_sealed == 0 and monsters_seen.is_empty() else 1))

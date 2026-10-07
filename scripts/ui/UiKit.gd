@@ -472,6 +472,12 @@ func _hero_look(node: CanvasItem, h: Hero) -> CanvasItem:
 
 
 ## A hero's portrait, trimmed and in their colour variant.
+## "Training Might · 2 days left" for a hero on a Training Yard course.
+func _training_tag(h: Hero) -> String:
+	var left := int(h.training.get("left", 0))
+	return tr("Training %s · %d day%s left") % [tr(str(GameData.ATTR_LABEL.get(str(h.training.get("program", "")), ""))), left, tr(str(_pl(left)))]
+
+
 func _hero_icon(h: Hero, size: int) -> TextureRect:
 	var t := _icon_trimmed(GameData.portrait_for_hero(h.cls_id, h.pool_id), size)
 	_hero_look(t, h)
@@ -1194,7 +1200,7 @@ func _party_cap() -> int:
 ## The `cap` strongest heroes able to go right now (the Tower ignores
 ## wounds, so it counts anyone not downed or away).
 func _best_party_power(cap: int = 4) -> int:
-	var ready: Array = GameState.heroes.filter(func(h): return h.is_available() or (screen == "tower" and h.down_runs <= 0 and h.busy_runs <= 0))
+	var ready: Array = GameState.heroes.filter(func(h): return h.is_available() or (screen == "tower" and h.down_runs <= 0 and not h.is_away()))
 	ready.sort_custom(func(a, b): return Combat.power_of(a) > Combat.power_of(b))
 	return Combat.party_power(ready.slice(0, cap))
 

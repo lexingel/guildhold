@@ -31,6 +31,7 @@ func _render_camp_screen(v: VBoxContainer) -> void:
 		"recruits": _render_recruits(v)
 		"champions": _render_champions(v)
 		"medical": _render_medical_bay(v)
+		"training": _render_training_yard(v)
 		"management": _render_management(v)
 		"bestiary": _render_bestiary(v)
 		"compendium": _render_compendium(v)
@@ -119,6 +120,8 @@ func _render_camp(v: VBoxContainer) -> void:
 		art.position = rect.position
 		art.size = rect.size
 		bg.add_child(art)
+		if b["id"] == "drill":
+			_place_trainees(art, sc.x / GameData.HAMLET_ART_SCALE * 0.6)   # people at the buildings' full density stood taller than the tents
 		if b["id"] == "campfire":
 			_start_ember_loop(scene, Vector2(anchor.x * sc.x, (anchor.y - 16.0) * sc.y))
 			continue
@@ -237,6 +240,34 @@ func _hang_banners(bg: Control, scene: Control, sc: Vector2) -> void:
 		scene.add_child(hot)
 
 
+## The Training Yard's trainees (0.58), one at each station, pacing in front
+## of it, a little finer than the buildings (standing still with reduced motion).
+func _place_trainees(yard: Control, px: float) -> void:
+	var trainees := GameState.trainees()
+	var n := GameState.training_slots()
+	for i in mini(trainees.size(), n):
+		var h: Hero = trainees[i]
+		var key := WalkSprites.hero_key(h, GameData.hero_role(h))
+		var s := WalkSprites.make(key, px)
+		s.material = UiKit.look_material(GameState.look_for(h))
+		var away := GameData.faces_away(key)
+		s.flip_h = away
+		var home := Vector2(yard.size.x * (i + 0.5) / n, yard.size.y - 3.0 * px)
+		s.position = home
+		yard.add_child(s)
+		if GameState.reduce_motion:
+			s.stop()
+			continue
+		var tw := s.create_tween().set_loops()
+		var step := 7.0 * px
+		tw.tween_callback(func(): s.flip_h = away)
+		tw.tween_property(s, "position:x", home.x + step, 1.1)
+		tw.tween_callback(func(): s.flip_h = not away)
+		tw.tween_property(s, "position:x", home.x - step, 2.2)
+		tw.tween_callback(func(): s.flip_h = away)
+		tw.tween_property(s, "position:x", home.x, 1.1)
+
+
 func _hamlet_targets() -> Dictionary:
 	return {
 		"scouts": func(): term_tab = "recruits"; render(),
@@ -244,7 +275,7 @@ func _hamlet_targets() -> Dictionary:
 		"lab": func(): hub_cluster = "arcane_lab"; render(),
 		"barracks": func(): term_tab = "roster"; render(),
 		"infirmary": func(): term_tab = "medical"; render(),
-		"drill": func(): term_tab = "roster"; roster_tab = "skills"; render(),
+		"drill": func(): term_tab = "training"; render(),
 		"board": func(): term_tab = "quests"; render(),
 		"gate": func(): screen = "rift_hall"; render(),
 		"market": func(): term_tab = "inventory"; inv_category = "items"; render(),
@@ -896,7 +927,7 @@ func _treasury_card() -> PanelContainer:
 	feast.disabled = not GameState.feast_ready() or GameState.coins < GameState.feast_cost()
 	feast.tooltip_text = tr("+%d morale for up to %d heroes, lowest morale first. Once a week.") % [GameData.FEAST_MORALE, GameState.feast_seats()] if GameState.feast_ready() else tr("Already feasted this week — the next one after payday.")
 	acts.add_child(feast)
-	var tl := _label(tr("Training Yard: %d of %d trainings left this week") % [GameState.training_left(), GameState.training_slots()], 12, true)
+	var tl := _label(tr("Training Yard: %d of %d stations in use") % [GameState.trainees().size(), GameState.training_slots()], 12, true)
 	tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	acts.add_child(tl)
 	cv.add_child(acts)
@@ -1444,6 +1475,86 @@ func _render_medical_bay(v: VBoxContainer) -> void:
 	rest.disabled = not GameState.run.is_empty()
 	v.add_child(rest)
 	v.add_child(_wrap_label(tr("Recovery counts rift runs, not real time: a downed hero sits out %d run(s) (a bed takes one off); a wounded hero regains %d%% HP each run (all of it in a bed).") % [GameState.recovery_runs(), int(GameData.WOUND_HEAL_PER_RUN * 100)], 12, true))
+
+
+var _train_program := {}   # hero id -> the program picked on the Training Yard screen
+
+
+## The Training Yard (0.58): its stations (who is training what, with a
+## Recall), then every hero free to train with a program and 1-3 days.
+func _render_training_yard(v: VBoxContainer) -> void:
+	var trainees := GameState.trainees()
+	v.add_child(_label(tr("Training Yard — %d/%d stations in use") % [trainees.size(), GameState.training_slots()], 16))
+	v.add_child(_wrap_label(tr("Each day a hero spends here: +1 point in their program (up to %d trained per hero). Courses of 2 or 3 days also give XP, up to your best hero's level (Lv%d). Trainees sit out runs; a day passes with every run or rest. Upgrade the Drill Yard for more stations.") % [GameData.ATTR_TRAIN_CAP, GameState.train_level_cap()], 12, true))
+	var stations := HFlowContainer.new()
+	stations.add_theme_constant_override("h_separation", 8)
+	stations.add_theme_constant_override("v_separation", 8)
+	for i in GameState.training_slots():
+		var card := PanelContainer.new()
+		card.theme_type_variation = &"CardPanelViolet"
+		card.custom_minimum_size = Vector2(230, 0)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var col := _vbox(2)
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if i < trainees.size():
+			var h: Hero = trainees[i]
+			row.add_child(_hero_icon(h, 40))
+			col.add_child(_label(h.name.split(" the ")[0], 13))
+			var t: Dictionary = h.training
+			col.add_child(_label(tr("%s · day %d of %d") % [tr(str(GameData.ATTR_LABEL[str(t["program"])])), int(t["total"]) - int(t["left"]) + 1, int(t["total"])], 11, true))
+			row.add_child(col)
+			var back := _button("Recall", func(id=h.id):
+				var refund := GameState.recall_training(id)
+				_flavor_toast = tr("Recalled: %d Gold back for the days not started.") % refund if refund > 0 else ""
+				render()
+			)
+			back.tooltip_text = tr("Days done are kept; today's training and its fee are lost, the days not started are refunded.")
+			back.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			row.add_child(back)
+		else:
+			col.add_child(_label(tr("Free station"), 13, true))
+			row.add_child(col)
+		card.add_child(row)
+		stations.add_child(card)
+	v.add_child(stations)
+
+	var free: Array = GameState.heroes.filter(func(h): return not h.is_champion and h.training.is_empty())
+	if free.is_empty():
+		return
+	v.add_child(_hsep())
+	v.add_child(_label(tr("Send a hero to train"), 14))
+	var room := GameState.training_free() > 0
+	for h in free:
+		var row := HFlowContainer.new()   # wraps on the phone canvas
+		row.add_theme_constant_override("h_separation", 8)
+		row.add_theme_constant_override("v_separation", 4)
+		row.add_child(_hero_icon(h, 32))
+		var info := _vbox(0)
+		info.custom_minimum_size.x = 170
+		info.add_child(_label(tr("%s · Lv%d") % [h.name.split(" the ")[0], h.level], 13))
+		var why := "" if h.is_available() and not (GameState.run.get("hero_ids", []) as Array).has(h.id) else (tr("in a rift") if (GameState.run.get("hero_ids", []) as Array).has(h.id) else tr("not fit to train"))
+		info.add_child(_label(why if why != "" else tr("Trained %d/%d") % [h.attr_trained, GameData.ATTR_TRAIN_CAP], 11, true))
+		row.add_child(info)
+		# Program: the hero's role attribute first.
+		var spread: Array = GameData.ROLE_ATTR_SPREAD.get(GameData.hero_role(h), ["might"])
+		var pick := str(_train_program.get(h.id, spread[0]))
+		for a in GameData.ATTRIBUTES:
+			var pb := _button(tr(str(GameData.ATTR_LABEL[a])), func(id=h.id, at=a): _train_program[id] = at; render())
+			pb.toggle_mode = true
+			pb.button_pressed = a == pick
+			pb.tooltip_text = tr(str(GameData.ATTR_DESC[a]))
+			row.add_child(pb)
+		for d in GameData.TRAIN_DAYS:
+			var db := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("%d day%s · %d") % [d, tr(str(_pl(d))), GameState.train_fee(h, d)], func(id=h.id, days=d, at=pick):
+				var err := GameState.start_training(id, at, days)
+				_flavor_toast = err
+				render()
+			)
+			db.disabled = why != "" or not room or GameState.coins < GameState.train_fee(h, d)
+			db.tooltip_text = tr("%d day%s of %s: +%d point%s%s") % [d, tr(str(_pl(d))), tr(str(GameData.ATTR_LABEL[pick])), mini(d, GameData.ATTR_TRAIN_CAP - h.attr_trained), tr(str(_pl(mini(d, GameData.ATTR_TRAIN_CAP - h.attr_trained)))), tr(" and XP") if d >= 2 and h.level < GameState.train_level_cap() else ""]
+			row.add_child(db)
+		v.add_child(row)
 
 
 ## "back in 2 runs" / "full after next run" — recovery in runs, not seconds.

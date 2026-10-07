@@ -257,6 +257,7 @@ func _guild(p: String, s: int) -> void:
 			act_day[act] = GameState.day
 	GameState.active_slot = 9
 	var last := (GameState.day - 1) / GameData.PAYDAY_DAYS
+	print("   [%s seed %d] training yard: %d hero-days, attribute points trained %d" % [p, s, GameState.heroes.reduce(func(t, h): return t + int(h.history.get("trained_days", 0)), 0), GameState.heroes.reduce(func(t, h): return t + h.attr_trained, 0)])
 	print("   [%s seed %d] day %d act %d · %d Gold %d Essence · roster %d · week %d bill %d of income %d · Renown %d vs rival %d · charter %s/%s · echoes %d (%d back) · ambushes %d/%d won · Endless %d runs, %s · Morrow %s%s" % [p, s, GameState.day, GameState.campaign_act, GameState.coins, GameState.crystals, GameState.heroes.size(),
 		last - 1, int(bill_paid.get(last - 1, 0)), int(gross_gold.get(last - 1, 0)), GameState.reputation, GameState.rival_renown,
 		GameState.charter_choice if GameState.charter_choice != "" else "-", GameState.charter_result if GameState.charter_result != "" else "-",
@@ -496,10 +497,12 @@ func _invest() -> void:
 		if GameState.recruit_hero(offers[0].id) != "":
 			break
 		bill = GameState.weekly_wages() + GameState.upkeep()
+	# The bench trains (0.58): heroes outside the best four, a 3-day course in their role's attribute.
+	var lineup := _pick_party()
 	for h in GameState.heroes:
-		if GameState.training_left() > 0 and GameState.coins - GameState.attr_train_cost(h) > bill + 200:
-			GameState.train_attr(h.id)
-			_spend_attrs(h)
+		if GameState.training_free() > 0 and not lineup.has(h.id) and h.is_available() and not h.is_champion and GameState.coins - GameState.train_fee(h, 3) > bill + 200:
+			var spread: Array = GameData.ROLE_ATTR_SPREAD.get(GameData.hero_role(h), ["might"])
+			GameState.start_training(h.id, str(spread[0]), 3)
 	if GameState.accord_ending == "renew":   # Keepers of the Vale
 		for hall in GameData.ACCORD_HALLS:
 			var keep_wages: bool = GameState.coins - int(GameState.hall_cost(str(hall["id"]))[0]) > bill + 300
@@ -541,7 +544,7 @@ func _learn_all(h: Hero) -> void:
 
 
 func _pick_party() -> Array[String]:
-	var ok: Array = GameState.heroes.filter(func(h): return not h.is_champion and not h.is_downed() and h.busy_runs <= 0 and h.hp > Combat.max_hp(h) * 0.35)
+	var ok: Array = GameState.heroes.filter(func(h): return not h.is_champion and not h.is_downed() and not h.is_away() and h.hp > Combat.max_hp(h) * 0.35)
 	ok.sort_custom(func(a, b): return Combat.power_of(a) > Combat.power_of(b))
 	var out: Array[String] = []
 	for h in ok.slice(0, 4):
