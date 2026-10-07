@@ -465,6 +465,8 @@ func _render_rift_run(v: VBoxContainer) -> void:
 		], 20)
 		st.add_theme_color_override("font_color", Palette.COINS)
 		st.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		st.autowrap_mode = TextServer.AUTOWRAP_WORD
+		st.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		sealed_row.add_child(st)
 		v.add_child(sealed_row)
 		var dbonus: Dictionary = sealed_dict.get("daily", {})
@@ -473,7 +475,7 @@ func _render_rift_run(v: VBoxContainer) -> void:
 			dl.add_theme_color_override("font_color", Palette.RANK_S)
 			v.add_child(dl)
 		if str(sealed_dict.get("flavor", "")) != "":
-			v.add_child(_label(str(sealed_dict["flavor"]), 12, true))
+			v.add_child(_wrap_label(str(sealed_dict["flavor"]), 12, true))   # bonds and quirks can run long (0.56.1: it widened the screen)
 		v.add_child(_run_report())
 		v.add_child(_icon_domain_button("ember", GameData.BUTTON_ICON_PATH["confirm"], "Return to camp", func():
 			GameState.finish_run()

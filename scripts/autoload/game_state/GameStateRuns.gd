@@ -918,6 +918,7 @@ func seal_rift() -> void:
 	# it, and every pair of them grows their bond (see GameData.BOND_LEVEL_RIFTS).
 	var sealers: Array[Hero] = []
 	sealers.assign(current_party())
+	var deepened: Array[String] = []   # "A & B (Lv2)": one line for every bond, not a sentence each
 	for i in sealers.size():
 		sealers[i].history["rifts_cleared"] = int(sealers[i].history.get("rifts_cleared", 0)) + 1
 		if int(sealers[i].history["rifts_cleared"]) == 50 and not sealers[i].is_champion:   # the Chronicle
@@ -936,8 +937,10 @@ func seal_rift() -> void:
 					var scene := tr(str(bond_pool[randi() % bond_pool.size()]))
 					var args := [pair[0], pair[1], pair[1]] if scene.count("%s") == 3 else pair
 					pending_stories.append({"title": tr("%s & %s") % pair, "subtitle": tr("A bond, written down"), "text": scene % args})
-				flavor += tr(" %s and %s's bond deepens (Lv%d).") % [tr(str(sealers[i].name.split(" the ")[0])), tr(str(sealers[j].name.split(" the ")[0])), before + 1]
+				deepened.append(tr("%s & %s (Lv%d)") % [tr(str(sealers[i].name.split(" the ")[0])), tr(str(sealers[j].name.split(" the ")[0])), before + 1])
 				push_toast(sealers[i], tr("Bond deepened — Lv%d") % (before + 1), tr("%s & %s: +%d%% party damage while both stand") % [tr(str(sealers[i].name.split(" the ")[0])), tr(str(sealers[j].name.split(" the ")[0])), int(round(GameData.BOND_DMG_PER_LEVEL * (before + 1) * 100))])
+	if not deepened.is_empty():
+		flavor += " " + tr("Bonds deepen: %s.") % ", ".join(deepened)
 	for h in sealers:
 		change_morale(h, GameData.MORALE_SEAL)
 		for line in check_earned_quirks(h):

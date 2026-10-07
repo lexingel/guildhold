@@ -88,7 +88,7 @@ func _ready() -> void:
 	# The Guild Hall itself at the camp (as grand as the guild), else a field camp.
 	goal.texture = load(GameState.hamlet_texture({"id": "hall", "tier": "guild"}) if run.region == "camp" else "res://assets/hamlet/barracks_t1.png")
 	goal.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	goal.scale = Vector2(2, 2)
+	goal.scale = Vector2.ONE   # hamlet art is drawn at the walkers' density (0.57), so 1:1
 	goal.offset = Vector2(0, -goal.texture.get_height() * 0.5 + 6)
 	goal.position = run.map["goal"] + Vector2(24, 0)
 	_world.add_child(goal)
@@ -97,7 +97,7 @@ func _ready() -> void:
 		var hb: Array = GameData.HAMLET_BUILDINGS.filter(func(b): return str(b["id"]) == str(d[0]))
 		prop.texture = load("res://assets/survivors/pillar.png" if d[0] == "pillar" else GameState.hamlet_texture(hb[0]))
 		prop.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		prop.scale = Vector2.ONE * (1.0 if d[0] == "pillar" else 1.6)
+		prop.scale = Vector2.ONE   # pillar and hamlet art both drawn 1:1
 		prop.offset = Vector2(0, -prop.texture.get_height() * 0.5 + 4)
 		prop.position = d[1]
 		_world.add_child(prop)

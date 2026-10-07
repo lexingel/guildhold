@@ -108,7 +108,7 @@ func _render_camp(v: VBoxContainer) -> void:
 	var plaques: Array = []
 	for b in GameData.HAMLET_BUILDINGS:
 		var tex: Texture2D = load(GameState.hamlet_texture(b))
-		var size := tex.get_size() * sc
+		var size := tex.get_size() * sc / GameData.HAMLET_ART_SCALE
 		var anchor: Vector2 = b["pos"]
 		var rect := Rect2(Vector2(anchor.x * sc.x - size.x * 0.5, anchor.y * sc.y - size.y), size)
 		var art := TextureRect.new()

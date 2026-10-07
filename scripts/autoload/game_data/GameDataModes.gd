@@ -620,25 +620,29 @@ const MANAGEMENT_NODE_ICON := {
 ## campaign act, "" = one fixed image (<art>.png).
 const HAMLET_BG := "res://assets/hamlet/backdrop.png"
 const HAMLET_SIZE := Vector2(400, 180)
+## Art pixels per native unit (0.57, the Accord Hall hamlet): the backdrop is
+## 640 x 288 and the buildings are drawn at the same density, so they sit as
+## crisp as the heroes; positions stay in native units.
+const HAMLET_ART_SCALE := 1.6
 ## The backdrop's night sky, continued above it when the village fills the window.
-const HAMLET_SKY := Color(0.0902, 0.0824, 0.2275)
+const HAMLET_SKY := Color(0.1495, 0.1081, 0.296)
 const HAMLET_BUILDINGS := [
-	{"id": "scouts", "name": "Recruits", "building": "Scouts' Lodge", "tier": "node", "node": "log.scouts", "pos": Vector2(62, 150), "row": "back"},
-	{"id": "hall", "name": "Guild Hall", "tier": "guild", "pos": Vector2(200, 152), "row": "back"},
-	{"id": "lab", "name": "Arcane Lab", "tier": "node", "node": "res.lab", "pos": Vector2(338, 150), "row": "back"},
-	{"id": "barracks", "name": "Heroes", "building": "Barracks", "tier": "node", "node": "ops.barracks", "pos": Vector2(32, 177), "row": "front"},
-	{"id": "infirmary", "name": "Medical Bay", "building": "Infirmary", "tier": "node", "node": "ops.infirmary", "pos": Vector2(96, 177), "row": "front"},
-	{"id": "drill", "name": "Skills", "building": "Drill Yard", "tier": "node", "node": "ops.drill", "pos": Vector2(152, 177), "row": "front"},
-	{"id": "campfire", "name": "", "tier": "", "pos": Vector2(200, 178), "row": "front"},
-	{"id": "board", "name": "Quests", "building": "Quest Board", "tier": "", "pos": Vector2(234, 176), "row": "front"},
-	{"id": "gate", "name": "Rift Hall", "building": "Rift Gate", "tier": "act", "pos": Vector2(270, 177), "row": "front"},
-	{"id": "market", "name": "Items", "building": "Market", "tier": "node", "node": "log.trade", "pos": Vector2(322, 177), "row": "front"},
-	{"id": "vault", "name": "Relics", "building": "Relic Vault", "tier": "node", "node": "res.vault", "pos": Vector2(374, 177), "row": "front"},
+	{"id": "drill", "name": "Skills", "building": "Drill Yard", "tier": "node", "node": "ops.drill", "pos": Vector2(78, 154), "row": "back"},
+	{"id": "hall", "name": "Guild Hall", "tier": "guild", "pos": Vector2(200, 124), "row": "back"},
+	{"id": "scouts", "name": "Recruits", "building": "Scouts' Lodge", "tier": "node", "node": "log.scouts", "pos": Vector2(266, 146), "row": "back"},
+	{"id": "market", "name": "Items", "building": "Market", "tier": "node", "node": "log.trade", "pos": Vector2(318, 150), "row": "back"},
+	{"id": "lab", "name": "Arcane Lab", "tier": "node", "node": "res.lab", "pos": Vector2(382, 146), "row": "back"},
+	{"id": "barracks", "name": "Heroes", "building": "Barracks", "tier": "node", "node": "ops.barracks", "pos": Vector2(32, 178), "row": "front"},
+	{"id": "infirmary", "name": "Medical Bay", "building": "Infirmary", "tier": "node", "node": "ops.infirmary", "pos": Vector2(100, 178), "row": "front"},
+	{"id": "campfire", "name": "", "tier": "", "pos": Vector2(170, 178), "row": "front"},
+	{"id": "board", "name": "Quests", "building": "Quest Board", "tier": "", "pos": Vector2(212, 177), "row": "front"},
+	{"id": "gate", "name": "Rift Hall", "building": "Rift Gate", "tier": "act", "pos": Vector2(264, 178), "row": "front"},
+	{"id": "vault", "name": "Relics", "building": "Relic Vault", "tier": "node", "node": "res.vault", "pos": Vector2(350, 178), "row": "front"},
 ]
 ## Past guilds' banners in the camp ("The Vale Remembers"): pole x on the
-## native backdrop, in the gaps either side of the Guild Hall, oldest first.
+## native backdrop, in the courtyard below the Guild Hall, oldest first.
 ## The cloth colour goes with the crest.
-const BANNER_X := [100, 116, 132, 264, 280, 296]
+const BANNER_X := [126, 140, 154, 168, 182, 112]   # the courtyard gap left of the campfire (0.57 layout)
 const BANNER_CLOTH := [Color("7a2e2e"), Color("2e3f7a"), Color("2f6a3f"), Color("5b2e7a"),
 	Color("8a6a24"), Color("24666a"), Color("6a2448"), Color("4a5260")]
 ## The Descent: the Endless Rift turn-based, with the guild's heroes, at its

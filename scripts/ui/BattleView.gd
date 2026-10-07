@@ -1264,12 +1264,12 @@ func _render_combat_node(v: VBoxContainer) -> void:
 		if not result.get("retreated", false) and not _sfx_seen.has(defeat_key):
 			_sfx_seen[defeat_key] = true
 			AudioManager.play_sfx(GameData.SFX_PATH["defeat"])
-		v.add_child(_label(defeat_text))
+		v.add_child(_wrap_label(defeat_text))
 		var reasons: Array = result.get("defeat_reasons", [])
 		if not reasons.is_empty():
 			v.add_child(_defeat_card(reasons))
 		if str(result.get("flavor", "")) != "":
-			v.add_child(_label(str(result["flavor"]), 12, true))
+			v.add_child(_wrap_label(str(result["flavor"]), 12, true))
 		var in_tower := GameState.run.has("tower")
 		if not in_tower:
 			v.add_child(_run_report())
@@ -1703,6 +1703,10 @@ const UNIT_PLATE_H := 44.0   # name/HP row + bar + status row
 
 ## Arena width: the content column, capped so a huge window doesn't blow the
 ## pixel art up past readability.
+## How much a fight's background is dimmed behind the fighters.
+const BG_DIM := Color(0.8, 0.8, 0.84)
+
+
 func _battle_width() -> float:
 	var vw: float = get_viewport().get_visible_rect().size.x
 	return clampf(vw - 72.0, minf(700.0, vw - 32.0), 1180.0)
@@ -1958,6 +1962,7 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 	bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	bg.size = Vector2(W, H)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bg.modulate = BG_DIM   # the scene sits a step behind the fighters (0.57: the crisp backgrounds are busier)
 	arena.add_child(bg)
 
 	var hero_wrappers: Dictionary = {}
