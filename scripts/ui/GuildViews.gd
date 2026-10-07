@@ -664,7 +664,6 @@ func _render_memorial(v: VBoxContainer) -> void:
 		v.add_child(row)
 
 
-var _dismiss_confirm: String = ""   # hero id awaiting a second click on Dismiss
 
 
 ## A matter waiting for your answer: a hero's request ("request") or the

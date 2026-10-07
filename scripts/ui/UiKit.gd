@@ -102,6 +102,7 @@ var selected_item_id: String = ""   # the Inventory item open in the pop-up ("" 
 var _confirm_retreat: bool = false   # the run bar's Retreat asks once before ending the run
 var inv_filter: String = "all"   # Inventory item filter: all | weapon | armor | focus
 var inv_view: String = "gear"
+var _dismiss_confirm: String = ""   # hero id awaiting a second click on Dismiss (hero page and payroll)
 var _confirm_respec_id: String = ""   # the hero whose attribute Reset is awaiting confirmation   # Inventory items page: gear | supplies
 var roster_tab: String = "hero"   # overview | gear | skills | history — the hero card's open tab
 var _combat_hotkeys: Dictionary = {}   # key string ("1", "Space") -> Callable for the current hero's actions; rebuilt every render

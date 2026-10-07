@@ -492,6 +492,28 @@ func _attr_panel(h: Hero) -> PanelContainer:
 			reset.disabled = GameState.crystals < cost
 		reset.tooltip_text = tr("Refund all %d spent points for %d Essence (you have %d)") % [refund, cost, GameState.crystals]
 		foot.add_child(reset)
+	# Let a hero go from their own page too (0.59.2; it was only on the Ledger's payroll).
+	if screen != "rift_run":
+		var confirming := _dismiss_confirm == h.id
+		var db := _button(tr("Confirm: let them go") if confirming else tr("Dismiss"), func(id=h.id):
+			if _dismiss_confirm != id:
+				_dismiss_confirm = id
+			else:
+				_dismiss_confirm = ""
+				var err := GameState.dismiss_hero(id)
+				if err != "":
+					_flavor_toast = err
+			render()
+		)
+		db.flat = not confirming
+		db.tooltip_text = tr("They leave the guild for good; their gear goes back to the stockpile. No more wages.")
+		var why := tr("They're on a rift right now") if (GameState.run.get("hero_ids", []) as Array).has(h.id) else (tr("The guild needs at least one hero") if GameState.heroes.size() <= 1 else "")
+		if why != "":
+			db.disabled = true
+			db.tooltip_text = why
+		foot.add_child(db)
+		if confirming:
+			foot.add_child(_button("Keep", func(): _dismiss_confirm = ""; render()))
 	if foot.get_child_count() > 1:
 		v.add_child(foot)
 	panel.add_child(v)

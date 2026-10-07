@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"A hero can now be dismissed from their own page in the Roster, as well as from the payroll on the Ledger.",
 	"Music: every region now has its own theme. The Shattered Vale, the Drowned Marches, the Ashen Wastes, the Glass Coast and the Inverted City each play theirs for the whole rift run, and the Endless Rift and the Descent play the Accord Hall's.",
 	"End day: a campfire button in the top bar ends the day from any camp screen, without a run. Hover it to see what tomorrow brings: payday and whether you can pay, who finishes training, who is back on their feet, and a rift about to break.",
 	"The Training Yard: send heroes to train Might, Agility or Focus for 1, 2 or 3 days. Each day gives +1 attribute point, longer courses also give XP (up to your best hero's level), and you can watch them drill in the camp's courtyard. Trainees sit out runs; the yard has 2 stations and grows to 4 with the Drill Yard. It replaces buying points with Gold.",
