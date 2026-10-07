@@ -51,6 +51,8 @@ the walls. The recommended power is fit to those numbers
 | | Trait reroll | 60 |
 | | Field Tonic · Incense · Runestone | 25 · 40 · 60 |
 | | Shop item/relic | ~25–40, reroll 8 + 6 per reroll |
+| | Forge: temper an item (0.61) | 40 × rarity mult × drop rank reward mult × level reached, 5 levels (Common F 600 in all, Epic S ~3,300); +6% stats per level |
+| | Hall Works (0.61, after Act I) | 800 + 600 per wing built, 6 wings (13,800 in all) |
 | Crystals | Guild Management | 50 × next level per step; 750 per upgrade, 6,750 for all 9 (perks included) |
 | | Relic upgrade to Lv5 | 15 × rarity mult × level per step (epic ≈ 285) |
 | | Relic effect reroll / item reforge | 10 × mult × n / 8 × mult × n |
@@ -70,8 +72,10 @@ the walls. The recommended power is fit to those numbers
 
 ## Watch list
 
-- Coins outpace sinks once the roster is full; training (1,800 per hero) is
-  the main mid-game sink. If coins still pile up, the next lever is recruit
+- Coins outpaced sinks once the roster was full (0.60 sims: 5–27k Gold
+  idle by day 45). 0.61 added the Forge and Hall Works; investor guilds now
+  hold 2–7k at day 45, and casual guilds that follow the power advice reach
+  Act IV 4/4 (was 2/4). If coins still pile up, the next lever is recruit
   prices for C+ ranks or a coin cost on relic upgrades.
 - Seal Tokens have one sink (attribute resets); fine while they're earned
   slowly, revisit if players sit on hundreds.

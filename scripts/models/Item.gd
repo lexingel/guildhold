@@ -33,6 +33,7 @@ var attr_req: int = 0           # that attribute needed to equip (0 = none)
 var reforges: int = 0           # times a stat line was rerolled (each costs more)
 var attune_wins: int = 0        # wins while equipped; every GameData.ATTUNE_WINS raises attune_level
 var attune_level: int = 0       # 0..ATTUNE_MAX, each level grew the rolled stats by ATTUNE_STEP
+var forge_level: int = 0        # 0..FORGE_MAX, each Forge temper grew the rolled stats by FORGE_STEP
 
 
 func slot_type() -> String:
@@ -50,7 +51,7 @@ func to_dict() -> Dictionary:
 		"unique_id": unique_id, "drawback_kind": drawback_kind, "drawback_value": drawback_value,
 		"locked_role": locked_role, "locked_subclasses": locked_subclasses,
 		"attr": attr, "attr_bonus": attr_bonus, "attr_req": attr_req,
-		"reforges": reforges, "attune_wins": attune_wins, "attune_level": attune_level,
+		"reforges": reforges, "attune_wins": attune_wins, "attune_level": attune_level, "forge_level": forge_level,
 	}
 
 
@@ -81,6 +82,7 @@ static func from_dict(d: Dictionary) -> Item:
 	it.reforges = int(d.get("reforges", 0))
 	it.attune_wins = int(d.get("attune_wins", 0))
 	it.attune_level = int(d.get("attune_level", 0))
+	it.forge_level = int(d.get("forge_level", 0))
 	if d.has("attr"):
 		it.attr = str(d["attr"])
 		it.attr_bonus = int(d.get("attr_bonus", 0))

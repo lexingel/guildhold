@@ -893,6 +893,16 @@ func _equip_picker_modal(h: Hero, slot_type: String, idx: int) -> void:
 		wn.add_theme_color_override("font_color", ITEM_RARITY_COLOR.get(equipped.rarity, Palette.TEXT))
 		wl.add_child(wn)
 		wear.add_child(wl)
+		var fcost := GameState.forge_cost(equipped)
+		if fcost > 0:   # the Forge, on the gear a hero wears
+			var fb := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Temper %d/%d · %d Gold") % [equipped.forge_level + 1, GameData.FORGE_MAX, fcost], func(iid=equipped.id):
+				var err := GameState.forge_item(iid)
+				if err != "":
+					_flavor_toast = err
+				render())
+			fb.disabled = GameState.coins < fcost
+			fb.tooltip_text = tr("Every rolled stat on this item grows %d%%. Each temper costs more than the last.") % int(GameData.FORGE_STEP * 100)
+			wear.add_child(fb)
 		wear.add_child(_icon_button("res://assets/skills/armor_chest.png", "Unequip", func(hid=h.id, st=slot_type, i=idx):
 			GameState.equip_item(hid, st, i, "")
 			render()))
@@ -1194,6 +1204,25 @@ func _item_modal(it: Item) -> void:
 		cv.add_child(equip_row)
 	if not blocked.is_empty():
 		cv.add_child(_wrap_label(tr("Needs %d %s: %s") % [it.attr_req, tr(str(GameData.ATTR_LABEL.get(it.attr, it.attr))), tr(str(", ".join(blocked)))], 12, true))
+	# The Forge: Gold tempers any item, equipped or not.
+	var fcost := GameState.forge_cost(it)
+	var forge_row := HBoxContainer.new()
+	forge_row.add_theme_constant_override("separation", 8)
+	var fl := _label(tr("Forge — tempered %d/%d") % [it.forge_level, GameData.FORGE_MAX], 13, true)
+	fl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	forge_row.add_child(fl)
+	if fcost > 0:
+		var fb := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Temper +%d%% stats · %d Gold") % [int(GameData.FORGE_STEP * 100), fcost], func(id=it.id):
+			var err := GameState.forge_item(id)
+			if err != "":
+				_flavor_toast = err
+			render()
+		)
+		fb.disabled = GameState.coins < fcost
+		fb.tooltip_text = tr("Every rolled stat on this item grows %d%%. Each temper costs more than the last.") % int(GameData.FORGE_STEP * 100)
+		forge_row.add_child(fb)
+	cv.add_child(forge_row)
 	if it.unique_id == "":
 		var rcost := GameState.reforge_cost(it)
 		cv.add_child(_label(tr("Reforge — reroll one stat (%d Essence)") % rcost, 13, true))

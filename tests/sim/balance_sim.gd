@@ -40,6 +40,17 @@ var TOWER_ONLY := false   # `-- tower` on the command line: skip the rift profil
 
 func _ready() -> void:
 	GameState.active_slot = 9
+	for a in OS.get_cmdline_user_args():   # knobs, as in campaign_sim
+		if a.begins_with("threat="):   # threat=combat:1:2,boss:0.85:0.85 ([hp, dmg] per kind)
+			for part in a.substr(7).split(","):
+				var bits := part.split(":")
+				GameData.FIGHT_THREAT[bits[0]] = [float(bits[1]), float(bits[2])]
+		elif a.begins_with("mendcap="):
+			GameData.MEND_CAP = float(a.substr(8))
+		elif a.begins_with("dodgecap="):
+			GameData.DODGE_CAP = float(a.substr(9))
+		elif a.begins_with("mend="):
+			GameData.POST_FIGHT_MEND = float(a.substr(5))
 	TOWER_ONLY = OS.get_cmdline_user_args().has("tower")
 	if OS.get_cmdline_user_args().has("calibrate"):
 		_calibrate()

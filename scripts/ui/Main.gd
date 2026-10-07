@@ -1868,7 +1868,9 @@ func _render_onboard(v: VBoxContainer) -> void:
 	name_row.add_child(rc)
 	v.add_child(name_row)
 	var found := _icon_domain_button("violet", GameData.BUTTON_ICON_PATH["confirm"], "Found the Guild", func():
-		var n := edit.text.strip_edges()
+		# The pending name, not edit.text: a click landing in the same frame as
+		# Random name still reaches the old (freed next frame) field.
+		var n := pending_guild_name.strip_edges()
 		if n == "":
 			# Say what's missing instead of doing nothing.
 			edit.placeholder_text = tr("Name your guild first")
@@ -2618,8 +2620,10 @@ func _render_party_assembly(v: VBoxContainer) -> void:
 	# rows): picking the same four for every Tower floor was a chore.
 	if _prefill_party:
 		_prefill_party = false
+		# A new guild's first party: its starters, rather than four empty slots.
+		var prev: Array = GameState.last_party if not GameState.last_party.is_empty() or GameState.runs_started > 0 else GameState.heroes.map(func(x): return x.id)
 		if not _pending_endless:
-			for id in GameState.last_party:
+			for id in prev:
 				var lh := GameState.find_hero(id)
 				if lh and not lh.is_champion and not lh.is_downed() and not lh.is_away() and not pending_party.has(id) and pending_party.size() < _party_cap():
 					pending_party.append(id)
@@ -2647,7 +2651,7 @@ func _render_party_assembly(v: VBoxContainer) -> void:
 		v.add_child(_wrap_label(tr("A harder %s Rift that ends in %s. Up to 4 heroes.") % [tr(str(GameState.current_act()["tier"]).capitalize()), tr(str(GameState.current_act()["boss"]))], 12, true))
 	else:
 		v.add_child(_label("Assemble Party (up to 4)", 20))
-	_coach(v, "party", "Pick your party", "Add heroes, then Enter the Rift. The front row takes most of the hits; the back row is attacked far less.")
+	_coach(v, "party", "Pick your party", "Pick who goes, then Enter the Rift. The front row takes most of the hits; the back row is attacked far less.")
 	# The party stands on four slots facing the foes, each hero set Front or
 	# Back with a small F/B switch. An empty slot's + opens a picker; a hero
 	# can also be dragged from the roster onto a slot (onto someone: a swap).

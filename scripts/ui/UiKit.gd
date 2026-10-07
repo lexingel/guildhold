@@ -1140,6 +1140,8 @@ func _item_card(it: Item, compare_for: Hero = null, slot: int = -2) -> String:
 	for e in it.effects:
 		var named := ("[b]★ %s[/b] — " % _bb(Palette.EMBER_BRIGHT, tr(str(e["name"])))) if e.has("name") else ""
 		lines.append("%s[i]%s[/i]  %s" % [named, tr(str(Combat.describe_effect(e).replace("[", "[lb]"))), tr(str(_arch_chip(str(e.get("arch", "")))))])
+	if it.forge_level > 0:
+		lines.append(_bb(Palette.COINS, tr("Tempered %d/%d (+%d%% stats)") % [it.forge_level, GameData.FORGE_MAX, int(round((pow(1.0 + GameData.FORGE_STEP, it.forge_level) - 1.0) * 100))]))
 	if it.attune_level > 0 or it.attune_wins > 0:
 		var nxt := "" if it.attune_level >= GameData.ATTUNE_MAX else tr(" · %d/%d wins to next") % [it.attune_wins, GameData.ATTUNE_WINS * (it.attune_level + 1)]
 		lines.append(_bb(Palette.RANK_E, tr("Attuned %d/%d (+%d%% stats)%s") % [it.attune_level, GameData.ATTUNE_MAX, int(round((pow(1.0 + GameData.ATTUNE_STEP, it.attune_level) - 1.0) * 100)), tr(str(nxt))]))

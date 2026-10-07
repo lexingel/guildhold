@@ -111,6 +111,38 @@ func _attune_gear(party: Array) -> void:
 				push_toast(h, tr("Gear attuned"), tr("%s grows stronger (%d/%d)") % [tr(str(it.name)), it.attune_level, GameData.ATTUNE_MAX])
 
 
+## Gold to temper `it` one more level at the Forge (0 = fully tempered).
+func forge_cost(it: Item) -> int:
+	if it.forge_level >= GameData.FORGE_MAX:
+		return 0
+	var rank_mult := float(GameData.find_rift_rank(it.item_rank).get("reward", 1.0)) if it.item_rank != "" else 1.0
+	return int(round(GameData.FORGE_GOLD * float(GameData.find_rarity(it.rarity)["mult"]) * rank_mult * (it.forge_level + 1) * (1.0 - work_bonus("forge"))))
+
+
+## Tempers an item (equipped or not): its rolled stats grow FORGE_STEP.
+func forge_item(item_id: String) -> String:
+	var it: Item = null
+	for x in items:
+		if x.id == item_id:
+			it = x
+	if not it:
+		return tr("No such item")
+	var cost := forge_cost(it)
+	if cost <= 0:
+		return tr("Fully tempered")
+	if coins < cost:
+		return tr("Needs %d Gold") % cost
+	coins -= cost
+	it.forge_level += 1
+	var g := 1.0 + GameData.FORGE_STEP
+	it.value = snappedf(it.value * g, 0.001)
+	it.secondary_value = snappedf(it.secondary_value * g, 0.001)
+	it.tertiary_value = snappedf(it.tertiary_value * g, 0.001)
+	save()
+	state_changed.emit()
+	return ""
+
+
 func reforge_cost(it: Item) -> int:
 	return int(round(GameData.REFORGE_CRYSTALS * float(GameData.find_rarity(it.rarity)["mult"]) * (it.reforges + 1)))
 
@@ -138,7 +170,7 @@ func reforge_item(item_id: String, line: int) -> String:
 		var pool: Array = GameData.ITEM_CATEGORY_KINDS[it.category].filter(func(k): return not kinds.has(k))
 		pool.append(kind)
 		kind = str(pool[randi() % pool.size()])
-	var val := Combat.item_line_value(kind, it.rarity, line, it.item_rank) * pow(1.0 + GameData.ATTUNE_STEP, it.attune_level)
+	var val := Combat.item_line_value(kind, it.rarity, line, it.item_rank) * pow(1.0 + GameData.ATTUNE_STEP, it.attune_level) * pow(1.0 + GameData.FORGE_STEP, it.forge_level)
 	match line:
 		0:
 			it.value = val

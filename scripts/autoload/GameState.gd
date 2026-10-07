@@ -87,6 +87,7 @@ func reset() -> void:
 	founding = "free"
 	oaths = []
 	halls_restored = []
+	hall_works = []
 	tide_count = 0
 	tides_held = 0
 	tidewalls = 0
@@ -327,6 +328,7 @@ func load_save() -> bool:
 	founding = str(data.get("founding", "free"))
 	oaths = (data.get("oaths", []) as Array).duplicate()
 	halls_restored = (data.get("halls_restored", []) as Array).duplicate()
+	hall_works = (data.get("hall_works", []) as Array).duplicate()
 	tide_count = int(data.get("tide_count", 0))
 	tides_held = int(data.get("tides_held", 0))
 	tidewalls = int(data.get("tidewalls", 0))

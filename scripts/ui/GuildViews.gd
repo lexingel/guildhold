@@ -489,7 +489,7 @@ func _guild_goals() -> Array:
 	var advice: Array = GameState.power_advice() if behind else []
 	if not advice.is_empty():
 		var a: Dictionary = advice[0]
-		var where: Callable = {"evolve": go_term.call("roster"), "recruit": go_term.call("recruits"), "drill": go_term.call("management"), "champion": go_term.call("champions")}.get(str(a["kind"]), go_term.call("roster"))
+		var where: Callable = {"evolve": go_term.call("roster"), "recruit": go_term.call("recruits"), "drill": go_term.call("management"), "hall_work": go_term.call("management"), "forge": go_term.call("roster"), "champion": go_term.call("champions")}.get(str(a["kind"]), go_term.call("roster"))
 		out.append(["Grow", str(a["text"]), Palette.TEXT, where])
 	else:
 		out.append(["Grow", tr("Seal a Rank %s rift: better gear, more Essence") % tr(GameState.highest_open_rank()), Palette.TEXT, go_screen.call("rift_hall")])
@@ -1168,6 +1168,7 @@ func _render_hub_cluster(v: VBoxContainer) -> void:
 			title = "Guild Hall"
 			entries = [
 				[GameData.CAMP_HUB_ICON_PATH["management"], "Management", func(): hub_cluster = ""; term_tab = "management"; render()],
+				["res://assets/skills/ingot_gold.png", "Hall Works", func(): hub_cluster = ""; term_tab = "management"; render()],
 				["res://assets/skills/gem_blue_a.png", "Ledger", func(): hub_cluster = ""; term_tab = "ledger"; render()],
 				[GameData.CAMP_HUB_ICON_PATH["compendium"], "Codex", func(): hub_cluster = ""; term_tab = "compendium"; render()],
 				["res://assets/skills/trophy.png", "Records", func(): hub_cluster = ""; term_tab = "records"; render()],
@@ -1182,7 +1183,7 @@ func _render_hub_cluster(v: VBoxContainer) -> void:
 	v.add_child(_label(title, 18))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
-	var entry_feature := {"Management": "management", "Items": "inventory", "Crafting": "crafting", "Bestiary": "bestiary", "Quests": "quests", "Ledger": "management"}
+	var entry_feature := {"Management": "management", "Hall Works": "management", "Items": "inventory", "Crafting": "crafting", "Bestiary": "bestiary", "Quests": "quests", "Ledger": "management"}
 	for entry in entries:
 		var fid: String = entry_feature.get(str(entry[1]), "")
 		if fid != "" and not GameState.feature_unlocked(fid):
@@ -2489,6 +2490,60 @@ func _render_endowment(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 
 
+## Hall Works: the guild's own hall rebuilt wing by wing with Gold (Guild
+## Management is Essence). Once every wing stands it folds to one line.
+func _render_hall_works(v: VBoxContainer) -> void:
+	var built := GameState.hall_works.size()
+	if built >= GameData.HALL_WORKS.size():
+		var done := _label(tr("Hall Works · every wing rebuilt"), 13, true)
+		var tip := ""
+		for w in GameData.HALL_WORKS:
+			tip += "• %s: %s\n" % [tr(str(w["name"])), tr(str(w["bonus"]))]
+		done.tooltip_text = tip.strip_edges()
+		done.mouse_filter = Control.MOUSE_FILTER_STOP
+		v.add_child(done)
+		return
+	if GameState.campaign_act < 2:   # one line until the wings open
+		v.add_child(_label(tr("Hall Works · rebuild the hall with Gold · opens when Act I is done"), 13, true))
+		return
+	var head := _label(tr("Hall Works · %d/%d wings · next wing %d Gold") % [built, GameData.HALL_WORKS.size(), GameState.hall_work_cost()], 16)
+	v.add_child(head)
+	v.add_child(_wrap_label("Rebuild the hall with Gold, one wing at a time, in any order. Each wing helps the whole guild for good; each costs more than the last.", 12, true))
+	var grid := GridContainer.new()
+	grid.columns = 2 if _narrow() else 3
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	for w in GameData.HALL_WORKS:
+		var id := str(w["id"])
+		var done := GameState.hall_works.has(id)
+		var card := PanelContainer.new()
+		card.theme_type_variation = &"CardPanel"
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var col := _vbox(4)
+		var nm := _label(tr(str(w["name"])), 14)
+		if done:
+			nm.add_theme_color_override("font_color", Palette.RANK_S)
+		col.add_child(nm)
+		col.add_child(_wrap_label(tr(str(w["bonus"])), 12, true))
+		if done:
+			col.add_child(_label("Built", 12, true))
+		else:
+			var lock := GameState.hall_work_lock(id)
+			var b := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Build · %d Gold") % GameState.hall_work_cost(), func(k=id):
+				var err := GameState.build_hall_work(k)
+				render()
+				if err == "":
+					_payoff(tr("%s rebuilt") % tr(str(w["name"])), tr(str(w["bonus"])), Palette.COINS, "level_up")
+			)
+			b.disabled = lock != ""
+			b.tooltip_text = lock
+			col.add_child(b)
+		card.add_child(col)
+		grid.add_child(card)
+	v.add_child(grid)
+	v.add_child(_hsep())
+
+
 func _render_management(v: VBoxContainer) -> void:
 	if GameState.keepers():
 		_render_accord_halls(v)
@@ -2496,6 +2551,7 @@ func _render_management(v: VBoxContainer) -> void:
 		_render_open_hollow(v)
 	if GameState.legacy_written:   # spare Gold, after the halls or the walls
 		_render_endowment(v)
+	_render_hall_works(v)
 	if mgmt_branch == "":
 		mgmt_branch = _mgmt_last
 	_mgmt_last = mgmt_branch

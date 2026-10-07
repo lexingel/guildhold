@@ -521,6 +521,16 @@ func _invest() -> void:
 		GameState.hold_feast()
 	for h in GameState.heroes:
 		GameState.equip_best(h.id)
+	# Gold into power (0.61): the hall's wings in order, then temper the lineup's gear, cheapest first.
+	for w in GameData.HALL_WORKS:
+		if GameState.coins - GameState.hall_work_cost() > bill + 300:
+			GameState.build_hall_work(str(w["id"]))
+	var worn: Array = GameState.items.filter(func(it): return lineup.has(it.equipped_to))
+	for i in 12:
+		worn.sort_custom(func(a, b): return GameState.forge_cost(a) < GameState.forge_cost(b))
+		var nxt: Array = worn.filter(func(it): return GameState.forge_cost(it) > 0)
+		if nxt.is_empty() or GameState.coins - GameState.forge_cost(nxt[0]) <= bill + 300 or GameState.forge_item(nxt[0].id) != "":
+			break
 
 
 func _spend_attrs(h: Hero) -> void:

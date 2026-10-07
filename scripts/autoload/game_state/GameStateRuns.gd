@@ -317,10 +317,11 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 			coins += int(result["coin"])
 			crystals += int(result["crystal"]) + int(result["bonus_crystal"])
 			_attune_gear(state.get("party", []))
-			if GameData.POST_FIGHT_MEND > 0.0 and not run.has("tower"):   # a breath between fights
+			var breath := GameData.POST_FIGHT_MEND + work_bonus("mend")   # the Chapel
+			if breath > 0.0 and not run.has("tower"):   # a breath between fights
 				for h in state.get("party", []):
 					if h.hp > 0:
-						h.hp = mini(Combat.max_hp(h), h.hp + int(ceil(Combat.max_hp(h) * GameData.POST_FIGHT_MEND)))
+						h.hp = mini(Combat.max_hp(h), h.hp + int(ceil(Combat.max_hp(h) * breath)))
 			if kind == "boss":
 				run["boss_rounds"] = int(result["rounds"])
 				var bname := str(result["monster_name"]).split(",")[0]

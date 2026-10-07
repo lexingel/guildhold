@@ -80,6 +80,7 @@ var legacy_written: bool = false     # this guild's legacy is in the Vale's hist
 var founding: String = "free"        # the founding charter (GameData.FOUNDINGS)
 var oaths: Array = []                # oaths sworn at founding (GameData.OATHS)
 var halls_restored: Array = []       # Keepers of the Vale (GameData.ACCORD_HALLS ids)
+var hall_works: Array = []           # wings of the guild's own hall (GameData.HALL_WORKS ids)
 var tide_count := 0                  # tides of the Open Hollow so far
 var tides_held := 0
 var tidewalls := 0                   # tidewalls raised against the Open Hollow
@@ -230,11 +231,11 @@ func hero_slot_cap() -> int:
 
 func relic_slot_cap() -> int:
 	var l := lvl("res.vault")
-	return 3 + (1 if l >= 3 else 0) + (1 if l >= 5 else 0)
+	return 3 + (1 if l >= 3 else 0) + (1 if l >= 5 else 0) + int(work_bonus("relic_slots"))
 
 
 func medical_recovery_reduction() -> float:
-	return 0.15 * lvl("ops.infirmary")
+	return 0.15 * lvl("ops.infirmary") + work_bonus("recovery")
 
 
 ## Runs a downed hero sits out (Medical upgrades bring it down to 1). A new
@@ -266,7 +267,7 @@ func guild_mentor() -> bool:
 
 
 func xp_mult() -> float:
-	return 1.2 if lvl("ops.barracks") >= 5 else 1.0
+	return (1.2 if lvl("ops.barracks") >= 5 else 1.0) + work_bonus("xp")
 
 
 func field_triage_available() -> bool:
@@ -284,7 +285,7 @@ func charter_role_dmg(h: Hero) -> float:
 
 
 func tactical_bonus() -> float:
-	return 1.0 + 0.04 * lvl("ops.drill")
+	return 1.0 + 0.04 * lvl("ops.drill") + work_bonus("tactics")
 
 
 func vanguard() -> bool:
@@ -356,6 +357,46 @@ func shop_guaranteed_epic() -> bool:
 ## x1.2 Gold and Essence for holding the Royal Charter.
 func sworn(oath: String) -> bool:
 	return oaths.has(oath)
+
+
+## ---- Hall Works: the guild's own hall, rebuilt wing by wing with Gold ----
+## The built wings' bonus of `kind` (GameData.HALL_WORKS), summed.
+func work_bonus(kind: String) -> float:
+	var b := 0.0
+	for w in GameData.HALL_WORKS:
+		if str(w["kind"]) == kind and hall_works.has(w["id"]):
+			b += float(w["value"])
+	return b
+
+
+func hall_work_cost() -> int:
+	return GameData.HALL_WORK_COST + GameData.HALL_WORK_COST_STEP * hall_works.size()
+
+
+## "" if wing `id` can be built now, else why not.
+func hall_work_lock(id: String) -> String:
+	if hall_works.has(id):
+		return tr("Built")
+	if campaign_act < 2:
+		return tr("Opens when Act I is done")
+	if coins < hall_work_cost():
+		return tr("Needs %d Gold") % hall_work_cost()
+	return ""
+
+
+func build_hall_work(id: String) -> String:
+	var lock := hall_work_lock(id)
+	if lock != "":
+		return lock
+	var w: Array = GameData.HALL_WORKS.filter(func(x): return x["id"] == id)
+	if w.is_empty():
+		return tr("No such wing")
+	coins -= hall_work_cost()
+	hall_works.append(id)
+	_news(tr("The %s is rebuilt.") % tr(str(w[0]["name"])))
+	save()
+	state_changed.emit()
+	return ""
 
 
 ## The restored Accord halls' bonus of `kind` (GameData.ACCORD_HALLS), summed.
@@ -543,7 +584,8 @@ func hamlet_tier(b: Dictionary) -> int:
 			return 1 + (1 if l >= 3 else 0) + (1 if l >= 5 else 0)
 		"guild":
 			var name := str(Combat.guild_tier_info()["name"])
-			return 3 if name == "Legendary Guild" else (2 if name in ["Established Guild", "Renowned Guild"] else 1)
+			var by_tier := 3 if name == "Legendary Guild" else (2 if name in ["Established Guild", "Renowned Guild"] else 1)
+			return maxi(by_tier, 1 + (1 if hall_works.size() >= 2 else 0) + (1 if hall_works.size() >= 5 else 0))
 		"act":
 			return clampi(campaign_act, 1, 3)
 	return 1
@@ -800,7 +842,7 @@ func save() -> void:
 		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
-		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
+		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "hall_works": hall_works, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
 		"run": _run_for_save(),
 		
 		"monsters_seen": monsters_seen, "bosses_defeated": bosses_defeated, "hazards_seen": hazards_seen,

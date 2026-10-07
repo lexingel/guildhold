@@ -582,6 +582,14 @@ const SALVAGE_CRYSTALS := 6
 const ATTUNE_WINS := 8
 const ATTUNE_STEP := 0.04
 const ATTUNE_MAX := 5
+## The Forge (0.61): Gold tempers an item, FORGE_STEP more to its rolled
+## stats per level, up to FORGE_MAX. A level costs FORGE_GOLD x rarity mult x
+## the rank it dropped at (its reward mult) x the level it reaches, so a
+## Common F item's five levels cost 600 Gold and an Epic S one ~3,300: the
+## Gold sink for a full roster (0.60 sims: guilds sat on 5-27k Gold by day 45).
+const FORGE_STEP := 0.06
+const FORGE_MAX := 5
+const FORGE_GOLD := 40
 
 ## The Training Yard (0.58): a hero trains one attribute (a program) for
 ## TRAIN_DAYS days. Each day passing gives +1 point in it, up to ATTR_TRAIN_CAP

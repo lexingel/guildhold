@@ -464,6 +464,8 @@ var POST_FIGHT_MEND := 0.0
 ## round, so ordinary fights never hurt and HP never carried (0.56 sim: 98%
 ## before a won fight, 95% after). A var so the sim can sweep it.
 var MEND_CAP := 0.4
+## Most of a hit a party can dodge, all sources together. A var so the sim can sweep it.
+var DODGE_CAP := 0.6
 ## Where a run's danger sits (0.56): [hp, dmg] multipliers on a kind of fight.
 ## The sim showed ordinary fights won 99% from near-full HP and bosses 68%,
 ## so a run was decided at the boss; ordinary fights now cost real HP.
@@ -1287,6 +1289,19 @@ const ACCORD_HALLS := [
 ## Sim (0.35.3): at 5000/2000 +3000/1500 and 25000/12000 strong guilds took
 ## ~110 days for all seven and sat on 47k unspent Essence; now ~45k Gold and
 ## ~40k Essence in all.
+## Hall Works (0.61): wings of the guild's own hall, rebuilt with Gold, any
+## order, each a lasting guild-wide bonus. Five raise the hall's art to its
+## top tier, two to the middle one. The other Gold sink beside the Forge.
+const HALL_WORKS := [
+	{"id": "war_room", "name": "War Room", "kind": "tactics", "value": 0.05, "bonus": "+5% damage and max HP for every hero"},
+	{"id": "chapel", "name": "Chapel", "kind": "mend", "value": 0.06, "bonus": "Standing heroes mend 6% of their max HP after every won fight in a rift"},
+	{"id": "smithy", "name": "Smithy", "kind": "forge", "value": 0.25, "bonus": "Tempering gear at the Forge costs 25% less"},
+	{"id": "library", "name": "Library", "kind": "xp", "value": 0.15, "bonus": "Heroes earn 15% more XP"},
+	{"id": "healers", "name": "Healers' Wing", "kind": "recovery", "value": 0.25, "bonus": "Downed heroes recover 25% sooner"},
+	{"id": "reliquary", "name": "Reliquary", "kind": "relic_slots", "value": 1, "bonus": "+1 equipped relic slot"},
+]
+const HALL_WORK_COST := 800       # the first wing, in Gold
+const HALL_WORK_COST_STEP := 600  # each wing after it costs this much more (13,800 for all six)
 const HALL_COST := [3000, 2500]          # the first hall: Gold, Essence
 const HALL_COST_STEP := [1000, 1000]     # each hall after it costs this much more
 const GRANDMASTER_HALL_COST := [12000, 10000]

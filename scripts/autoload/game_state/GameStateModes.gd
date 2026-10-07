@@ -1564,6 +1564,19 @@ func power_advice() -> Array:
 		if crystals >= dcost:
 			out.append({"kind": "drill", "id": "ops.drill",
 				"text": tr("Build the Drill Yard to level %d: +4%% damage and health for every hero, %d Essence.") % [int(upgrades.get("ops.drill", 0)) + 1, dcost]})
+	# Gold into power (0.61): a hall wing, then the Forge, keeping payday's bill in hand.
+	if hall_work_lock("war_room") == "" and coins - hall_work_cost() > bill:
+		out.append({"kind": "hall_work", "id": "war_room",
+			"text": tr("Rebuild the War Room (Guild Hall > Hall Works): +5%% damage and health for every hero, %d Gold.") % hall_work_cost()})
+	var temper: Item = null
+	for it in items:
+		var h: Hero = find_hero(it.equipped_to) if it.equipped_to != "" else null
+		var fc := forge_cost(it)
+		if h and not h.is_champion and fc > 0 and coins - fc > bill and (temper == null or fc < forge_cost(temper)):
+			temper = it
+	if temper:
+		out.append({"kind": "forge", "id": temper.id,
+			"text": tr("Temper %s's %s at the Forge (their gear slot on the Roster): +%d%% to its stats, %d Gold.") % [tr(str(find_hero(temper.equipped_to).name.split(" the ")[0])), tr(str(temper.name)), int(GameData.FORGE_STEP * 100), forge_cost(temper)]})
 	if overseer != "" and champion_level_cost(overseer) > 0 and crystals >= champion_level_cost(overseer):
 		out.append({"kind": "champion", "id": overseer,
 			"text": tr("Level %s to %d: a stronger Boon, %d Essence.") % [GameData.champion_full_name(overseer), champion_level(overseer) + 1, champion_level_cost(overseer)]})
@@ -1587,6 +1600,10 @@ func follow_advice(a: Dictionary) -> String:
 			return recruit_hero(str(a["id"]))
 		"drill":
 			return upgrade_node("ops.drill")
+		"hall_work":
+			return build_hall_work(str(a["id"]))
+		"forge":
+			return forge_item(str(a["id"]))
 		"champion":
 			return level_champion(str(a["id"]))
 	return ""
