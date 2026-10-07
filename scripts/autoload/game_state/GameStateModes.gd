@@ -1573,6 +1573,32 @@ func power_advice() -> Array:
 		if crystals >= dcost:
 			out.append({"kind": "drill", "id": "ops.drill",
 				"text": tr("Build the Drill Yard to level %d: +4%% damage and health for every hero, %d Essence.") % [int(upgrades.get("ops.drill", 0)) + 1, dcost]})
+	# Essence into power (0.61.3): the cheapest equipped relic level, then the
+	# cheapest level of a Management node that strengthens the party (the
+	# Drill Yard is above). Not slots or income: the sim's guilds took the
+	# cheapest of any node, swelled to 16 heroes and hoarded more Gold.
+	var relic: Relic = null
+	for r in relics:
+		if r.equipped and r.level < RELIC_MAX_LEVEL and relic_levels_up(r) and relic_upgrade_cost(r) <= crystals and (relic == null or relic_upgrade_cost(r) < relic_upgrade_cost(relic)):
+			relic = r
+	if relic:
+		out.append({"kind": "relic", "id": relic.id,
+			"text": tr("Upgrade %s on the Relic Altar to level %d: %d Essence.") % [tr(str(relic.name)), relic.level + 1, relic_upgrade_cost(relic)]})
+	if feature_unlocked("management"):
+		var best_key := ""
+		var best_cost := 1 << 30
+		for b in GameData.BRANCHES:
+			for n in b["nodes"]:
+				var key := "%s.%s" % [b["id"], n["id"]]
+				var cur := int(upgrades.get(key, 0))
+				var c := int(n["cost_base"]) + int(n["cost_step"]) * cur
+				if key in ["res.lab", "res.vault", "infra.wardstones"] and cur < int(n["max"]) and c <= crystals and c < best_cost:
+					best_key = key
+					best_cost = c
+		if best_key != "":
+			var node := GameData.find_branch_node(best_key)
+			out.append({"kind": "management", "id": best_key,
+				"text": tr("Build %s to level %d (Guild Management): %s, %d Essence.") % [tr(str(node["name"])), int(upgrades.get(best_key, 0)) + 1, tr(str(node["every"])), best_cost]})
 	# Gold into power (0.61): a hall wing, then the Forge, keeping payday's bill in hand.
 	if hall_work_lock("war_room") == "" and coins - hall_work_cost() > bill:
 		out.append({"kind": "hall_work", "id": "war_room",
@@ -1611,6 +1637,10 @@ func follow_advice(a: Dictionary) -> String:
 			return upgrade_node("ops.drill")
 		"hall_work":
 			return build_hall_work(str(a["id"]))
+		"relic":
+			return upgrade_relic(str(a["id"]))
+		"management":
+			return upgrade_node(str(a["id"]))
 		"forge":
 			return forge_item(str(a["id"]))
 		"champion":

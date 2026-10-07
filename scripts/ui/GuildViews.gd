@@ -490,7 +490,7 @@ func _guild_goals() -> Array:
 	var advice: Array = GameState.power_advice() if behind else []
 	if not advice.is_empty():
 		var a: Dictionary = advice[0]
-		var where: Callable = {"evolve": go_term.call("roster"), "recruit": go_term.call("recruits"), "drill": go_term.call("management"), "hall_work": go_term.call("management"), "forge": go_term.call("roster"), "champion": go_term.call("champions")}.get(str(a["kind"]), go_term.call("roster"))
+		var where: Callable = {"evolve": go_term.call("roster"), "recruit": go_term.call("recruits"), "drill": go_term.call("management"), "hall_work": go_term.call("management"), "forge": go_term.call("roster"), "relic": go_term.call("inventory"), "management": go_term.call("management"), "champion": go_term.call("champions")}.get(str(a["kind"]), go_term.call("roster"))
 		out.append(["Grow", str(a["text"]), Palette.TEXT, where])
 	else:
 		out.append(["Grow", tr("Seal a Rank %s rift: better gear, more Essence") % tr(GameState.highest_open_rank()), Palette.TEXT, go_screen.call("rift_hall")])

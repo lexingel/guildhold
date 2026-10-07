@@ -70,6 +70,15 @@ func run() -> void:
 	var kinds: Array = GameState.power_advice().map(func(a): return str(a["kind"]))
 	check(kinds.has("hall_work") and kinds.has("forge"), "power advice names a hall wing and the Forge (%s)" % str(kinds))
 	check(GameState.spare_wealth(), "idle Gold counts as spare wealth, so the Grow goal names the advice")
+	GameState.crystals = 5000
+	var rl := Combat.gen_relic("rare")
+	rl.equipped = true
+	GameState.relics.append(rl)
+	GameState.features_seen.append("management")
+	var ek: Array = GameState.power_advice().map(func(a): return str(a["kind"]))
+	check(ek.has("relic") and ek.has("management"), "spare Essence: the advice names a relic level and a Management level (%s)" % str(ek))
+	var lv0 := rl.level
+	check(GameState.follow_advice(GameState.power_advice().filter(func(a): return str(a["kind"]) == "relic")[0]) == "" and rl.level == lv0 + 1, "following it upgrades the relic")
 	GameState.coins = 0
 	GameState.crystals = 0
 	check(not GameState.spare_wealth(), "an empty treasury isn't spare wealth")
