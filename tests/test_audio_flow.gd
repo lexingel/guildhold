@@ -60,7 +60,7 @@ func run() -> void:
 	main.term_tab = "camp"
 	main.render()
 	await _wait(0.5)
-	check(AudioManager._current_music_path in GameData.CAMP_MUSIC and not AudioManager.voice_speaking(), "home again: a camp track, nothing speaking")
+	check(AudioManager._current_music_path in GameData.camp_pool() and not AudioManager.voice_speaking(), "home again: a camp track, nothing speaking")
 	main.queue_free()
 	GameState.voice_on = was_on
 	GameState.language = was_lang

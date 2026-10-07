@@ -251,6 +251,36 @@ static func run_track(run: Dictionary) -> String:
 	return str(REGION_MUSIC.get(str(run.get("biome", "vale")), ""))
 
 
+## The next batch of the user's tracks (0.60.2): each plays once its file is
+## in assets/audio/music, and until then the music that played before does.
+## Built from the folder, not written out whole: test_media checks that every
+## asset path in the code exists, and these are optional until they arrive.
+const PENDING_MUSIC := "res://assets/audio/music/"
+const BOSS_MUSIC := PENDING_MUSIC + "boss.ogg"
+const FINALE_MUSIC := {
+	1: PENDING_MUSIC + "finale_1.ogg", 2: PENDING_MUSIC + "finale_2.ogg", 3: PENDING_MUSIC + "finale_3.ogg",
+	4: PENDING_MUSIC + "finale_4.ogg", 5: PENDING_MUSIC + "finale_5.ogg", 6: PENDING_MUSIC + "finale_6.ogg",
+}
+const RIFTBREAK_MUSIC := PENDING_MUSIC + "riftbreak.ogg"
+const CAMP_EXTRA := [PENDING_MUSIC + "camp_hall.ogg"]
+
+
+## The camp's rotation: the three tracks, plus any new camp track that's in.
+static func camp_pool() -> Array:
+	return CAMP_MUSIC + CAMP_EXTRA.filter(func(p): return ResourceLoader.exists(p))
+
+
+## A boss fight's own track (a pillar's warden counts): the act's finale
+## track on its finale, else the boss track; "" when that file isn't in.
+static func fight_track(run: Dictionary, kind: String) -> String:
+	if kind not in ["boss", "pillar"] or run.has("tower"):
+		return ""
+	var finale := str(FINALE_MUSIC.get(int(run.get("finale", 0)), ""))
+	if finale != "" and ResourceLoader.exists(finale):
+		return finale
+	return BOSS_MUSIC if ResourceLoader.exists(BOSS_MUSIC) else ""
+
+
 ## A track from `pool`, not `last` when there's another to choose.
 static func pick_track(pool: Array, last: String = "") -> String:
 	var options: Array = pool.filter(func(p): return p != last)

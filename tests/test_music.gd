@@ -19,6 +19,10 @@ func run() -> void:
 	for b in GameData.BIOMES:
 		check(GameData.REGION_MUSIC.has(b), "%s has a theme" % b)
 	check(GameData.run_track({"biome": "marsh"}) == GameData.REGION_MUSIC["marsh"] and GameData.run_track({"biome": "vale", "descent": 2}) == GameData.ACCORD_MUSIC 		and GameData.run_track({"biome": "glass", "finale": 4}) == GameData.ACCORD_MUSIC and GameData.run_track({"tower": 3}) == "", "which run plays which theme")
+	# The next batch (0.60.2): a boss track only for bosses and pillars, never the Tower; only once its file is in.
+	var any_boss := ResourceLoader.exists(GameData.BOSS_MUSIC)
+	check(GameData.fight_track({"biome": "vale"}, "elite") == "" and GameData.fight_track({"tower": 3}, "boss") == "" 		and (GameData.fight_track({"biome": "vale"}, "boss") != "") == any_boss, "boss music: bosses and pillars, not elites or the Tower")
+	check(GameData.camp_pool().size() >= GameData.CAMP_MUSIC.size() and GameData.camp_pool().all(func(t): return ResourceLoader.exists(t)), "the camp rotation only holds tracks that are in")
 	# Ducking (0.59.3): music dips while a line is spoken and comes back after.
 	var clip := ""
 	for f in DirAccess.get_files_at("res://assets/voice"):

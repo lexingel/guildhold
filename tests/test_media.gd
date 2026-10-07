@@ -58,7 +58,7 @@ func run() -> void:
 		if not (s is AudioStream) or s.get_length() < (0.02 if "/sfx/" in str(p) else 0.2):   # a click is short; a line or a track isn't
 			bad_snd.append(str(p))
 	check(sounds.size() > 180 and bad_snd.is_empty(), "%d sounds load and have length %s" % [sounds.size(), bad_snd])
-	for track in GameData.CAMP_MUSIC + GameData.COMBAT_MUSIC + GameData.REGION_MUSIC.values() + [GameData.ACCORD_MUSIC]:
+	for track in GameData.camp_pool() + GameData.COMBAT_MUSIC + GameData.REGION_MUSIC.values() + [GameData.ACCORD_MUSIC]:
 		check((load(track) as AudioStream).get_length() > 30.0, "%s is a full track" % str(track).get_file())
 	for key in GameData.SFX_PATH:
 		check(ResourceLoader.exists(str(GameData.SFX_PATH[key])), "sound %s exists" % key)
@@ -115,7 +115,7 @@ func run() -> void:
 	main.term_tab = "camp"
 	main.render()
 	await _frames()
-	check(AudioManager._current_music_path in GameData.CAMP_MUSIC, "the camp plays a camp track")
+	check(AudioManager._current_music_path in GameData.camp_pool(), "the camp plays a camp track")
 
 	GameState.pending_stories.append(GameState._act_intro_card(1))
 	main.render()
@@ -166,7 +166,7 @@ func run() -> void:
 	main.term_tab = "camp"
 	main.render()
 	await _frames()
-	check(AudioManager._current_music_path in GameData.CAMP_MUSIC, "and coming home plays a camp track again")
+	check(AudioManager._current_music_path in GameData.camp_pool(), "and coming home plays a camp track again")
 
 	var sv := SurvivorsView.new()
 	sv.setup(GameState.heroes.slice(0, 3), "vale")

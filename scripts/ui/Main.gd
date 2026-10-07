@@ -1024,7 +1024,7 @@ var _last_combat_track := ""
 func _update_screen_music() -> void:
 	if screen in ["camp", "rift_hall", "party_assembly", "tower", "crafting_hall", "settings", "title", "load_game", "credits", "onboard"]:
 		if _camp_track == "":
-			_camp_track = GameData.pick_track(GameData.CAMP_MUSIC, _last_camp_track)
+			_camp_track = GameData.pick_track(GameData.camp_pool(), _last_camp_track)
 			_last_camp_track = _camp_track
 		_combat_track = ""   # the next run picks its own
 		AudioManager.play_music(_camp_track)
@@ -1032,7 +1032,11 @@ func _update_screen_music() -> void:
 		var kind := GameState.current_node_kind()
 		var ns: Dictionary = GameState.run.get("node_state", {})
 		var theme := GameData.run_track(GameState.run)
-		if theme != "":   # a region's theme carries the whole run, map and fights
+		var boss := GameData.fight_track(GameState.run, kind) if ns.has("combat_state") and not ns.has("result") else ""
+		if boss != "":   # a boss has its own track; the run's theme comes back after
+			_camp_track = ""
+			AudioManager.play_music(boss)
+		elif theme != "":   # a region's theme carries the whole run, map and fights
 			_combat_track = theme
 			_camp_track = ""
 			AudioManager.play_music(theme)

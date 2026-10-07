@@ -120,7 +120,7 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_fit_camera)
 	_fit_camera()
 	_build_hud()
-	AudioManager.play_music(GameData.pick_track(GameData.COMBAT_MUSIC))
+	AudioManager.play_music(GameData.RIFTBREAK_MUSIC if ResourceLoader.exists(GameData.RIFTBREAK_MUSIC) else GameData.pick_track(GameData.COMBAT_MUSIC))
 	_banner(tr("The rift has broken!"), Palette.HAZARD, tr("Build towers on the pads, then call the first wave"))
 
 
