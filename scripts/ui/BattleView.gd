@@ -1059,6 +1059,45 @@ func _play_retreat(heroes: Array[Hero], wrappers: Dictionary) -> void:
 	await _await_or_timeout(get_tree().create_timer(0.22).timeout, 1.0)
 
 
+## The room before Engage: the party's HP and the foes ahead (the same roll
+## Engage makes). The haul is in the run bar above.
+func _room_preview() -> Control:
+	var col := _vbox(6)
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 18)
+	row.add_theme_constant_override("v_separation", 8)
+	var bar_w := 70.0 if _compact() else 96.0
+	for h in GameState.current_party():
+		var chip := HBoxContainer.new()
+		chip.add_theme_constant_override("separation", 6)
+		var pic := _icon_trimmed(GameData.hero_portrait(h), 30)
+		if h.is_downed() or h.hp <= 0:
+			pic.modulate = Color(0.4, 0.4, 0.45)
+		chip.add_child(pic)
+		var hc := _vbox(2)
+		hc.add_child(_label(tr(str(h.name.split(" the ")[0])), 12))
+		var mx := Combat.max_hp(h)
+		hc.add_child(_hp_bar(maxi(0, h.hp), mx, bar_w))
+		hc.add_child(_label("%d/%d" % [maxi(0, h.hp), mx], 11, true))
+		chip.add_child(hc)
+		row.add_child(chip)
+	var sep := VSeparator.new()
+	row.add_child(sep)
+	var foes := GameState.preview_foes()
+	for m in foes:
+		var fc := _vbox(2)
+		var mname := str(m["name"])
+		fc.add_child(_icon(GameData.sprite_for_monster(mname), 48))
+		var fl := _label(tr(mname.split(",")[0]), 11, true)
+		fl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		fc.add_child(fl)
+		fc.tooltip_text = "%s · %d HP" % [tr(mname), int(m["max_hp"])]
+		fc.mouse_filter = Control.MOUSE_FILTER_STOP
+		row.add_child(fc)
+	col.add_child(row)
+	return col
+
+
 func _render_combat_node(v: VBoxContainer) -> void:
 	var ns: Dictionary = GameState.run.get("node_state", {})
 	var kind := GameState.current_node_kind()
@@ -1069,8 +1108,10 @@ func _render_combat_node(v: VBoxContainer) -> void:
 		GameState.ensure_combat_bg()
 		var pre_bg_idx := int(ns.get("bg_idx", 0)) % GameData.BATTLE_BACKGROUNDS.size()
 		var bw := _battle_width()
-		v.add_child(_banner(GameData.BATTLE_BACKGROUNDS[pre_bg_idx], bw, 120.0 if _compact() else minf(_battle_height(bw), 190.0)))   # scenery only: Engage stays high on the screen
-		v.add_child(_label(tr("A boss awaits.") if is_boss else (tr("An elite awaits.") if kind == "elite" else (tr("A pillar of light awaits.") if kind == "pillar" else tr("A fight awaits."))), 16))
+		v.add_child(_banner(GameData.BATTLE_BACKGROUNDS[pre_bg_idx], bw, 72.0 if _compact() else minf(_battle_height(bw), 190.0)))   # scenery only: Engage stays high on the screen (the party/foe row sits below it)
+		if not _compact():   # on a phone the foe row says it, and Engage stays on screen
+			v.add_child(_label(tr("A boss awaits.") if is_boss else (tr("An elite awaits.") if kind == "elite" else (tr("A pillar of light awaits.") if kind == "pillar" else tr("A fight awaits."))), 16))
+		v.add_child(_room_preview())
 		var coming := GameState.coming_feat()
 		if coming != "":   # the Feat, before Engage
 			var ft: Array = Combat.feat_preview_text(coming, kind)

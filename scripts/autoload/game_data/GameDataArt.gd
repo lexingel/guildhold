@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Before each fight the room now shows your party's health and the foes waiting there (the same ones you'll fight), so Engage or Retreat is an informed choice.",
 	"When Essence piles up, the Grow line now also names a relic level on the Relic Altar or a Guild Management level that strengthens the party (Arcane Lab, Relic Vault, Wardstones).",
 	"The Guild status board's Grow line now speaks up whenever Gold or Essence is piling up, not only when the guild is stuck: it names a Forge temper, a hall wing, an evolution or a stronger recruit you can afford.",
 	"Recommended power now tells the truth: at Recommended a party seals a rift about 2 times in 3. Rank E and up, and especially the act finales, used to read Even when the odds were 1 in 5 to 1 in 2, so the numbers are higher now (fights themselves are unchanged).",

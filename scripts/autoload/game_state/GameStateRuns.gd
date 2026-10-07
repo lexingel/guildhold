@@ -147,6 +147,25 @@ func ensure_combat_bg() -> void:
 	run["node_state"] = ns
 
 
+## The foes engage_node() will roll on this floor (same seed, same diff),
+## for the room screen before Engage. gen_monsters() only reads state.
+func preview_foes() -> Array:
+	if run.is_empty() or not run.has("pos"):
+		return []
+	var kind := current_node_kind()
+	if not kind in ["combat", "elite", "boss", "pillar"]:
+		return []
+	var diff := _diff()
+	if kind == "pillar":
+		diff = diff.duplicate()
+		diff.erase("boss_name")
+	seed(hash([int(run.get("seed", 0)), int(run["pos"])]))
+	var floor_i := int(run["pos"]) % GameData.DESCENT_FLOORS if run.has("descent") else int(run["pos"])
+	var foes: Array = Combat.gen_monsters(diff, floor_i, "boss" if kind == "pillar" else kind)
+	randomize()
+	return foes
+
+
 func engage_node() -> void:
 	var diff := _diff()
 	var party: Array[Hero] = []
