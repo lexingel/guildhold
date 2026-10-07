@@ -1446,6 +1446,18 @@ func _topbar(container: Control, breadcrumb: String = "") -> void:
 	var stat_spacer := Control.new()
 	stat_spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(stat_spacer)
+	# End the day without a run (0.59; it used to live only in the Medical Bay).
+	if screen == "camp" and GameState.run.is_empty() and GameState.guild_name != "":
+		var end_day := _icon_button("res://assets/ui/node_campfire.png", tr("Day %d · End day") % GameState.day if term_tab == "camp" and not _compact() else "", func():
+			GameState.rest_guild()
+			render()
+		)
+		var tip := tr("Day %d. End the day and rest. Tomorrow:") % GameState.day
+		for line in GameState.day_preview():
+			tip += "\n• %s" % line
+		end_day.tooltip_text = tip
+		end_day.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(end_day)
 	for entry in [
 		[GameData.CURRENCY_ICON_PATH["coins"], GameState.coins],
 		[GameData.CURRENCY_ICON_PATH["crystals"], GameState.crystals],

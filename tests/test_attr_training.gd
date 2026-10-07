@@ -39,6 +39,15 @@ func run() -> void:
 	var c0 := GameState.coins
 	var refund := GameState.recall_training("h1")
 	check(refund == fee / 3 and GameState.coins == c0 + refund and h.training.is_empty() and h.is_available(), "recalled with 2 days left: the day under way is lost, the last one refunded (%d)" % refund)
+	# End day (0.59): the preview says who finishes tomorrow and what payday asks; resting passes a day.
+	GameState.start_training("h2", "focus", 1)
+	GameState.day = GameData.PAYDAY_DAYS - 1
+	GameState.coins = 0
+	var pv := GameState.day_preview()
+	check(pv.any(func(l): return l.contains(b.name.split(" the ")[0])) and pv.any(func(l): return l.contains("short")), "End day's preview: %s" % str(pv))
+	GameState.rest_guild()
+	check(GameState.day == GameData.PAYDAY_DAYS and b.training.is_empty(), "resting ends the day")
+	GameState.coins = 10000
 	# The cap: past ATTR_TRAIN_CAP trained points a course gives XP only.
 	h.attr_trained = GameData.ATTR_TRAIN_CAP
 	var m1 := int(h.attrs["might"])

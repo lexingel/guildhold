@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"End day: a campfire button in the top bar ends the day from any camp screen, without a run. Hover it to see what tomorrow brings: payday and whether you can pay, who finishes training, who is back on their feet, and a rift about to break.",
 	"The Training Yard: send heroes to train Might, Agility or Focus for 1, 2 or 3 days. Each day gives +1 attribute point, longer courses also give XP (up to your best hero's level), and you can watch them drill in the camp's courtyard. Trainees sit out runs; the yard has 2 stations and grows to 4 with the Drill Yard. It replaces buying points with Gold.",
 	"A new look: every fight now has a crisp, detailed backdrop drawn to match the heroes and foes, and the camp has become the ruins of an old Accord guild hall that your guild rebuilds as it grows, from scaffolding to a restored hall. Long sealing reports no longer stretch the screen.",
 	"The haul: what a rift run earns is only safe once the party is home. If the party falls, half of it is lost; fleeing a fight drops a quarter; sealing the rift or leaving between floors keeps it all. The run bar shows the haul, and at a boss's door you see what's at stake and can still retreat. A guild's first three seals are spared.",

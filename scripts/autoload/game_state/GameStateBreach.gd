@@ -280,3 +280,23 @@ func repair_building(key: String) -> String:
 	save()
 	state_changed.emit()
 	return ""
+
+
+## What ending the day will bring (the End day button, 0.59): payday, the
+## trainees and the downed who are done tomorrow, a rift about to break.
+func day_preview() -> Array[String]:
+	var out: Array[String] = []
+	var bill := weekly_wages() + upkeep()
+	if days_to_payday() == 1:
+		out.append(tr("Payday: a bill of %d Gold (you have %d)") % [bill, coins] if coins >= bill else tr("Payday: a bill of %d Gold, %d short") % [bill, bill - coins])
+	else:
+		out.append(tr("Payday in %d day%s") % [days_to_payday() - 1, GameData.pl(days_to_payday() - 1)])
+	for h in trainees():
+		if int(h.training["left"]) <= 1:
+			out.append(tr("%s finishes training") % h.name.split(" the ")[0])
+	for h in heroes:
+		if h.down_runs > 0 and h.down_runs <= 1 + int(founding_rule("recover", 0)):
+			out.append(tr("%s is back on their feet") % h.name.split(" the ")[0])
+	if breach_active() and not breach_broken() and breach_days_left() <= 1:
+		out.append(tr("The rift near %s breaks open") % breach_place())
+	return out
