@@ -44,7 +44,7 @@ func _await_or_timeout(sig: Signal, timeout_sec: float) -> void:
 const ACTION_BEAT := [0.6, 1.8, 1.0, 1.7, 0.7]
 
 
-func _play_frames(rect: TextureRect, frames: Array[String], frame_time: float = 0.08, beat := false) -> void:
+func _play_frames(rect: TextureRect, frames: Array[String], frame_time: float = 0.08, beat := false, on_strike := Callable()) -> void:
 	for k in frames.size():
 		# A screen navigation (e.g. opening Settings mid-animation) can free
 		# `rect` out from under this still-awaiting coroutine — bail instead
@@ -52,6 +52,8 @@ func _play_frames(rect: TextureRect, frames: Array[String], frame_time: float = 
 		if not is_instance_valid(rect):
 			return
 		rect.texture = load(frames[k])
+		if k == 3 and on_strike.is_valid():   # the strike frame: the blow lands, the arrow or bolt leaves (0.62.3)
+			on_strike.call()
 		var t: float = frame_time * (float(ACTION_BEAT[k]) if beat and frames.size() == ACTION_BEAT.size() else 1.0)
 		await _await_or_timeout(get_tree().create_timer(t).timeout, t + 1.0)
 
@@ -843,28 +845,65 @@ func _anim_hero_attack(h: Hero, hw: Control, rect: TextureRect, tw: Control, tin
 		else:
 			await _tween_lunge(hw)
 		return
+	var still := GameState.reduce_motion
+	var sx := hw.position.x
 	if role in MELEE_ROLES:
-		var sx := hw.position.x
-		await _dash(hw, tw.position.x - hw.custom_minimum_size.x * 0.9, 0.14)
-		if not is_instance_valid(arena):
-			return   # the screen was rebuilt mid-animation, freeing hw, rect and tw
-		if not frames.is_empty() and rect:
-			await _play_frames(rect, frames, 0.05, true)
+		if not still:   # a wind-up: a short step back before the dash (0.62.3)
+			await _dash(hw, sx - 10.0, 0.08)
 			if not is_instance_valid(arena):
 				return
-		Fx.burst(arena, Fx.hero_hit(role, h.type), _center(tw), tw.custom_minimum_size.y * 0.95, Color.WHITE, 18.0, randf_range(-0.3, 0.2))
-		_dash(hw, sx, 0.18)
-	else:
-		if not frames.is_empty() and rect:
-			await _play_frames(rect, frames, 0.06, true)
-		else:
-			await _tween_lunge(hw)
+		await _dash(hw, tw.position.x - hw.custom_minimum_size.x * 0.9, 0.12)
 		if not is_instance_valid(arena):
+			return   # the screen was rebuilt mid-animation, freeing hw, rect and tw
+		var strike := func():
+			if is_instance_valid(arena) and is_instance_valid(tw):
+				Fx.burst(arena, Fx.hero_hit(role, h.type), _center(tw), tw.custom_minimum_size.y * 0.95, Color.WHITE, 18.0, randf_range(-0.3, 0.2))
+				_camera_punch(arena, 1.015)
+		if not frames.is_empty() and rect:
+			await _play_frames(rect, frames, 0.05, true, strike)
+			if not is_instance_valid(arena):
+				return
+		else:
+			strike.call()
+		_dash(hw, sx, 0.18)
+		return
+	# Ranged: a ranger draws (leans back) and the string snaps on release; a
+	# caster gathers light in the hand (a cleric over a sigil). The arrow or
+	# bolt leaves the hand on the strike frame, not after the animation (0.62.3).
+	var arrow := role == "ranger"
+	var col: Color = Color.WHITE if arrow else (Palette.RANK_S if role == "cleric" else tint.lerp(Color.WHITE, 0.25))
+	var hand := _center(hw) + Vector2(hw.custom_minimum_size.x * 0.3, -hw.custom_minimum_size.y * 0.1)
+	if arrow:
+		if not still:
+			create_tween().tween_property(hw, "position:x", sx - 6.0, 0.2).set_ease(Tween.EASE_OUT)
+	else:
+		Fx.sparkles(arena, hand, col, 14, hw.custom_minimum_size.x * 0.5, true, 0.3)
+		if role == "cleric":
+			Fx.sigil(arena, _center(hw) + Vector2(0, hw.custom_minimum_size.y * 0.42), hw.custom_minimum_size.x * 0.9, Palette.RANK_S, 0.6)
+	var shot: Array = []
+	var release := func():
+		if not shot.is_empty() or not is_instance_valid(arena) or not is_instance_valid(tw) or not is_instance_valid(hw):
 			return
-		var arrow := role == "ranger"
-		var col: Color = Color.WHITE if arrow else (Palette.RANK_S if role == "cleric" else tint.lerp(Color.WHITE, 0.25))
-		var from := _center(hw) + Vector2(hw.custom_minimum_size.x * 0.3, -hw.custom_minimum_size.y * 0.1)
-		await _await_or_timeout(Fx.projectile(arena, "arrow" if arrow else "bolt", from, _center(tw), 44.0 if arrow else 34.0, col, 0.26).finished, 1.0)
+		if arrow:
+			Fx.ring(arena, hand, 12.0, Color.WHITE, 0.16)
+			if not still:
+				var t := create_tween()
+				t.tween_property(hw, "position:x", sx + 4.0, 0.05)
+				t.tween_property(hw, "position:x", sx, 0.12)
+		else:
+			Fx.burst(arena, "impact", hand, 26.0, col, 30.0)
+		shot.append(Fx.projectile(arena, "arrow" if arrow else "bolt", hand, _center(tw), 44.0 if arrow else 34.0, col, 0.22))
+	if not frames.is_empty() and rect:
+		await _play_frames(rect, frames, 0.065 if arrow else 0.06, true, release)
+		if is_instance_valid(rect):
+			rect.texture = load(frames[0])   # the shot is gone: back to the stance, not held at full draw
+	else:
+		await _tween_lunge(hw)
+	if not is_instance_valid(arena):
+		return
+	release.call()   # no strike frame (no frames, or an odd count): fire now
+	if not shot.is_empty():
+		await _await_or_timeout((shot[0] as Tween).finished, 1.0)
 
 
 ## An Ability: a charge-up on the caster, their skill frames, then the
