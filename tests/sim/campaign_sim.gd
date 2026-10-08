@@ -56,6 +56,7 @@ var bill_paid := {}      # week -> wages + upkeep paid
 var fights := {}         # rank -> [won, lost]
 var left_with_haul := 0
 var sustain := [0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0]   # mend/round sum, start hp sum, end hp sum, won fights
+var hard_level := 0   # hard=N: found at Hardship N (-1 Story), 0.64
 var take_path_relics := true   # relics=0: always take the Essence
 var path_relics_taken := 0
 var resolve_doors := [0, 0, 0, 0, 0]   # boss doors with Resolve on: [doors, wavering, broken, won from wavering/broken, sum of Resolve]
@@ -91,6 +92,8 @@ func _ready() -> void:
 		elif a.begins_with("resolve="):   # resolve=0 turns the drain off; resolve=2 doubles it (0.64)
 			for k in GameData.RESOLVE_DRAIN:
 				GameData.RESOLVE_DRAIN[k] = int(round(float(GameData.RESOLVE_DRAIN[k]) * float(a.substr(8))))
+		elif a.begins_with("hard="):
+			hard_level = int(a.substr(5))
 		elif a == "relics=0":
 			take_path_relics = false
 		elif a.begins_with("rstart="):
@@ -247,6 +250,7 @@ func _guild(p: String, s: int) -> void:
 		GameState.legacy["line"] = GameData.LINE_PIECES.size()
 	GameState.apply_founding(founding)
 	GameState.oaths = oaths.duplicate()
+	GameState.hardship = hard_level
 	if year == "random":
 		GameState.vale_year = GameState.roll_vale_year()
 	elif year != "":

@@ -79,6 +79,10 @@ func run() -> void:
 	GameState.relics.append(torc)
 	var st := Combat.start_combat(party, "combat", GameState._diff(), 1)
 	check(Combat._pm(st, "rage_cap") > 0.0 and Combat._pp_dmg_mult(st, rager, 0) > plain + 0.05, "Red Tooth Torc: a badly hurt Bloodrage hero hits harder (%.2f vs %.2f)" % [Combat._pp_dmg_mult(st, rager, 0), plain])
+	var hp0 := rager.hp
+	var healed := Combat._pp_heal(st, rager, 40)
+	check(Combat._pm(st, "rage_heal_cut") > 0.0 and healed == 20 and rager.hp == hp0 + 20, "and its drawback: Bloodrage heroes heal half as much (%d of 40)" % healed)
+	rager.hp = hp0
 	# Kindling Box: Evocation starts warm.
 	var box := Combat.relic_from_unique(GameData.find_unique_relic("p_kindling_box"))
 	box.equipped = true

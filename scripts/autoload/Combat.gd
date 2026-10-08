@@ -2066,6 +2066,8 @@ func _pp_start(state: Dictionary) -> void:
 			var pd := GameData.find_unique_relic(r.unique_id)
 			if pd.has("pmod"):
 				pmods[str(pd["pmod"])] = float(pd["value"])
+			if pd.has("pmod2"):   # its drawback (0.64.1)
+				pmods[str(pd["pmod2"])] = float(pd["value2"])
 	state["_pmods"] = pmods
 	for h in state["party"]:
 		var p := _pp(state, h)
@@ -2625,6 +2627,13 @@ func _pp_taken_mult(state: Dictionary, m: Dictionary, target: Hero) -> float:
 		return 0.0
 	if int(_pp(state, target).get("untouch", 0)) > 0 or int(_pp(state, target).get("vanish", 0)) > 0:
 		return 0.0
+	match _pa(target):   # Path relic drawbacks (0.64.1)
+		"shieldwall":
+			mult *= 1.0 + _pm(state, "guard_taken")
+		"zeal":
+			mult *= 1.0 + _pm(state, "zeal_taken")
+		"skirmisher":
+			mult *= 1.0 + _pm(state, "skirm_taken")
 	for a in _on_path(state, "aegis"):
 		var cut := SANCTUARY * (2.0 if _legend(a) else 1.0) + _pm(state, "sanctuary")
 		if _tw(a, "frostward-sister") and target.formation != "back":
@@ -2845,6 +2854,10 @@ func _pp_stun_immune(state: Dictionary, h: Hero) -> bool:
 ## Red Mist refuses it. Returns the HP restored.
 func _pp_heal(state: Dictionary, h: Hero, amount: int, overflow := true) -> int:
 	if amount <= 0 or h.hp <= 0 or int(_pp(state, h).get("mist", 0)) > 0:
+		return 0
+	# Path relic drawbacks (0.64.1): Brimming Chalice, Red Tooth Torc.
+	amount = int(round(amount * (1.0 - _pm(state, "heal_cut")) * (1.0 - (_pm(state, "rage_heal_cut") if _pa(h) == "bloodrage" else 0.0))))
+	if amount <= 0:
 		return 0
 	var room := max_hp(h) - h.hp
 	var healed := mini(room, amount)

@@ -25,6 +25,26 @@ const MAP_NODE_DESC := {
 }
 
 
+## What a map stop does to Resolve (0.64.1), or "" while Resolve doesn't count.
+func _resolve_line(kind: String) -> String:
+	if not GameState.resolve_on():
+		return ""
+	var d: Dictionary = GameData.RESOLVE_DRAIN
+	var g: Dictionary = GameData.RESOLVE_GAIN
+	match kind:
+		"elite":
+			return tr("Resolve: -%d after the fight, and -%d for the floor") % [int(d["elite"]), int(d["floor"])]
+		"hazard":
+			return tr("Resolve: -%d pushing through or -%d risking it, and -%d for the floor") % [int(d["hazard"]), int(d["risk"]), int(d["floor"])]
+		"campfire":
+			return tr("Resolve: +%d if you rest (+%d otherwise), then -%d for the floor") % [int(g["rest"]), int(g["campfire"]), int(d["floor"])]
+		"shrine":
+			return tr("Resolve: +%d, then -%d for the floor") % [int(g["shrine"]), int(d["floor"])]
+		"boss", "unknown":
+			return ""
+	return tr("Resolve: -%d for the floor") % int(d["floor"])
+
+
 func _path_node_marker(kind: String, is_current: bool, cb: Callable) -> Control:
 	const MARKER_SIZE := 34.0
 	var wrap := Control.new()
@@ -62,6 +82,9 @@ func _path_node_marker(kind: String, is_current: bool, cb: Callable) -> Control:
 		wrap.add_child(l)
 
 	var desc: String = MAP_NODE_DESC.get(kind, str(kind).capitalize())
+	var rline := _resolve_line(kind)
+	if rline != "":
+		desc = "%s\n%s" % [desc, rline]
 	ring.tooltip_text = desc
 	if cb.is_valid():
 		var btn := Button.new()
