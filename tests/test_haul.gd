@@ -7,6 +7,8 @@ extends "res://tests/base_test.gd"
 func _run(sealed: int, earned: int) -> void:
 	GameState.active_slot = 9
 	GameState.reset()
+	if sealed >= 3:   # past the grace (0.65: a day into Act II)
+		reveal_all()
 	GameState.guild_name = "T"
 	var h := Combat.gen_hero("F", 1)
 	h.id = "h%d" % GameState.next_id
@@ -55,6 +57,6 @@ func run() -> void:
 	_run(2, 200)
 	c0 = GameState.coins
 	_lose()
-	check(not GameState.haul_at_risk() and GameState.coins == c0, "a guild under 3 seals loses nothing")
+	check(not GameState.haul_at_risk() and GameState.coins == c0, "a guild before Act II loses nothing")
 	GameState.finish_run()
 	GameState.delete_slot(9)

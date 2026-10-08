@@ -16,6 +16,7 @@ func _heroes(n: int) -> Array[String]:
 func run() -> void:
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	var ids := _heroes(3)
 	GameState.runs_started = 3
@@ -31,10 +32,15 @@ func run() -> void:
 			differs = true
 	check(differs, "other days differ")
 	check(not a["rule"].has("party_cap"), "no party-cap rules on the Daily")
-	GameState.rifts_sealed = GameData.DAILY_SEALS - 1
-	check(not GameState.daily_available(), "locked before the seventh seal")
-	GameState.rifts_sealed = GameData.DAILY_SEALS
-	check(GameState.daily_available(), "open after seven seals")
+	var was_act: int = GameState.campaign_act
+	GameState.features_seen.erase("daily")
+	GameState.campaign_act = 2
+	check(not GameState.daily_available(), "locked before Act III")
+	GameState.campaign_act = 3
+	GameState.act_since = GameState.day - 1
+	check(GameState.daily_available(), "open a day into Act III")
+	GameState.campaign_act = was_act
+	GameState.features_seen.append("daily")
 	GameState.start_daily("E", ids, null)
 	check(int(GameState.run.get("daily", -1)) == today and GameState.run["boons"] == [a["boon"]] and str(GameState.run["rift_rank"]) == "E", "the twist rides a ladder rift, with its boon")
 	var layers1: Array = (GameState.run["layers"] as Array).duplicate(true)

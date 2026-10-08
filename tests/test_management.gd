@@ -5,6 +5,7 @@ extends "res://tests/base_test.gd"
 func run() -> void:
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 
 	# Old-save refund: every Crystal spent on the old tree comes back.
@@ -21,10 +22,10 @@ func run() -> void:
 			check(GameData.MANAGEMENT_NODE_ICON.has("%s.%s" % [b["id"], n["id"]]), "icon for %s" % n["id"])
 			check(Combat.describe_node_effect(n["id"], 3) != "", "description for %s" % n["id"])
 	check(nodes == 13, "13 upgrades (4 of them Defenses)")
-	GameState.crystals = 10000
+	GameState.coins = 10000
 	for i in 6:
 		GameState.upgrade_node("ops.barracks")
-	check(GameState.lvl("ops.barracks") == 5 and GameState.crystals == 10000 - 750, "5 levels cost 750, no 6th")
+	check(GameState.lvl("ops.barracks") == 5 and GameState.coins == 10000 - 750, "5 levels cost 750 Gold, no 6th (0.65: rooms are built with Gold)")
 
 	# Operations.
 	check(GameState.hero_slot_cap() == 16 and GameState.guild_mentor() and GameState.xp_mult() > 1.0, "Barracks: slots, mentor, XP")
@@ -84,6 +85,7 @@ func run() -> void:
 
 func _orders() -> void:
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	check(GameState.orders_per_rift() == 0, "no orders without Lv2 nodes")
 	GameState.upgrades = {"ops.infirmary": 2, "ops.drill": 2, "log.trade": 2, "log.scouts": 2}
@@ -138,6 +140,7 @@ func _orders() -> void:
 
 func _camp_props() -> void:
 	GameState.reset()
+	reveal_all()
 	for b in GameData.HAMLET_BUILDINGS:
 		if str(b.get("node", "")) != "":
 			check(not GameData.find_branch_node(str(b["node"])).is_empty(), "%s tied to a real upgrade" % b["id"])

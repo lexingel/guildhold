@@ -21,7 +21,7 @@ func _render_camp_screen(v: VBoxContainer) -> void:
 			_coach(v, "after_first_run", "Back at camp", "Equip what you found on the Roster's Hero tab (key 1), spend skill points under Skills, and hire more heroes when you can afford them. Every rift run or rest is one day.")
 		_render_camp(v)
 		return
-	var tab_feature: String = {"inventory": "inventory", "medical": "medical", "bestiary": "bestiary", "quests": "quests", "management": "management", "champions": "champions"}.get(term_tab, "")
+	var tab_feature: String = {"inventory": "inventory", "medical": "medical", "bestiary": "bestiary", "quests": "quests", "management": "management", "champions": "champions", "training": "training"}.get(term_tab, "")
 	if tab_feature != "" and not GameState.feature_unlocked(tab_feature):
 		_locked_feature(v, tab_feature)
 		return
@@ -125,6 +125,8 @@ func _render_camp(v: VBoxContainer) -> void:
 		if b["id"] == "campfire":
 			_start_ember_loop(scene, Vector2(anchor.x * sc.x, (anchor.y - 16.0) * sc.y))
 			continue
+		if not GameState.feature_unlocked(str(HAMLET_FEATURE.get(b["id"], ""))):   # where it leads isn't revealed yet: just scenery
+			continue
 		var tip := tr(str(b["name"])) + (tr(" — the %s") % tr(str(b["building"])) if b.has("building") else "")
 		if str(b.get("tier", "")) == "node":
 			tip += tr(" — tier %d/3 (%s Lv%d; grows at Lv3 and Lv5)") % [GameState.hamlet_tier(b), tr(str(GameData.find_branch_node(str(b["node"]))["name"])), GameState.lvl(str(b["node"]))]
@@ -186,6 +188,10 @@ func _render_camp(v: VBoxContainer) -> void:
 		board.custom_minimum_size.x = minf(360.0, SCENE_SIZE.x * 0.42)
 		scene.add_child(board)
 		v.add_child(scene)
+
+
+## The reveal each building waits for before it can be clicked.
+const HAMLET_FEATURE := {"drill": "training", "infirmary": "medical", "board": "quests", "market": "inventory", "vault": "relics"}
 
 
 ## Which tab's badge each building wears (its count of things to do).
@@ -458,14 +464,14 @@ func _guild_status_lines() -> Array:
 		for br in GameData.BRANCHES:
 			for n in br["nodes"]:
 				var key := "%s.%s" % [br["id"], n["id"]]
-				var lv := GameState.lvl(key)
-				if lv < int(n["max"]):
-					var c: int = int(n["cost_base"]) + int(n["cost_step"]) * lv
-					if c < best_cost:
-						best_cost = c
-						best = tr("%s Lv%d") % [tr(str(n["name"])), lv + 1]
-		if best != "" and GameState.crystals >= best_cost:
-			out.append([tr("Upgrade ready: %s (%d Essence)") % [tr(str(best)), best_cost], Palette.CRYSTALS, go_term.call("management")])
+				var c := GameState.room_cost(key)
+				if c > 0 and c < best_cost and GameState.room_open(key):
+					best_cost = c
+					best = tr("%s Lv%d") % [tr(str(n["name"])), int(GameState.upgrades.get(key, 0)) + 1]
+		if best != "" and GameState.coins >= best_cost:
+			out.append([tr("Room ready to build: %s (%d Gold)") % [tr(str(best)), best_cost], Palette.COINS, go_term.call("management")])
+	if not GameState.wing_offer.is_empty():
+		out.append([tr("A wing of the hall is on offer (%d Gold)") % GameState.hall_work_cost(), Palette.COINS if GameState.coins >= GameState.hall_work_cost() else Palette.MUTED, go_term.call("management")])
 	return out
 
 
@@ -909,7 +915,7 @@ func _treasury_card() -> PanelContainer:
 	figs.add_theme_constant_override("separation", 16)
 	figs.add_child(_ledger_figure(str(GameState.coins), tr("Gold in the vault"), Palette.COINS))
 	figs.add_child(_ledger_figure(str(bill), tr("Payday in %d day%s") % [int(f["days"]), tr(str(_pl(int(f["days"]))))], Palette.TEXT,
-		tr("Wages %d + upkeep %d Gold (%d a week per Guild Management level).") % [int(f["wages"]), int(f["upkeep"]), GameData.UPKEEP_PER_LEVEL]))
+		tr("Wages %d + upkeep %d Gold (%d a week per hall room level).") % [int(f["wages"]), int(f["upkeep"]), GameData.UPKEEP_PER_LEVEL]))
 	figs.add_child(_ledger_figure(str(after) if after >= 0 else tr("short %d") % -after, tr("Left after payday"), Palette.good() if after >= 0 else Palette.HAZARD))
 	var since := int(f["since"])
 	figs.add_child(_ledger_figure("%+d" % since, tr("Since last payday"), Palette.TEXT if since >= 0 else Palette.HAZARD, tr("Gold gained or spent since the last payday.")))
@@ -1202,8 +1208,7 @@ func _render_hub_cluster(v: VBoxContainer) -> void:
 		"guild_hall":
 			title = "Guild Hall"
 			entries = [
-				[GameData.CAMP_HUB_ICON_PATH["management"], "Management", func(): hub_cluster = ""; term_tab = "management"; render()],
-				["res://assets/skills/ingot_gold.png", "Hall Works", func(): hub_cluster = ""; term_tab = "management"; render()],
+				[GameData.CAMP_HUB_ICON_PATH["management"], "Accord Hall", func(): hub_cluster = ""; term_tab = "management"; render()],
 				["res://assets/skills/gem_blue_a.png", "Ledger", func(): hub_cluster = ""; term_tab = "ledger"; render()],
 				[GameData.CAMP_HUB_ICON_PATH["compendium"], "Codex", func(): hub_cluster = ""; term_tab = "compendium"; render()],
 				["res://assets/skills/trophy.png", "Records", func(): hub_cluster = ""; term_tab = "records"; render()],
@@ -1218,15 +1223,10 @@ func _render_hub_cluster(v: VBoxContainer) -> void:
 	v.add_child(_label(title, 18))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
-	var entry_feature := {"Management": "management", "Hall Works": "management", "Items": "inventory", "Crafting": "crafting", "Bestiary": "bestiary", "Quests": "quests", "Ledger": "management"}
+	var entry_feature := {"Accord Hall": "management", "Crafting": "crafting", "Bestiary": "bestiary"}
 	for entry in entries:
 		var fid: String = entry_feature.get(str(entry[1]), "")
-		if fid != "" and not GameState.feature_unlocked(fid):
-			var card := _hub_card(entry[0], tr("%s (locked)") % tr(str(entry[1])), func(): pass)
-			card.modulate = Color(1, 1, 1, 0.45)
-			card.tooltip_text = GameData.FEATURE_UNLOCKS[fid]["hint"]
-			row.add_child(card)
-		else:
+		if fid == "" or GameState.feature_unlocked(fid):   # a destination not revealed yet isn't shown
 			row.add_child(_hub_card(entry[0], entry[1], entry[2]))
 	v.add_child(row)
 
@@ -1546,7 +1546,7 @@ func _render_training_yard(v: VBoxContainer) -> void:
 			col.add_child(_label(h.name.split(" the ")[0], 13))
 			var t: Dictionary = h.training
 			var prog := str(t["program"])
-			var prog_name := tr(str(GameData.find_class(prog.trim_prefix("subclass:")).get("name", ""))) if prog.begins_with("subclass:") else tr(str(GameData.ATTR_LABEL.get(prog, prog)))
+			var prog_name := tr(str(GameData.find_class(prog.trim_prefix("subclass:")).get("name", ""))) if prog.begins_with("subclass:") else (tr("Mastery %d") % (h.mastery + 1) if prog == "mastery" else tr(str(GameData.ATTR_LABEL.get(prog, prog))))
 			col.add_child(_label(tr("%s · day %d of %d") % [prog_name, int(t["total"]) - int(t["left"]) + 1, int(t["total"])], 11, true))
 			row.add_child(col)
 			var back := _button("Recall", func(id=h.id):
@@ -1568,6 +1568,7 @@ func _render_training_yard(v: VBoxContainer) -> void:
 	if free.is_empty():
 		return
 	_render_subclass_training(v, free)
+	_render_mastery(v, free)
 	v.add_child(_hsep())
 	v.add_child(_label(tr("Send a hero to train"), 14))
 	var room := GameState.training_free() > 0
@@ -1600,6 +1601,36 @@ func _render_training_yard(v: VBoxContainer) -> void:
 			db.disabled = why != "" or not room or GameState.coins < GameState.train_fee(h, d)
 			db.tooltip_text = tr("%d day%s of %s: +%d point%s%s") % [d, tr(str(_pl(d))), tr(str(GameData.ATTR_LABEL[pick])), mini(d, GameData.ATTR_TRAIN_CAP - h.attr_trained), tr(str(_pl(mini(d, GameData.ATTR_TRAIN_CAP - h.attr_trained)))), tr(" and XP") if d >= 2 and h.level < GameState.train_level_cap() else ""]
 			row.add_child(db)
+		v.add_child(row)
+
+
+## Path Mastery (0.65): heroes who've finished their Path train ranks here,
+## a day and Essence each; every rank makes their Path rule 4% stronger.
+func _render_mastery(v: VBoxContainer, free: Array) -> void:
+	var done: Array = free.filter(func(h): return h.path != "" and GameData.subclass_stage(h.pool_id) >= 1)
+	if done.is_empty():
+		return
+	v.add_child(_hsep())
+	v.add_child(_label(tr("Path Mastery"), 14))
+	v.add_child(_wrap_label(tr("A hero on a Path can master it: each rank makes their Path rule %d%% stronger, for a day at the yard. Each Path stage opens more ranks (3, 6, then all %d).") % [int(round(GameData.MASTERY_STEP * 100)), GameData.MASTERY_MAX], 12, true))
+	for h in done:
+		var row := HFlowContainer.new()
+		row.add_theme_constant_override("h_separation", 8)
+		row.add_child(_hero_icon(h, 32))
+		var path: Dictionary = GameData.PATHS.get(GameData.hero_path_id(h), {})
+		var info := _vbox(0)
+		info.custom_minimum_size.x = 220
+		info.add_child(_label(tr("%s · %s") % [h.name.split(" the ")[0], tr(str(path.get("rule", {}).get("name", "")))], 13))
+		info.add_child(_label(tr("Mastery %d/%d · +%d%%") % [h.mastery, GameState.mastery_cap(h), int(round(GameData.MASTERY_STEP * h.mastery * 100))], 11, true))
+		row.add_child(info)
+		if h.mastery < GameData.MASTERY_MAX:
+			var lock := GameState.mastery_lock(h)
+			var b := _icon_button(GameData.CURRENCY_ICON_PATH["crystals"], tr("Rank %d · %d Essence") % [h.mastery + 1, GameState.mastery_cost(h)], func(id=h.id):
+				_flavor_toast = GameState.train_mastery(id)
+				render())
+			b.disabled = lock != ""
+			b.tooltip_text = lock if lock != "" else tr("%s: %s") % [tr(str(path.get("rule", {}).get("name", ""))), tr(str(path.get("rule", {}).get("desc", "")))]
+			row.add_child(b)
 		v.add_child(row)
 
 
@@ -2292,8 +2323,8 @@ func _render_compendium_crafting(v: VBoxContainer) -> void:
 
 func _render_compendium_systems(v: VBoxContainer) -> void:
 	var entries := [
-		["Guild Management", "Spend Essence on 9 upgrades across 4 branches, and Gold on Wardcraft (Armory, Quartermaster, Palisade, Watchtower), which softens breaches. Every level adds its effect; some levels unlock a perk (a first-strike bonus, a boss Essence cache, extra relic slots…). Guild Tier tracks total levels. A building damaged by a breach works a level lower until you repair it with Gold."],
-		["Daily twist", "Once you have sealed a rift, the Rift Ladder offers a twist each day: a rule and a starting boon that come from the date, so every guild faces the same one. Tick it and your next ladder rift (any rank) carries it; one try a day. Sealing it pays bonus Essence and grows your streak. Records (in the Guild Hall) track achievements, lifetime statistics and your last 30 runs; the Memorial remembers heroes lost for good."],
+		["The Accord Hall", "Your camp was an Accord hall once. Its 13 rooms are rebuilt with Gold, a few at a time as the guild grows: Operations after two seals, Infrastructure, Logistics and Wardcraft in Act II, Research in Act III. Every level adds its effect and a little upkeep; some levels unlock a perk (a first-strike bonus, a boss Essence cache, extra relic slots…). Guild Tier, and the hall's art, track total levels. At the end of Acts I, III and V you are offered two of the six wings and build one, 3 of 6 per guild. A room damaged by a breach works a level lower until you repair it with Gold."],
+		["Daily twist", "From Act III, the Rift Ladder offers a twist each day: a rule and a starting boon that come from the date, so every guild faces the same one. Tick it and your next ladder rift (any rank) carries it; one try a day. Sealing it pays bonus Essence and grows your streak. Records (in the Guild Hall) track achievements, lifetime statistics and your last 30 runs; the Memorial remembers heroes lost for good."],
 		[] if not GameData.ENDLESS_ENABLED else ["Endless Rift", "A real-time survival run in the region you pick, and only champions go in (up to 4). You steer the first (WASD, arrows, drag or stick); the rest follow and fight on their own, and each fires their signature move on a timer (the ring over their head fills as it recharges). Your equipped relics come along. Every five minutes the rift runs the same cycle: the horde, a swarm, an elite pack (its leader carries a chest), archers and casters, then a lull with a chest nearby, and a warden at the end of it. At 20:00 the Rift Warden comes: beat it to seal the rift. The rift's strength (shown before you enter) starts gentle and grows with every champion you free and every act you pass. A run pays Essence and a little Gold, and costs the guild a day."],
 		[] if not GameData.ENDLESS_ENABLED else ["Endless picks", "Collect shards to level up and pick 1 of 3; one card is always a signature pick while any are left. Party upgrades (damage, speed, health…), a champion's role skill, a rank in their signature (up to 3: sooner and harder), or one of their two signature mods once it has a rank (Aftershock, Kindled, Frostbite, Expose, Stagger, Leech, Shrapnel, Radiance, Bulwark, Fervor, Renewal, Smokescreen). From level 10, two champions whose signatures are rank 2 can fuse: they fire together, 25% harder, and carry each other's mods. Max an upgrade and the matching role's attack can evolve (Whirlwind, Thousand Cuts, Arrow Storm, Starfall, Sanctum). Chests give one of three rift relics for the run."],
 		[] if not GameData.ENDLESS_ENABLED else ["Endless ground", "The Vale has pillars that block foes, the Marches have pools that slow everyone, the Wastes have lava that burns foes and your lead. Braziers break when you walk into or hit them, dropping a heal, a magnet for shards or a bomb. Elites and wardens slam: step out of the red circle before it fills. Your first 5, 10 and 15 minutes and your first sealed rift each pay once, with two Endless relics and guild titles."],
@@ -2312,7 +2343,7 @@ func _render_compendium_systems(v: VBoxContainer) -> void:
 		["Designed encounters", "About six regular fights in ten are one of a region's named encounters (Scarecrow Line, Reed Snipers, Forge Guard...), groups whose members play off each other: a warder shielding a brute, a healer behind a wall, snipers behind a tank. The name and a tactical hint open the fight log; hover the round label to read the hint again."],
 		["Rift bosses", "Each boss is always the same fight. Vaelith's Harvest hits everyone and heals her, and she calls a Crier and a Warden at half health. Nyxara's Drowning Tide chills and weakens the party. Korrath's Sunder tears the wards off the front row. Drevok Brands a hero to take 50% more damage and calls fire cultists. Sythrane Immolates the party while she regenerates and enrages. Their signature moves are telegraphed like any other."],
 		["Bestiary", "Every monster, boss, and hazard you've encountered is tracked as a silhouette-to-full-color reveal — pure record-keeping, no reward tied to completion."],
-		["Tower of Trials", "Opens with Act II, in the Rift Hall. 100 fixed floors, one fight each: a floor is always the same fight, so a loss is something to plan around. Heroes fight at full HP and leave as they came (no downing, scars or days passing). Most floors carry a rule (armored or burning foes, a swarm, a party cap). Every 10th floor is a guardian that gives a unique relic, and floors 10/25/50/75/100 earn guild titles. Only a first clear pays; floors 91-100 reshuffle their rules every week and pay half for a re-clear."],
+		["Tower of Trials", "Opens with Act IV, in the Rift Hall. 100 fixed floors, one fight each: a floor is always the same fight, so a loss is something to plan around. Heroes fight at full HP and leave as they came (no downing, scars or days passing). Most floors carry a rule (armored or burning foes, a swarm, a party cap). Every 10th floor is a guardian that gives a unique relic, and floors 10/25/50/75/100 earn guild titles. Only a first clear pays; floors 91-100 reshuffle their rules every week and pay half for a re-clear."],
 		["Foes & regions", "Each rift is in a region (the Vale, the Marshes, the Ashen Wastes) with its own foes. Some foes wind up a heavy blow a turn ahead (x2.5, stuns unless the target Defends); armored foes shrug off part of every basic attack (each hit chips the armor; abilities ignore it); fire foes can burn and frost foes can chill (act late). A Field Tonic cleanses burn, chill, poison and stun."],
 		["Campaign", "Three acts, each ending in a finale rift against a named foe. Meet an act\'s objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a Legendary relic. Act I opens Greater Rifts, Act II the Endless Rift."],
 		["Relics", "Relics sit on the Relic Altar (Inventory) and empower the whole party. Every relic has a special; rare and epic ones also have a trigger that fires in battle (on a kill, every third round, when an ally falls...). Level a relic to 5 to awaken a new effect, or reroll any effect for Essence. Legendary relics have unique powers."],
@@ -2322,7 +2353,7 @@ func _render_compendium_systems(v: VBoxContainer) -> void:
 		["Champions", "Each new guild meets twelve champions, drawn from a pool of twenty-four: three are freed at the end of Acts I, II and III, and nine are lost in the Endless Rift, where a pillar of light marks each one (stand in it to free them). A champion never joins the roster. In rift runs one oversees the party: their Boon lifts everyone, and any hero can spend a turn on their Call (once a rift, twice from level 3). In the Endless Rift your champions are the party, each with their Call as a signature move. Essence levels them up (to 5)."],
 		["Attributes", "Might (damage, HP), Agility (speed, dodge, first strike) and Focus (ability power, mend). Heroes gain 3 points per level to spend on the Roster's Hero tab; gear adds more, and better gear needs a minimum in its attribute to equip. Train up to 8 extra points with Gold, or reset a hero's points for 5 Essence per level (gear they no longer qualify for comes off)."],
 		["Quests & Milestones", "The quest board posts 6 quests (hunts, boss bounties, rift seals, trials); take up to 3 at a time. Unaccepted postings are replaced every 3 days (a day passes with each rift run or rest). Milestones are a static checklist, auto-granted the moment they're met. Renown occasionally arms a guaranteed Epic relic at the next Shop. A rare escort NPC can also tag along on a fight — surviving pays a small bonus."],
-		["Wages, morale and the rival", "Every 7 days (a day = one rift run or rest) heroes draw wages by rank and level, and every Guild Management level costs upkeep; see Guild > Ledger. Unpaid upkeep costs Renown. The Training Yard trains only a few attribute points a week (more with the Drill Yard), and a feast seats a limited number of heroes, lowest morale first (more with the Trade Network). The unpaid lose morale, and a hero unpaid twice in a row, or at rock-bottom morale on payday, walks out. Morale (0-100) rises with sealed rifts and feasts and falls with defeats, knockouts, idle weeks and failed contracts: Inspired heroes deal +10% damage, Shaken -10%, Breaking -20%. Taken contracts are due in 6-10 days. A rival guild gains Renown daily, and once a week it may make a move you answer before payday: court one of your heroes (match their offer, or they choose, staying only at morale 50 or above), dare you to seal a rift by payday (Renown rides on it), or go for a posted contract (take it on or lose it). Requests and the rival's moves pop up at camp and wait in the Ledger, whose week board shows each day to payday. At payday, the leader on Renown gets the better recruits. Every 28 days, whichever guild gained more Renown wins a prize."],
+		["Wages, morale and the rival", "Every 7 days (a day = one rift run or rest) heroes draw wages by rank and level, and every hall room level costs upkeep; see Guild > Ledger. Unpaid upkeep costs Renown. The Training Yard trains only a few attribute points a week (more with the Drill Yard), and a feast seats a limited number of heroes, lowest morale first (more with the Trade Network). The unpaid lose morale, and a hero unpaid twice in a row, or at rock-bottom morale on payday, walks out. Morale (0-100) rises with sealed rifts and feasts and falls with defeats, knockouts, idle weeks and failed contracts: Inspired heroes deal +10% damage, Shaken -10%, Breaking -20%. Taken contracts are due in 6-10 days. A rival guild gains Renown daily, and once a week it may make a move you answer before payday: court one of your heroes (match their offer, or they choose, staying only at morale 50 or above), dare you to seal a rift by payday (Renown rides on it), or go for a posted contract (take it on or lose it). Requests and the rival's moves pop up at camp and wait in the Ledger, whose week board shows each day to payday. At payday, the leader on Renown gets the better recruits. Every 28 days, whichever guild gained more Renown wins a prize."],
 		["Hero requests", "Mid-week a hero may ask for something: time off (away a few days), a raise (a bigger wage for good), Gold for kit, a Training Yard slot, or your side in a feud with another hero. Saying yes costs something; saying no costs morale. Answer in the Ledger before payday, or it counts as a no."],
 		["Camp events", "On about a third of days something happens at camp, and each is a choice: a travelling merchant, a renowned hero who drills one of yours, a wandering recruit, a relic peddler, a smith's apprentice, a scholar; a festival, refugees, a debt, the rival's quartermaster. Threats (fire, fever, bandits, a storm, a rift tremor) are foretold the evening before (the status board and the week's calendar): pay, send a hero who stays home that day, or take the loss. An event left unanswered takes its last option the next day. Act I brings only opportunities."],
 		["The rift map", "A ranked rift is a map of lanes: Ranks F-E have 3, D-B 4, A and up 5. Each node leads on to its own lane and one or both neighbours on the next floor, so plan a route: an elite on the way to a treasure, a shop before the boss. Every route ends at a campfire before the boss. Anvils temper a worn piece for free, a Path's shrine teaches the party (its Path's heroes most), and a trainer's echo gives one hero a level. From Rank S, floors more than two ahead are unseen unless a Trapper or a Stalker scouts."],
@@ -2665,54 +2696,45 @@ func _render_endowment(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 
 
-## Hall Works: the guild's own hall rebuilt wing by wing with Gold (Guild
-## Management is Essence). Once every wing stands it folds to one line.
+## The hall's wings (Hall Works): the ones built, and the two on offer at the
+## end of Acts I, III and V (one of them can be built). A guild ends with 3.
 func _render_hall_works(v: VBoxContainer) -> void:
-	var built := GameState.hall_works.size()
-	if built >= GameData.HALL_WORKS.size():
-		var done := _label(tr("Hall Works · every wing rebuilt"), 13, true)
-		var tip := ""
-		for w in GameData.HALL_WORKS:
-			tip += "• %s: %s\n" % [tr(str(w["name"])), tr(str(w["bonus"]))]
-		done.tooltip_text = tip.strip_edges()
-		done.mouse_filter = Control.MOUSE_FILTER_STOP
-		v.add_child(done)
-		return
-	if GameState.campaign_act < 2:   # one line until the wings open
-		v.add_child(_label(tr("Hall Works · rebuild the hall with Gold · opens when Act I is done"), 13, true))
-		return
-	var head := _label(tr("Hall Works · %d/%d wings · next wing %d Gold") % [built, GameData.HALL_WORKS.size(), GameState.hall_work_cost()], 16)
+	var built: Array = GameData.HALL_WORKS.filter(func(w): return GameState.has_wing(str(w["id"])))
+	var head := _label(tr("Wings · %d/%d built") % [built.size(), GameData.WINGS_MAX], 16)
 	v.add_child(head)
-	v.add_child(_wrap_label("Rebuild the hall with Gold, one wing at a time, in any order. Each wing helps the whole guild for good; each costs more than the last.", 12, true))
+	for w in built:
+		var l := _wrap_label("%s (%s): %s" % [tr(str(w["name"])), tr(str(w["identity"])), tr(str(w["bonus"]))], 12)
+		l.add_theme_color_override("font_color", Palette.RANK_S)
+		v.add_child(l)
+	if GameState.wing_offer.is_empty():
+		var next: Array = GameData.WING_ACTS.filter(func(a): return GameState.campaign_act < int(a))
+		if built.size() < GameData.WINGS_MAX and not next.is_empty():
+			v.add_child(_wrap_label(tr("The next wing is offered at the end of Act %s: a choice of two, built with Gold.") % tr(str(GameState._roman(int(next[0]) - 1))), 12, true))
+		v.add_child(_hsep())
+		return
+	v.add_child(_wrap_label("Two wings could stand again. Build one: the other stays a ruin, so choose what kind of guild you are.", 12, true))
 	var grid := GridContainer.new()
-	grid.columns = 2 if _narrow() else 3
+	grid.columns = 1 if _narrow() else 2
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
-	for w in GameData.HALL_WORKS:
-		var id := str(w["id"])
-		var done := GameState.hall_works.has(id)
+	for id in GameState.wing_offer:
+		var w: Dictionary = GameData.HALL_WORKS.filter(func(x): return x["id"] == id)[0]
 		var card := PanelContainer.new()
 		card.theme_type_variation = &"CardPanel"
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var col := _vbox(4)
-		var nm := _label(tr(str(w["name"])), 14)
-		if done:
-			nm.add_theme_color_override("font_color", Palette.RANK_S)
-		col.add_child(nm)
+		col.add_child(_label("%s · %s" % [tr(str(w["name"])), tr(str(w["identity"]))], 14))
 		col.add_child(_wrap_label(tr(str(w["bonus"])), 12, true))
-		if done:
-			col.add_child(_label("Built", 12, true))
-		else:
-			var lock := GameState.hall_work_lock(id)
-			var b := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Build · %d Gold") % GameState.hall_work_cost(), func(k=id):
-				var err := GameState.build_hall_work(k)
-				render()
-				if err == "":
-					_payoff(tr("%s rebuilt") % tr(str(w["name"])), tr(str(w["bonus"])), Palette.COINS, "level_up")
-			)
-			b.disabled = lock != ""
-			b.tooltip_text = lock
-			col.add_child(b)
+		var lock := GameState.hall_work_lock(str(id))
+		var b := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Build · %d Gold") % GameState.hall_work_cost(), func(k=str(id)):
+			var err := GameState.build_hall_work(k)
+			render()
+			if err == "":
+				_payoff(tr("%s rebuilt") % tr(str(w["name"])), tr(str(w["bonus"])), Palette.COINS, "level_up")
+		)
+		b.disabled = lock != ""
+		b.tooltip_text = lock
+		col.add_child(b)
 		card.add_child(col)
 		grid.add_child(card)
 	v.add_child(grid)
@@ -2727,12 +2749,18 @@ func _render_management(v: VBoxContainer) -> void:
 	if GameState.legacy_written:   # spare Gold, after the halls or the walls
 		_render_endowment(v)
 	_render_hall_works(v)
+	# Only the rooms already revealed (GameData.BRANCH_FEATURE).
+	var open: Array = GameData.BRANCHES.filter(func(br): return GameState.feature_unlocked(str(GameData.BRANCH_FEATURE.get(br["id"], ""))))
 	if mgmt_branch == "":
 		mgmt_branch = _mgmt_last
+	if not open.any(func(br): return br["id"] == mgmt_branch):
+		mgmt_branch = str(open[0]["id"])
 	_mgmt_last = mgmt_branch
-	v.add_child(_hub_strip(GameData.MANAGEMENT_BG, GameData.BRANCHES.map(func(br): return [str(br["id"]), tr(str(br["name"])).trim_suffix(tr(" Branch"))]), mgmt_branch, func(id):
-		mgmt_branch = id
-		render()))
+	v.add_child(_label("Rooms · rebuilt with Gold; each level adds upkeep", 13, true))
+	if open.size() > 1:
+		v.add_child(_hub_strip(GameData.MANAGEMENT_BG, open.map(func(br): return [str(br["id"]), tr(str(br["name"])).trim_suffix(tr(" Branch"))]), mgmt_branch, func(id):
+			mgmt_branch = id
+			render()))
 	var branch: Dictionary = {}
 	for b in GameData.BRANCHES:
 		if b["id"] == mgmt_branch:
@@ -2843,7 +2871,7 @@ func _management_node_card(branch: Dictionary, n: Dictionary) -> PanelContainer:
 		cv.add_child(_wrap_label("⌂ Camp: every level grows the Guild Hall (guild tier)", 11, true))
 
 	if not maxed:
-		var cost: int = int(n["cost_base"]) + int(n["cost_step"]) * cur
+		var cost := GameState.room_cost(key)
 		var next_perk := str(perks.get(cur + 1, ""))
 		var ub := _icon_button(icon_path, (tr("Upgrade to Lv%d — %d Gold") if gold else tr("Upgrade to Lv%d — %d Essence")) % [cur + 1, cost], func(k=key, nm=str(n["name"]), nid=str(n["id"]), perk=next_perk):
 			var err := GameState.upgrade_node(k)

@@ -49,6 +49,7 @@ var year := ""           # "The Vale this year": year=dry,restless or year=rando
 var spire := ""          # the Spire's fall: spire=archive or spire=hollin ("" = either, at random)
 var hand_bonus := 0      # fights that paid the flawless-by-hand bonus
 var train_count := 0     # subclass trainings started (0.62)
+var mastery_ranks := 0   # Path Mastery ranks bought (0.65)
 var curve := {}          # power/recommended bucket -> [sealed, lost], ladder runs only
 # Per guild:
 var gross_gold := {}     # week -> Gold earned (runs, quests, defenses)
@@ -284,8 +285,9 @@ func _guild(p: String, s: int) -> void:
 	var last := (GameState.day - 1) / GameData.PAYDAY_DAYS
 	var top: Array = GameState.heroes.filter(func(h): return not h.is_champion)
 	top.sort_custom(func(a, b): return GameData.rank_index(a.rank) * 10 + a.level > GameData.rank_index(b.rank) * 10 + b.level)
-	print("   [%s seed %d] heroes: %s · subclass trainings %d" % [p, s, " ".join(top.slice(0, 6).map(func(h): return "%s%d/%d" % [h.rank, h.level, GameData.subclass_stage(h.pool_id)])), train_count])
+	print("   [%s seed %d] heroes: %s · subclass trainings %d · mastery ranks %d · rooms %d · wings %s" % [p, s, " ".join(top.slice(0, 6).map(func(h): return "%s%d/%d" % [h.rank, h.level, GameData.subclass_stage(h.pool_id)])), train_count, mastery_ranks + GameState.heroes.reduce(func(a, h): return a + (h.mastery if mastery_ranks == 0 else 0), 0), int(Combat.guild_tier_info()["total"]), GameState.hall_works])
 	train_count = 0
+	mastery_ranks = 0
 	print("   [%s seed %d] training yard: %d hero-days, attribute points trained %d" % [p, s, GameState.heroes.reduce(func(t, h): return t + int(h.history.get("trained_days", 0)), 0), GameState.heroes.reduce(func(t, h): return t + h.attr_trained, 0)])
 	print("   [%s seed %d] day %d act %d · %d Gold %d Essence · roster %d · week %d bill %d of income %d · Renown %d vs rival %d · charter %s/%s · echoes %d (%d back) · ambushes %d/%d won · Endless %d runs, %s · Morrow %s%s" % [p, s, GameState.day, GameState.campaign_act, GameState.coins, GameState.crystals, GameState.heroes.size(),
 		last - 1, int(bill_paid.get(last - 1, 0)), int(gross_gold.get(last - 1, 0)), GameState.reputation, GameState.rival_renown,
@@ -517,7 +519,10 @@ func _invest() -> void:
 		_spend_attrs(h)
 		_learn_all(h)
 	var bill := GameState.weekly_wages() + GameState.upkeep()
+	if not GameState.wing_offer.is_empty() and GameState.coins - GameState.hall_work_cost() > bill + 100:   # the wing on offer (0.65: the first of the two), before anything else
+		GameState.build_hall_work(str(GameState.wing_offer[0]))
 	_grow_heroes(bill + 200)
+	var wing_keep := GameState.hall_work_cost() / 2 if not GameState.wing_offer.is_empty() else 0   # half the wing on offer kept in hand
 	for round_i in 3:
 		var best_key := ""
 		var best_cost := 1 << 30
@@ -527,10 +532,9 @@ func _invest() -> void:
 				var cur := int(GameState.upgrades.get(key, 0))
 				if cur >= int(n["max"]):
 					continue
-				var gold: bool = str(n.get("currency", "")) == "gold"
-				var cost := int(n["cost_base"]) + int(n["cost_step"]) * cur
-				var ok: bool = (GameState.coins - cost > bill + 150 and GameState.campaign_act >= 2) if gold else GameState.crystals >= cost
-				if ok and cost < best_cost and GameState.feature_unlocked("management"):
+				var cost := GameState.room_cost(key)   # 0.65: every room is built with Gold
+				var ok: bool = GameState.coins - cost > bill + 150 + wing_keep and GameState.room_open(key)
+				if ok and cost < best_cost:
 					best_cost = cost
 					best_key = key
 		if best_key == "" or GameState.upgrade_node(best_key) != "":
@@ -563,19 +567,22 @@ func _invest() -> void:
 		var c := GameState.champion_level_cost(str(id))
 		if c > 0 and GameState.crystals > c + 200:
 			GameState.level_champion(str(id))
+	for i in 3:   # Path Mastery (0.65), the cheapest rank first, keeping some Essence back
+		var mh := GameState.mastery_pick()
+		if mh == null or GameState.crystals <= GameState.mastery_cost(mh) + 200 or GameState.train_mastery(mh.id) != "":
+			break
+		mastery_ranks += 1
 	if GameState.feast_ready() and GameState.heroes.any(func(h): return h.morale < 45) and GameState.coins > bill + GameState.feast_cost():
 		GameState.hold_feast()
 	for h in GameState.heroes:
 		GameState.equip_best(h.id)
-	# Gold into power (0.61): the hall's wings in order, then temper the lineup's gear, cheapest first.
-	for w in GameData.HALL_WORKS:
-		if GameState.coins - GameState.hall_work_cost() > bill + 300:
-			GameState.build_hall_work(str(w["id"]))
+	# Gold into power (0.61): temper the lineup's gear, cheapest first (the wing on offer comes before the rooms, above).
 	var worn: Array = GameState.items.filter(func(it): return lineup.has(it.equipped_to))
+	var keep_forge := GameState.hall_work_cost() / 2 if not GameState.wing_offer.is_empty() else 0
 	for i in 12:
 		worn.sort_custom(func(a, b): return GameState.forge_cost(a) < GameState.forge_cost(b))
 		var nxt: Array = worn.filter(func(it): return GameState.forge_cost(it) > 0)
-		if nxt.is_empty() or GameState.coins - GameState.forge_cost(nxt[0]) <= bill + 300 or GameState.forge_item(nxt[0].id) != "":
+		if nxt.is_empty() or GameState.coins - GameState.forge_cost(nxt[0]) <= bill + 300 + keep_forge or GameState.forge_item(nxt[0].id) != "":
 			break
 
 

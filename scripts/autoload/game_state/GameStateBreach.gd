@@ -248,7 +248,6 @@ func _close_breach() -> void:
 ## {held, coins, crystals, lost_coins, lost_crystals, damaged: [names], wounded: [names]}.
 ## A defense takes the guild's day.
 func resolve_breach(result: Dictionary, take_day := true) -> Dictionary:
-	note_milestone("first Riftbreak")
 	var held := bool(result.get("held", false))
 	if take_day:   # a breach rift's day passes in finish_run instead
 		_resolving = true   # the day passing below mustn't tick breaches
@@ -608,8 +607,11 @@ func camp_event_options() -> Array:
 			out.append([tr("Let it roam (Essence lost, the camp damaged)"), ""])
 		_:
 			for o in GameData.CAMP_EVENTS[id].get("opts", []):
+				var only_resolve: bool = (o.get("fx", {}) as Dictionary).keys() == ["resolve"]
 				if o.has("hero"):
 					out.append(_camp_helper_option(o["hero"], tr(str(o["label"]))))
+				elif o.has("gold") and only_resolve and not resolve_counts():   # Resolve that wouldn't count isn't sold (0.65)
+					out.append([tr(str(o["label"])) % camp_gold(int(o["gold"])), tr("Resolve doesn't count yet")])
 				elif o.has("gold"):
 					out.append([tr(str(o["label"])) % camp_gold(int(o["gold"])), gold.call(camp_gold(int(o["gold"])))])
 				elif o.has("ess"):
@@ -629,6 +631,7 @@ func _camp_helper_option(roles: Array, label: String) -> Array:
 
 ## Takes option `k` of today's event. "" on success, else why not.
 func answer_camp_event(k: int) -> String:
+	note_milestone("first camp event")
 	if camp_event.is_empty():
 		return ""
 	var opts := camp_event_options()
@@ -770,8 +773,9 @@ func _camp_fx(fx: Dictionary) -> Array:
 						change_morale(h, int(v))
 				out.append(tr("Morale up.") if int(v) > 0 else tr("Morale down."))
 			"resolve":
-				next_resolve += int(v)
-				out.append(tr("%+d Resolve for the next party.") % int(v))
+				if resolve_counts():
+					next_resolve = clampi(next_resolve + int(v), -GameData.RESOLVE_MAX, GameData.RESOLVE_MAX)
+					out.append(tr("%+d Resolve for the next party.") % int(v))
 			"tonic":
 				add_tonic("healing", int(v))
 			"xp_camp":

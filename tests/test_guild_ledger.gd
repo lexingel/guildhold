@@ -22,6 +22,7 @@ func run() -> void:
 	seed(3)
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	check(GameState.rival_name != "" and GameState.rival_renown == 0, "a new guild has a rival")
 	var a := _hero("F", 1)
@@ -186,6 +187,7 @@ func run() -> void:
 	# Pay rates: half pay halves the wage for a morale cost at payday, a bonus
 	# adds half again for a morale gain; payday pays the rate.
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	var p1 := _hero("F", 1)
 	var p2 := _hero("F", 1)
@@ -209,6 +211,7 @@ func run() -> void:
 
 	# The Guildhold Chronicle: a scene at the pay table, picked by the week.
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	var c1 := _hero("F", 1)
 	_hero("F", 1)

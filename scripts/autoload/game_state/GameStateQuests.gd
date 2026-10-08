@@ -336,7 +336,7 @@ func payday_forecast() -> Dictionary:
 
 ## Mid-week, maybe a hero asks for something (see HERO_REQUESTS).
 func maybe_hero_request() -> void:
-	if not hero_request.is_empty() or not GameData.REQUEST_DAYS.has(day % GameData.PAYDAY_DAYS):
+	if not hero_request.is_empty() or not GameData.REQUEST_DAYS.has(day % GameData.PAYDAY_DAYS) or not feature_unlocked("requests"):
 		return
 	var in_rift: Array = run.get("hero_ids", []) if not run.is_empty() else []
 	var pool: Array = heroes.filter(func(h): return not h.is_champion and not in_rift.has(h.id) and not h.is_downed() and h.busy_runs <= 0)
@@ -585,7 +585,8 @@ func _request_fx(fx: Dictionary, hs: Array) -> void:
 			"renown":
 				add_reputation(int(v))
 			"resolve":
-				next_resolve += int(v)
+				if resolve_counts():
+					next_resolve = clampi(next_resolve + int(v), -GameData.RESOLVE_MAX, GameData.RESOLVE_MAX)
 			"busy":
 				h.busy_runs = maxi(h.busy_runs, int(v))
 			"busy_pair":

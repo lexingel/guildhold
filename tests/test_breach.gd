@@ -13,6 +13,7 @@ func run() -> void:
 	seed(5)
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	var h := Combat.gen_hero("D", 5)
 	h.id = "h%d" % GameState.next_id
@@ -90,10 +91,10 @@ func run() -> void:
 	# builds on its built level, not the damaged one.
 	GameState.coins = 1000
 	var e0 := GameState.crystals
-	check(GameState.upgrade_node("def.armory") == "" and GameState.coins == 1000 - 80 and GameState.crystals == e0, "Defenses research costs Gold")
+	check(GameState.upgrade_node("def.armory") == "" and GameState.coins == 1000 - 50 and GameState.crystals == e0, "Defenses research costs Gold")
 	check((GameState.defense_opts()["towers"] as Array).has("frost"), "Armory Lv1 opens the Frost Totem")
 	GameState.upgrades["ops.barracks"] = 3
 	GameState.damaged["ops.barracks"] = 1
-	GameState.crystals = 1000
+	GameState.coins = 1000
 	GameState.upgrade_node("ops.barracks")
 	check(int(GameState.upgrades["ops.barracks"]) == 4 and GameState.lvl("ops.barracks") == 3, "an upgrade on a damaged building builds on its real level")

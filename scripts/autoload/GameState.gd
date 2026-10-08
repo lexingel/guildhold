@@ -98,6 +98,7 @@ func reset() -> void:
 	oaths = []
 	halls_restored = []
 	hall_works = []
+	wing_offer = []
 	tide_count = 0
 	tides_held = 0
 	tidewalls = 0
@@ -157,7 +158,11 @@ func _migrate_save(data: Dictionary) -> Dictionary:
 		# Heroes are converted after they load (migrate_hero_to_paths).
 		data["_paths_migrate"] = true
 		v = 4
-	# if v < 5: ...next migration goes here, then v = 5
+	if v < 5:
+		# The reveal schedule (0.65): what was open before stays open (after load).
+		data["_reveal_migrate"] = true
+		v = 5
+	# if v < 6: ...next migration goes here, then v = 6
 	data["save_version"] = max(v, SAVE_VERSION)
 	return data
 
@@ -287,6 +292,7 @@ func load_save() -> bool:
 	contest_start = (data.get("contest_start", {}) as Dictionary).duplicate()
 	rival_event = (data.get("rival_event", {}) as Dictionary).duplicate(true)
 	session = (data.get("session", {}) as Dictionary).duplicate()
+	session["n"] = int(session.get("n", 0)) + 1   # times this guild was opened (0.65, for the feedback report)
 	endless_milestones = (data.get("endless_milestones", []) as Array).map(func(x): return int(x))
 	boon_set4_reached = bool(data.get("boon_set4_reached", false))
 	tower_week = int(data.get("tower_week", 0))
@@ -300,7 +306,7 @@ func load_save() -> bool:
 	payday_report = data.get("payday_report", {})
 	guild_news = data.get("guild_news", [])
 	runs_started = int(data.get("runs_started", 0 if rifts_sealed == 0 and monsters_seen.is_empty() else 1))
-	pending_stories = []
+	pending_stories = (data.get("pending_stories", []) as Array).duplicate(true)   # cards still to read (0.65: they were lost on a reload)
 	if data.has("campaign_act"):
 		campaign_act = int(data["campaign_act"])
 	else:
@@ -327,6 +333,16 @@ func load_save() -> bool:
 	else:
 		# A guild from before staged unlocks: everything it already has is old news.
 		features_seen = GameData.FEATURE_UNLOCKS.keys().filter(func(f): return feature_unlocked(f))
+	if data.has("_reveal_migrate"):
+		# 0.65 hid things that were open from day 1, and opened the hall's rooms in stages.
+		var had: Array = ["forge", "training", "requests", "relics"]
+		if features_seen.has("management"):
+			had.append_array(["hall_rooms", "hall_research", "wardcraft"])
+		if rifts_sealed >= 3:
+			had.append("resolve")
+		for f in had:
+			if not features_seen.has(f):
+				features_seen.append(f)
 	triage_used_this_cycle = data.get("triage_used_this_cycle", false)
 	pending_shop_boost = data.get("pending_shop_boost", false)
 	guide_hidden = data.get("guide_hidden", false)
@@ -361,6 +377,7 @@ func load_save() -> bool:
 	oaths = (data.get("oaths", []) as Array).duplicate()
 	halls_restored = (data.get("halls_restored", []) as Array).duplicate()
 	hall_works = (data.get("hall_works", []) as Array).duplicate()
+	wing_offer = (data.get("wing_offer", []) as Array).duplicate()
 	tide_count = int(data.get("tide_count", 0))
 	tides_held = int(data.get("tides_held", 0))
 	tidewalls = int(data.get("tidewalls", 0))
@@ -368,6 +385,7 @@ func load_save() -> bool:
 	vale_year = (data.get("vale_year", {}) as Dictionary).duplicate(true)
 	board_claimed = (data.get("board_claimed", []) as Array).duplicate()
 	echoes_returned = int(data.get("echoes_returned", 0))
+	check_wing_offer()   # a guild past the end of Act I, III or V with a wing due
 	# Guilds that finished the campaign before Act IV existed start it now.
 	if campaign_act == 4 and not hints_seen.has("act4_intro"):
 		hints_seen.append("act4_intro")
@@ -416,6 +434,16 @@ func load_save() -> bool:
 			run["descent"] = int(run_data["descent"])
 		if run_data.has("resolve"):
 			run["resolve"] = int(run_data["resolve"])
+		if run_data.get("free_rally_used", false):
+			run["free_rally_used"] = true
+		var pre: Dictionary = (run["node_state"] as Dictionary).get("pre_hp", {})
+		if not pre.is_empty() and not (run["node_state"] as Dictionary).has("result"):
+			# Reloaded mid-fight: the fight starts over from where the party stood.
+			for id in pre:
+				var ph := find_hero(str(id))
+				if ph:
+					ph.hp = int(pre[id][0])
+					ph.down_runs = int(pre[id][1])
 		for key in ["morrow", "breach"]:
 			if run_data.has(key):
 				run[key] = bool(run_data[key])
@@ -483,15 +511,26 @@ func orders_left() -> int:
 	return maxi(0, orders_per_rift() - int(run.get("orders_used", 0)))
 
 
+## Whether the run has any Guild Order to show (one unlocked, or the War Room's Rally).
+func has_orders() -> bool:
+	return orders_per_rift() > 0 or free_rally()
+
+
+## The War Room's free Rally, once a rift (it needs no Drill Yard and no order).
+func free_rally() -> bool:
+	return has_wing("war_room") and not run.is_empty() and not run.get("free_rally_used", false) and not run.has("tower")
+
+
 ## "" if `id` can be used right now, else why not.
 func order_blocker(id: String) -> String:
 	if run.is_empty():
 		return tr("Only inside a rift")
 	if run.has("tower"):
 		return tr("The Tower is a trial: no orders")
-	if not orders_unlocked().has(id):
+	var free := id == "rally" and free_rally()
+	if not orders_unlocked().has(id) and not free:
 		return tr("Not unlocked")
-	if orders_left() <= 0:
+	if orders_left() <= 0 and not free:
 		return tr("No orders left this rift")
 	var ns: Dictionary = run.get("node_state", {})
 	var in_fight: bool = ns.has("combat_state") and not ns.has("result")
@@ -540,7 +579,10 @@ func use_order(id: String) -> String:
 			var a: String = pool[0]
 			var rest: Array = pool.filter(func(k): return k != a)
 			layer["options"] = [a, rest[0]]
-	run["orders_used"] = int(run.get("orders_used", 0)) + 1
+	if id == "rally" and free_rally():
+		run["free_rally_used"] = true
+	else:
+		run["orders_used"] = int(run.get("orders_used", 0)) + 1
 	save()
 	state_changed.emit()
 	return ""

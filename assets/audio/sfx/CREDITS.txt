@@ -16,5 +16,6 @@ Made from the sounds above (0.69, tools/derive_sfx.py: pitch, filters, layers, a
   path_* (one per Path), foe_hit_* / foe_down_* (by region), dodge, guard, ward, boss_down,
   elite_down, camp_event, camp_dilemma, camp_omen, tab, node_pick, resolve_down, resolve_waver,
   relic_pick, title, payday
+  (0.65: these are loudness-matched, by the loudest 0.4 s, not peak-matched.)
 
 Each was trimmed and gain-matched to sit with the rest.

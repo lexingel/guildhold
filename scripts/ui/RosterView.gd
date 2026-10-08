@@ -1026,7 +1026,7 @@ func _equip_picker_modal(h: Hero, slot_type: String, idx: int) -> void:
 		wl.add_child(wn)
 		wear.add_child(wl)
 		var fcost := GameState.forge_cost(equipped)
-		if fcost > 0:   # the Forge, on the gear a hero wears
+		if fcost > 0 and GameState.feature_unlocked("forge"):   # the Forge, on the gear a hero wears
 			var fb := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Temper %d/%d · %d Gold") % [equipped.forge_level + 1, GameData.FORGE_MAX, fcost], func(iid=equipped.id):
 				var err := GameState.forge_item(iid)
 				if err != "":
@@ -1339,6 +1339,7 @@ func _item_modal(it: Item) -> void:
 	# The Forge: Gold tempers any item, equipped or not.
 	var fcost := GameState.forge_cost(it)
 	var forge_row := HBoxContainer.new()
+	forge_row.visible = GameState.feature_unlocked("forge")
 	forge_row.add_theme_constant_override("separation", 8)
 	var fl := _label(tr("Forge — tempered %d/%d") % [it.forge_level, GameData.FORGE_MAX], 13, true)
 	fl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1355,7 +1356,7 @@ func _item_modal(it: Item) -> void:
 		fb.tooltip_text = tr("Every rolled stat on this item grows %d%%. Each temper costs more than the last.") % int(GameData.FORGE_STEP * 100)
 		forge_row.add_child(fb)
 	cv.add_child(forge_row)
-	if it.unique_id == "":
+	if it.unique_id == "" and GameState.feature_unlocked("crafting"):
 		var rcost := GameState.reforge_cost(it)
 		cv.add_child(_label(tr("Reforge — reroll one stat (%d Essence)") % rcost, 13, true))
 		var ref_row := HFlowContainer.new()

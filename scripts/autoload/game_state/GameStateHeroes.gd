@@ -656,6 +656,7 @@ func tree_points_spent(h: Hero, kind: String) -> int:
 ## (a Legend keeps the hero's Path). Changing Path refunds the old Path
 ## tree's skill points when it isn't also the role tree.
 func apply_subclass(h: Hero, pool_id: String, path: String = "") -> void:
+	note_milestone("first Path")
 	var cls := GameData.find_class(pool_id)
 	if cls.is_empty():
 		return
@@ -987,6 +988,58 @@ func start_training(hero_id: String, program: String, days: int, free := false) 
 	return ""
 
 
+## ---- Path Mastery (0.65) ----
+## "" if `h` can train their next Mastery rank now, else why not.
+func mastery_lock(h: Hero) -> String:
+	if h == null or h.is_champion or h.path == "" or GameData.subclass_stage(h.pool_id) < 1:
+		return tr("Train a Path first")
+	if h.mastery >= GameData.MASTERY_MAX:
+		return tr("Mastered")
+	if h.mastery >= mastery_cap(h):
+		return tr("The next Path stage opens rank %d") % (h.mastery + 1)
+	if not h.training.is_empty():
+		return tr("Already training")
+	if not h.is_available() or (run.get("hero_ids", []) as Array).has(h.id):
+		return tr("Not here to train")
+	if training_free() <= 0:
+		return tr("Every station is taken")
+	if crystals < mastery_cost(h):
+		return tr("Needs %d Essence") % mastery_cost(h)
+	return ""
+
+
+## The highest Mastery rank `h`'s Path stage allows (GameData.MASTERY_BY_STAGE).
+func mastery_cap(h: Hero) -> int:
+	return int(GameData.MASTERY_BY_STAGE[clampi(GameData.subclass_stage(h.pool_id), 0, 3)])
+
+
+func mastery_cost(h: Hero) -> int:
+	return GameData.MASTERY_ESSENCE * (h.mastery + 1)
+
+
+## A day at the yard for the next Mastery rank. "" on success, else why not.
+func train_mastery(hero_id: String) -> String:
+	var h := find_hero(hero_id)
+	var lock := mastery_lock(h)
+	if lock != "":
+		return lock
+	var cost := mastery_cost(h)
+	crystals -= cost
+	h.training = {"program": "mastery", "left": 1, "total": 1, "fee": 0, "essence": cost}
+	save()
+	state_changed.emit()
+	return ""
+
+
+## The hero whose next Mastery rank is cheapest and trainable now (the advice), or null.
+func mastery_pick() -> Hero:
+	var pick: Hero = null
+	for h in heroes:
+		if mastery_lock(h) == "" and (pick == null or mastery_cost(h) < mastery_cost(pick)):
+			pick = h
+	return pick
+
+
 ## Calls a hero back early: the days already done are kept, the day in
 ## progress and its fee are lost, the days not started are refunded.
 func recall_training(hero_id: String) -> int:
@@ -1010,7 +1063,8 @@ func _train_day() -> void:
 		var t: Dictionary = h.training
 		var a := str(t["program"])
 		var subclass := a.begins_with("subclass:")
-		if not subclass and h.attr_trained < GameData.ATTR_TRAIN_CAP:
+		var mastery := a == "mastery"
+		if not subclass and not mastery and h.attr_trained < GameData.ATTR_TRAIN_CAP:
 			h.attrs[a] = int(h.attrs.get(a, GameData.ATTR_BASELINE)) + 1
 			h.attr_trained += 1
 		if int(t["total"]) >= 2 and h.level < cap:
@@ -1020,6 +1074,9 @@ func _train_day() -> void:
 			h.training = {}
 			if subclass:
 				apply_subclass(h, a.trim_prefix("subclass:"), str(t.get("path", "")))
+			elif mastery:
+				h.mastery = mini(GameData.MASTERY_MAX, h.mastery + 1)
+				push_toast(h, tr("Path Mastery"), tr("%s reaches Mastery %d: their Path rule is %d%% stronger.") % [tr(str(h.name.split(" the ")[0])), h.mastery, int(round(GameData.MASTERY_STEP * h.mastery * 100))])
 			else:
 				push_toast(h, tr("Training done"), tr("%s is back from the Training Yard.") % tr(str(h.name.split(" the ")[0])))
 		h.history["trained_days"] = int(h.history.get("trained_days", 0)) + 1

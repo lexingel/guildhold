@@ -110,10 +110,34 @@ def crackle(d=0.4, density=0.02):
     return lp(n, 5000) * env(len(n), decay=2.5) * 4
 
 
-def save(name, x, peak=0.7):
+def loudness(x):
+    """dBFS RMS of the loudest 0.4 s (the whole clip when shorter), after a
+    gentle high-pass: a rough short-term loudness, enough to even out a set."""
+    y = hp(np.asarray(x, dtype=np.float64), 100)
+    w = int(SR * 0.4)
+    if len(y) <= w:
+        r = np.sqrt(np.mean(y ** 2))
+    else:
+        c = np.concatenate([[0.0], np.cumsum(y ** 2)])
+        r = np.sqrt(np.max(c[w:] - c[:-w]) / w)
+    return 20 * np.log10(max(r, 1e-9))
+
+
+# Loudness targets (0.65: they were all set to the same peak, so a long
+# rumble played far louder than a click). Small UI ticks sit under the
+# moments; the big moments sit a little over.
+TARGET_DB = -20.0
+TARGETS = {"tab": -27.0, "node_pick": -25.0, "boss_down": -17.0, "title": -18.0, "payday": -18.0, "relic_pick": -18.0, "camp_omen": -22.0}
+CEILING = 0.9
+
+
+def save(name, x):
     x = np.asarray(x, dtype=np.float64)
-    m = np.max(np.abs(x)) or 1.0
-    x = x / m * peak
+    x = x / (np.max(np.abs(x)) or 1.0)
+    x = x * 10 ** ((TARGETS.get(name, TARGET_DB) - loudness(x)) / 20)
+    m = np.max(np.abs(x))
+    if m > CEILING:   # the peak ceiling wins: a very peaky effect ends a little quieter
+        x = x / m * CEILING
     pcm = (np.clip(x, -1, 1) * 32767).astype(np.int16)
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
         path = tmp.name
@@ -177,5 +201,6 @@ RECIPES = {
 
 if __name__ == "__main__":
     for name, make in RECIPES.items():
-        save(name, make())
+        x = make()
+        save(name, x)
     print("%d effects written to %s" % (len(RECIPES), os.path.normpath(DIR)))

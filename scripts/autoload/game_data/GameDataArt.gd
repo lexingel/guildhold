@@ -60,23 +60,39 @@ const ESCORT_NAMES := ["Wounded Survivor", "Lost Scout", "Stranded Merchant", "F
 ## (bigger target, bigger reward including Reputation) quests. `type` is
 ## looked up against GameState.quest_progress()'s match — kept here only as
 ## the id/label pairing so a new type is a one-line add in both places.
-## Features open up as the guild grows instead of all at once. Each entry:
-## what unlocks it (checked by GameState.feature_unlocked) and the toast that
-## announces it. Roster, Recruits, Rift Hall and the Codex are always open.
-const CRAFTING_SEALS := 5
-const DAILY_SEALS := 7
+## Features open up as the guild grows instead of all at once (the reveal
+## schedule, docs/design/focus_2026_10.md). Each entry: its gate, read by
+## GameState.feature_unlocked ("seals": rifts sealed, "act": campaign act
+## reached, "act_days": days into that act; entries without a gate have their
+## own rule there) and how it is announced: a story card from "who" when set,
+## else a toast. Roster, Recruits, Rift Hall and the Codex are always open.
 const FEATURE_UNLOCKS := {
-	"inventory": {"name": "Inventory", "hint": "Opens once you find your first item or relic", "news": "Loot you find is kept here — equip items on the Roster's Hero tab."},
+	"inventory": {"name": "Inventory", "hint": "Opens once you find your first item", "news": "Loot you find is kept here — equip items on the Roster's Hero tab."},
 	"medical": {"name": "Medical Bay", "hint": "Opens after your first rift run", "news": "Wounded and downed heroes recover faster in a bed."},
 	"bestiary": {"name": "Bestiary", "hint": "Opens after your first fight", "news": "Every foe you meet is recorded here."},
-	"quests": {"name": "Quests", "hint": "Opens after you seal your first rift", "news": "Take on quests for Gold, Essence and Renown."},
-	"management": {"name": "Management", "hint": "Opens after you seal 2 rifts", "news": "Spend Essence (and Gold, for Defenses) on lasting guild upgrades."},
-	"crafting": {"name": "Crafting", "hint": "Opens after you seal 5 rifts", "news": "Combine 3 spare items or relics into a better one."},
-	"daily": {"name": "Daily twist", "hint": "Opens after you seal 7 rifts", "news": "Once a day a ladder rift can carry a twist: a special rule and a starting boon, for extra Essence. Tick it in the Rift Hall."},
-	"rival": {"name": "Rival moves", "hint": "Opens after you seal 3 rifts", "news": "Once a week the rival guild may court a hero, dare you, or go after a contract. Answer before payday."},
-	"tower": {"name": "Tower of Trials", "hint": "Opens when you complete Act I", "news": "100 fixed floors in the Rift Hall. Each floor is always the same fight, and pays the first time you clear it."},
+	"quests": {"name": "Quests", "hint": "Opens after you seal your first rift", "seals": 1, "news": "Take on quests for Gold, Essence and Renown."},
+	"training": {"name": "Training Yard", "hint": "Opens after you seal 2 rifts", "seals": 2, "who": "Wen, the Chronicler",
+		"news": "\"Two rifts sealed, and the yard behind the barracks is finally clear of rubble. Send a hero there for a few days and they come back stronger: an attribute point, a new program. The Drill Yard room adds places.\""},
+	"management": {"name": "Accord Hall", "hint": "Opens after you seal 2 rifts", "seals": 2, "who": "Wen, the Chronicler",
+		"news": "\"This camp was an Accord hall once. The Barracks, the Infirmary and the Drill Yard can be rebuilt now, room by room, with Gold. Each level costs a little upkeep. More rooms open as the guild grows.\" (Guild > Accord Hall)"},
+	"requests": {"name": "Hero requests", "hint": "Opens after you seal 3 rifts", "seals": 3, "news": "Twice a week a hero may ask for something: time off, a partner, a rift of their own. Say yes for their trust, or no."},
 	"champions": {"name": "Champions", "hint": "Opens when you free your first champion (the end of Act I)", "news": "A champion oversees your rift runs: their Boon for the party and their Call. Choose one and level them up under Roster > Champions."},
+	"forge": {"name": "The Smithy", "hint": "Opens when you complete Act I", "act": 2, "who": "Dobbs, the Quartermaster",
+		"news": "\"Found a smith who'll work for our rates. Bring her any piece a hero wears and she'll temper it: every stat on it a little higher, for Gold. Each temper costs more than the last.\" (Roster > a hero's item)"},
+	"relics": {"name": "Relics", "hint": "Opens when you complete Act I", "act": 2, "news": "Relics bend the rules of a fight for the whole guild. Equip them under Inventory > Relics; you have a few slots."},
+	"rival": {"name": "Rival moves", "hint": "Opens a day into Act II", "act": 2, "act_days": 1, "news": "Once a week the rival guild may court a hero, dare you, or go after a contract. Answer before payday."},
+	"resolve": {"name": "Resolve and the haul", "hint": "Opens a day into Act II", "act": 2, "act_days": 1, "who": "Old Hesper",
+		"news": "\"The easy rifts are behind you. From now on a party carries Resolve: hard floors and hazards wear it down, rests and shrines bring it back, and a party that breaks hits softer. And what you carry is at risk: lose the boss, or run, and part of the haul stays down there.\""},
+	"hall_rooms": {"name": "More hall rooms", "hint": "Opens two days into Act II", "act": 2, "act_days": 2, "news": "The Infrastructure and Logistics rooms can be rebuilt now: Essence Amplifiers, Wardstones, the Trade Network and the Scouts' Lodge (Guild > Accord Hall)."},
+	"wardcraft": {"name": "Wardcraft", "hint": "Opens when the first rift swells into a breach", "news": "The Armory, Quartermaster, Palisade and Watchtower soften breach rifts (Guild > Accord Hall)."},
+	"crafting": {"name": "Reforge and combine", "hint": "Opens when you complete Act II", "act": 3, "who": "Dobbs, the Quartermaster",
+		"news": "\"The smith has taken on an apprentice. Now she can reforge one stat on an item for Essence, and melt three spare pieces into one better one.\" (Inventory > Crafting)"},
+	"hall_research": {"name": "Research rooms", "hint": "Opens when you complete Act II", "act": 3, "news": "The Relic Vault and the Arcane Lab can be rebuilt now (Guild > Accord Hall)."},
+	"daily": {"name": "Daily twist", "hint": "Opens when you complete Act II", "act": 3, "act_days": 1, "news": "Once a day a ladder rift can carry a twist: a special rule and a starting boon, for extra Essence. Tick it in the Rift Hall."},
+	"tower": {"name": "Tower of Trials", "hint": "Opens when you complete Act III", "act": 4, "news": "100 fixed floors in the Rift Hall. Each floor is always the same fight, and pays the first time you clear it."},
 }
+## Which Accord Hall rooms (GameData.BRANCHES ids) each reveal opens.
+const BRANCH_FEATURE := {"ops": "management", "infra": "hall_rooms", "log": "hall_rooms", "def": "wardcraft", "res": "hall_research"}
 
 ## One-shot SFX, all CC0 (Kenney.nl — Interface Sounds/RPG Audio/Impact
 ## Sounds packs, see assets/audio/sfx/KENNEY_LICENSE.txt). Every key here is
@@ -160,6 +176,8 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"], ["es", "Español (beta)"], ["zh_CN", "简体中文 (beta)"]]
 
 const WHATS_NEW := [
+	"One new thing at a time. A new guild starts with heroes, rifts, fights and payday; the rest comes in turn, brought in by Wen, Dobbs or Hesper: the Training Yard and the hall's first rooms after two seals, the Smithy and relics with Act I's finale, the rival, Resolve and the haul a day into Act II, reforging and the Daily twist in Act III, the Tower in Act IV. A player whose past guild got past Act I has all of Act II's from day 1. The Accord Hall is one tree now: its 13 rooms are built with Gold, and at the end of Acts I, III and V you choose one of two wings (3 of 6 per guild), each with a new effect. Heroes on a Path can train Path Mastery for Essence: each rank makes their Path rule 4% stronger.",
+	"Fixes from the review: a reload in the middle of a fight puts the party back as it stood before it, so the fight starts over fairly (and running from it afterwards costs the haul, as fleeing does). The hazard card now shows exactly what lands, Pathfinder and Scavenger included. A key left waiting in Settings no longer catches a later press; moved keys stay in fights and the hints name them. Resolve isn't sold while it doesn't count. The daily score counts Resolve only where it drains and scales with the difficulty. Phones: the map's legend wraps, Resolve shows in a fight, and the attack shows its damage on the foe. Story cards waiting to be read survive a reload. The sound effects are loudness-matched. Settings > Send feedback can share play milestones with the developer, if you tick it.",
 	"Five Path relics now carry a drawback, as designed: Bulwark Chain, Red Tooth Torc, Brimming Chalice, Burning Psalter and Feather-Step Wraps. Each stop on the rift map says what it costs or gives back in Resolve. Hardship levels were checked in a full simulation: the Recommended power stays honest at every level.",
 	"Deeper rifts and a busier guild. Resolve: a party sets out with 8 and loses some with every floor, elite, risky hazard and fled fight; campfires, shrines and some events give it back. At 3 or less foes strike first; at 0 the heroes also lose their Momentum. Sealing a Rank D or higher rift offers one of 30 Path relics, each bending a Path's rule (or Essence instead). The camp has 15 new events and heroes 20 new requests, twice a week, that leave quirks, bonds and titles; heroes earn titles for their deeds and can be renamed on their page. A new guild picks its difficulty: Story, Standard, or a Hardship once a guild has reached Act IV. Hovering a fight command shows the damage it would deal, and Settings > Controls moves the fight keys. About 40 new sounds. The game speaks Spanish, and Simplified Chinese on desktop (both beta). A sealed daily twist has a score you can post to the day's board.",
 	"A simpler, deeper guild. Rifts are maps now: lanes that cross (3 at the low ranks, up to 5 at the top), so you plan a route, with a campfire before every boss and new stops along the way (an anvil that tempers a piece for free, a Path's shrine, a trainer's echo); from Rank S the far floors stay unseen unless a Trapper or a Stalker scouts. The camp lives: on about a third of days a merchant, a visiting hero, a wandering recruit or a dilemma turns up, and threats like fire, fever, bandits and storms are foretold the evening before, so you can pay, send a hero, or take the loss. Breaches are held in a breach rift (fights back to back, no camp between them) instead of the tower defense, and the Defenses research is now Wardcraft, which softens them. The real-time Endless Rift is resting for now: its gate leads down the Descent. A saved Descent also remembers its depth now.",

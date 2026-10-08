@@ -13,7 +13,7 @@ const SLOT_COUNT := 3
 ## _migrate_save() on anything older before reading it. (Older, per-field
 ## fallbacks still live in the model from_dicts: Hero attrs, Item attrs,
 ## Relic specials, the Guild Board's old contract/daily format.)
-const SAVE_VERSION := 4
+const SAVE_VERSION := 5
 const ACTIVE_SLOT_PATH := "user://active_slot.cfg"
 const SETTINGS_PATH := "user://settings.json"
 var active_slot: int = 0
@@ -26,6 +26,8 @@ var reduce_motion := false   # no shakes, sways, zooms or flashes in fights (set
 var key_hints := false      # keycaps on the fight's command buttons (settings.json); tooltips always name the key
 var colorblind := false      # blue instead of green against red, rarity letters on items (settings.json)
 var language := "en"         # a GameData.LANGUAGES locale (settings.json)
+var share_stats := false     # opt-in: the session's milestones go to the developer's relay (settings.json, 0.65)
+var install_id := ""         # a random id for this install: the daily board and shared stats, never the save
 var hearing_aid := false     # captions for meaningful sounds + an edge pulse on big hits (settings.json; see AudioManager.cue)
 var ui_scale: float = 1.0   # whole-UI scale (Window.content_scale_factor), a settings.json preference   # animation time scale inside a rift (x1/x2/x3), a settings.json preference
 var sfx_volume: float = 1.0
@@ -86,6 +88,7 @@ var founding: String = "free"        # the founding charter (GameData.FOUNDINGS)
 var oaths: Array = []                # oaths sworn at founding (GameData.OATHS)
 var halls_restored: Array = []       # Keepers of the Vale (GameData.ACCORD_HALLS ids)
 var hall_works: Array = []           # wings of the guild's own hall (GameData.HALL_WORKS ids)
+var wing_offer: Array = []           # the two wings offered now (built one at a time, GameData.WING_ACTS)
 var tide_count := 0                  # tides of the Open Hollow so far
 var tides_held := 0
 var tidewalls := 0                   # tidewalls raised against the Open Hollow
@@ -158,6 +161,16 @@ var session: Dictionary = {}
 ## A first-time moment, kept with the minutes played when it happened, for
 ## the Feedback report (0.53): where a tester's hours went, without sending
 ## anything anywhere. Only the first time counts.
+## This install's random id (made and kept in settings.json on first use).
+func get_install_id() -> String:
+	if install_id == "":
+		const A := "abcdefghjkmnpqrstuvwxyz23456789"
+		for i in 12:
+			install_id += A[randi() % A.length()]
+		save_settings()
+	return install_id
+
+
 func note_milestone(id: String) -> void:
 	var m: Dictionary = session.get("milestones", {})
 	if not m.has(id):
@@ -226,14 +239,28 @@ func has_cap(key: String) -> bool:
 	return caps.get(key, false)
 
 
+## Whether room `key`'s wing of rooms has been revealed (GameData.BRANCH_FEATURE).
+func room_open(key: String) -> bool:
+	return feature_unlocked(str(GameData.BRANCH_FEATURE.get(key.get_slice(".", 0), "management")))
+
+
+## What room `key`'s next level costs (in Gold), or 0 at its top level.
+func room_cost(key: String) -> int:
+	var node := GameData.find_branch_node(key)
+	var cur := int(upgrades.get(key, 0))   # the built level (a damaged building still keeps it)
+	if node.is_empty() or cur >= int(node["max"]):
+		return 0
+	return int(node["cost_base"]) + int(node["cost_step"]) * cur
+
+
 func upgrade_node(key: String) -> String:
 	var node := GameData.find_branch_node(key)
-	if node.is_empty():
+	if node.is_empty() or not room_open(key):
 		return ""
-	var cur := int(upgrades.get(key, 0))   # the built level (a damaged building still keeps it)
+	var cur := int(upgrades.get(key, 0))
 	if cur >= int(node["max"]):
 		return ""
-	var cost: int = int(node["cost_base"]) + int(node["cost_step"]) * cur
+	var cost := room_cost(key)
 	var gold := str(node.get("currency", "")) == "gold"
 	if (coins if gold else crystals) < cost:
 		return tr("Not enough Gold") if gold else tr("Not enough Essence")
@@ -259,7 +286,7 @@ func relic_slot_cap() -> int:
 
 
 func medical_recovery_reduction() -> float:
-	return 0.15 * lvl("ops.infirmary") + work_bonus("recovery")
+	return 0.15 * lvl("ops.infirmary")
 
 
 ## Runs a downed hero sits out (Medical upgrades bring it down to 1). A new
@@ -267,7 +294,7 @@ func medical_recovery_reduction() -> float:
 ## loses a hero for 1 run: early wipes are common and a small roster otherwise
 ## sits idle.
 func recovery_runs() -> int:
-	if rifts_sealed < 3:
+	if rifts_sealed < 3 or has_wing("healers"):   # the Healers' Wing: back after a day
 		return 1
 	return max(1, int(round(GameData.DOWNED_RECOVERY_RUNS * (1.0 - medical_recovery_reduction()))))
 
@@ -291,7 +318,7 @@ func guild_mentor() -> bool:
 
 
 func xp_mult() -> float:
-	return (1.2 if lvl("ops.barracks") >= 5 else 1.0) + work_bonus("xp")
+	return 1.2 if lvl("ops.barracks") >= 5 else 1.0
 
 
 func field_triage_available() -> bool:
@@ -309,7 +336,7 @@ func charter_role_dmg(h: Hero) -> float:
 
 
 func tactical_bonus() -> float:
-	return 1.0 + 0.04 * lvl("ops.drill") + work_bonus("tactics")
+	return 1.0 + 0.04 * lvl("ops.drill")
 
 
 func vanguard() -> bool:
@@ -388,21 +415,46 @@ func sworn(oath: String) -> bool:
 func work_bonus(kind: String) -> float:
 	var b := 0.0
 	for w in GameData.HALL_WORKS:
-		if str(w["kind"]) == kind and hall_works.has(w["id"]):
+		if str(w.get("kind", "")) == kind and hall_works.has(w["id"]):
 			b += float(w["value"])
 	return b
+
+
+func has_wing(id: String) -> bool:
+	return hall_works.has(id)
 
 
 func hall_work_cost() -> int:
 	return GameData.HALL_WORK_COST + GameData.HALL_WORK_COST_STEP * hall_works.size()
 
 
+## Wings the campaign has offered so far: one as each of GameData.WING_ACTS is reached.
+func wings_due() -> int:
+	return GameData.WING_ACTS.filter(func(a): return campaign_act >= int(a)).size()
+
+
+## Offers two unbuilt wings when one is due and none is on offer (the end of
+## Acts I, III and V; on load for a guild already past them). A guild with
+## GameData.WINGS_MAX wings is offered no more.
+func check_wing_offer() -> void:
+	if not wing_offer.is_empty() or hall_works.size() >= mini(wings_due(), GameData.WINGS_MAX):
+		return
+	var pool: Array = GameData.HALL_WORKS.map(func(w): return str(w["id"])).filter(func(id): return not hall_works.has(id))
+	pool.shuffle()
+	wing_offer = pool.slice(0, 2)
+	if wing_offer.is_empty():
+		return
+	var names: Array = wing_offer.map(func(id): return tr(str(GameData.HALL_WORKS.filter(func(w): return w["id"] == id)[0]["name"])))
+	pending_stories.append({"title": tr("A wing of the hall"), "subtitle": tr("Wen, the Chronicler"),
+		"text": tr("\"There's Gold enough in the chest, or there will be, to rebuild one more wing of the hall. Two of them could stand again: the %s or the %s. We can't afford both; whichever we raise says what kind of guild we are.\" (Guild > Accord Hall, %d Gold)") % [names[0], names[-1], hall_work_cost()]})
+
+
 ## "" if wing `id` can be built now, else why not.
 func hall_work_lock(id: String) -> String:
 	if hall_works.has(id):
 		return tr("Built")
-	if campaign_act < 2:
-		return tr("Opens when Act I is done")
+	if not wing_offer.has(id):
+		return tr("Not on offer")
 	if coins < hall_work_cost():
 		return tr("Needs %d Gold") % hall_work_cost()
 	return ""
@@ -417,7 +469,9 @@ func build_hall_work(id: String) -> String:
 		return tr("No such wing")
 	coins -= hall_work_cost()
 	hall_works.append(id)
+	wing_offer = []
 	_news(tr("The %s is rebuilt.") % tr(str(w[0]["name"])))
+	check_wing_offer()   # a guild that waited may have the next one due already
 	save()
 	state_changed.emit()
 	return ""
@@ -568,26 +622,38 @@ func _news(line: String) -> void:
 
 
 ## Whether a staged feature (GameData.FEATURE_UNLOCKS) is open yet; anything
-## not in the table is always open, and so is anything already announced. The
-## first seals open one thing at a time, so a new player meets them in turn.
+## not in the table is always open, and so is anything already announced.
+## Gates are a seal count, an act (and days into it), or a rule of their own.
 func feature_unlocked(id: String) -> bool:
 	if features_seen.has(id):
 		return true
+	var def: Dictionary = GameData.FEATURE_UNLOCKS.get(id, {})
+	if def.is_empty():
+		return true
+	if def.has("seals") or def.has("act"):
+		var act := int(def.get("act", 1))
+		if veteran_reveal() and act <= 2:   # a returning player: Act II and before are open from day 1
+			return true
+		return rifts_sealed >= int(def.get("seals", 0)) and campaign_act >= act 			and (campaign_act > act or day - act_since >= int(def.get("act_days", 0)))
 	match id:
 		"inventory": return not items.is_empty() or not relics.is_empty() or rifts_sealed > 0
 		"medical": return runs_started > 1 or (runs_started == 1 and run.is_empty()) or rifts_sealed > 0
 		"bestiary": return not monsters_seen.is_empty()
-		"quests": return rifts_sealed >= 1
-		"management": return rifts_sealed >= 2
-		# Spread out (the gameplay report): the rival and the Charter card own
-		# the third seal; Crafting the fifth; the Daily twist the seventh,
-		# after Act I's finale has opened Greater Rifts, the Tower and champions.
-		"rival": return rifts_sealed >= 3
-		"crafting": return rifts_sealed >= GameData.CRAFTING_SEALS
-		"daily": return rifts_sealed >= GameData.DAILY_SEALS
-		"tower": return campaign_act >= 2
 		"champions": return not champions.is_empty()
+		"wardcraft": return not breach.is_empty() or (veteran_reveal() and campaign_act >= GameData.BREACH_UNLOCK_ACT)
 	return true
+
+
+## Whether a party's Resolve counts (it drains and can break): not in Story,
+## and not before its reveal a day into Act II. Camp offers of Resolve wait too.
+func resolve_counts() -> bool:
+	return hardship >= 0 and feature_unlocked("resolve")
+
+
+## A past guild of this legacy got past Act I: the reveal schedule's early
+## gates (Act II and before) open from day 1, announced by toasts, not cards.
+func veteran_reveal() -> bool:
+	return skipped_act1 or (legacy.get("guilds", []) as Array).any(func(g): return int(g.get("act", 1)) >= 2)
 
 
 func recruit_offer_count() -> int:
@@ -643,7 +709,7 @@ func hamlet_tier(b: Dictionary) -> int:
 		"guild":
 			var name := str(Combat.guild_tier_info()["name"])
 			var by_tier := 3 if name == "Legendary Guild" else (2 if name in ["Established Guild", "Renowned Guild"] else 1)
-			return maxi(by_tier, 1 + (1 if hall_works.size() >= 2 else 0) + (1 if hall_works.size() >= 5 else 0))
+			return by_tier
 		"act":
 			return clampi(campaign_act, 1, 3)
 	return 1
@@ -695,7 +761,7 @@ func _run_for_save() -> Dictionary:
 	if run.has("tower"):
 		out["tower"] = run["tower"]
 		out["tower_snap"] = run.get("tower_snap", {})
-	for key in ["descent", "morrow", "breach", "at", "resolve"]:   # 0.65: these were lost on a reload
+	for key in ["descent", "morrow", "breach", "at", "resolve", "free_rally_used"]:   # 0.65: these were lost on a reload
 		if run.has(key):
 			out[key] = run[key]
 	return out
@@ -822,6 +888,7 @@ func save_settings() -> void:
 		f.store_string(JSON.stringify({
 			"music_volume": music_volume, "sfx_volume": sfx_volume, "voice_volume": voice_volume, "voice_on": voice_on, "resolution_idx": resolution_idx, "fullscreen": fullscreen, "combat_speed": combat_speed, "ui_scale": ui_scale,
 			"reduce_motion": reduce_motion, "colorblind": colorblind, "hearing_aid": hearing_aid, "language": language, "key_hints": key_hints, "key_binds": key_binds,
+			"share_stats": share_stats, "install_id": install_id,
 		}))
 
 
@@ -923,6 +990,8 @@ func load_settings() -> void:
 		colorblind = bool(parsed.get("colorblind", false))
 		key_hints = bool(parsed.get("key_hints", false))
 		key_binds = (parsed.get("key_binds", {}) as Dictionary).duplicate()
+		share_stats = bool(parsed.get("share_stats", false))
+		install_id = str(parsed.get("install_id", ""))
 		hearing_aid = bool(parsed.get("hearing_aid", false))
 		language = str(parsed.get("language", "en"))
 		sfx_volume = parsed.get("sfx_volume", 1.0)
@@ -968,7 +1037,7 @@ func save() -> void:
 		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "camp_event": camp_event, "camp_omen": camp_omen, "camp_event_last": camp_event_last, "next_resolve": next_resolve, "hardship": hardship, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
-		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "hall_works": hall_works, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
+		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "hall_works": hall_works, "wing_offer": wing_offer, "pending_stories": pending_stories, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
 		"run": _run_for_save(),
 		
 		"monsters_seen": monsters_seen, "bosses_defeated": bosses_defeated, "hazards_seen": hazards_seen,

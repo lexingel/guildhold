@@ -388,7 +388,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
-	var key := GameState.unbind_key(OS.get_keycode_string(event.keycode))   # Settings > Controls (0.68)
+	var raw := OS.get_keycode_string(event.keycode)
+	var key := GameState.unbind_key(raw) if screen == "rift_run" else raw   # Settings > Controls: fight keys only (0.68)
 	if _combat_hotkeys.has(key):
 		get_viewport().set_input_as_handled()
 		_combat_hotkeys[key].call()
@@ -2292,7 +2293,7 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 				chip = _intent_chip("Winding up", true, tr("Gathering strength this round. Next round it lands a heavy blow (×%s damage) that stuns its target unless they Defend. Defend, Guard, or move the likely target to the back row.") % tr(str(GameData.HEAVY_BLOW_MULT)))
 			elif intent.get("heavy_blow", false):
 				chip = _intent_chip("⚠ %d → %s" % [int(intent["dmg"]), tr(str(t.name.split(" the ")[0]))], true,
-					tr("HEAVY BLOW on %s for about %d — it stuns unless they Defend. Defend (5) halves it; Guard (6) takes it for them; Shield Bash breaks it.") % [tr(str(t.name)), int(intent["dmg"])])
+					_keys(tr("HEAVY BLOW on %s for about %d — it stuns unless they Defend. Defend (5) halves it; Guard (6) takes it for them; Shield Bash breaks it.") % [tr(str(t.name)), int(intent["dmg"])]))
 			else:
 				chip = _intent_chip("%d → %s" % [int(intent["dmg"]), tr(str(t.name.split(" the ")[0]))], bool(intent["heavy"]),
 					tr("Attacks %s this round for about %d%s") % [tr(str(t.name)), int(intent["dmg"]), tr(str(tr(" — a heavy hit, consider Defending") if intent["heavy"] else ""))])
@@ -2560,7 +2561,7 @@ func _cmd_button(icon_path: String, caption: String, key: String, cb: Callable, 
 		selected = true
 		_pulse(b, 0.55, 0.5)
 	b.custom_minimum_size = Vector2(70, 54) if _compact() else Vector2(92, 72)
-	b.tooltip_text = tip
+	b.tooltip_text = _keys(tr(tip))
 	b.disabled = block != ""
 	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	for sn in ["normal", "hover", "pressed", "focus", "disabled"]:
@@ -2584,6 +2585,13 @@ func _cmd_button(icon_path: String, caption: String, key: String, cb: Callable, 
 	cap.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	cap.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	cap.clip_text = true
+	if _text_w(tr(caption), 12) > b.custom_minimum_size.x - 8:   # a long name (Spanish, on a phone): two smaller lines, not "Disparo cer…"
+		cap.clip_text = false
+		cap.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		cap.max_lines_visible = 2
+		cap.add_theme_font_size_override("font_size", 10)
+		cap.custom_minimum_size.x = b.custom_minimum_size.x - 4
+		ic.custom_minimum_size = Vector2(18, 18) if _compact() else ic.custom_minimum_size
 	col.add_child(cap)
 	b.add_child(col)
 	if key != "" and not _compact() and GameState.key_hints:   # a keycap (Settings > Key hints); a phone has no keys
@@ -2637,7 +2645,8 @@ func _momentum_meter(n: int) -> Control:
 ## dark red, pips it earns show pale.
 ## While `b` is hovered, the share of foe `ti`'s HP it would take shows on
 ## the foe's plate (0.68), with a skull when it's a kill.
-func _damage_hover(b: Control, state: Dictionary, ti: int, dmg: int) -> void:
+## `always`: shown from the start (a touch screen has no hover, 0.65).
+func _damage_hover(b: Control, state: Dictionary, ti: int, dmg: int, always: bool = false) -> void:
 	if ti < 0 or dmg <= 0 or ti >= (state["monsters"] as Array).size():
 		return
 	var m: Dictionary = state["monsters"][ti]
@@ -2666,6 +2675,9 @@ func _damage_hover(b: Control, state: Dictionary, ti: int, dmg: int) -> void:
 			skull.add_theme_color_override("font_color", Palette.HAZARD)
 			ghost.add_child(skull)
 			skull.position = Vector2(ghost.size.x + 2, -5)
+	if always:
+		show.call_deferred(true)
+		return
 	b.mouse_entered.connect(show.bind(true))
 	b.mouse_exited.connect(show.bind(false))
 	b.focus_entered.connect(show.bind(true))
@@ -2829,7 +2841,7 @@ func _tool_button(icon_path: String, text: String, tip: String, cb: Callable) ->
 	var b := _button(text, cb)
 	b.icon = load(icon_path)
 	b.expand_icon = false
-	b.tooltip_text = tip
+	b.tooltip_text = _keys(tr(tip))
 	b.custom_minimum_size = Vector2(44, 40)
 	b.add_theme_font_size_override("font_size", 14)
 	return b
@@ -2888,7 +2900,7 @@ func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[He
 		var primary: Container = HBoxContainer.new() if compact and (_more_open or _tut_key in ["6", "7", "8", "9"] or last_action == "guard") else row
 		var ab_atk := _cmd_button("res://assets/skills/sword_a.png", "Attack" if not weak_reach else "Attack ½", "1", do_attack, atk_tip, last_action == "attack")
 		_momentum_hover(ab_atk, mom, 2 if atk_kills else 1)
-		_damage_hover(ab_atk, state, tgt, atk_dmg)
+		_damage_hover(ab_atk, state, tgt, atk_dmg, DisplayServer.is_touchscreen_available())
 		primary.add_child(ab_atk)
 		_combat_hotkeys["1"] = do_attack
 		if last_action == "attack":

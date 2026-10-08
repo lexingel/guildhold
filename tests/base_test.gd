@@ -16,5 +16,11 @@ func check(ok: bool, what: String) -> void:
 		print("  FAIL ", what)
 
 
+## Opens every staged feature (the reveal schedule, GameData.FEATURE_UNLOCKS),
+## for a test of a feature rather than of when it appears.
+func reveal_all() -> void:
+	GameState.features_seen = GameData.FEATURE_UNLOCKS.keys()
+
+
 func run() -> void:
 	pass

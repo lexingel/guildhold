@@ -10,6 +10,7 @@ func run() -> void:
 	seed(64)
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	var ids: Array[String] = []
 	for r in ["warrior", "ranger", "mage", "cleric"]:
@@ -28,9 +29,11 @@ func run() -> void:
 
 	# Off during the grace: no change, no tier.
 	GameState.rifts_sealed = 0
+	GameState.features_seen.erase("resolve")
 	GameState.start_ladder_rift("C", ids, null)
-	check(not GameState.resolve_on() and GameState.change_resolve(-3) == 0 and GameState.resolve_tier() == 0, "Resolve is off before the first seals")
+	check(not GameState.resolve_on() and GameState.change_resolve(-3) == 0 and GameState.resolve_tier() == 0, "Resolve is off before Act II")
 	GameState.run = {}
+	GameState.features_seen.append("resolve")
 
 	GameState.rifts_sealed = 5
 	GameState.start_ladder_rift("C", ids, null)

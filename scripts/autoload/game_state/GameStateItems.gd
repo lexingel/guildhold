@@ -67,13 +67,28 @@ func craft_items(category: String, rarity: String) -> void:
 	# The crafted item keeps the best rank among the three fed in — feeding
 	# high-rank commons shouldn't hand back a Rank-F rare.
 	var best_rank_idx := 0
+	var best_kind := ""
+	var best_roll := 0.0
 	for i in 3:
 		best_rank_idx = max(best_rank_idx, GameData.rift_rank_index(matches[i].item_rank))
+		var r := item_roll(matches[i])
+		if r > best_roll:
+			best_kind = matches[i].kind
+			best_roll = r
 		items.erase(matches[i])
-	items.append(Combat.gen_item(str(CRAFT_RARITY_UP[rarity]), category, str(GameData.RIFT_RANKS[best_rank_idx]["id"])))
+	if not has_wing("smithy"):   # the Smithy wing keeps the best stat line of the three
+		best_kind = ""
+		best_roll = 0.0
+	items.append(Combat.gen_item(str(CRAFT_RARITY_UP[rarity]), category, str(GameData.RIFT_RANKS[best_rank_idx]["id"]), best_kind, minf(best_roll, GameData.ITEM_ROLL_RANGE[1])))
 	crafts_performed += 1
 	save()
 	state_changed.emit()
+
+
+## How well an item's first stat line rolled (0.9-1.1), whatever its rarity and rank.
+func item_roll(it: Item) -> float:
+	var base := float(GameData.ITEM_KIND_BASE.get(it.kind, 0.0)) * float(GameData.find_rarity(it.rarity)["mult"]) * float(GameData.ITEM_AFFIX_VALUE_SHARE[0]) 		* float(GameData.ITEM_RANK_MULT[GameData.rift_rank_index(it.item_rank)])
+	return it.value / base if base > 0.0 else 0.0
 
 
 func craft_relics(type: String, rarity: String) -> void:
@@ -127,6 +142,8 @@ func forge_item(item_id: String) -> String:
 			it = x
 	if not it:
 		return tr("No such item")
+	if not feature_unlocked("forge"):
+		return tr("The Smithy opens when Act I is done")
 	var cost := forge_cost(it)
 	if cost <= 0:
 		return tr("Fully tempered")

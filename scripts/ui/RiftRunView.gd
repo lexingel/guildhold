@@ -208,15 +208,11 @@ func _render_rift_map(v: VBoxContainer) -> void:
 		for k in layer["options"]:
 			if not kinds.has(str(k)):
 				kinds.append(str(k))
-	var legend := HBoxContainer.new()
-	legend.add_theme_constant_override("separation", 16)
 	if pos < n and (layers[pos]["options"] as Array).size() > 1 and not chosen.has(pos):
 		var hint := _label("Choose your path — click a node on the map.", 13)
 		hint.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
-		legend.add_child(hint)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	legend.add_child(spacer)
+		v.add_child(hint)
+	var legend := _legend_flow()
 	for k in ["combat", "elite", "shop", "hazard", "campfire", "event", "treasure", "boss"]:
 		if not kinds.has(k):
 			continue
@@ -230,6 +226,15 @@ func _render_rift_map(v: VBoxContainer) -> void:
 		item.add_child(kl)
 		legend.add_child(item)
 	v.add_child(legend)
+
+
+## The map's legend: wraps onto a second row on a narrow screen (0.65: it clipped on phones).
+func _legend_flow() -> HFlowContainer:
+	var f := HFlowContainer.new()
+	f.add_theme_constant_override("h_separation", 14)
+	f.add_theme_constant_override("v_separation", 4)
+	f.alignment = FlowContainer.ALIGNMENT_END
+	return f
 
 
 ## The lane map (0.65): floors left to right, each floor's nodes stacked in
@@ -306,15 +311,11 @@ func _render_lane_map(v: VBoxContainer) -> void:
 				marker.modulate = Color(1, 1, 1, 0.7)
 			map_ctrl.add_child(marker)
 	v.add_child(map_ctrl)
-	var legend := HBoxContainer.new()
-	legend.add_theme_constant_override("separation", 14)
 	if pos < n and not chosen.has(pos) and reach.size() > 1:
 		var hint := _label("Choose your path — click a lit node on the map.", 13)
 		hint.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
-		legend.add_child(hint)
-	var spacer := Control.new()
-	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	legend.add_child(spacer)
+		v.add_child(hint)
+	var legend := _legend_flow()
 	var kinds: Array[String] = []
 	for i in n:
 		if deep_fog and i > pos + 2:
@@ -442,7 +443,7 @@ func _run_bar(in_combat: bool, at_door := false) -> Control:
 			var rb := _icon_button("res://assets/skills/wing.png", "Climb out" if GameState.run.has("descent") else "Retreat", func(): _confirm_retreat = true; render())
 			rb.tooltip_text = "Leave the rift now — keep your loot, no sealing reward"
 			top.add_child(rb)
-	if in_combat and GameState.orders_per_rift() > 0 and not GameState.run.has("tower"):
+	if in_combat and GameState.has_orders() and not GameState.run.has("tower"):
 		var osp := Control.new()
 		osp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		top.add_child(osp)
@@ -528,10 +529,13 @@ func _orders_bar() -> Control:
 	var head := _label(tr("Guild Orders  %d/%d") % [left, GameState.orders_per_rift()], 13)
 	head.add_theme_color_override("font_color", Palette.EMBER_BRIGHT if left > 0 else Palette.MUTED)
 	head.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	head.tooltip_text = tr("Orders from your Guild Management upgrades. You get %d per rift (more at Renowned and Legendary guild tier).") % GameState.orders_per_rift()
+	head.tooltip_text = tr("Orders from your hall's rooms. You get %d per rift (more at Renowned and Legendary guild tier).") % GameState.orders_per_rift()
 	head.mouse_filter = Control.MOUSE_FILTER_STOP
 	row.add_child(head)
-	for id in GameState.orders_unlocked():
+	var ids: Array = GameState.orders_unlocked()
+	if GameState.free_rally() and not ids.has("rally"):   # the War Room's
+		ids.append("rally")
+	for id in ids:
 		var def: Dictionary = GameData.GUILD_ORDERS[id]
 		var why := GameState.order_blocker(id)
 		var b := _icon_button(str(def["icon"]), str(def["name"]), func(oid=id):
@@ -540,7 +544,7 @@ func _orders_bar() -> Control:
 			GameState.use_order(oid)
 		)
 		b.disabled = why != ""
-		b.tooltip_text = tr(str(def["desc"])) + ("\n(%s)" % why if why != "" else "")
+		b.tooltip_text = tr(str(def["desc"])) + ("\n(%s)" % why if why != "" else "") + (tr("\nFree once a rift (the War Room).") if id == "rally" and GameState.free_rally() else "")
 		row.add_child(b)
 	return row
 
@@ -560,12 +564,23 @@ func _render_rift_run(v: VBoxContainer) -> void:
 	var slim := _compact() and fighting and ns_now.has("combat_state") and not ns_now.has("result")
 	if not slim:
 		v.add_child(_run_bar(fighting, fighting and not ns_now.has("combat_state") and not ns_now.has("result")))
-	elif _has_orders_row():
-		v.add_child(_orders_bar())
+	else:
+		var slim_row := HBoxContainer.new()   # the phone fight: Resolve (0.65: it was hidden) and the orders
+		slim_row.add_theme_constant_override("separation", 10)
+		if GameState.resolve_on():
+			var tier := GameState.resolve_tier()
+			var rl := _label(tr("Resolve %d") % GameState.resolve_now() + ((" · " + (tr("Broken") if tier == 2 else tr("Wavering"))) if tier > 0 else ""), 12)
+			rl.add_theme_color_override("font_color", Palette.HAZARD if tier > 0 else Palette.MUTED)
+			rl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			slim_row.add_child(rl)
+		if _has_orders_row():
+			slim_row.add_child(_orders_bar())
+		if slim_row.get_child_count() > 0:
+			v.add_child(slim_row)
 	if rift_hero_id != "":
 		_render_rift_hero_page(v)
 		return
-	if GameState.orders_per_rift() > 0 and not GameState.run.has("tower") and not fighting:   # a fight has them in the run bar
+	if GameState.has_orders() and not GameState.run.has("tower") and not fighting:   # a fight has them in the run bar
 		v.add_child(_orders_bar())
 	if not (GameState.run.get("boons", []) as Array).is_empty() and not slim:
 		var bl := HBoxContainer.new()
@@ -667,18 +682,23 @@ func _render_daily_board(v: VBoxContainer, day: int, score: int) -> void:
 	row.add_theme_constant_override("separation", 10)
 	row.add_child(_label(tr("Daily score: %d") % score, 14))
 	if _daily_board_day != day:
+		var sending := _daily_msg == tr("Posting…")
 		var post := _button(tr("Post to today's board"), func():
+			if _daily_msg == tr("Posting…"):
+				return
 			_daily_msg = tr("Posting…")
 			render()
-			call("_transfer", HTTPClient.METHOD_POST, "/daily/%d" % day, JSON.stringify({"guild": GameState.guild_name, "score": score}), func(status: int, body: String):
+			call("_transfer", HTTPClient.METHOD_POST, "/daily/%d" % day, JSON.stringify({"guild": GameState.guild_name, "score": score, "id": GameState.get_install_id()}), func(status: int, body: String):
 				var d = JSON.parse_string(body) if status == 200 else null
 				if typeof(d) == TYPE_DICTIONARY:
 					_daily_board_day = day
 					_daily_board = d.get("top", [])
-					_daily_msg = tr("You're #%d today.") % int(d.get("rank", 0))
+					var rank := int(d.get("rank", 0)) if d.get("rank") != null else 0
+					_daily_msg = tr("You're #%d today.") % rank if rank > 0 else tr("Posted. Outside today's top 50.")
 				else:
 					_daily_msg = tr("Couldn't reach the board. Try again later.")
 				render()))
+		post.disabled = sending
 		post.tooltip_text = tr("Shares your guild's name and this score on today's public board.")
 		row.add_child(post)
 	v.add_child(row)

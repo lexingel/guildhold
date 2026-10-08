@@ -14,6 +14,7 @@ func run() -> void:
 	seed(5)
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	GameState.coins = 5000
 	var hs: Array[Hero] = []
@@ -21,9 +22,11 @@ func run() -> void:
 		hs.append(_hero(r, 3))
 	GameState.resolve_guild_board()
 	GameState.day = GameData.RIVAL_MOVE_DAY
+	GameState.features_seen.erase("rival")
 	for i in 20:
 		GameState.maybe_rival_move()
-	check(GameState.rival_event.is_empty(), "no moves before the third seal")
+	check(GameState.rival_event.is_empty(), "no moves before Act II")
+	GameState.features_seen.append("rival")
 	GameState.rifts_sealed = 3
 
 	# A move comes only on its day of the week.

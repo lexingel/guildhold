@@ -117,6 +117,8 @@ func run() -> void:
 	await _frames()
 	check(AudioManager._current_music_path in GameData.camp_pool(), "the camp plays a camp track")
 
+	reveal_all()   # no reveal card ahead of it
+	GameState.pending_stories.clear()
 	GameState.pending_stories.append(GameState._act_intro_card(1))
 	main.render()
 	await _frames()

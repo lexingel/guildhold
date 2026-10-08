@@ -333,16 +333,30 @@ var _rotate_prompt := false   # a phone held upright: ask for landscape
 
 ## A phone has no keyboard: its visible text drops the key hints ("(Space)",
 ## "(key 3)", ", key 1", "Attack (1)"). Tooltips keep them for desktop.
-static var _key_hint_re := RegEx.create_from_string("\\s*\\((?:(?:key|tuş)\\s*)?(?:Space|Boşluk|Esc|Tab|Q|M|A|[1-9](?:-[1-9])?)\\)|,\\s*(?:key|tuş)\\s*[1-9]")   # English and Turkish
+static var _key_hint_re := RegEx.create_from_string("\\s*[(（](?:(?:key|tuş|tecla|按键)\\s*)?(?:Space|Boşluk|Espacio|空格|Esc|Tab|Q|M|A|[1-9](?:-[1-9])?)[)）]|[,，]\\s*(?:key|tuş|tecla|按键)\\s*[1-9]")   # en, tr, es, zh
+## A key named in a hint ("Defend (5)", "(key 3)"): rewritten to the player's own binding.
+static var _key_ref_re := RegEx.create_from_string("[(（](?:(?:key|tuş|tecla|按键)\\s*)?(Space|Tab|Q|M|A|[1-9])[)）]")
 
 
 func _no_keys(text: String) -> String:
-	return _key_hint_re.sub(text, "", true) if _compact() else text
+	return _key_hint_re.sub(text, "", true) if _compact() else _keys(text)
+
+
+## `text` with every fight key it names moved to where Settings > Controls put it.
+func _keys(text: String) -> String:
+	if GameState.key_binds.is_empty():
+		return text
+	var out := text
+	var ms := _key_ref_re.search_all(text)
+	for i in range(ms.size() - 1, -1, -1):
+		var m: RegExMatch = ms[i]
+		out = out.substr(0, m.get_start(1)) + GameState.bound_key(m.get_string(1)) + out.substr(m.get_end(1))
+	return out
 
 
 ## The guild's orders keep a row of their own above a fight.
 func _has_orders_row() -> bool:
-	return GameState.orders_per_rift() > 0 and not GameState.run.has("tower")
+	return GameState.has_orders() and not GameState.run.has("tower")
 
 
 ## True on the phone canvas (a short landscape window): half the height of

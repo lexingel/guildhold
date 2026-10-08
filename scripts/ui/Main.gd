@@ -316,6 +316,11 @@ func render() -> void:
 	# animation. The fight re-renders itself when the turn is done.
 	if _combat_animating and screen == "rift_run":
 		return
+	if screen != "settings":
+		_rebinding = ""   # a key capture left open in Settings must not catch a later key press
+	if GameState.guild_name != "":
+		GameState.session["last_screen"] = screen if screen != "camp" else "camp:" + term_tab
+		_maybe_share_stats()
 	_coached_this_render = false
 	if GameState.run.is_empty():
 		_resolve_heard = -1
@@ -393,6 +398,8 @@ func render() -> void:
 	_last_render_key = render_key
 
 	_clear_root()
+	if _scene_ui:
+		_scene_ui.visible = true   # an overlay hides it again (_cover_scene)
 	# On a full-window scene the UI lets clicks through to the art's props.
 	var bleed := _bleed_ui()
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE if bleed else _root_filter
@@ -497,6 +504,13 @@ func render() -> void:
 
 ## A phone held upright: the game needs the long side across (a fight is six
 ## figures in a row), so it asks, over whatever screen is up.
+## A card over a full-window scene: the scene's plaques and hotspots (their
+## own layer, under Root) step aside, or they'd show through the dimmer.
+func _cover_scene() -> void:
+	if _scene_ui:
+		_scene_ui.visible = false
+
+
 func _rotate_overlay() -> void:
 	var cover := ColorRect.new()
 	cover.color = Color(0.06, 0.05, 0.1)
@@ -523,6 +537,7 @@ func _rotate_overlay() -> void:
 ## A campaign story card over the screen (act intros, finale outros, the
 ## ending). Continue shows the next queued card or returns to the game.
 func _story_overlay(card_data: Dictionary) -> void:
+	_cover_scene()
 	var overlay := Control.new()
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var dim := ColorRect.new()
@@ -762,6 +777,7 @@ var _founding_open := false   # the founding screen's optional section, opened
 ## to two heroes the Vale will remember (they return as champions in later
 ## guilds) and write the guild into the Hall of Guilds for its Laurels.
 func _legacy_overlay(retire: bool) -> void:
+	_cover_scene()
 	var overlay := Control.new()
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var dim := ColorRect.new()
@@ -944,9 +960,13 @@ func _founding_hardship() -> Control:
 	elif _pending_hardship == 0:
 		lines.append(tr("The game as designed."))
 	else:
+		# The newest rule only (it sits above the Found button now, 0.65); the rest in the tooltip.
+		lines.append(tr("%d. %s") % [_pending_hardship, tr(str(GameData.HARDSHIPS[_pending_hardship - 1]["desc"]))])
+		lines.append((tr("…and the %d before it. ") % (_pending_hardship - 1) if _pending_hardship > 1 else "") + tr("+%d%% Laurels.") % int(round(GameData.HARDSHIP_LAURELS * 100 * _pending_hardship)))
+		var all: Array = []
 		for i in _pending_hardship:
-			lines.append(tr("%d. %s") % [i + 1, tr(str(GameData.HARDSHIPS[i]["desc"]))])
-		lines.append(tr("+%d%% Laurels.") % int(round(GameData.HARDSHIP_LAURELS * 100 * _pending_hardship)))
+			all.append(tr("%d. %s") % [i + 1, tr(str(GameData.HARDSHIPS[i]["desc"]))])
+		col.tooltip_text = "\n".join(all)
 	for ln in lines:
 		col.add_child(_wrap_label(str(ln), 12, true))
 	if GameState.hardship_unlocked() < GameData.HARDSHIPS.size():
@@ -1073,11 +1093,16 @@ func _founding_gifts() -> Control:
 ## A hero's request or the rival's move, popped up over the camp the first
 ## time you're home after it arrives.
 func _matter_overlay(kind: String) -> void:
+	_cover_scene()
 	var overlay := Control.new()
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var dim := ColorRect.new()
 	dim.color = Color(0, 0, 0, 0.7)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for side in [SIDE_LEFT, SIDE_TOP]:   # past Root's margins, to the window's edge
+		dim.set_offset(side, -80)
+	for side in [SIDE_RIGHT, SIDE_BOTTOM]:
+		dim.set_offset(side, 80)
 	overlay.add_child(dim)
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -1253,10 +1278,10 @@ const NAV_GROUPS := [
 	["Roster", "roster", [["roster", "Heroes"], ["recruits", "Recruits"], ["medical", "Medical Bay"], ["training", "Training Yard"], ["champions", "Champions"]]],
 	["Inventory", "inventory", [["inventory", "Items"], ["crafting", "Crafting"]]],
 	["Rift Hall", "rift", [["rift", "Rift Hall"]]],
-	["Guild", "management", [["management", "Management"], ["ledger", "Ledger"], ["quests", "Quests"], ["records", "Records"], ["memorial", "Memorial"]]],
+	["Guild", "management", [["management", "Accord Hall"], ["ledger", "Ledger"], ["quests", "Quests"], ["records", "Records"], ["memorial", "Memorial"]]],
 	["Library", "bestiary", [["bestiary", "Bestiary"], ["compendium", "Codex"]]],
 ]
-const NAV_FEATURE := {"champions": "champions", "crafting": "crafting", "quests": "quests", "management": "management", "inventory": "inventory", "medical": "medical", "bestiary": "bestiary"}
+const NAV_FEATURE := {"champions": "champions", "crafting": "crafting", "quests": "quests", "management": "management", "inventory": "inventory", "medical": "medical", "bestiary": "bestiary", "training": "training"}
 
 
 func _quick_nav_current() -> String:
@@ -1331,18 +1356,15 @@ func _quick_nav() -> Control:
 		var ids: Array = members.map(func(m): return str(m[0]))
 		var open: Array = ids.filter(func(id): return not _nav_locked(id))
 		var key := str(i + 1)
-		var locked := open.is_empty()
-		var go := _quick_go.bind(str(open[0]) if not locked else "")
+		if open.is_empty():   # nothing in it revealed yet: the tab isn't shown
+			continue
+		var go := _quick_go.bind(str(open[0]))
 		var b := _button("", go)
 		b.custom_minimum_size = Vector2(48, 38) if compact else (Vector2(104, 36) if in_header else Vector2(88, 54))
 		b.toggle_mode = true
 		b.button_pressed = ids.has(current)
 		b.tooltip_text = tr("%s  (key %s)") % [tr(str(g[0])), tr(str(key))]
 		b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-		if locked:
-			b.disabled = true
-			b.modulate = Color(1, 1, 1, 0.45)
-			b.tooltip_text = "%s — %s" % [tr(str(g[0])), tr(str(GameData.FEATURE_UNLOCKS[NAV_FEATURE[ids[0]]]["hint"]))]
 		# In the top bar: icon and name side by side; the key is in the tooltip.
 		var tile: BoxContainer = HBoxContainer.new() if in_header and not compact else VBoxContainer.new()
 		tile.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -1360,8 +1382,7 @@ func _quick_nav() -> Control:
 			nl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			tile.add_child(nl)
 		b.add_child(tile)
-		if not locked:
-			_combat_hotkeys[key] = go
+		_combat_hotkeys[key] = go
 		if not compact and not in_header:
 			var kl := _label(key, 12)
 			kl.add_theme_color_override("font_color", Palette.MUTED)
@@ -1382,16 +1403,14 @@ func _quick_nav() -> Control:
 			sub.alignment = FlowContainer.ALIGNMENT_CENTER
 			for m in members:
 				var sid := str(m[0])
+				if _nav_locked(sid):   # not revealed yet
+					continue
 				var sb := _button(str(m[1]), _quick_go.bind(sid))
 				sb.toggle_mode = true
 				sb.button_pressed = sid == current
 				sb.custom_minimum_size = Vector2(92, 32)
 				var badge: Array = badges.get(str(m[0]), [])
-				if _nav_locked(sid):
-					sb.disabled = true
-					sb.modulate = Color(1, 1, 1, 0.45)
-					sb.tooltip_text = GameData.FEATURE_UNLOCKS[NAV_FEATURE[sid]]["hint"]
-				elif not badge.is_empty():
+				if not badge.is_empty():
 					sb.text = "%s  %s" % [tr(str(m[1])), tr(str(badge[0]))]
 					sb.tooltip_text = str(badge[1])
 				sub.add_child(sb)
@@ -1511,10 +1530,10 @@ func _topbar(container: Control, breadcrumb: String = "") -> void:
 			tl.custom_minimum_size.x = minf(110.0, _text_w(tl.text, 12) + 2.0)
 			# A long guild name keeps the room: the tier shows as its icon (tooltip has it all).
 			tl.visible = GameState.guild_name.length() <= 12
-			var tip := tr("%d Guild Management levels") % int(tier["total"])
+			var tip := tr("%d hall room levels") % int(tier["total"])
 			if not (tier["next"] as Dictionary).is_empty():
 				tip += tr(" · %d more to %s") % [int(tier["next"]["min"]) - int(tier["total"]), tr(str(tier["next"]["name"]))]
-			tl.tooltip_text = tip + tr(". The tier grows with Guild Management levels; the Guild Hall grows with it.")
+			tl.tooltip_text = tip + tr(". The tier grows with hall room levels; the hall's art grows with it.")
 			tl.mouse_filter = Control.MOUSE_FILTER_STOP
 			row.add_child(tl)
 			if ticon != "":   # the icon says it too, for when the words are hidden
@@ -1770,6 +1789,22 @@ func _whats_new_card() -> PanelContainer:
 
 var _feedback_open := false
 var _feedback_note := ""
+var _stats_sent_at := -10000000   # msec ticks of the last shared-milestones post (at most one per STATS_EVERY_MS)
+const STATS_EVERY_MS := 300000
+
+
+## Opt-in (Settings > Send feedback): the session's numbers go to the relay,
+## at most every five minutes while a guild is played. Never the save.
+func _maybe_share_stats() -> void:
+	if not GameState.share_stats or GameState.guild_name == "" or Time.get_ticks_msec() - _stats_sent_at < STATS_EVERY_MS:
+		return
+	_stats_sent_at = Time.get_ticks_msec()
+	var s: Dictionary = GameState.session
+	var body := {"id": GameState.get_install_id(), "v": str(ProjectSettings.get_setting("application/config/version")), "lang": GameState.language,
+		"web": OS.has_feature("web"), "touch": DisplayServer.is_touchscreen_available(), "mins": int(float(s.get("secs", 0.0)) / 60.0), "n": int(s.get("n", 1)),
+		"last": str(s.get("last_screen", "")), "ms": s.get("milestones", {}), "hand": [int(s.get("hand_w", 0)), int(s.get("hand_l", 0))], "auto": [int(s.get("auto_w", 0)), int(s.get("auto_l", 0))],
+		"act": GameState.campaign_act, "day": GameState.day, "sealed": GameState.rifts_sealed, "hardship": GameState.hardship, "heroes": GameState.heroes.size()}
+	_transfer(HTTPClient.METHOD_POST, "/m", JSON.stringify(body), func(_status: int, _body: String): pass)
 
 
 ## What a tester's report carries: the build, where they're playing, and how
@@ -1834,6 +1869,16 @@ func _feedback_panel() -> PanelContainer:
 		OS.shell_open(GameData.FEEDBACK_DISCORD_URL)
 		render()))
 	col.add_child(row)
+	var share := CheckBox.new()
+	share.text = tr("Share play milestones with the developer")
+	share.button_pressed = GameState.share_stats
+	share.tooltip_text = tr("Anonymous: a random id for this browser, the build, and the report above as numbers (time played, fights, when you first sealed, fell, fled, chose a Path...). No names, no save. Off by default; untick to stop.")
+	share.toggled.connect(func(on: bool):
+		GameState.share_stats = on
+		GameState.save_settings()
+		_stats_sent_at = -10000000
+		render())
+	col.add_child(share)
 	if _feedback_note != "":
 		var n := _label(_feedback_note, 12)
 		n.add_theme_color_override("font_color", Palette.RANK_E)
@@ -1949,6 +1994,7 @@ func _render_onboard(v: VBoxContainer) -> void:
 	rc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	name_row.add_child(rc)
 	v.add_child(name_row)
+	v.add_child(_founding_hardship())   # above the button (0.65): it can't be changed later
 	var found := _icon_domain_button("violet", GameData.BUTTON_ICON_PATH["confirm"], "Found the Guild", func():
 		# The pending name, not edit.text: a click landing in the same frame as
 		# Random name still reaches the old (freed next frame) field.
@@ -2036,7 +2082,6 @@ func _render_onboard(v: VBoxContainer) -> void:
 					render())
 				colour_row.add_child(cb)
 			ov.add_child(colour_row)
-		ov.add_child(_founding_hardship())
 		if returning:
 			ov.add_child(_founding_charters())
 			ov.add_child(_founding_oaths())
@@ -2396,7 +2441,7 @@ func _rift_mode_cards(best: int, go: Callable) -> HFlowContainer:
 	cards.alignment = FlowContainer.ALIGNMENT_CENTER
 	cards.add_theme_constant_override("h_separation", 10)
 	cards.add_theme_constant_override("v_separation", 10)
-	for cd in _rift_mode_defs(go):
+	for cd in _rift_mode_defs(go).filter(func(d): return str(d[4]) == ""):   # a mode not yet revealed isn't shown
 		var card := PanelContainer.new()
 		card.custom_minimum_size.x = 270
 		var cv := _vbox(6)
@@ -2422,7 +2467,10 @@ func _rift_mode_rows(best: int, go: Callable) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.theme_type_variation = &"CardPanelViolet"
 	var col := _vbox(8)
-	for cd in _rift_mode_defs(go):
+	var open := _rift_mode_defs(go).filter(func(d): return str(d[4]) == "")   # a mode not yet revealed isn't shown
+	if open.is_empty():
+		col.add_child(_wrap_label("Other ways into the rifts open as the story goes on.", 12, true))
+	for cd in open:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
 		var tv := _vbox(0)

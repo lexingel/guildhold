@@ -199,7 +199,9 @@ func item_line_value(kind: String, rarity_id: String, line: int, rank: String) -
 	return snappedf(GameData.ITEM_KIND_BASE[kind] * float(GameData.find_rarity(rarity_id)["mult"]) * GameData.ITEM_AFFIX_VALUE_SHARE[line] * roll, 0.001)
 
 
-func gen_item(rarity_id: String, category_override: String = "", rank: String = "") -> Item:
+## `main_kind`/`main_roll` (the Smithy wing's combine) fix the first stat
+## line and its roll (0.9-1.1, before the rank) instead of rolling them.
+func gen_item(rarity_id: String, category_override: String = "", rank: String = "", main_kind: String = "", main_roll: float = 0.0) -> Item:
 	if rarity_id == "legendary":
 		return gen_unique_item()
 	if rank == "":
@@ -219,6 +221,9 @@ func gen_item(rarity_id: String, category_override: String = "", rank: String = 
 	var affix_count: int = GameData.ITEM_AFFIX_COUNT_BY_RARITY.get(rarity_id, 1)
 	var pool: Array = GameData.ITEM_CATEGORY_KINDS[category].duplicate()
 	pool.shuffle()
+	if pool.has(main_kind):
+		pool.erase(main_kind)
+		pool.push_front(main_kind)
 	var rolled_kinds: Array = pool.slice(0, affix_count)
 
 	var it := Item.new()
@@ -228,7 +233,7 @@ func gen_item(rarity_id: String, category_override: String = "", rank: String = 
 	it.rarity = rarity["id"]
 	it.item_rank = rank
 	it.kind = str(rolled_kinds[0])
-	it.value = snappedf(GameData.ITEM_KIND_BASE[it.kind] * rarity["mult"] * GameData.ITEM_AFFIX_VALUE_SHARE[0] * roll.call(), 0.001)
+	it.value = snappedf(GameData.ITEM_KIND_BASE[it.kind] * rarity["mult"] * GameData.ITEM_AFFIX_VALUE_SHARE[0] * (main_roll * rank_mult if main_roll > 0.0 and it.kind == main_kind else roll.call()), 0.001)
 	if rolled_kinds.size() > 1:
 		it.secondary_kind = str(rolled_kinds[1])
 		it.secondary_value = snappedf(GameData.ITEM_KIND_BASE[it.secondary_kind] * rarity["mult"] * GameData.ITEM_AFFIX_VALUE_SHARE[1] * roll.call(), 0.001)
@@ -286,7 +291,7 @@ func gen_unique_item() -> Item:
 
 ## Returns {"loot_type": "item"|"relic", "obj": Item|Relic}
 func gen_loot(rarity_id: String) -> Dictionary:
-	if randf() < (GameData.LOOT_GEAR_SHARE_ACT1 if GameState.campaign_act <= 1 else GameData.LOOT_GEAR_SHARE):
+	if not GameState.feature_unlocked("relics") or randf() < GameData.LOOT_GEAR_SHARE:   # relics come with Act I's finale
 		return {"loot_type": "item", "obj": gen_item(rarity_id)}
 	return {"loot_type": "relic", "obj": gen_relic(rarity_id)}
 

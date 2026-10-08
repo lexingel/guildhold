@@ -85,12 +85,19 @@ func check_feature_unlocks() -> Array:
 		if grudge != "":   # the Vale remembers: an old score
 			card["text"] = str(card["text"]) + "\n\n" + tr(GameData.GRUDGE_NOTICE) % [tr(str(rival_name)), grudge, GameData.GRUDGE_LAURELS]
 		pending_stories.append(card)
-	if fresh.size() == 1:
-		var def: Dictionary = GameData.FEATURE_UNLOCKS[fresh[0]]
+	# A person brings the bigger news in (a story card); the rest are toasts.
+	# A returning player gets toasts only.
+	var told: Array = fresh.filter(func(f): return GameData.FEATURE_UNLOCKS[f].has("who") and not veteran_reveal())
+	for f in told:
+		var def: Dictionary = GameData.FEATURE_UNLOCKS[f]
+		pending_stories.append({"title": tr("New: %s") % tr(str(def["name"])), "subtitle": tr(str(def["who"])), "text": tr(str(def["news"]))})
+	var rest: Array = fresh.filter(func(f): return not told.has(f))
+	if rest.size() == 1:
+		var def: Dictionary = GameData.FEATURE_UNLOCKS[rest[0]]
 		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("New: %s") % tr(str(def["name"])), "text": str(def["news"])})
-	elif fresh.size() > 1:
-		# Several at once (e.g. the first seal): one toast, not a stack.
-		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("New at camp"), "text": ", ".join(fresh.map(func(f): return tr(str(GameData.FEATURE_UNLOCKS[f]["name"])))) + tr(" — check the tabs above.")})
+	elif rest.size() > 1:
+		# Several at once: one toast, not a stack.
+		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("New at camp"), "text": ", ".join(rest.map(func(f): return tr(str(GameData.FEATURE_UNLOCKS[f]["name"])))) + tr(" — check the tabs above.")})
 	if not fresh.is_empty():
 		save()
 	return fresh
@@ -229,6 +236,11 @@ func engage_node() -> void:
 	party.assign(current_party().filter(func(h): return not h.is_downed() and h.hp > 0))
 	if party.is_empty():
 		return
+	# The party as it stood before the fight: a reload mid-fight (which can't
+	# keep the fight itself) puts it back, so the fight starts over fairly.
+	var pre_hp := {}
+	for h in current_party():
+		pre_hp[h.id] = [h.hp, h.down_runs]
 	var kind := current_node_kind()
 	if run.has("tower"):
 		for h in party:
@@ -254,7 +266,7 @@ func engage_node() -> void:
 			monsters_seen.append(mname)
 	# bg_idx stays alongside so a reload mid-fight (which drops combat_state)
 	# brings back the same arena.
-	run["node_state"] = {"type": "combat", "combat_state": state, "reward_chosen": false, "bg_idx": int(state.get("background_idx", prior_bg_idx)), "feat_pre": feat_pre}
+	run["node_state"] = {"type": "combat", "combat_state": state, "reward_chosen": false, "bg_idx": int(state.get("background_idx", prior_bg_idx)), "feat_pre": feat_pre, "pre_hp": pre_hp}
 	save()
 	state_changed.emit()
 
@@ -551,7 +563,7 @@ func campfire_choose(choice: String) -> void:
 		"sharpen":
 			run["momentum_bonus"] = int(run.get("momentum_bonus", 0)) + 4
 			log.append(tr("Weapons sharpened, focus restored — the next fight starts with +4 Momentum."))
-	var gain := change_resolve(int(GameData.RESOLVE_GAIN["rest" if choice == "rest" else "campfire"]))
+	var gain := change_resolve(int(GameData.RESOLVE_GAIN["rest" if choice == "rest" else "campfire"]) + (1 if has_wing("chapel") else 0))
 	if gain != 0:
 		log.append(tr("%+d Resolve.") % gain)
 	ns["type"] = "campfire"
@@ -688,7 +700,7 @@ func _apply_event_effect(e: Dictionary) -> Array[String]:
 			var rr := Combat.weighted_rarity()
 			if _rarity_order(rr) < _rarity_order(str(e[kind])):
 				rr = str(e[kind])
-			var lt: Dictionary = {"loot_type": "item", "obj": Combat.gen_item(rr)} if kind == "item" else {"loot_type": "relic", "obj": Combat.gen_relic(rr)}
+			var lt: Dictionary = {"loot_type": "item", "obj": Combat.gen_item(rr)} if kind == "item" or not feature_unlocked("relics") else {"loot_type": "relic", "obj": Combat.gen_relic(rr)}
 			_grant_loot(lt)
 			log.append(tr("You receive: %s (%s).") % [tr(str(lt["obj"].name)), tr(str(rr.capitalize()))])
 	if e.has("loot"):
@@ -796,7 +808,7 @@ func pray_at_shrine() -> void:
 		if h.hp <= 0 or h.level >= 10:
 			continue
 		var own := (h.path if h.path != "" else GameData.path_of(h.pool_id)) == str(ns.get("path", ""))
-		Combat.gain_xp(h, int(round(Combat.xp_to_next(h.level, h.rank) * float(SHRINE_XP[0 if own else 1]))))
+		Combat.gain_xp(h, int(round(Combat.xp_to_next(h.level, h.rank) * float(SHRINE_XP[0 if own else 1]) * (2.0 if has_wing("library") else 1.0))))
 		if own:
 			names.append(h.name.split(" the ")[0])
 	ns["done"] = true
@@ -811,12 +823,15 @@ func train_with_echo(hero_id: String) -> void:
 	var h := find_hero(hero_id)
 	if ns.get("done", false) or h == null:
 		return
+	var times := 2 if has_wing("library") else 1   # the Library: twice the lesson
 	if h.level < 10:
-		Combat.gain_xp(h, Combat.xp_to_next(h.level, h.rank) - h.xp)
+		for i in times:
+			if h.level < 10:
+				Combat.gain_xp(h, Combat.xp_to_next(h.level, h.rank) - h.xp)
 		ns["note"] = tr("%s trains with the echo: level %d.") % [h.name.split(" the ")[0], h.level]
 	else:
-		h.attr_points += GameData.ATTR_PER_STEP
-		ns["note"] = tr("%s trains with the echo: +%d attribute points.") % [h.name.split(" the ")[0], GameData.ATTR_PER_STEP]
+		h.attr_points += GameData.ATTR_PER_STEP * times
+		ns["note"] = tr("%s trains with the echo: +%d attribute points.") % [h.name.split(" the ")[0], GameData.ATTR_PER_STEP * times]
 	ns["done"] = true
 	save()
 	state_changed.emit()
@@ -878,12 +893,19 @@ func hazard_preview(dmg_scale: float) -> Dictionary:
 	dmg = round(dmg * (1.0 - guard))
 	var absorbed: int = min(int(run.get("shield", 0)), int(dmg))
 	dmg -= absorbed
+	if party.any(func(x): return x.pool_id == "pathfinder"):   # Twist (0.62): hazards 20% weaker
+		dmg = round(dmg * 0.8)
+	# One reckoning for the card and the outcome (0.65: they had drifted apart).
 	var per: float = dmg / party.size() if party.size() > 0 else 0.0
+	var hits := {}
 	var downs: Array[String] = []
 	for h in party:
-		if dmg > 0 and int(round(h.hp - per)) <= 0:
+		if h.pool_id == "scavenger" or dmg <= 0:   # Twist (0.62): hazards never hurt them
+			continue
+		hits[h.id] = int(round(per))
+		if h.hp - int(round(per)) <= 0 and not hazards_nonlethal():
 			downs.append(h.name.split(" the ")[0])
-	return {"anchor": false, "total": int(dmg), "absorbed": absorbed, "per_hero": int(round(per)), "downs": downs, "party": party}
+	return {"anchor": false, "total": int(dmg), "absorbed": absorbed, "per_hero": int(round(per)), "hits": hits, "downs": downs, "party": party}
 
 
 func _apply_hazard(dmg_scale: float, bonus_chance_override: float) -> void:
@@ -903,18 +925,14 @@ func _apply_hazard(dmg_scale: float, bonus_chance_override: float) -> void:
 		run["shield"] = int(run.get("shield", 0)) - absorbed
 		if absorbed > 0:
 			log.append(tr("Relic wards absorb %d of the hazard.") % absorbed)
-		var dmg: int = pv["total"]
-		if party.any(func(x): return x.pool_id == "pathfinder"):   # Twist (0.62): hazards 20% weaker
-			dmg = int(round(dmg * 0.8))
-		if dmg > 0 and party.size() > 0:
-			var per: float = float(dmg) / party.size()
+		var hits: Dictionary = pv["hits"]
+		if not hits.is_empty():
 			for h in party:
-				if h.pool_id == "scavenger":   # Twist (0.62): hazards never hurt them
-					continue
-				h.hp = max(1 if hazards_nonlethal() else 0, int(round(h.hp - per)))
-				if h.hp <= 0:
-					knock_out(h)
-			log.append(tr("The hazard deals %d damage across the party.") % dmg)
+				if hits.has(h.id):
+					h.hp = max(1 if hazards_nonlethal() else 0, h.hp - int(hits[h.id]))
+					if h.hp <= 0:
+						knock_out(h)
+			log.append(tr("The hazard deals %d damage across the party.") % hits.values().reduce(func(a, b): return a + b, 0))
 			_note_injuries("wounded")
 	# Getting through always pays about what a fight here pays; the hazard's
 	# bonus chance (or Risk it) doubles it. It was a 15-50% chance of 2-6.
@@ -1160,7 +1178,6 @@ func seal_rift() -> void:
 ## champion freed on the way. The guild spends a day on it (wages, healing).
 ## Returns what was earned for the result screen.
 func finish_survivors(r: SurvivorsRun) -> Dictionary:
-	note_milestone("first Endless run")
 	var pay := r.rewards()
 	coins += int(pay["coins"])
 	crystals += int(pay["crystals"])
@@ -1279,7 +1296,7 @@ func haul() -> Vector2i:
 ## Whether a lost or fled fight costs part of the haul (GameData.HAUL_LOSS).
 func haul_at_risk() -> bool:
 	return not run.is_empty() and not run.has("tower") and not run.get("training", false) and hardship >= 0 \
-		and (run.has("descent") or rifts_sealed >= GameData.HAUL_GRACE_SEALS)
+		and (run.has("descent") or feature_unlocked("resolve"))
 
 
 ## A campfire's Rest (Hardship 9 lowers it).
@@ -1311,7 +1328,7 @@ func roll_path_relic_offer() -> Array:
 		if offer.size() < 2 and paths.has(str(d["path"])):
 			offer.append(str(d["id"]))
 	for d in pool:
-		if offer.size() < 3 and not offer.has(str(d["id"])):
+		if offer.size() < (4 if has_wing("reliquary") else 3) and not offer.has(str(d["id"])):
 			offer.append(str(d["id"]))
 	return offer
 
@@ -1385,6 +1402,7 @@ func resolve_hint(n: int) -> String:
 
 ## A lost ("fell") or fled fight drops its share of the haul, once per run.
 func _drop_haul(why: String) -> void:
+	note_milestone("first fall" if why == "fell" else "first flee")
 	if not haul_at_risk() or run.has("haul_lost"):
 		return
 	var h := haul()
@@ -1700,6 +1718,9 @@ func retreat_now() -> void:
 		_news(tr("The party climbed out of the Descent at depth %d.") % int(run["descent"]))
 	if run.has("breach"):   # leaving a breach rift gives the breach up
 		_breach_outcome(false)
+	var ns: Dictionary = run.get("node_state", {})
+	if ns.has("pre_hp") and not ns.has("result"):   # a fight begun (and reloaded) and then run from: fleeing
+		_drop_haul("fled")
 	_record_run("Retreated")
 	_lose_left_behind()
 	run = {}

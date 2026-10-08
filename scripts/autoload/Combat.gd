@@ -1932,7 +1932,7 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 			h.history["knockouts"] = int(h.history.get("knockouts", 0)) + 1
 			# A freshly-knocked-out roster hero may pick up a scar quirk
 			# (up to GameData.SCARS_MAX).
-			if not GameState.run.has("tower") and randf() < 0.5:
+			if not GameState.run.has("tower") and not GameState.has_wing("healers") and randf() < 0.5:
 				var scar := roll_scar(h)
 				if scar != "":
 					h.quirks.append(scar)
@@ -1951,7 +1951,7 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 		var is_elite: bool = state["is_elite"]
 		var diff: Dictionary = state["diff"]
 		var floor_idx: int = state["floor_idx"]
-		var reward_mult: float = 1.4 if is_elite else 1.0
+		var reward_mult: float = (1.4 * (1.5 if GameState.has_wing("war_room") else 1.0)) if is_elite else 1.0
 		var depth_mult: float = 1.0 + floor_idx * 0.05
 		result["coin"] = round(randf_range(diff["coin"][0], diff["coin"][1]) * reward_mult * depth_mult)
 		var base_crystal: float = round(randf_range(diff["crystal"][0], diff["crystal"][1]) * reward_mult * depth_mult)
@@ -2048,6 +2048,12 @@ func _on_path(state: Dictionary, pid: String, stage: int = 1) -> Array:
 	return (state["party"] as Array).filter(func(x): return x.hp > 0 and _pa(x) == pid and _st(x) >= stage)
 
 
+## Path Mastery (0.65): each rank makes the hero's Path rule numbers
+## GameData.MASTERY_STEP stronger (1.0 for an unmastered hero or a champion).
+func _mx(h: Hero) -> float:
+	return 1.0 if h == null or h.is_champion else 1.0 + GameData.MASTERY_STEP * h.mastery
+
+
 ## A Path relic's bend on a rule (0.65), by its "pmod"; 0 when none is equipped.
 func _pm(state: Dictionary, key: String) -> float:
 	return float(state.get("_pmods", {}).get(key, 0.0))
@@ -2128,7 +2134,7 @@ func _pp_round_start(state: Dictionary) -> void:
 						second = x
 				if second:
 					targets.append(second)
-		var frac := (0.12 if _tw(w, "stoneward-mystic") else 0.08) + _pm(state, "ward_frac")
+		var frac := ((0.12 if _tw(w, "stoneward-mystic") else 0.08) + _pm(state, "ward_frac")) * _mx(w)
 		var sh: Dictionary = state["hero_shields"]
 		for t in targets:
 			sh[t.id] = float(sh.get(t.id, 0.0)) + max_hp(t) * frac
@@ -2183,13 +2189,13 @@ func _pp_round_start(state: Dictionary) -> void:
 	# Scrapper: front-row heroes patch themselves up.
 	for s in _on_path(state, "scrapper"):
 		if (s.formation != "back" or _pm(state, "scrap_back") > 0) and rn > 1:
-			_pp_heal(state, s, int(round(max_hp(s) * 0.05)))
+			_pp_heal(state, s, int(round(max_hp(s) * 0.05 * _mx(s))))
 
 
 func _snare(state: Dictionary, trapper: Hero, i: int) -> void:
 	var m: Dictionary = state["monsters"][i]
 	var base := dmg_of(trapper) / float(state["raw_sum"]) * float(state["team_dmg_base"])
-	var dmg := base * (1.0 if _tw(trapper, "deadfall-hunter") else 0.5) * (2.0 if _tw(trapper, "trapper") else 1.0)
+	var dmg := base * (1.0 if _tw(trapper, "deadfall-hunter") else 0.5) * (2.0 if _tw(trapper, "trapper") else 1.0) * _mx(trapper)
 	m["hp"] = float(m["hp"]) - round(dmg)
 	m["_snared"] = 2   # through this round's end, so it acts last next round
 	m["_snared_ever"] = true
@@ -2234,7 +2240,7 @@ func _pp_dmg_mult(state: Dictionary, h: Hero, ti: int) -> float:
 	for other in state["party"]:   # the party's shared Marks (Stalker)
 		var op: Dictionary = all.get(other.id, {})
 		if other.hp > 0 and _pa(other) == "stalker" and (int(op.get("mark", -1)) == ti or int(op.get("mark2", -1)) == ti):
-			mult *= 1.0 + MARK_BONUS + _pm(state, "mark_bonus")
+			mult *= 1.0 + (MARK_BONUS + _pm(state, "mark_bonus")) * _mx(other)
 			break
 	if pid == "" or not all.has(h.id):
 		return mult
@@ -2242,29 +2248,29 @@ func _pp_dmg_mult(state: Dictionary, h: Hero, ti: int) -> float:
 	match pid:
 		"bloodrage":
 			var missing := 1.0 - float(h.hp) / maxf(1.0, max_hp(h))
-			mult *= 1.0 + minf(BLOODRAGE_CAP + _pm(state, "rage_cap"), missing * 0.5)
+			mult *= 1.0 + minf(BLOODRAGE_CAP + _pm(state, "rage_cap"), missing * 0.5) * _mx(h)
 			if p.get("bp", false):
 				mult *= 1.5
 			if _tw(h, "squire"):
 				mult *= 1.1
 		"weaponmaster":
 			if int(p.get("combo_t", -1)) == ti or (_legend(h) and int(p.get("combo", 0)) > 0):
-				mult *= 1.0 + COMBO_STEP * int(p.get("combo", 0))
+				mult *= 1.0 + COMBO_STEP * int(p.get("combo", 0)) * _mx(h)
 		"marksman":
 			var need := 2 if _tw(h, "longshot") else 1
 			if int(p.get("quiet", 0)) >= need:
-				mult *= 1.0 + (STEADY_BONUS + (_pm(state, "steady_back") if h.formation == "back" else 0.0)) * (2.0 if _tw(h, "longshot") else 1.0) * (2.0 if p.get("ow_shot", false) else 1.0)
+				mult *= 1.0 + (STEADY_BONUS + (_pm(state, "steady_back") if h.formation == "back" else 0.0)) * (2.0 if _tw(h, "longshot") else 1.0) * (2.0 if p.get("ow_shot", false) else 1.0) * _mx(h)
 		"stalker":
 			if p.get("hunt", false) and int(p.get("mark", -1)) == ti:
 				mult *= 1.6
 			if p.get("vanish_shot", false) and int(p.get("mark", -1)) == ti:
 				mult *= 3.0
 		"evocation":
-			mult *= 1.0 + HEAT_STEP * int(p.get("heat", 0))
+			mult *= 1.0 + HEAT_STEP * int(p.get("heat", 0)) * _mx(h)
 		"assassin":
 			var below := (0.5 if _legend(h) else EXECUTE_BELOW) + _pm(state, "execute_at")
 			if float(m["hp"]) < float(m["max_hp"]) * below:
-				mult *= 1.0 + EXECUTE_BONUS
+				mult *= 1.0 + EXECUTE_BONUS * _mx(h)
 		"zeal":
 			if _tw(h, "vanguard-chaplain") and not p.get("first_done", false):
 				mult *= 1.5
@@ -2351,7 +2357,7 @@ func _pp_after_hit(state: Dictionary, h: Hero, ti: int, dealt: float, was_alive:
 		"zeal":
 			p["first_done"] = true
 			if dealt > 0:
-				var heal_frac := (FERVOR + _pm(state, "fervor")) * (2.0 if p.get("smiting", false) else 1.0)
+				var heal_frac := (FERVOR + _pm(state, "fervor")) * (2.0 if p.get("smiting", false) else 1.0) * _mx(h)
 				if _legend(h):
 					for x in state["party"]:
 						if x.hp > 0:
@@ -2368,7 +2374,7 @@ func _pp_after_hit(state: Dictionary, h: Hero, ti: int, dealt: float, was_alive:
 				_pp_log(state, tr("%s breaks %s's wind-up!") % [tr(str(h.name)), tr(str(m["name"]))])
 		"scrapper":
 			if dealt > 0:
-				var steal := (SCRAPPY + _pm(state, "scrappy")) * (2.0 if _legend(h) else 1.0)
+				var steal := (SCRAPPY + _pm(state, "scrappy")) * (2.0 if _legend(h) else 1.0) * _mx(h)
 				var got := int(round(dealt * steal))
 				_pp_heal(state, h, got)
 				if _tw(h, "herbrunner"):
@@ -2635,7 +2641,7 @@ func _pp_taken_mult(state: Dictionary, m: Dictionary, target: Hero) -> float:
 		"skirmisher":
 			mult *= 1.0 + _pm(state, "skirm_taken")
 	for a in _on_path(state, "aegis"):
-		var cut := SANCTUARY * (2.0 if _legend(a) else 1.0) + _pm(state, "sanctuary")
+		var cut := (SANCTUARY * (2.0 if _legend(a) else 1.0) + _pm(state, "sanctuary")) * _mx(a)
 		if _tw(a, "frostward-sister") and target.formation != "back":
 			cut += 0.04
 		mult *= 1.0 - cut
@@ -2661,7 +2667,7 @@ func _pp_dodge(state: Dictionary, target: Hero, m: Dictionary) -> float:
 	var p := _pp(state, target)
 	match _pa(target):
 		"skirmisher":
-			d += EVASION + _pm(state, "evasion")
+			d += (EVASION + _pm(state, "evasion")) * _mx(target)
 			if int(p.get("feint", -1)) == int(state["round_num"]):
 				d += 0.25
 		"weaponmaster":
@@ -2686,7 +2692,9 @@ func _pp_cancel_heavy(state: Dictionary, m: Dictionary) -> bool:
 	var pf: Dictionary = state.get("_pf", {})
 	if int(pf.get("cancels", 0)) <= 0:
 		return false
-	pf["cancels"] = int(pf["cancels"]) - 1
+	var seers := _on_path(state, "augury")
+	if seers.is_empty() or randf() >= _mx(seers[0]) - 1.0:   # Mastery: a chance the cancel isn't spent
+		pf["cancels"] = int(pf["cancels"]) - 1
 	if _pm(state, "cancel_momentum") > 0:   # Omen Bones
 		gain_momentum(state, int(_pm(state, "cancel_momentum")))
 	_pp_log(state, tr("Foresight: the party saw %s's blow coming and it comes to nothing.") % tr(str(m["name"])))
@@ -2709,7 +2717,7 @@ func _pp_guardian_share(state: Dictionary, m: Dictionary, target: Hero, back: fl
 		if target.formation != "back" and not _legend(g):
 			continue
 		var hold: bool = int(_pp(state, g).get("hold", -9)) == int(state["round_num"]) and target.formation == "back"
-		var share := 1.0 if hold else ((0.4 if _tw(g, "bulwark") else 0.25) + _pm(state, "guard_share"))
+		var share := 1.0 if hold else minf(0.9, ((0.4 if _tw(g, "bulwark") else 0.25) + _pm(state, "guard_share")) * _mx(g))
 		var taken := back * share * (0.7 if hold else 1.0)
 		var sh: Dictionary = state["hero_shields"]
 		var absorbed: float = minf(float(sh.get(g.id, 0.0)), taken)
@@ -2865,7 +2873,7 @@ func _pp_heal(state: Dictionary, h: Hero, amount: int, overflow := true) -> int:
 	var over := amount - healed
 	if over > 0 and overflow:
 		for c in _on_path(state, "mercy"):
-			var ward := float(over) * (0.5 + _pm(state, "overflow")) * (1.5 if _tw(c, "peddler") else 1.0)
+			var ward := float(over) * (0.5 + _pm(state, "overflow")) * (1.5 if _tw(c, "peddler") else 1.0) * _mx(c)
 			var sh: Dictionary = state["hero_shields"]
 			sh[h.id] = minf(float(sh.get(h.id, 0.0)) + ward, max_hp(h) * 0.2)
 			break

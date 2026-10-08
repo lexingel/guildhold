@@ -25,10 +25,13 @@ func _fight() -> bool:
 func run() -> void:
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
-	check(not GameState.feature_unlocked("tower"), "tower locked in Act I")
-	GameState.campaign_act = 2
-	check(GameState.feature_unlocked("tower") and GameState.tower_next_floor() == 1, "Act II opens the tower at floor 1")
+	GameState.features_seen.erase("tower")
+	GameState.campaign_act = 3
+	check(not GameState.feature_unlocked("tower"), "tower locked before Act IV (0.65)")
+	GameState.campaign_act = 4
+	check(GameState.feature_unlocked("tower") and GameState.tower_next_floor() == 1, "Act IV opens the tower at floor 1")
 
 	# Floors are fixed: same info and same foes every time.
 	var a := GameState.tower_floor_info(37)

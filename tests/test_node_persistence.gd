@@ -84,8 +84,13 @@ func run() -> void:
 	GameState.choose_node_type("combat")
 	GameState.engage_node()
 	var mon: Array = GameState.run["node_state"]["combat_state"]["monsters"].map(func(m): return m["name"])
+	var hp_before: Array = GameState.current_party().map(func(h): return h.hp)
+	for h in GameState.current_party():   # hurt in the fight, then the tab is closed
+		h.hp = maxi(1, h.hp / 3)
+	GameState.save()
 	_reload()
 	check(not GameState.run["node_state"].has("combat_state") and not GameState.run["node_state"].has("result"), "mid-fight reload -> encounter awaits")
+	check(GameState.current_party().map(func(h): return h.hp) == hp_before, "and the party stands as it did before the fight (0.65)")
 	GameState.engage_node()
 	check(GameState.run["node_state"]["combat_state"]["monsters"].map(func(m): return m["name"]) == mon, "re-engaged fight has the same monsters %s" % [mon])
 	for step in 60:

@@ -54,15 +54,35 @@ func run() -> void:
 	check(fresh.has("quests") and not fresh.has("management") and not fresh.has("crafting"), "the first seal opens quests only %s" % [fresh])
 	check(GameState.pending_toasts.size() == 1 and str(GameState.pending_toasts[0]["text"]).contains("Quests"), "one combined unlock toast")
 	check(GameState.check_feature_unlocks().is_empty(), "announced only once")
+	# The reveal schedule (0.65): seals first, then the acts.
+	GameState.pending_stories.clear()
 	GameState.rifts_sealed = 2
-	check(GameState.check_feature_unlocks() == ["management"], "the second seal opens Management")
+	var second := GameState.check_feature_unlocks()
+	check(second.has("training") and second.has("management") and second.size() == 2, "the second seal opens the Training Yard and the hall's rooms %s" % [second])
+	check(GameState.pending_stories.size() == 2 and str(GameState.pending_stories[0]["subtitle"]).contains("Wen"), "brought in by Wen, as story cards")
 	GameState.rifts_sealed = 3
-	var third := GameState.check_feature_unlocks()
-	check(third == ["rival"], "the third opens the rival's moves on their own %s" % [third])
-	GameState.rifts_sealed = GameData.CRAFTING_SEALS
-	check(GameState.check_feature_unlocks().has("crafting"), "Crafting opens at the fifth")
-	GameState.rifts_sealed = GameData.DAILY_SEALS
-	check(GameState.check_feature_unlocks().has("daily"), "the Daily twist at the seventh")
+	check(GameState.check_feature_unlocks() == ["requests"], "the third opens hero requests")
+	check(not GameState.feature_unlocked("forge") and not GameState.feature_unlocked("rival") and not GameState.feature_unlocked("tower"), "the Smithy, the rival and the Tower wait")
+	GameState.rifts_sealed = 9
+	check(GameState.check_feature_unlocks().is_empty(), "seals alone open nothing more")
+	GameState.campaign_act = 2
+	GameState.act_since = GameState.day
+	var act2 := GameState.check_feature_unlocks()
+	check(act2.has("forge") and act2.has("relics") and not act2.has("rival"), "the end of Act I opens the Smithy and relics %s" % [act2])
+	GameState.day += 1
+	var act2b := GameState.check_feature_unlocks()
+	check(act2b.has("rival") and act2b.has("resolve"), "a day into Act II: the rival, Resolve and the haul %s" % [act2b])
+	GameState.day += 1
+	check(GameState.check_feature_unlocks() == ["hall_rooms"], "two days in: more rooms")
+	GameState.campaign_act = 3
+	GameState.act_since = GameState.day
+	var act3 := GameState.check_feature_unlocks()
+	check(act3.has("crafting") and act3.has("hall_research") and not act3.has("daily") and not act3.has("tower"), "Act III: reforge and the research rooms %s" % [act3])
+	GameState.day += 1
+	check(GameState.check_feature_unlocks() == ["daily"], "then the Daily twist")
+	GameState.campaign_act = 4
+	check(GameState.check_feature_unlocks() == ["tower"], "Act IV: the Tower")
+	GameState.campaign_act = 1
 	GameState.rifts_sealed = 0
 	check(GameState.feature_unlocked("management"), "an announced feature stays open")
 	# Tips.

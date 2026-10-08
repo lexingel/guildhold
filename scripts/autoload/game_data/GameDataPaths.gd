@@ -246,6 +246,17 @@ static func is_legend(pool_id: String) -> bool:
 	return LEGENDS.values().has(pool_id)
 
 
+## Path Mastery (0.65): a hero on a Path trains ranks at the Training Yard,
+## one yard day and MASTERY_ESSENCE x rank Essence each (5,500 for all ten),
+## up to MASTERY_BY_STAGE of their Path stage (the sim: few heroes finish a
+## Path by day 45, so stage 3 alone left Essence idle). Each rank makes the
+## Path rule's numbers MASTERY_STEP stronger (Combat._mx).
+const MASTERY_MAX := 10
+const MASTERY_BY_STAGE := [0, 3, 6, 10]
+const MASTERY_STEP := 0.04
+const MASTERY_ESSENCE := 100
+
+
 ## 0 for a base class (or anything unknown), else 1-3.
 static func subclass_stage(pool_id: String) -> int:
 	if is_legend(pool_id):

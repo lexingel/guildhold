@@ -697,47 +697,49 @@ static func rift_rank_index(rank_id: String) -> int:
 # Every kind that can appear on a hero build (skills/items/relics/traits/innate).
 const BUILD_KINDS := ["dmg_pct", "hp_pct", "speed_pct", "first_round_pct", "escalate_pct", "mend_pct", "hazard_guard_pct", "dodge_pct", "ability_power", "wipe_guard", "boss_alpha_strike"]
 
-# Guild Management: 5 branches, 13 upgrades of 5 levels. Every level adds the
-# node's "every" effect (numbers from Combat.describe_node_effect); the
-# "perks" levels unlock something new (Lv2 perks marked "Order:" are Guild
-# Orders, used once per rift). Costs: cost_base + cost_step * current level.
+# The Accord Hall's rooms (Guild Management until 0.65): 5 wings of rooms, 13
+# rooms of 5 levels. Every level adds the room's "every" effect (numbers from
+# Combat.describe_node_effect); the "perks" levels unlock something new (Lv2
+# perks marked "Order:" are Guild Orders, used once per rift). Costs, in Gold
+# ("Gold builds, Essence empowers"): cost_base + cost_step * current level.
+# Each wing of rooms opens with its reveal (GameData.BRANCH_FEATURE).
 const BRANCHES := [
 	{"id": "ops", "name": "Operations Branch", "sub": "Heroes & Combat", "nodes": [
-		{"id": "barracks", "name": "Barracks", "max": 5, "cost_base": 50, "cost_step": 50, "every": "+2 hero slots",
+		{"id": "barracks", "name": "Barracks", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "+2 hero slots",
 			"perks": {3: "Mentors: new recruits join 1 level higher", 5: "Veteran instructors: heroes earn +20% XP"}},
-		{"id": "infirmary", "name": "Infirmary", "max": 5, "cost_base": 50, "cost_step": 50, "every": "-15% recovery time; a bed at Lv1/3/5",
+		{"id": "infirmary", "name": "Infirmary", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "-15% recovery time; a bed at Lv1/3/5",
 			"perks": {2: "Order: Supply Drop — heal the party 35% between fights", 3: "Field Triage: once per rift, get a downed hero back up", 5: "Wounded heroes heal fully after every run"}},
-		{"id": "drill", "name": "Drill Yard", "max": 5, "cost_base": 50, "cost_step": 50, "every": "a Training Yard slot every 2 levels; +4% party damage and +4% max HP",
+		{"id": "drill", "name": "Drill Yard", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "a Training Yard slot every 2 levels; +4% party damage and +4% max HP",
 			"perks": {2: "Order: Rally — the party acts first this round and hits 30% harder", 3: "Vanguard: a fight's first strike deals +25% damage", 5: "Abilities are ready at the start of every fight"}},
 	]},
 	{"id": "infra", "name": "Infrastructure Branch", "sub": "Rift Yield & Safety", "nodes": [
-		{"id": "amplifiers", "name": "Essence Amplifiers", "max": 5, "cost_base": 50, "cost_step": 50, "every": "+8% Essence from fights",
+		{"id": "amplifiers", "name": "Essence Amplifiers", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "+8% Essence from fights",
 			"perks": {3: "Energy extraction: elites often drop bonus Essence", 5: "Resonance: bosses drop an Essence cache"}},
-		{"id": "wardstones", "name": "Wardstones", "max": 5, "cost_base": 50, "cost_step": 50, "every": "-12% hazard damage, +10% Essence for sealing",
+		{"id": "wardstones", "name": "Wardstones", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "-12% hazard damage, +10% Essence for sealing",
 			"perks": {3: "Anchor: the first hazard of each rift is negated", 5: "Hazards can't knock a hero out"}},
 	]},
 	{"id": "log", "name": "Logistics Branch", "sub": "Trade & Recruiting", "nodes": [
-		{"id": "trade", "name": "Trade Network", "max": 5, "cost_base": 50, "cost_step": 50, "every": "+1 feast seat; -6% shop prices, -2% auction fees, +5% Rift Cache chance",
+		{"id": "trade", "name": "Trade Network", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "+1 feast seat; -6% shop prices, -2% auction fees, +5% Rift Cache chance",
 			"perks": {2: "Order: Requisition — reroll a fight's loot choices", 3: "Black Market: Rift Caches hold 30% more Gold", 5: "Every rift shop stocks an Epic relic"}},
-		{"id": "scouts", "name": "Scouts' Lodge", "max": 5, "cost_base": 50, "cost_step": 50, "every": "Recruit board: +1 offer at Lv1 and Lv4",
+		{"id": "scouts", "name": "Scouts' Lodge", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "Recruit board: +1 offer at Lv1 and Lv4",
 			"perks": {2: "Order: Scout Ahead — reroll the next fork's paths", 3: "Headhunter: every recruit refresh has a Rank C+ hero", 5: "Recruit rerolls cost half"}},
 	]},
 	# 0.63: Wardcraft (the node ids stay, so saved levels carry over): it
 	# softens breach rifts instead of building towers.
-	{"id": "def", "name": "Wardcraft", "sub": "Breaches (paid in Gold)", "nodes": [
-		{"id": "armory", "name": "Armory", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "breach foes -5% HP and damage",
+	{"id": "def", "name": "Wardcraft", "sub": "Breaches", "nodes": [
+		{"id": "armory", "name": "Armory", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "breach foes -5% HP and damage",
 			"perks": {}},
-		{"id": "engineering", "name": "Quartermaster", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "+10% Gold and Essence for holding a breach",
+		{"id": "engineering", "name": "Quartermaster", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "+10% Gold and Essence for holding a breach",
 			"perks": {}},
-		{"id": "palisade", "name": "Palisade", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "a lost defense costs 10% less",
+		{"id": "palisade", "name": "Palisade", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "a lost defense costs 10% less",
 			"perks": {5: "A lost defense damages one building at most"}},
-		{"id": "watch", "name": "Watchtower", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "breach foes deal -4% damage",
+		{"id": "watch", "name": "Watchtower", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "breach foes deal -4% damage",
 			"perks": {1: "+1 day of warning before a rift breaks", 3: "+1 more day of warning"}},
 	]},
 	{"id": "res", "name": "Research Branch", "sub": "Relics & Theory", "nodes": [
-		{"id": "vault", "name": "Relic Vault", "max": 5, "cost_base": 50, "cost_step": 50, "every": "Starting relic choices (2 at Lv1, 3 at Lv2, 4 at Lv4)",
+		{"id": "vault", "name": "Relic Vault", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "Starting relic choices (2 at Lv1, 3 at Lv2, 4 at Lv4)",
 			"perks": {3: "+1 equipped relic slot", 5: "+1 more relic slot, and starting relics are Rare or better"}},
-		{"id": "lab", "name": "Arcane Lab", "max": 5, "cost_base": 50, "cost_step": 50, "every": "+5% to every relic effect; Lv1 unlocks relic scrapping and trait/scar removal",
+		{"id": "lab", "name": "Arcane Lab", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "+5% to every relic effect; Lv1 unlocks relic scrapping and trait/scar removal",
 			"perks": {3: "Skill respecs and quirk treatments cost 30% less", 5: "Relic upgrades cost 25% fewer Essence"}},
 	]},
 ]
@@ -843,11 +845,10 @@ const DESCENT_GROWTH := 0.15
 const DESCENT_PAY_GROWTH := 0.10
 ## The haul (0.56): what a run has earned is only safe once the party is
 ## home. Sealing or leaving between floors keeps it all; fleeing a fight drops
-## HAUL_LOSS["fled"] of it, falling HAUL_LOSS["fell"]. Spared until the guild
-## has sealed HAUL_GRACE_SEALS rifts, in the training rift and in the Tower.
+## HAUL_LOSS["fled"] of it, falling HAUL_LOSS["fell"]. Spared until a day
+## into Act II (the "resolve" reveal), in the training rift and in the Tower.
 ## A var so the sim can sweep it.
 var HAUL_LOSS := {"fell": 0.5, "fled": 0.25}
-const HAUL_GRACE_SEALS := 3
 ## Pillars on the ladder: a rift of PILLAR_MIN_RANK or higher sometimes offers
 ## a lost champion's pillar as a fork (once the Endless Rift is open).
 const PILLAR_CHANCE := 0.15
@@ -1483,19 +1484,22 @@ const ACCORD_HALLS := [
 ## Sim (0.35.3): at 5000/2000 +3000/1500 and 25000/12000 strong guilds took
 ## ~110 days for all seven and sat on 47k unspent Essence; now ~45k Gold and
 ## ~40k Essence in all.
-## Hall Works (0.61): wings of the guild's own hall, rebuilt with Gold, any
-## order, each a lasting guild-wide bonus. Five raise the hall's art to its
-## top tier, two to the middle one. The other Gold sink beside the Forge.
+## Hall Works (0.61), wings by choice (0.65): at the end of Acts I, III and
+## V the guild is offered two wings it hasn't built and builds one, so it ends
+## with 3 of the 6, its identity. No wing repeats a hall room. "kind"/"value"
+## are read by GameState.work_bonus; the other effects by has_wing(id).
 const HALL_WORKS := [
-	{"id": "war_room", "name": "War Room", "kind": "tactics", "value": 0.05, "bonus": "+5% damage and max HP for every hero"},
-	{"id": "chapel", "name": "Chapel", "kind": "mend", "value": 0.06, "bonus": "Standing heroes mend 6% of their max HP after every won fight in a rift"},
-	{"id": "smithy", "name": "Smithy", "kind": "forge", "value": 0.25, "bonus": "Tempering gear at the Forge costs 25% less"},
-	{"id": "library", "name": "Library", "kind": "xp", "value": 0.15, "bonus": "Heroes earn 15% more XP"},
-	{"id": "healers", "name": "Healers' Wing", "kind": "recovery", "value": 0.25, "bonus": "Downed heroes recover 25% sooner"},
-	{"id": "reliquary", "name": "Reliquary", "kind": "relic_slots", "value": 1, "bonus": "+1 equipped relic slot"},
+	{"id": "chapel", "name": "Chapel", "identity": "Sustain", "kind": "mend", "value": 0.06, "bonus": "Standing heroes mend 6% of their max HP after every won fight; campfires restore 1 more Resolve"},
+	{"id": "smithy", "name": "Smithy", "identity": "Gear", "kind": "forge", "value": 0.25, "bonus": "Tempering costs 25% less; combining three items keeps the best stat line of the three"},
+	{"id": "library", "name": "Library", "identity": "Learning", "bonus": "Shrines and a trainer's echo teach twice as much"},
+	{"id": "war_room", "name": "War Room", "identity": "Fighting", "bonus": "Elites pay 50% more; one free Rally order in every rift"},
+	{"id": "healers", "name": "Healers' Wing", "identity": "Care", "bonus": "Knockouts never leave scars; a downed hero is back after one day"},
+	{"id": "reliquary", "name": "Reliquary", "identity": "Relics", "kind": "relic_slots", "value": 1, "bonus": "+1 equipped relic slot; Path relic offers show 4, not 3"},
 ]
-const HALL_WORK_COST := 800       # the first wing, in Gold
-const HALL_WORK_COST_STEP := 600  # each wing after it costs this much more (13,800 for all six)
+const HALL_WORK_COST := 600       # the first wing, in Gold
+const HALL_WORK_COST_STEP := 400  # each wing after it costs this much more (600 / 1,000 / 1,400; the 0.65 sim)
+const WING_ACTS := [2, 4, 6]      # a wing is offered as campaign_act reaches each (the end of Acts I, III, V)
+const WINGS_MAX := 3
 const HALL_COST := [3000, 2500]          # the first hall: Gold, Essence
 const HALL_COST_STEP := [1000, 1000]     # each hall after it costs this much more
 const GRANDMASTER_HALL_COST := [12000, 10000]

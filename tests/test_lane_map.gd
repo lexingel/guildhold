@@ -9,6 +9,7 @@ func run() -> void:
 	seed(31)
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	var ids: Array[String] = []
 	for r in ["warrior", "ranger", "mage", "cleric"]:

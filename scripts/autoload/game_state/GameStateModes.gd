@@ -265,6 +265,7 @@ func _complete_act(act_num: int) -> void:
 		var vc: Dictionary = GameData.VAELITH_CHOICE.duplicate(true)
 		vc["relic"] = relic.id
 		pending_stories.insert(mini(first_card, pending_stories.size()), vc)
+	check_wing_offer()   # the end of Acts I, III and V: a wing of the hall
 
 
 ## Branch B1 (the Unwritten Accord): a guild that knows why Vaelith left may
@@ -972,8 +973,11 @@ func daily_score() -> int:
 		hp += maxf(0, h.hp)
 		mx += Combat.max_hp(h)
 	var rr := maxi(0, GameData.rift_rank_index(str(run.get("rift_rank", "F"))))
-	return maxi(0, 1000 + rr * 150 + int(500.0 * hp / maxf(1.0, mx)) + int(run.get("resolve", 0)) * 25
-		+ maxi(0, 200 - int(run.get("boss_rounds", 0)) * 10) - int(run.get("heroes_lost", 0)) * 200)
+	# Resolve counts only where it can drain; the total scales with the
+	# difficulty chosen (Story lower, Hardships higher), 0.65.
+	var resolve := int(run.get("resolve", 0)) * 25 if resolve_counts() else 0
+	return maxi(0, int(round((1000 + rr * 150 + int(500.0 * hp / maxf(1.0, mx)) + resolve
+		+ maxi(0, 200 - int(run.get("boss_rounds", 0)) * 10) - int(run.get("heroes_lost", 0)) * 200) * hardship_rec_mult())))
 
 
 # ---------------- Records: run history, memorial ----------------
@@ -1593,16 +1597,24 @@ func power_advice() -> Array:
 	if best_offer:
 		out.append({"kind": "recruit", "id": best_offer.id,
 			"text": tr("Hire %s from the recruit board: Rank %s, %d Gold. Your weakest hero is Rank %s.") % [tr(str(best_offer.name.split(" the ")[0])), tr(best_offer.rank), int(GameData.find_rank(best_offer.rank)["cost"]), tr(str(GameData.RANKS[weakest]["id"])) if weakest < GameData.RANKS.size() else "?"]})
-	var drill := GameData.find_branch_node("ops.drill")
-	if feature_unlocked("management") and not drill.is_empty() and int(upgrades.get("ops.drill", 0)) < int(drill["max"]):
-		var dcost := int(drill["cost_base"]) + int(drill["cost_step"]) * int(upgrades.get("ops.drill", 0))
-		if crystals >= dcost:
-			out.append({"kind": "drill", "id": "ops.drill",
-				"text": tr("Build the Drill Yard to level %d: +4%% damage and health for every hero, %d Essence.") % [int(upgrades.get("ops.drill", 0)) + 1, dcost]})
-	# Essence into power (0.61.3): the cheapest equipped relic level, then the
-	# cheapest level of a Management node that strengthens the party (the
-	# Drill Yard is above). Not slots or income: the sim's guilds took the
-	# cheapest of any node, swelled to 16 heroes and hoarded more Gold.
+	# A wing on offer (0.65), before any room: the guild's one big choice.
+	if not wing_offer.is_empty() and coins - hall_work_cost() > bill:
+		var wid := str(wing_offer[0])
+		var w: Dictionary = GameData.HALL_WORKS.filter(func(x): return x["id"] == wid)[0]
+		out.append({"kind": "hall_work", "id": wid,
+			"text": tr("Rebuild the %s (Guild > Accord Hall): %s, %d Gold.") % [tr(str(w["name"])), tr(str(w["bonus"])), hall_work_cost()]})
+	# While a wing is on offer, rooms and tempering keep half its price in hand
+	# (the 0.65 sim: cheap rooms ate the Gold every day, and stopping them
+	# outright starved the hall instead).
+	var keep := bill + (hall_work_cost() / 2 if not wing_offer.is_empty() else 0)
+	var dcost := room_cost("ops.drill")
+	if room_open("ops.drill") and dcost > 0 and coins - dcost > keep:
+		out.append({"kind": "drill", "id": "ops.drill",
+			"text": tr("Build the Drill Yard to level %d (Accord Hall): +4%% damage and health for every hero, %d Gold.") % [int(upgrades.get("ops.drill", 0)) + 1, dcost]})
+	# Essence into power (0.61.3): the cheapest equipped relic level, a Path
+	# Mastery rank; Gold into power: the cheapest room that strengthens the
+	# party (the Drill Yard is above). Not slots or income: the sim's guilds
+	# took the cheapest of any room, swelled to 16 heroes and hoarded Gold.
 	var relic: Relic = null
 	for r in relics:
 		if r.equipped and r.level < RELIC_MAX_LEVEL and relic_levels_up(r) and relic_upgrade_cost(r) <= crystals and (relic == null or relic_upgrade_cost(r) < relic_upgrade_cost(relic)):
@@ -1610,30 +1622,27 @@ func power_advice() -> Array:
 	if relic:
 		out.append({"kind": "relic", "id": relic.id,
 			"text": tr("Upgrade %s on the Relic Altar to level %d: %d Essence.") % [tr(str(relic.name)), relic.level + 1, relic_upgrade_cost(relic)]})
-	if feature_unlocked("management"):
-		var best_key := ""
-		var best_cost := 1 << 30
-		for b in GameData.BRANCHES:
-			for n in b["nodes"]:
-				var key := "%s.%s" % [b["id"], n["id"]]
-				var cur := int(upgrades.get(key, 0))
-				var c := int(n["cost_base"]) + int(n["cost_step"]) * cur
-				if key in ["res.lab", "res.vault", "infra.wardstones"] and cur < int(n["max"]) and c <= crystals and c < best_cost:
-					best_key = key
-					best_cost = c
-		if best_key != "":
-			var node := GameData.find_branch_node(best_key)
-			out.append({"kind": "management", "id": best_key,
-				"text": tr("Build %s to level %d (Guild Management): %s, %d Essence.") % [tr(str(node["name"])), int(upgrades.get(best_key, 0)) + 1, tr(str(node["every"])), best_cost]})
-	# Gold into power (0.61): a hall wing, then the Forge, keeping payday's bill in hand.
-	if hall_work_lock("war_room") == "" and coins - hall_work_cost() > bill:
-		out.append({"kind": "hall_work", "id": "war_room",
-			"text": tr("Rebuild the War Room (Guild Hall > Hall Works): +5%% damage and health for every hero, %d Gold.") % hall_work_cost()})
+	var mh := mastery_pick()
+	if mh:
+		out.append({"kind": "mastery", "id": mh.id,
+			"text": tr("Train %s's Path Mastery to rank %d at the Training Yard: %d Essence.") % [tr(str(mh.name.split(" the ")[0])), mh.mastery + 1, mastery_cost(mh)]})
+	var best_key := ""
+	var best_cost := 1 << 30
+	for key in ["infra.wardstones", "res.vault", "res.lab"]:
+		var c := room_cost(key)
+		if room_open(key) and c > 0 and coins - c > keep and c < best_cost:
+			best_key = key
+			best_cost = c
+	if best_key != "":
+		var node := GameData.find_branch_node(best_key)
+		out.append({"kind": "management", "id": best_key,
+			"text": tr("Build %s to level %d (Accord Hall): %s, %d Gold.") % [tr(str(node["name"])), int(upgrades.get(best_key, 0)) + 1, tr(str(node["every"])), best_cost]})
+	# The Forge, keeping payday's bill in hand.
 	var temper: Item = null
 	for it in items:
 		var h: Hero = find_hero(it.equipped_to) if it.equipped_to != "" else null
 		var fc := forge_cost(it)
-		if h and not h.is_champion and fc > 0 and coins - fc > bill and (temper == null or fc < forge_cost(temper)):
+		if h and not h.is_champion and fc > 0 and coins - fc > keep and feature_unlocked("forge") and (temper == null or fc < forge_cost(temper)):
 			temper = it
 	if temper:
 		out.append({"kind": "forge", "id": temper.id,
@@ -1671,6 +1680,8 @@ func follow_advice(a: Dictionary) -> String:
 			return upgrade_node(str(a["id"]))
 		"forge":
 			return forge_item(str(a["id"]))
+		"mastery":
+			return train_mastery(str(a["id"]))
 		"champion":
 			return level_champion(str(a["id"]))
 	return ""
