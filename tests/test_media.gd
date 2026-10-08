@@ -82,7 +82,7 @@ func run() -> void:
 				elif key.begins_with("champ_"):
 					still = GameData.champion_portrait(key.trim_prefix("champ_"))
 				else:
-					still = str(GameData.SUBCLASS_PORTRAIT_PATH.get(key, own0))
+					still = str(GameData.SUBCLASS_PORTRAIT_PATH.get(key, GameData.HERO_PORTRAIT_PATH.get(key, own0)))   # base classes (0.62.1): the role portrait
 			still_of[key] = _size(still)
 		if _size(p) != still_of[key]:
 			jumps.append(f)

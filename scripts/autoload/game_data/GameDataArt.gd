@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"A hero's page has a Path tab now: their Path's three stages side by side, the Twist, and the rank and XP bar with Evolve and training. The Skills tab is shorter, so the skill tree starts higher up. Base-class heroes animate in fights. Tuning: Called Shot hits harder, snares bite harder, Benediction heals 10% (was 15%) and Overflow turns half the overhealing into a ward.",
 	"Paths: heroes are hired as base classes and grow into one of 15 Paths (3 per role). Every rank is levels 1-10 now, and evolving at 10 starts the next rank at level 1 with +20% XP for two runs; raised heroes end up a little stronger than hired ones, hired ones bring more skill points. At Ranks D, B and S a hero trains at the Training Yard: stage 1 brings the Path's rule (a Bloodrager hits harder the more hurt they are, a Marksman lines up a steady shot), stage 2 a Technique in place of the role's second skill, stage 3 a once-a-fight Signature moment or the role's Legend. Every subclass bends its Path with its own Twist. New subclasses unlock with acts, Tower floors and deeds (Codex › Paths), and a new guild can carry them over with Laurels. Heroes sharing an element now Resonate in a party. Your heroes keep their subclasses; their skill points were refunded to spend again.",
 	"Before each fight the room now shows your party's health and the foes waiting there (the same ones you'll fight), so Engage or Retreat is an informed choice.",
 	"When Essence piles up, the Grow line now also names a relic level on the Relic Altar or a Guild Management level that strengthens the party (Arcane Lab, Relic Vault, Wardstones).",
@@ -534,7 +535,7 @@ static func subclass_anim_frames(pool_id: String, action: String) -> Array[Strin
 	if not ResourceLoader.exists(frames[1]):
 		return []
 	if not ResourceLoader.exists(frames[0]):   # frame 0 is the still itself (0.53: not stored twice)
-		frames[0] = ("res://assets/champions/%s.png" % pool_id.trim_prefix("champ_")) if pool_id.begins_with("champ_") else str(SUBCLASS_PORTRAIT_PATH.get(pool_id, frames[0]))
+		frames[0] = ("res://assets/champions/%s.png" % pool_id.trim_prefix("champ_")) if pool_id.begins_with("champ_") else str(SUBCLASS_PORTRAIT_PATH.get(pool_id, HERO_PORTRAIT_PATH.get(pool_id, frames[0])))
 	return frames
 
 
@@ -550,7 +551,7 @@ static func subclass_anim_frames(pool_id: String, action: String) -> Array[Strin
 static func hero_combat_frames(cls_id: String, pool_id: String, action: String) -> Array[String]:
 	# Champions have their own portraits, so the role's frames would be a
 	# stranger mid-swing: only their own (subclass_anim/champ_<id>_*), else a tween.
-	if SUBCLASS_PORTRAIT_PATH.has(pool_id) or pool_id.begins_with("champ_"):
+	if SUBCLASS_PORTRAIT_PATH.has(pool_id) or pool_id.begins_with("champ_") or HERO_PORTRAIT_PATH.has(pool_id):   # 0.62: a base class (pool_id = role) has its own frames too
 		return subclass_anim_frames(pool_id, action)
 	return hero_anim_frames(cls_id, action)
 const MONSTER_SPRITE_PATH := {

@@ -179,8 +179,8 @@ In the tables, stage I/II/III = stage 1/2/3 (trained at D/B/S).
 ### Cleric
 
 **Mercy** — healing that keeps on giving.
-- **Rule, Overflow:** healing past full HP becomes a ward.
-- **Technique, Benediction:** heals every ally for 15% of max HP.
+- **Rule, Overflow:** half the healing past full HP becomes a ward (at most 20% of max HP).
+- **Technique, Benediction:** heals every ally for 10% of max HP.
 - **Signature, Miracle:** the first time an ally falls, they rise at 30% HP.
 - **Legend (Last-Light Martyr):** Miracle works twice a fight.
 

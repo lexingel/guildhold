@@ -2110,7 +2110,7 @@ func _pp_round_start(state: Dictionary) -> void:
 func _snare(state: Dictionary, trapper: Hero, i: int) -> void:
 	var m: Dictionary = state["monsters"][i]
 	var base := dmg_of(trapper) / float(state["raw_sum"]) * float(state["team_dmg_base"])
-	var dmg := base * (1.0 if _tw(trapper, "deadfall-hunter") else 0.3) * (2.0 if _tw(trapper, "trapper") else 1.0)
+	var dmg := base * (1.0 if _tw(trapper, "deadfall-hunter") else 0.5) * (2.0 if _tw(trapper, "trapper") else 1.0)
 	m["hp"] = float(m["hp"]) - round(dmg)
 	m["_snared"] = 2   # through this round's end, so it acts last next round
 	m["_snared_ever"] = true
@@ -2428,7 +2428,7 @@ func _pp_technique(state: Dictionary, h: Hero, pid: String, target_idx: int) -> 
 			p["called"] = tgt
 			p["quiet"] = maxi(1, int(p.get("quiet", 0)))
 			if tgt >= 0:
-				_hero_hit(state, h, tgt, 1.0, _tw(h, "fieldscout"))
+				_hero_hit(state, h, tgt, 1.6, _tw(h, "fieldscout"))
 			if _st(h) >= 3 and not p.get("ow_used", false):
 				p["ow_used"] = true
 				p["overwatch"] = true
@@ -2469,7 +2469,7 @@ func _pp_technique(state: Dictionary, h: Hero, pid: String, target_idx: int) -> 
 		"mercy":
 			for x in party:
 				if x.hp > 0:
-					_pp_heal(state, x, int(round(max_hp(x) * 0.15)))
+					_pp_heal(state, x, int(round(max_hp(x) * 0.10)))
 					if _tw(h, "frost-anchorite"):
 						for key in ["hero_poison", "hero_burn", "_chilled", "_stunned", "_weakened", "_branded"]:
 							state.get(key, {}).erase(x.id)
@@ -2756,9 +2756,9 @@ func _pp_heal(state: Dictionary, h: Hero, amount: int) -> int:
 	var over := amount - healed
 	if over > 0:
 		for c in _on_path(state, "mercy"):
-			var ward := float(over) * (1.5 if _tw(c, "peddler") else 1.0)
+			var ward := float(over) * 0.5 * (1.5 if _tw(c, "peddler") else 1.0)
 			var sh: Dictionary = state["hero_shields"]
-			sh[h.id] = minf(float(sh.get(h.id, 0.0)) + ward, max_hp(h) * 0.3)
+			sh[h.id] = minf(float(sh.get(h.id, 0.0)) + ward, max_hp(h) * 0.2)
 			break
 	if healed > 0 and (state["party"] as Array).any(func(x): return x.hp > 0 and _tw(x, "acolyte")):
 		for key in ["hero_poison", "hero_burn", "_weakened"]:
