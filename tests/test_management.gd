@@ -56,14 +56,14 @@ func run() -> void:
 	GameState.upgrades["log.trade"] = 5
 	check(GameState.black_market_unlocked() and GameState.shop_guaranteed_epic() and is_equal_approx(GameState.merchant_price_reduction(), 0.3), "Trade Network perks")
 
-	# Research.
-	var r := Combat.gen_relic("epic")
-	r.level = 2
-	var c0 := GameState.relic_upgrade_cost(r)
+	# Research (0.66): the Vault adds relic slots; the Lab cheapens treatments and respecs and raises salvage.
+	var junk := Combat.gen_item("rare")
+	var s0 := GameState.salvage_value(junk)
+	var t0 := GameState.quirk_treat_cost()
 	GameState.upgrades["res.vault"] = 5
 	GameState.upgrades["res.lab"] = 5
-	check(GameState.relic_slot_cap() == 5 and GameState.relic_choice_count() == 4 and GameState.inherited_power(), "Relic Vault perks")
-	check(GameState.relic_upgrade_cost(r) < c0 and GameState.quirk_treat_cost() == 21 and GameState.recycle_unlocked() and is_equal_approx(GameState.relic_power_mult(), 1.25), "Arcane Lab perks")
+	check(GameState.relic_slot_cap() == 6, "Relic Vault Lv5: 6 relic slots")
+	check(GameState.quirk_treat_cost() < t0 and is_equal_approx(GameState.respec_fee_reduction(), 0.5) and GameState.salvage_value(junk) > s0, "Arcane Lab Lv5: treatments and respecs -50%, salvage +50%")
 
 	# A boss win with Resonance pays a Crystal cache.
 	var champ := Combat.gen_hero("S", 10)

@@ -34,6 +34,7 @@ var reforges: int = 0           # times a stat line was rerolled (each costs mor
 var attune_wins: int = 0        # wins while equipped; every GameData.ATTUNE_WINS raises attune_level
 var attune_level: int = 0       # 0..ATTUNE_MAX, each level grew the rolled stats by ATTUNE_STEP
 var forge_level: int = 0        # 0..FORGE_MAX, each Forge temper grew the rolled stats by FORGE_STEP
+var lore: String = ""           # a story-web fragment it carries (a keepsake, 0.66; GameData.FRAGMENTS id), or ""
 
 
 func slot_type() -> String:
@@ -49,7 +50,7 @@ func to_dict() -> Dictionary:
 		"item_rank": item_rank, "effects": effects,
 		"equipped_to": equipped_to, "equipped_idx": equipped_idx,
 		"unique_id": unique_id, "drawback_kind": drawback_kind, "drawback_value": drawback_value,
-		"locked_role": locked_role, "locked_subclasses": locked_subclasses,
+		"locked_role": locked_role, "locked_subclasses": locked_subclasses, "lore": lore,
 		"attr": attr, "attr_bonus": attr_bonus, "attr_req": attr_req,
 		"reforges": reforges, "attune_wins": attune_wins, "attune_level": attune_level, "forge_level": forge_level,
 	}
@@ -77,6 +78,7 @@ static func from_dict(d: Dictionary) -> Item:
 	it.drawback_kind = d.get("drawback_kind", "")
 	it.drawback_value = d.get("drawback_value", 0.0)
 	it.locked_role = d.get("locked_role", "")
+	it.lore = str(d.get("lore", ""))
 	var subs: Array = d.get("locked_subclasses", [])
 	it.locked_subclasses.assign(subs)
 	it.reforges = int(d.get("reforges", 0))

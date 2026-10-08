@@ -9,10 +9,6 @@ const CLASSES := [
 ]
 
 # Item/relic rarity only — heroes and Champions use RANKS below.
-## A loot drop's chance to be gear rather than a relic. Every hero wears
-## several pieces but the guild equips only a few relics, so gear comes far
-## more often. Before relics are revealed (Act I's finale) every drop is gear.
-const LOOT_GEAR_SHARE := 0.7
 const RARITIES := [
 	{"id": "common", "name": "Common", "mult": 1.0, "cost": 40, "weight": 60},
 	{"id": "rare", "name": "Rare", "mult": 1.4, "cost": 120, "weight": 32},
@@ -167,7 +163,6 @@ const RELIC_TRIGGERS := [
 	{"trigger": "ally_down", "effect": "mend_party", "value": 0.10},
 ]
 
-const RELIC_REROLL_CRYSTALS := 10
 const TYPE_DOMAIN := {
 	"Ember": "damage", "Verdant": "heal", "Frost": "chance",
 	"Umbral": "defense", "Arcane": "droprate",
@@ -582,6 +577,16 @@ const FIELD_HEALER_MIN_RANK := "B"
 ## more each time; salvage returns SALVAGE_CRYSTALS x rarity mult.
 const REFORGE_CRYSTALS := 8
 const SALVAGE_CRYSTALS := 6
+## Relics are rules only (0.66): the 14 uniques, the Tower's, the Endless
+## ones and the Path relics. An elite's loot sometimes holds a unique the
+## guild doesn't have yet; a rift shop sometimes sells one (every shop with
+## the Trade Network at Lv5) for SHOP_UNIQUE_MULT x an epic item's price.
+const ELITE_UNIQUE_CHANCE := 0.10
+const SHOP_UNIQUE_CHANCE := 0.20
+const SHOP_UNIQUE_MULT := 3.0
+## A rolled relic from a save before 0.66 turns into this many times its
+## salvage Essence (SALVAGE_CRYSTALS x rarity mult).
+const OLD_RELIC_ESSENCE_MULT := 2.0
 
 ## Attunement: gear grows with its hero — every ATTUNE_WINS won fights while
 ## equipped raise its rolled stats by ATTUNE_STEP, up to ATTUNE_MAX times.

@@ -52,6 +52,7 @@ var last_rift_day: int = 0      # day this hero last went on a rift (idle heroes
 var look: int = 0               # colour variant (0 = the art as drawn), see GameState.refresh_looks
 var look_of: String = ""        # the portrait `look` was picked for; a new one (an evolution) picks again
 var path: String = ""          # GameData.PATHS id once trained (0.62); "" = base class
+var path_relic: String = ""    # the Path relic this hero carries (0.66; a GameData.PATH_RELICS id, their own Path's), or ""
 var mastery: int = 0           # Path Mastery ranks (0.65), 0-GameData.MASTERY_MAX: the Path rule's numbers +MASTERY_STEP each
 var seasoned: int = 0          # ranks reached by levelling and evolving (0.62): +SEASONED_PER_RANK HP/damage each
 var xp_boost_runs: int = 0      # rift runs left at +XP_BOOST XP after an evolution
@@ -87,7 +88,7 @@ func to_dict() -> Dictionary:
 		"formation": formation, "prior_pool_id": prior_pool_id,
 		"prior_innate_kind": prior_innate_kind, "prior_innate_value": prior_innate_value,
 "ability_awakened": ability_awakened, "look": look, "look_of": look_of,
-		"path": path, "mastery": mastery, "seasoned": seasoned, "xp_boost_runs": xp_boost_runs,
+		"path": path, "mastery": mastery, "path_relic": path_relic, "seasoned": seasoned, "xp_boost_runs": xp_boost_runs,
 		"history": history, "titles": titles, "morale": morale, "unpaid_weeks": unpaid_weeks, "last_rift_day": last_rift_day,
 	}
 
@@ -102,6 +103,7 @@ static func from_dict(d: Dictionary) -> Hero:
 	h.flavor = d.get("flavor", "")
 	h.titles.assign(d.get("titles", []))
 	h.mastery = int(d.get("mastery", 0))
+	h.path_relic = str(d.get("path_relic", ""))
 	h.rank = d.get("rank", "F")
 	h.innate_kind = d.get("innate_kind", "")
 	h.innate_value = d.get("innate_value", 0.0)

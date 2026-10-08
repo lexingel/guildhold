@@ -63,6 +63,10 @@ func run() -> void:
 
 	# The wings' effects (0.65): none repeats a hall room.
 	GameState.hall_works = []
+	for pair in [["bloodrage", "squire"], ["evocation", "apprentice"], ["aegis", "hearth-warden"]]:   # Paths to offer relics for (0.66)
+		var walker := _hero("C")
+		walker.path = pair[0]
+		walker.pool_id = pair[1]
 	var offer3 := GameState.roll_path_relic_offer().size()
 	GameState.hall_works = ["reliquary"]
 	check(GameState.roll_path_relic_offer().size() == offer3 + 1, "the Reliquary: Path relic offers show 4")
@@ -85,14 +89,18 @@ func run() -> void:
 	GameState.run = {}
 	GameState.hall_works = ["smithy"]
 	var cat: String = GameData.ITEM_CATEGORIES[0]
+	GameState.items.clear()
 	var fed: Array = []
 	for i in 3:
 		var it := Combat.gen_item("common", cat, "E")
 		GameState.items.append(it)
 		fed.append(it)
-	fed[1].value *= 1.08   # the best roll of the three
-	var best_kind: String = fed[1].kind
-	var best_roll := GameState.item_roll(fed[1])
+	var best: Item = fed[0]
+	for it in fed:
+		if GameState.item_roll(it) > GameState.item_roll(best):
+			best = it
+	var best_kind: String = best.kind
+	var best_roll := GameState.item_roll(best)
 	var before := GameState.items.size()
 	GameState.craft_items(cat, "common")
 	var made: Item = GameState.items[-1]

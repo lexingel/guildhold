@@ -445,8 +445,9 @@ func _offer_camp_event(id: String) -> void:
 			var rec := Combat.gen_recruit(str(GameData.RANKS[ri]["id"]))
 			data["hero"] = rec.to_dict()
 			data["price"] = int(round(float(GameData.RANKS[ri]["cost"]) * 0.75))
-		"peddler":
-			data["relic"] = Combat.gen_relic("epic").to_dict()
+		"peddler":   # a unique relic (0.66), else an epic item
+			var ware := unique_or_epic()
+			data["relic" if str(ware["loot_type"]) == "relic" else "item"] = ware["obj"].to_dict()
 			data["price"] = camp_gold(160)
 		"smith":
 			data["item"] = _camp_smith_item().id
@@ -562,8 +563,8 @@ func camp_event_options() -> Array:
 			out.append([tr("Hire them (%d Gold)") % int(d["price"]), tr("Roster is full.") if heroes.size() >= hero_slot_cap() else gold.call(int(d["price"]))])
 			out.append([tr("Let them go"), ""])
 		"peddler":
-			var rl := Relic.from_dict(d["relic"])
-			out.append([tr("Buy %s (%d Gold)") % [tr(rl.name), int(d["price"])], gold.call(int(d["price"]))])
+			var ware_name := str((d["relic"] if d.has("relic") else d["item"])["name"])
+			out.append([tr("Buy %s (%d Gold)") % [tr(ware_name), int(d["price"])], gold.call(int(d["price"]))])
 			out.append([tr("Send them on"), ""])
 		"smith":
 			var it3 := find_item(str(d["item"]))
@@ -676,12 +677,9 @@ func answer_camp_event(k: int) -> String:
 		"peddler":
 			if not last:
 				coins -= int(d["price"])
-				var rl := Relic.from_dict(d["relic"])
-				rl.id = "rl%d" % next_id
-				next_id += 1
-				rl.equipped = false
-				relics.append(rl)
-				note = tr("Bought: %s.") % tr(rl.name)
+				var ware: Variant = Relic.from_dict(d["relic"]) if d.has("relic") else Item.from_dict(d["item"])
+				_grant_loot({"loot_type": "relic" if d.has("relic") else "item", "obj": ware})
+				note = tr("Bought: %s.") % tr(ware.name)
 		"smith":
 			if not last:
 				var it2 := find_item(str(d["item"]))
@@ -782,7 +780,7 @@ func _camp_fx(fx: Dictionary) -> Array:
 				for h in _camp_trainees():
 					_xp_share(h, float(v))
 			"item", "relic":
-				var lt: Dictionary = {"loot_type": "item", "obj": Combat.gen_item(str(v))} if k == "item" else {"loot_type": "relic", "obj": Combat.gen_relic(str(v))}
+				var lt: Dictionary = {"loot_type": "item", "obj": Combat.gen_item(str(v))} if k == "item" else unique_or_epic()
 				_grant_loot(lt)
 				out.append(tr("You receive: %s.") % tr(str(lt["obj"].name)))
 	return out

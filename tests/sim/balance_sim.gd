@@ -361,8 +361,8 @@ func _build_party(p: Array) -> Array[Hero]:
 		if p[4] != "":
 			_gear(party[i], p[4])
 		party[i].hp = Combat.max_hp(party[i])
-	for i in p[5]:
-		var rl := Combat.gen_relic(p[6])
+	for i in mini(int(p[5]), GameData.UNIQUE_RELICS.size()):   # 0.66: relics are uniques
+		var rl := Combat.relic_from_unique(GameData.UNIQUE_RELICS[i])
 		rl.equipped = true
 		GameState.relics.append(rl)
 	return party

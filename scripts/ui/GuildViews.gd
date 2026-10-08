@@ -1180,14 +1180,11 @@ func _camp_badges() -> Dictionary:
 		if it.equipped_to == "" and it.rarity in ["common", "rare"]:
 			var k := "i:%s:%s" % [tr(str(it.category)), tr(str(it.rarity))]
 			groups[k] = int(groups.get(k, 0)) + 1
-	for r in GameState.relics:
-		if not r.equipped and r.rarity in ["common", "rare"]:
-			var k2 := "r:%s:%s" % [tr(str(r.type)), tr(str(r.rarity))]
-			groups[k2] = int(groups.get(k2, 0)) + 1
 	for k in groups:
 		craftable += int(groups[k]) / 3
 	if craftable > 0:
-		out["crafting"] = [str(craftable), tr("%d craft(s) ready in Crafting") % craftable]
+		if GameState.feature_unlocked("crafting"):
+			out["crafting"] = [str(craftable), tr("%d combine(s) ready at the Smithy") % craftable]
 	var free_relic_slots := GameState.relic_slot_cap() - Combat.equipped_relics().size()
 	var spare_relics := GameState.relics.filter(func(r): return not r.equipped).size()
 	if free_relic_slots > 0 and spare_relics > 0:
@@ -1217,13 +1214,13 @@ func _render_hub_cluster(v: VBoxContainer) -> void:
 		"arcane_lab":
 			title = "Arcane Lab"
 			entries = [
-				[GameData.CAMP_HUB_ICON_PATH["crafting"], "Crafting", func(): hub_cluster = ""; screen = "crafting_hall"; render()],
+				[GameData.CAMP_HUB_ICON_PATH["crafting"], "Smithy", func(): hub_cluster = ""; screen = "crafting_hall"; render()],
 				[GameData.CAMP_HUB_ICON_PATH["bestiary"], "Bestiary", func(): hub_cluster = ""; term_tab = "bestiary"; render()],
 			]
 	v.add_child(_label(title, 18))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
-	var entry_feature := {"Accord Hall": "management", "Crafting": "crafting", "Bestiary": "bestiary"}
+	var entry_feature := {"Accord Hall": "management", "Smithy": "forge", "Bestiary": "bestiary"}
 	for entry in entries:
 		var fid: String = entry_feature.get(str(entry[1]), "")
 		if fid == "" or GameState.feature_unlocked(fid):   # a destination not revealed yet isn't shown
@@ -1751,80 +1748,89 @@ func _craft_count(count: int) -> String:
 	return tr("%d owned — ready to craft%s") % [count, tr(str(" (x%d)" % (count / 3) if count >= 6 else ""))]
 
 
+## The Smithy (0.66): one screen for gear's four actions. Temper the
+## lineup's gear (Gold), combine three spare items into one of the next
+## rarity, reforge a spare item's stat line (its card), salvage for Essence.
+## Combine and reforge come with the apprentice (Act III).
 func _render_crafting_hall(v: VBoxContainer) -> void:
-	v.add_child(_label("Crafting", 20))
-	v.add_child(_label("Combine 3 of the same kind and rarity into 1 of the next rarity up.", 12, true))
-
-	var scene := _hub_banner(GameData.CRAFTING_BG, 200)
+	v.add_child(_label("The Smithy", 20))
+	var scene := _hub_banner(GameData.CRAFTING_BG, 160)
 	scene.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(scene)
+	var full := GameState.feature_unlocked("crafting")
 
-	var craft_icon: String = GameData.CAMP_HUB_ICON_PATH["crafting"]
+	# Temper: what the heroes wear, least tempered first.
+	v.add_child(_label("Temper", 16))
+	v.add_child(_wrap_label(tr("Every rolled stat on a piece grows %d%% a temper, up to %d. Each costs more than the last.") % [int(GameData.FORGE_STEP * 100), GameData.FORGE_MAX], 12, true))
+	var worn: Array = GameState.items.filter(func(it): return it.equipped_to != "" and GameState.forge_cost(it) > 0)
+	worn.sort_custom(func(a, b): return GameState.forge_cost(a) < GameState.forge_cost(b))
+	if worn.is_empty():
+		v.add_child(_label("Everything the heroes wear is fully tempered.", 12, true))
+	for it in worn.slice(0, 8):
+		var who := GameState.find_hero(it.equipped_to)
+		var cost := GameState.forge_cost(it)
+		var tb := _icon_button(GameData.CURRENCY_ICON_PATH["coins"], tr("Temper · %d Gold") % cost, func(id=it.id):
+			_flavor_toast = GameState.forge_item(id)
+			render())
+		tb.disabled = GameState.coins < cost
+		v.add_child(_info_row(tr("%s's %s — tempered %d/%d") % [tr(str(who.name.split(" the ")[0])) if who else "?", tr(_loot_display_name(it)), it.forge_level, GameData.FORGE_MAX], 13, [tb], _icon(GameData.item_icon(it), 20)))
 
-	v.add_child(_label("Items", 16))
-	var item_groups: Dictionary = {}
-	for it in GameState.items:
-		if it.equipped_to != "" or not GameState.CRAFT_RARITY_UP.has(it.rarity):
-			continue
-		var key := "%s|%s" % [it.category, it.rarity]
-		item_groups[key] = int(item_groups.get(key, 0)) + 1
-	if item_groups.is_empty():
-		v.add_child(_label("No craftable (unequipped Common/Rare) items.", 12))
-	for key in item_groups.keys():
-		var parts: PackedStringArray = key.split("|")
-		var category: String = parts[0]
-		var rarity: String = parts[1]
-		var count: int = item_groups[key]
-		var next_rarity: String = str(GameState.CRAFT_RARITY_UP[rarity])
-		var craft_btn := _icon_button(craft_icon, tr("Craft → %s") % tr(str(GameData.find_rarity(next_rarity)["name"])), func(c=category, r=rarity):
-			if _crafting_animating:
-				return
-			_crafting_animating = true
-			if GameState.state_changed.is_connected(_on_state_changed):
-				GameState.state_changed.disconnect(_on_state_changed)
-			GameState.craft_items(c, r)
-			await _play_craft_flourish(v, GameData.ITEM_CATEGORY_ICON_PATH[c])
-			if not GameState.state_changed.is_connected(_on_state_changed):
-				GameState.state_changed.connect(_on_state_changed)
-			_crafting_animating = false
-			render()
-		)
-		craft_btn.disabled = count < 3
-		v.add_child(_info_row("%s %s — %s" % [tr(str(GameData.find_rarity(rarity)["name"])), tr(str(GameData.ITEM_CATEGORY_LABEL[category])), tr(str(_craft_count(count)))], 13, [craft_btn], _icon(GameData.ITEM_CATEGORY_ICON_PATH[category], 20), count < 3))
-
+	# Combine: three spare items of a category and rarity.
 	v.add_child(_hsep())
-	v.add_child(_label("Relics", 16))
-	var relic_groups: Dictionary = {}
-	for r in GameState.relics:
-		if r.equipped or not GameState.CRAFT_RARITY_UP.has(r.rarity):
-			continue
-		var rkey := "%s|%s" % [r.type, r.rarity]
-		relic_groups[rkey] = int(relic_groups.get(rkey, 0)) + 1
-	if relic_groups.is_empty():
-		v.add_child(_label("No craftable (unequipped Common/Rare) relics.", 12))
-	for rkey in relic_groups.keys():
-		var rparts: PackedStringArray = rkey.split("|")
-		var rtype: String = rparts[0]
-		var rrarity: String = rparts[1]
-		var rcount: int = relic_groups[rkey]
-		var rnext_rarity: String = str(GameState.CRAFT_RARITY_UP[rrarity])
-		var rcraft_btn := _icon_button(craft_icon, tr("Craft → %s") % tr(str(GameData.find_rarity(rnext_rarity)["name"])), func(t=rtype, r2=rrarity):
-			if _crafting_animating:
-				return
-			_crafting_animating = true
-			if GameState.state_changed.is_connected(_on_state_changed):
-				GameState.state_changed.disconnect(_on_state_changed)
-			GameState.craft_relics(t, r2)
-			await _play_craft_flourish(v, GameData.RELIC_TYPE_ICON_PATH[t])
-			if not GameState.state_changed.is_connected(_on_state_changed):
-				GameState.state_changed.connect(_on_state_changed)
-			_crafting_animating = false
-			render()
-		)
-		rcraft_btn.disabled = rcount < 3
-		v.add_child(_info_row("%s %s — %s" % [tr(str(GameData.find_rarity(rrarity)["name"])), tr(str(rtype)), tr(str(_craft_count(rcount)))], 13, [rcraft_btn], _icon(GameData.RELIC_TYPE_ICON_PATH[rtype], 20), rcount < 3))
+	v.add_child(_label("Combine", 16))
+	if not full:
+		v.add_child(_wrap_label("Combining and reforging come with the smith's apprentice, in Act III.", 12, true))
+	else:
+		v.add_child(_wrap_label("Three spare items of one category and rarity become one of the next rarity up.", 12, true))
+		var groups: Dictionary = {}
+		for it in GameState.items:
+			if it.equipped_to == "" and GameState.CRAFT_RARITY_UP.has(it.rarity):
+				var key := "%s|%s" % [it.category, it.rarity]
+				groups[key] = int(groups.get(key, 0)) + 1
+		if groups.is_empty():
+			v.add_child(_label("No spare Common or Rare items.", 12, true))
+		for key in groups.keys():
+			var parts: PackedStringArray = key.split("|")
+			var category: String = parts[0]
+			var rarity: String = parts[1]
+			var count: int = groups[key]
+			var next_rarity: String = str(GameState.CRAFT_RARITY_UP[rarity])
+			var cb := _icon_button(GameData.CAMP_HUB_ICON_PATH["crafting"], tr("Combine → %s") % tr(str(GameData.find_rarity(next_rarity)["name"])), func(c=category, r=rarity):
+				if _crafting_animating:
+					return
+				_crafting_animating = true
+				if GameState.state_changed.is_connected(_on_state_changed):
+					GameState.state_changed.disconnect(_on_state_changed)
+				GameState.craft_items(c, r)
+				await _play_craft_flourish(v, GameData.ITEM_CATEGORY_ICON_PATH[c])
+				if not GameState.state_changed.is_connected(_on_state_changed):
+					GameState.state_changed.connect(_on_state_changed)
+				_crafting_animating = false
+				render())
+			cb.disabled = count < 3
+			v.add_child(_info_row("%s %s — %s" % [tr(str(GameData.find_rarity(rarity)["name"])), tr(str(GameData.ITEM_CATEGORY_LABEL[category])), tr(str(_craft_count(count)))], 13, [cb], _icon(GameData.ITEM_CATEGORY_ICON_PATH[category], 20), count < 3))
 
-
+	# Spare gear: reforge (on its card) or salvage.
+	v.add_child(_hsep())
+	v.add_child(_label("Spare gear", 16))
+	var spare: Array = GameState.items.filter(func(it): return it.equipped_to == "")
+	spare.sort_custom(func(a, b): return GameData.find_rarity(a.rarity)["mult"] < GameData.find_rarity(b.rarity)["mult"])
+	if spare.is_empty():
+		v.add_child(_label("No spare gear.", 12, true))
+	for it in spare.slice(0, 12):
+		var acts: Array[Control] = []
+		if full and it.unique_id == "":
+			acts.append(_button("Reforge…", func(id=it.id): selected_item_id = id; render()))
+		var sb := _icon_button(GameData.CURRENCY_ICON_PATH["crystals"], tr("Salvage +%d") % GameState.salvage_value(it), func(id=it.id):
+			GameState.salvage_item(id)
+			render())
+		acts.append(sb)
+		v.add_child(_info_row(tr(_loot_display_name(it)), 13, acts, _icon(GameData.item_icon(it), 20)))
+	if spare.size() > 12:
+		v.add_child(_label(tr("…and %d more in the Inventory.") % (spare.size() - 12), 12, true))
+	var sel: Array = GameState.items.filter(func(it): return it.id == selected_item_id)
+	if not sel.is_empty():
+		_item_modal(sel[0])
 
 
 ## Pure checklist, no reward tied to completion — three sections (Monsters,
@@ -2202,42 +2208,15 @@ func _render_compendium_items(v: VBoxContainer) -> void:
 			v.add_child(_rich_line("[b]%s[/b]%s — %s" % [tr(str(e["name"])), tr(" (Epic)") if e.get("epic", false) else "", tr(str(Combat.describe_effect(e)))], 12))
 
 
-const RELIC_DOMAIN_NAME := {"damage": "Damage", "heal": "Mending", "chance": "Chance", "defense": "Defense", "droprate": "Fortune"}
-
-
 func _render_compendium_relics(v: VBoxContainer) -> void:
-	v.add_child(_wrap_label("Relics sit on the Relic Altar (Inventory) and work for the whole party. Each adds damage and a shield, plus a special; Rare and Epic relics also carry a trigger that fires in battle. Rarity scales the numbers (a Rare's by 1.4, an Epic's by 1.9). A relic levelled to 5 awakens a second special, and any special or trigger can be rerolled for Essence.", 12, true))
-
-	v.add_child(_hsep())
-	v.add_child(_label("Types and their specials", 16))
-	v.add_child(_wrap_label("A relic's type picks its special from its own family 60% of the time (any other family otherwise). Values shown are a Common's.", 12, true))
-	for rtype in GameData.RELIC_TYPES:
-		var domain := str(GameData.TYPE_DOMAIN.get(rtype, ""))
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 10)
-		var ic := _icon(str(GameData.RELIC_TYPE_ICON_PATH.get(rtype, "")), 28)
-		ic.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		row.add_child(ic)
-		var col := _vbox(2)
-		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		col.add_child(_label(tr("%s — %s") % [tr(str(rtype)), tr(str(RELIC_DOMAIN_NAME.get(domain, domain)))], 14))
-		for s in GameData.RELIC_SPECIALS.filter(func(x): return x["domain"] == domain):
-			col.add_child(_wrap_label("• " + Combat.relic_special_label(str(s["kind"]), float(s["value"])), 12, true))
-		row.add_child(col)
-		v.add_child(row)
-
-	v.add_child(_hsep())
-	v.add_child(_label("Triggers (Rare and Epic)", 16))
-	v.add_child(_wrap_label("One per relic, rolled from this list. Values shown are the base; a Rare rolls them about 18% stronger, an Epic about 38%.", 12, true))
-	for t in GameData.RELIC_TRIGGERS:
-		v.add_child(_wrap_label("• " + Combat.describe_effect(t, true), 12, true))
+	v.add_child(_wrap_label("Relics bend a rule for the whole guild: each is one of a kind, found from Act I's finale on (finales, an elite's loot, a rift shop, events, the Tower). They sit on the Relic Altar (Inventory), 3 slots and more with the Relic Vault. Path relics are different: a hero of the relic's Path carries it, and it works while they fight.", 12, true))
 
 	# Legendaries: the fixed relics, each with where it comes from. Ones the
 	# guild has never held stay dark, but their source shows (a thing to chase).
 	GameState.note_relics_found()
 	var legends: Array = []
 	for u in GameData.UNIQUE_RELICS:
-		legends.append([u, "An act's finale, or a very rare drop"])
+		legends.append([u, "An act's finale, an elite, a rift shop or an event"])
 	for f in GameData.TOWER_RELICS:
 		legends.append([GameData.TOWER_RELICS[f], tr("Tower of Trials, floor %d guardian") % int(f)])
 	for k in (GameData.ENDLESS_RELICS if GameData.ENDLESS_ENABLED else {}):
@@ -2282,7 +2261,7 @@ func _legendary_card(u: Dictionary, source: String) -> PanelContainer:
 
 
 func _render_compendium_crafting(v: VBoxContainer) -> void:
-	v.add_child(_wrap_label("Crafting (Arcane Lab) turns three unequipped items or relics of one kind and rarity into one of the next rarity up.", 12, true))
+	v.add_child(_wrap_label("The Smithy combines three spare items of one category and rarity into one of the next rarity up (from Act III).", 12, true))
 	v.add_child(_hsep())
 	for rarity in GameState.CRAFT_RARITY_UP:
 		var up := str(GameState.CRAFT_RARITY_UP[rarity])
@@ -2293,7 +2272,7 @@ func _render_compendium_crafting(v: VBoxContainer) -> void:
 		v.add_child(line)
 	for rule in [
 		"Items: three of the same category (Weapon, Armor or Focus). The new item rolls fresh stats at the best rank among the three.",
-		"Relics: three of the same type (Ember, Frost...). The new relic keeps that type and rolls fresh effects.",
+		"Relics aren't combined: each is a rule of its own.",
 		"Equipped gear never goes in. Legendaries can't be crafted or fed in: they are fixed finds.",
 	]:
 		v.add_child(_wrap_label("• " + tr(rule), 12, true))
@@ -2304,10 +2283,6 @@ func _render_compendium_crafting(v: VBoxContainer) -> void:
 		if it.equipped_to == "" and GameState.CRAFT_RARITY_UP.has(it.rarity):
 			var k := "%s · %s" % [tr(str(GameData.ITEM_CATEGORY_LABEL.get(it.category, it.category))), tr(str(it.rarity).capitalize())]
 			groups[k] = int(groups.get(k, 0)) + 1
-	for r in GameState.relics:
-		if not r.equipped and GameState.CRAFT_RARITY_UP.has(r.rarity):
-			var k2 := "%s %s · %s" % [tr(str(r.type)), tr("relic"), tr(str(r.rarity).capitalize())]
-			groups[k2] = int(groups.get(k2, 0)) + 1
 	var ready: Array = groups.keys().filter(func(k): return int(groups[k]) >= 3)
 	v.add_child(_hsep())
 	v.add_child(_label(tr("Ready now — %d") % ready.size(), 16))
@@ -2316,7 +2291,7 @@ func _render_compendium_crafting(v: VBoxContainer) -> void:
 	for k in ready:
 		v.add_child(_wrap_label(tr("%s: %d spare, %d craft%s") % [k, int(groups[k]), int(groups[k]) / 3, tr(str(_pl(int(groups[k]) / 3)))], 13))
 	if not ready.is_empty() and GameState.feature_unlocked("crafting"):
-		var go := _button("Open Crafting", func(): screen = "crafting_hall"; render())
+		var go := _button("Open the Smithy", func(): screen = "crafting_hall"; render())
 		go.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		v.add_child(go)
 
@@ -2346,7 +2321,7 @@ func _render_compendium_systems(v: VBoxContainer) -> void:
 		["Tower of Trials", "Opens with Act IV, in the Rift Hall. 100 fixed floors, one fight each: a floor is always the same fight, so a loss is something to plan around. Heroes fight at full HP and leave as they came (no downing, scars or days passing). Most floors carry a rule (armored or burning foes, a swarm, a party cap). Every 10th floor is a guardian that gives a unique relic, and floors 10/25/50/75/100 earn guild titles. Only a first clear pays; floors 91-100 reshuffle their rules every week and pay half for a re-clear."],
 		["Foes & regions", "Each rift is in a region (the Vale, the Marshes, the Ashen Wastes) with its own foes. Some foes wind up a heavy blow a turn ahead (x2.5, stuns unless the target Defends); armored foes shrug off part of every basic attack (each hit chips the armor; abilities ignore it); fire foes can burn and frost foes can chill (act late). A Field Tonic cleanses burn, chill, poison and stun."],
 		["Campaign", "Three acts, each ending in a finale rift against a named foe. Meet an act\'s objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a Legendary relic. Act I opens Greater Rifts, Act II the Endless Rift."],
-		["Relics", "Relics sit on the Relic Altar (Inventory) and empower the whole party. Every relic has a special; rare and epic ones also have a trigger that fires in battle (on a kill, every third round, when an ally falls...). Level a relic to 5 to awaken a new effect, or reroll any effect for Essence. Legendary relics have unique powers."],
+		["Relics", "Relics bend rules: each is one of a kind (14 Legendaries, the Tower's, the Endless Rift's), found from Act I's finale on, and sits on the Relic Altar for the whole guild. Stats live on gear. A sealed Rank D+ rift offers a Path relic instead, carried by a hero of that Path (one each) and passed between them at camp; it works while they fight. Declining one pays the seal's Essence."],
 		["Quirks", "Everything personal about a hero beyond class, skills and gear: at most one born quirk (it sets their voice), up to 2 scars from being knocked out (a wound with a small upside), and quirks earned by what they've done. Bad born quirks and scars can be treated for Gold at the Arcane Lab."],
 		["Riftbreaks", "From Act II a rift swells every so often: a rank, a place and a countdown in days (Rift Hall and the camp's status board). Seal a rift of that rank or higher before it runs out to close it, for a little Essence. Otherwise it breaks, and every rift run waits until your guild holds it: a breach rift of back-to-back fights (a fight, an elite and the breach's warden; the Inverted City's gate adds an elite) with no camp, shop or campfire between them. Ranks below S break out in a region; from S up they break at your camp. Holding pays Gold and Essence. Falling or turning back costs a share of your Essence and of the Gold beyond the coming payday's wages, and damages a building (two at the camp). Wardcraft in Guild Management softens all of it."],
 		[] if not GameData.DEFENSE_TD_ENABLED else ["Defending", "Foes walk the roads toward the goal. Build towers on the round pads with supplies (you start with some and earn more for every kill); click a tower to upgrade or sell it. Ballistas shoot far, Fire Braziers splash and burn, Frost Totems slow, Ward Stones shield nearby heroes, Chapels mend them; research in the Defenses branch opens the last three and tier 3. Idle heroes stand at posts: warriors and rogues hold foes in place, rangers and mages shoot. Steer one champion by clicking where to go. Every foe that gets through costs integrity (an elite 3, a warden 10); at 0 the defense is lost. Call a wave early for bonus supplies."],

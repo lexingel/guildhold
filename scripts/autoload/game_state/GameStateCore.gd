@@ -6,14 +6,13 @@ extends Node
 ## like the HTML version's lvl()/hasCap().
 
 signal state_changed
-const RELIC_MAX_LEVEL := 5
 const SLOT_COUNT := 3
 
 ## Bumped whenever the save's shape changes. load_save() runs
 ## _migrate_save() on anything older before reading it. (Older, per-field
 ## fallbacks still live in the model from_dicts: Hero attrs, Item attrs,
 ## Relic specials, the Guild Board's old contract/daily format.)
-const SAVE_VERSION := 5
+const SAVE_VERSION := 6
 const ACTIVE_SLOT_PATH := "user://active_slot.cfg"
 const SETTINGS_PATH := "user://settings.json"
 var active_slot: int = 0
@@ -88,6 +87,7 @@ var founding: String = "free"        # the founding charter (GameData.FOUNDINGS)
 var oaths: Array = []                # oaths sworn at founding (GameData.OATHS)
 var halls_restored: Array = []       # Keepers of the Vale (GameData.ACCORD_HALLS ids)
 var hall_works: Array = []           # wings of the guild's own hall (GameData.HALL_WORKS ids)
+var path_relic_chest: Array = []     # Path relics no hero carries yet (0.66: no hero of that Path, or set down)
 var wing_offer: Array = []           # the two wings offered now (built one at a time, GameData.WING_ACTS)
 var tide_count := 0                  # tides of the Open Hollow so far
 var tides_held := 0
@@ -282,7 +282,7 @@ func hero_slot_cap() -> int:
 
 func relic_slot_cap() -> int:
 	var l := lvl("res.vault")
-	return 3 + (1 if l >= 3 else 0) + (1 if l >= 5 else 0) + int(work_bonus("relic_slots"))
+	return 3 + (1 if l >= 1 else 0) + (1 if l >= 3 else 0) + (1 if l >= 5 else 0) + int(work_bonus("relic_slots"))
 
 
 func medical_recovery_reduction() -> float:
@@ -347,8 +347,9 @@ func abilities_ready_each_fight() -> bool:
 	return lvl("ops.drill") >= 5
 
 
+## The Arcane Lab (0.66): treatments and respecs 10% cheaper a level.
 func respec_fee_reduction() -> float:
-	return 0.3 if lvl("res.lab") >= 3 else 0.0
+	return 0.1 * lvl("res.lab")
 
 
 func crystal_yield_bonus() -> float:
@@ -674,30 +675,9 @@ func recruit_reroll_base() -> int:
 	return GameData.RECRUIT_REROLL_COST / (2 if lvl("log.scouts") >= 5 else 1)
 
 
-func relic_choice_count() -> int:
-	var l := lvl("res.vault")
-	if l >= 4: return 4
-	if l >= 2: return 3
-	if l == 1: return 2
-	return 0
-
-
-func inherited_power() -> bool:
-	return lvl("res.vault") >= 5
-
-
-## Multiplier on every relic effect (Arcane Lab).
-func relic_power_mult() -> float:
-	return 1.0 + 0.05 * lvl("res.lab")
-
-
-func recycle_unlocked() -> bool:
-	return lvl("res.lab") >= 1
-
-
-func relic_upgrade_cost(r: Relic) -> int:
-	var cost := 15.0 * float(GameData.find_rarity(r.rarity)["mult"]) * r.level
-	return int(round(cost * (0.75 if lvl("res.lab") >= 5 else 1.0)))
+## Salvage at the Smithy (0.66): open with it; the Arcane Lab adds 10% a level.
+func salvage_mult() -> float:
+	return 1.0 + 0.1 * lvl("res.lab")
 
 
 ## Which art a hamlet building shows (1-3), see GameData.HAMLET_BUILDINGS.
@@ -1037,7 +1017,7 @@ func save() -> void:
 		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "camp_event": camp_event, "camp_omen": camp_omen, "camp_event_last": camp_event_last, "next_resolve": next_resolve, "hardship": hardship, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
-		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "hall_works": hall_works, "wing_offer": wing_offer, "pending_stories": pending_stories, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
+		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "hall_works": hall_works, "wing_offer": wing_offer, "path_relic_chest": path_relic_chest, "pending_stories": pending_stories, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,
 		"run": _run_for_save(),
 		
 		"monsters_seen": monsters_seen, "bosses_defeated": bosses_defeated, "hazards_seen": hazards_seen,

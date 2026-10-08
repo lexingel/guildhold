@@ -49,7 +49,7 @@ func run() -> void:
 		it.id = "i%d" % GameState.next_id
 		GameState.next_id += 1
 		GameState.items.append(it)
-	GameState.relics.append(Combat.gen_relic("rare"))
+	GameState.relics.append(Combat.relic_from_unique(GameData.UNIQUE_RELICS[0]))
 	GameState.add_tonic("healing")
 	GameState.refresh_recruit_pool()
 	GameState.hero_request = {"type": "feud", "ids": [ids[0], ids[1]], "day": 10}

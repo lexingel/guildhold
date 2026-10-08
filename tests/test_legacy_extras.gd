@@ -37,21 +37,12 @@ func run() -> void:
 	GameState.note_milestone("first payday")
 	check(GameState.session["milestones"] == {"first seal": 2, "first payday": 15}, "milestones keep the first time (%s)" % str(GameState.session.get("milestones")))
 	GameState.session = {}
-	# Loot (0.51.2): mostly gear; in Act I (0.65, before relics are revealed) only gear.
-	var was_act: int = GameState.campaign_act
-	var was_seen: Array = GameState.features_seen.duplicate()
-	GameState.features_seen = []
-	for act in [1, 3]:
-		GameState.campaign_act = act
-		var gear := 0
-		for i in 600:
-			if str(Combat.gen_loot("common")["loot_type"]) == "item":
-				gear += 1
-		var share := gear / 600.0
-		var want: float = 1.0 if act == 1 else GameData.LOOT_GEAR_SHARE
-		check(absf(share - want) < 0.07, "Act %d: %d%% of drops are gear (aim %d%%)" % [act, int(share * 100), int(want * 100)])
-	GameState.campaign_act = was_act
-	GameState.features_seen = was_seen
+	# Loot (0.66): fights drop gear only; relics come as uniques.
+	var gear := 0
+	for i in 300:
+		if str(Combat.gen_loot("common")["loot_type"]) == "item":
+			gear += 1
+	check(gear == 300, "every fight drop is gear (%d of 300)" % gear)
 	# The endowment: spare Gold for the next guild, a Laurel at a time.
 	_legacy([])
 	_guild("Endowers")

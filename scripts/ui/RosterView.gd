@@ -369,6 +369,7 @@ func _hero_card(h: Hero) -> PanelContainer:
 					))
 		"path":
 			_path_panel(cv, h)
+			_path_relic_panel(cv, h)
 			_rank_panel(cv, h)
 		"history":
 			var who := _label(tr("%s · Morale %d %s") % [tr(str(GameData.VOICE_NAME[voice])), h.morale, tr(str(GameData.morale_tier(h.morale)[1]))], 13)
@@ -1311,6 +1312,8 @@ func _item_modal(it: Item) -> void:
 	desc.custom_minimum_size.x = 340
 	top.add_child(desc)
 	cv.add_child(top)
+	if it.lore != "":   # a keepsake: a fragment of the Vale's story rides on it (0.66)
+		cv.add_child(_wrap_label(GameState.fragment_text(it.lore), 12, true))
 	var slot := it.slot_type()
 	var equip_row := HFlowContainer.new()
 	equip_row.add_theme_constant_override("h_separation", 6)
@@ -1384,7 +1387,7 @@ func _item_modal(it: Item) -> void:
 		GameState.sell_item(id)
 		render()
 	))
-	if GameState.recycle_unlocked():
+	if GameState.feature_unlocked("forge") and it.equipped_to == "":   # the Smithy's salvage (0.66)
 		bottom.add_child(_icon_button(GameData.CURRENCY_ICON_PATH["crystals"], tr("Salvage +%d") % GameState.salvage_value(it), func(id=it.id):
 			selected_item_id = ""
 			GameState.salvage_item(id)
@@ -1430,14 +1433,19 @@ func _render_inventory_relics(v: VBoxContainer) -> void:
 	for i in cap:
 		slots.add_child(_relic_slot_card(equipped[i] if i < equipped.size() else null))
 	av.add_child(slots)
+	var carried := GameState.heroes.filter(func(h): return h.path_relic != "").size()
+	if carried > 0 or not GameState.path_relic_chest.is_empty():   # Path relics (0.66): on heroes, not the altar
+		var pl := _wrap_label(tr("Path relics: %d carried by heroes, %d in the chest. A hero of the relic's Path takes one on their Path tab.") % [carried, GameState.path_relic_chest.size()], 12, true)
+		pl.tooltip_text = "\n".join(GameState.path_relic_chest.map(func(u): return tr(str(GameData.find_unique_relic(str(u)).get("name", "")))))
+		av.add_child(pl)
 	altar.add_child(av)
 	v.add_child(altar)
 
 	var rest: Array = GameState.relics.filter(func(r): return not r.equipped)
-	rest.sort_custom(func(a, b): return _rarity_rank(a.rarity) > _rarity_rank(b.rarity) or (a.rarity == b.rarity and a.level > b.level))
+	rest.sort_custom(func(a, b): return _rarity_rank(a.rarity) > _rarity_rank(b.rarity))
 	v.add_child(_label(tr("Collection (%d)") % rest.size(), 16))
 	if rest.is_empty():
-		v.add_child(_label("No spare relics — they drop from fights, treasure and shops.", 12, true))
+		v.add_child(_label("No spare relics: each is one of a kind, from finales, elites, shops and events.", 12, true))
 	var grid := HFlowContainer.new()
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
@@ -1490,7 +1498,7 @@ func _relic_slot_card(r: Relic) -> Control:
 	nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	nm.custom_minimum_size.x = 170
 	col.add_child(nm)
-	col.add_child(_label(tr("%s · Lv%d%s") % [tr(str(r.type)), r.level, tr(str(tr(" · Awakened") if r.awakened else ""))], 12, true))
+	col.add_child(_label(_relic_kind_line(r), 12, true))
 	var lines := _relic_effect_lines(r)
 	for line in lines:
 		var l := _label(("• " if lines.size() > 1 else "") + line, 12)
@@ -1503,6 +1511,45 @@ func _relic_slot_card(r: Relic) -> Control:
 	b.add_child(row)
 	b.tooltip_text = tr("%s\n%s\nClick for details") % [_loot_display_name(r), "\n".join(lines)]
 	return b
+
+
+## The Path relic a hero carries (0.66), and the chest's relics of their
+## Path they could take instead. Passed at camp, not in a rift.
+func _path_relic_panel(cv: VBoxContainer, h: Hero) -> void:
+	if h.is_champion or h.path == "":
+		return
+	var pid := GameData.hero_path_id(h)
+	var spare: Array = GameState.path_relic_chest.filter(func(uid): return str(GameData.find_unique_relic(str(uid)).get("path", "")) == pid)
+	for x in GameState.heroes:   # or one a fellow of the Path carries
+		if x != h and x.path_relic != "" and str(GameData.find_unique_relic(x.path_relic).get("path", "")) == pid:
+			spare.append(x.path_relic)
+	if h.path_relic == "" and spare.is_empty():
+		return
+	cv.add_child(_hsep())
+	cv.add_child(_label("Path relic", 14))
+	if h.path_relic != "":
+		var d := GameData.find_unique_relic(h.path_relic)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var l := _wrap_label("%s — %s" % [tr(str(d.get("name", ""))), tr(str(d.get("desc", "")))], 12)
+		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(l)
+		var down := _button("To the chest", func(id=h.id):
+			var x := GameState.find_hero(id)
+			GameState.set_down_path_relic(x)
+			GameState.save()
+			render())
+		down.disabled = (GameState.run.get("hero_ids", []) as Array).has(h.id)
+		row.add_child(down)
+		cv.add_child(row)
+	for uid in spare:
+		var d2 := GameData.find_unique_relic(str(uid))
+		var holder: Array = GameState.heroes.filter(func(x): return x.path_relic == str(uid))
+		var b := _button(tr("Carry %s%s") % [tr(str(d2.get("name", ""))), tr(" (from %s)") % tr(str(holder[0].name.split(" the ")[0])) if not holder.is_empty() else ""], func(u=str(uid), id=h.id):
+			_flavor_toast = GameState.carry_path_relic(u, id)
+			render())
+		b.tooltip_text = tr(str(d2.get("desc", "")))
+		cv.add_child(b)
 
 
 func _relic_icon_box(r: Relic, size: int) -> Control:
@@ -1525,7 +1572,16 @@ func _relic_icon_box(r: Relic, size: int) -> Control:
 	return box
 
 
-## A collection tile: framed icon with the element gem, name and level.
+## "Unique relic", "Tower relic", "Endless relic" (0.66: relics are rules, no levels).
+func _relic_kind_line(r: Relic) -> String:
+	if GameData.TOWER_RELICS.values().any(func(d): return d["id"] == r.unique_id):
+		return tr("Tower relic")
+	if GameData.ENDLESS_RELICS.values().any(func(d): return d["id"] == r.unique_id):
+		return tr("Endless relic")
+	return tr("Unique relic")
+
+
+## A collection tile: framed icon with the element gem, name and kind.
 func _relic_tile(r: Relic) -> Button:
 	var b := Button.new()
 	b.custom_minimum_size = Vector2(112, 134)
@@ -1547,7 +1603,7 @@ func _relic_tile(r: Relic) -> Button:
 	nl.custom_minimum_size.x = 100
 	nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(nl)
-	var ll := _label(tr("Lv%d%s") % [r.level, tr(str(" ★" if r.awakened else ""))], 12, true)
+	var ll := _label(_relic_kind_line(r), 11, true)
 	ll.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ll.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.add_child(ll)
@@ -1592,43 +1648,15 @@ func _relic_modal(r: Relic) -> void:
 	var nm := _label(_loot_display_name(r), 16)
 	nm.add_theme_color_override("font_color", ITEM_RARITY_COLOR.get(r.rarity, Palette.TEXT))
 	tcol.add_child(nm)
-	tcol.add_child(_label(tr("%s %s relic · Lv%d/%d%s") % [tr(str(r.rarity.capitalize())), tr(str(r.type)), r.level, GameState.RELIC_MAX_LEVEL, tr(str(tr(" · Awakened") if r.awakened else ""))], 12, true))
-	tcol.add_child(_label(tr("+%d party damage · +%d rift shield") % [r.dmg, r.hp], 13))
-	if r.lore != "":   # a fragment of the Vale's story rides on it
-		tcol.add_child(_wrap_label(GameState.fragment_text(r.lore), 12, true))
+	tcol.add_child(_label(_relic_kind_line(r), 12, true))
 	top.add_child(tcol)
 	cv.add_child(top)
-	var rcost := GameState.relic_reroll_cost(r)
 	var effects := _vbox(4)
-	if r.unique_id != "":
-		effects.add_child(_wrap_label(str(GameData.find_unique_relic(r.unique_id).get("desc", "")), 13))
-		if r.combo_with != "":
-			var partner := str(GameData.find_unique_relic(r.combo_with).get("name", ""))
-			effects.add_child(_wrap_label(tr("Combo: stronger with %s%s") % [tr(str(partner)), tr(str(" (active!)" if Combat.party_has_unique_relic(r.combo_with) else ""))], 12, true))
-	else:
-		var rows: Array = []
-		for i in r.specials.size():
-			rows.append([str(r.specials[i]["label"]), i])
-		if not r.trigger.is_empty():
-			rows.append([Combat.describe_effect(r.trigger, true), -1])
-		for row_def in rows:
-			var er := HBoxContainer.new()
-			er.add_theme_constant_override("separation", 8)
-			var el := _wrap_label(("⚡ " if int(row_def[1]) < 0 else "• ") + tr(str(row_def[0])), 13)
-			el.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			er.add_child(el)
-			var rb := _icon_button(GameData.CURRENCY_ICON_PATH["crystals"], "Reroll", func(id=r.id, idx=int(row_def[1])):
-				var err := GameState.reroll_relic(id, idx)
-				if err != "":
-					push_warning(err)
-				render()
-			)
-			rb.disabled = GameState.crystals < rcost
-			rb.tooltip_text = tr("Reroll this effect for %d Essence (each reroll costs more)") % rcost
-			er.add_child(rb)
-			effects.add_child(er)
-		if r.level < GameState.RELIC_MAX_LEVEL and not r.awakened:
-			effects.add_child(_label(tr("Reaches Lv%d: awakens with one more effect.") % GameState.RELIC_MAX_LEVEL, 12, true))
+	var def := GameData.find_unique_relic(r.unique_id)
+	effects.add_child(_wrap_label(tr(str(def.get("desc", ""))) if not def.is_empty() else r.desc(), 13))
+	if r.combo_with != "":
+		var partner := str(GameData.find_unique_relic(r.combo_with).get("name", ""))
+		effects.add_child(_wrap_label(tr("Combo: stronger with %s%s") % [tr(str(partner)), tr(str(" (active!)" if Combat.party_has_unique_relic(r.combo_with) else ""))], 12, true))
 	cv.add_child(effects)
 	cv.add_child(_hsep())
 	var acts := HFlowContainer.new()
@@ -1649,30 +1677,12 @@ func _relic_modal(r: Relic) -> void:
 		eb.disabled = used >= GameState.relic_slot_cap()
 		eb.tooltip_text = tr("Every altar slot is full — take a relic off first") if eb.disabled else ""
 		acts.add_child(eb)
-	if r.level < GameState.RELIC_MAX_LEVEL and not GameState.relic_levels_up(r):
-		acts.add_child(_label(tr("Its power is fixed: Legendary relics like this one don't level."), 12, true))
-	elif r.level < GameState.RELIC_MAX_LEVEL:
-		var ucost := GameState.relic_upgrade_cost(r)
-		var ub := _icon_button(GameData.CURRENCY_ICON_PATH["crystals"], tr("Upgrade — %d") % ucost, func(id=r.id):
-			var err := GameState.upgrade_relic(id)
-			if err != "":
-				push_warning(err)
-			render()
-		)
-		ub.disabled = GameState.crystals < ucost
-		acts.add_child(ub)
 	if not r.equipped:
 		acts.add_child(_icon_button(GameData.CURRENCY_ICON_PATH["coins"], "Sell", func(id=r.id):
 			selected_item_id = ""
 			GameState.sell_relic(id)
 			render()
 		))
-		if GameState.recycle_unlocked():
-			acts.add_child(_icon_button("res://assets/skills/ingot_gold.png", "Scrap", func(id=r.id):
-				selected_item_id = ""
-				GameState.scrap_relic(id)
-				render()
-			))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	acts.add_child(sp)

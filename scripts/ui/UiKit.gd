@@ -32,12 +32,6 @@ var pending_guild_name: String = ""
 var pending_party: Array[String] = []
 
 
-var pending_relic_options: Array = []
-
-
-var pending_relic_choice: int = -1
-
-
 var selected_hero_id: String = ""
 
 

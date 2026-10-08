@@ -203,13 +203,13 @@ func lore_on_seal(region: String, rank: int) -> String:
 	lore_dry = 0
 	var id := str(open[randi() % open.size()])
 	var f: Dictionary = GameData.FRAGMENTS[id]
-	if str(f["channel"]) == "relic":   # the fragment rides on a relic
-		var r := Combat.gen_relic("common")
-		r.id = "rl" + str(next_id)
+	if str(f["channel"]) == "relic":   # the fragment rides on a keepsake (an item, 0.66)
+		var it := Combat.gen_item("common")
+		it.id = "it" + str(next_id)
 		next_id += 1
-		r.name = str(f["relic"])
-		r.lore = id
-		relics.append(r)
+		it.name = str(f["relic"])
+		it.lore = id
+		items.append(it)
 	find_fragment(id)
 	return id
 

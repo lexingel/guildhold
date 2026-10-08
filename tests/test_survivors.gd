@@ -74,13 +74,12 @@ func run() -> void:
 
 	# The guild's build comes along: relics (ward, damage, dodge), and each
 	# hero's subclass Ability picks its special.
-	var rl := Combat.gen_relic("rare")
+	var rl := Combat.relic_from_unique(GameData.UNIQUE_RELICS[0])
 	rl.equipped = true
-	rl.hp = 40
 	rl.specials = [{"kind": "dodge_pct", "value": 0.2}]
 	GameState.relics.append(rl)
 	var r4 := SurvivorsRun.new(party, "vale", 7)
-	check(r4.dodge >= 0.2 and r4.heroes[0]["max_hp"] > float(Combat.max_hp(party[0])), "relic dodge and ward carry in")
+	check(r4.dodge >= 0.2, "relic dodge carries in (0.66: no relic wards)")
 	var styled: Array = r4.heroes.filter(func(x): return x["has_ability"] and str(x["style"]) != "")
 	for x in r4.heroes:
 		if x["has_ability"]:

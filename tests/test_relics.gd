@@ -1,5 +1,6 @@
 extends "res://tests/base_test.gd"
-## Relic generation, triggers, sets, legendaries, awakening and rerolls.
+## Relics bend rules (0.66): where they come from, the legendaries' rules,
+## the Relic Vault, and an old save's rolled relics turning into Essence.
 
 func _uniq(id: String) -> Relic:
 	return Combat.relic_from_unique(GameData.find_unique_relic(id))
@@ -24,6 +25,7 @@ func run() -> void:
 	seed(8)
 	GameState.active_slot = 9
 	GameState.reset()
+	reveal_all()
 	GameState.guild_name = "T"
 	GameState.crystals = 5000
 	var ids: Array[String] = []
@@ -34,64 +36,35 @@ func run() -> void:
 		GameState.heroes.append(h)
 		ids.append(h.id)
 
-	# Generation.
-	var c := Combat.gen_relic("common")
-	var ra := Combat.gen_relic("rare")
-	var ep := Combat.gen_relic("epic")
-	check(c.specials.size() == 1 and c.trigger.is_empty(), "common: 1 special, no trigger")
-	check(ra.specials.size() == 1 and not ra.trigger.is_empty(), "rare: special + trigger")
-	check(ep.specials.size() == 2 and ep.specials[0]["kind"] != ep.specials[1]["kind"] and not ep.trigger.is_empty(), "epic: 2 distinct specials + trigger")
-	check(c.name.contains(" of "), "named: %s" % c.name)
-	print("   epic: ", ep.name, " — ", ep.desc())
+	# Where relics come from: fights drop gear; a relic reward is a unique the
+	# guild doesn't hold, else an epic item.
+	var only_items := true
+	for i in 200:
+		only_items = only_items and str(Combat.gen_loot("rare")["loot_type"]) == "item"
+	check(only_items, "fights drop gear, not relics")
+	var got := GameState.unique_or_epic()
+	check(str(got["loot_type"]) == "relic" and (got["obj"] as Relic).rarity == "legendary", "a relic reward is a unique relic")
+	for u in GameData.UNIQUE_RELICS:
+		GameState.relics.append(_uniq(str(u["id"])))
+	var none_left := GameState.unique_or_epic()
+	check(str(none_left["loot_type"]) == "item" and (none_left["obj"] as Item).rarity == "epic", "with every unique held: an epic item")
+	GameState.relics.clear()
+	GameState.features_seen.erase("relics")
+	check(str(GameState.unique_or_epic()["loot_type"]) == "item", "before relics are revealed: an item")
+	reveal_all()
 
-	# Migration: an old blank relic gains a special; an old special is kept.
-	var old := {"id": "rlx", "name": "Ember Sigil", "type": "Ember", "rarity": "rare", "dmg": 4, "hp": 13, "special_kind": "", "level": 2}
-	var m := Relic.from_dict(old)
-	check(m.specials.size() == 1, "old stat-stick relic gains a special")
-	old["special_kind"] = "dodge_pct"; old["special_value"] = 0.07; old["special_label"] = "+7% dodge"
-	check(Relic.from_dict(old).specials[0]["kind"] == "dodge_pct", "old special kept")
-	var back := Relic.from_dict(JSON.parse_string(JSON.stringify(ep.to_dict())))
-	check(back.specials.size() == 2 and back.trigger.get("effect") == ep.trigger.get("effect"), "save round-trip")
-
-	# Special totals.
-	_equip_only([c])
-	var k: String = c.specials[0]["kind"]
-	check(is_equal_approx(Combat.relic_special_total(k), float(c.specials[0]["value"])), "special total")
-
-	# No set bonuses any more; the Arcane Lab strengthens every relic effect.
-	var e1 := Combat.gen_relic("common", "Ember")
-	var e2 := Combat.gen_relic("common", "Ember")
-	var e3 := Combat.gen_relic("common", "Ember")
-	_equip_only([e1, e2, e3])
-	check(Combat.synergy_value_for("dmg_pct") == 0.0, "three of an element: no set bonus")
-	_equip_only([c])
-	GameState.upgrades["res.lab"] = 2
-	check(is_equal_approx(Combat.relic_special_total(k), float(c.specials[0]["value"]) * 1.1), "Arcane Lab Lv2: relic effects +10%")
-	GameState.upgrades["res.lab"] = 0
-
-	# Triggers fire in battle: a round_third nova.
-	var nova := Combat.gen_relic("rare")
-	nova.trigger = {"trigger": "round_third", "effect": "nova", "value": 0.5}
-	_equip_only([nova])
-	var st := _fight_party(ids)
-	for m2 in st["monsters"]:
-		m2["hp"] = 99999.0
-		m2["max_hp"] = 99999.0
-	var fired := false
-	for i in 80:
-		if GameState.run["node_state"].has("result"):
-			break
-		GameState.resolve_turn_now()
-		if (st["log"] as Array).any(func(l): return str(l).contains("strikes every foe")):
-			fired = true
-			break
-	check(fired, "round-third nova fires")
-	GameState.run = {}
+	# The Relic Vault: a slot at Lv1, Lv3 and Lv5 (and the Reliquary wing).
+	check(GameState.relic_slot_cap() == 3, "3 slots to start")
+	GameState.upgrades["res.vault"] = 1
+	check(GameState.relic_slot_cap() == 4, "Vault Lv1: +1")
+	GameState.upgrades["res.vault"] = 5
+	check(GameState.relic_slot_cap() == 6, "Vault Lv5: 6 slots")
+	GameState.upgrades.clear()
 
 	# Legendaries.
 	var ph := _uniq("phoenix_feather")
 	_equip_only([ph])
-	st = _fight_party(ids)
+	var st := _fight_party(ids)
 	for h in st["party"]:
 		h.hp = 0
 	var out := Combat._check_party_defeated(st)
@@ -115,7 +88,6 @@ func run() -> void:
 	for m3 in st["monsters"]:
 		m3["hp"] = 99999.0
 		m3["max_hp"] = 99999.0
-	var hp_before: Array = (st["party"] as Array).map(func(h): return h.hp)
 	for i in 30:
 		if int(st["round_num"]) > 1 or GameState.run["node_state"].has("result"):
 			break
@@ -135,23 +107,41 @@ func run() -> void:
 	check(not GameState.champion_call_ready(), "…not a third")
 	GameState.run = {}
 
-	var mirror := _uniq("mirror_shard")
-	_equip_only([mirror, ep])
-	var kk: String = ep.specials[0]["kind"]
-	check(is_equal_approx(Combat.relic_special_total(kk), float(ep.specials[0]["value"]) * 2.0), "Mirror doubles the best relic's specials")
-
 	var ws := _uniq("wardens_seal")
 	_equip_only([ws])
 	check(is_equal_approx(Combat.relic_special_total("hazard_guard_pct"), 0.2), "Warden's Seal guards against hazards")
+	var mirror := _uniq("mirror_shard")
+	_equip_only([mirror, ws])
+	check(is_equal_approx(Combat.relic_special_total("hazard_guard_pct"), 0.4), "Mirror doubles the best other relic's specials")
 
-	# Awaken + reroll.
-	var up := Combat.gen_relic("rare")
-	_equip_only([up])
-	for i in 4:
-		GameState.upgrade_relic(up.id)
-	check(up.level == 5 and up.awakened and up.specials.size() == 2, "Lv5 awakens with a 2nd special")
-	var cr0 := GameState.crystals
-	var t0: Dictionary = up.trigger.duplicate()
-	check(GameState.reroll_relic(up.id, -1) == "" and GameState.crystals < cr0 and up.rerolls == 1, "trigger reroll spends crystals")
-	check(GameState.reroll_relic(up.id, 0) == "" and up.specials[0]["kind"] != up.specials[1]["kind"], "special reroll stays distinct")
-	check(GameState.reroll_relic(ph.id, 0) != "" if GameState.relics.has(ph) else true, "legendaries can't reroll")
+	# An old save: rolled relics become Essence, levels are refunded, Path
+	# relics go to a hero of their Path.
+	GameState.reset()
+	GameState.guild_name = "Old Relics"
+	var mage := Combat.gen_hero("C", 6)
+	mage.cls_id = "mage"
+	mage.pool_id = "apprentice"
+	mage.path = "evocation"
+	mage.id = "h%d" % GameState.next_id
+	GameState.next_id += 1
+	GameState.heroes.append(mage)
+	GameState.crystals = 100
+	GameState.save()
+	var d: Dictionary = JSON.parse_string(GameState.export_save_text())
+	d["save_version"] = 5
+	d["relics"] = [
+		{"id": "rl1", "name": "Ember Sigil of Fury", "type": "Ember", "rarity": "rare", "dmg": 3, "hp": 8, "level": 3, "equipped": true, "unique_id": "",
+			"specials": [{"kind": "dmg_pct", "value": 0.05, "label": "+5% damage"}]},
+		{"id": "rl2", "name": "Kindling Box", "type": "Ember", "rarity": "legendary", "level": 1, "equipped": true, "unique_id": "p_kindling_box"},
+		{"id": "rl3", "name": "Phoenix Feather", "type": "Ember", "rarity": "legendary", "level": 1, "equipped": true, "unique_id": "phoenix_feather"},
+	]
+	GameState.import_save_text(JSON.stringify(d), 9)
+	GameState.load_save()
+	var mult := float(GameData.find_rarity("rare")["mult"])
+	var want := int(round(15.0 * mult * 1)) + int(round(15.0 * mult * 2)) + int(round(GameData.SALVAGE_CRYSTALS * mult * GameData.OLD_RELIC_ESSENCE_MULT))
+	check(GameState.crystals == 100 + want, "a rolled relic and its levels became %d Essence (got %d)" % [want, GameState.crystals - 100])
+	check(GameState.relics.size() == 1 and GameState.relics[0].unique_id == "phoenix_feather", "the unique stays on the altar")
+	check(GameState.find_hero(mage.id).path_relic == "p_kindling_box", "the Path relic went to the Evocation hero")
+	check(GameState.pending_toasts.any(func(t): return str(t.get("title", "")) == "Relics have changed"), "one toast says so")
+	GameState.reset()
+	GameState.delete_slot(9)

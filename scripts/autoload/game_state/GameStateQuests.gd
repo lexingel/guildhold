@@ -759,6 +759,7 @@ func _release(h: Hero) -> void:
 			it.equipped_to = ""
 			it.equipped_idx = -1
 	pay_rate.erase(h.id)
+	set_down_path_relic(h)
 	for p in party_presets:
 		for entry in (p as Array).duplicate():
 			if str(entry[0]) == h.id:

@@ -44,11 +44,11 @@ func run() -> void:
 		"the second only from Rank D")
 
 	# A seal turns one up (the pity rule makes it certain), riding on a relic.
-	var relics_before := GameState.relics.size()
+	var items_before := GameState.items.size()
 	GameState.lore_dry = GameData.LORE_PITY
 	var got := GameState.lore_on_seal("vale", 0)
 	check(got == "f_corin" and GameState.fragment_known("f_corin"), "a Vale seal turns up Corin's tag")
-	check(GameState.relics.size() == relics_before + 1 and GameState.relics[-1].lore == "f_corin" and GameState.relics[-1].name == "Corin's Tag", "on a relic that carries it")
+	check(GameState.items.size() == items_before + 1 and GameState.items[-1].lore == "f_corin" and GameState.items[-1].name == "Corin's Tag", "on a keepsake that carries it (0.66: an item)")
 	check(GameState.pending_toasts.any(func(t): return str(t["title"]).contains("Corin")), "with a toast")
 	check(not GameState.truth_known("t_squad"), "one fragment isn't a truth yet")
 	GameState.lore_dry = 0

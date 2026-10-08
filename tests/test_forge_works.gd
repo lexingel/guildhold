@@ -109,13 +109,12 @@ func run() -> void:
 	GameState.upgrades = {}
 	check(GameState.spare_wealth(), "idle Gold counts as spare wealth, so the Grow goal names the advice")
 	GameState.crystals = 5000
-	var rl := Combat.gen_relic("rare")
-	rl.equipped = true
-	GameState.relics.append(rl)
+	h2.pool_id = "footman"   # a Path: Mastery to train (0.66: relics have no levels)
+	h2.path = "shieldwall"
 	GameState.hall_works = ["war_room", "chapel", "library"]   # no wing left to offer
 	GameState.wing_offer = []
 	var ek: Array = GameState.power_advice().map(func(a): return str(a["kind"]))
-	check(ek.has("relic") and (ek.has("management") or ek.has("drill")), "spare Essence names a relic level, spare Gold a hall room (%s)" % str(ek))
+	check(ek.has("mastery") and (ek.has("management") or ek.has("drill")), "spare Essence names Path Mastery, spare Gold a hall room (%s)" % str(ek))
 	GameState.wing_offer = ["smithy", "reliquary"]
 	ek = GameState.power_advice().map(func(a): return str(a["kind"]))
 	check(not ek.is_empty() and ek[0] == "hall_work", "a wing on offer comes first (%s)" % str(ek))
@@ -124,8 +123,7 @@ func run() -> void:
 	check(not ek.has("drill") and not ek.has("management"), "and the rooms keep half its price in hand (%s)" % str(ek))
 	GameState.coins = 50000
 	GameState.wing_offer = []
-	var lv0 := rl.level
-	check(GameState.follow_advice(GameState.power_advice().filter(func(a): return str(a["kind"]) == "relic")[0]) == "" and rl.level == lv0 + 1, "following it upgrades the relic")
+	check(GameState.follow_advice(GameState.power_advice().filter(func(a): return str(a["kind"]) == "mastery")[0]) == "" and h2.training.get("program", "") == "mastery", "following it sends the hero to master their Path")
 	GameState.coins = 0
 	GameState.crystals = 0
 	check(not GameState.spare_wealth(), "an empty treasury isn't spare wealth")

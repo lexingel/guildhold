@@ -132,7 +132,7 @@ func run() -> void:
 	GameState.load_save()
 	check(GameState.campaign_act == 3 and GameState.endless_unlocked(), "an old guild that played Endless starts at Act III")
 	# The Compendium remembers every Legendary the guild has held, even one sold since.
-	var leg := Combat.gen_unique_relic()
+	var leg := Combat.relic_from_unique(GameData.UNIQUE_RELICS[0])
 	GameState.relics.append(leg)
 	GameState.save()
 	GameState.relics.assign(GameState.relics.filter(func(r): return r.unique_id != leg.unique_id))   # every copy (a finale may have given the same one)

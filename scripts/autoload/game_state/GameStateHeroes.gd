@@ -657,6 +657,8 @@ func tree_points_spent(h: Hero, kind: String) -> int:
 ## tree's skill points when it isn't also the role tree.
 func apply_subclass(h: Hero, pool_id: String, path: String = "") -> void:
 	note_milestone("first Path")
+	if h.path_relic != "" and path != "" and str(GameData.find_unique_relic(h.path_relic).get("path", "")) != path:
+		set_down_path_relic(h)   # a relic of the old Path (0.66)
 	var cls := GameData.find_class(pool_id)
 	if cls.is_empty():
 		return
@@ -983,6 +985,58 @@ func start_training(hero_id: String, program: String, days: int, free := false) 
 		return tr("Not enough Gold")
 	coins -= fee
 	h.training = {"program": program, "left": days, "total": days, "fee": fee / days}
+	save()
+	state_changed.emit()
+	return ""
+
+
+## ---- Path relics on heroes (0.66) ----
+## Heroes who could carry Path relic `uid`: the guild's heroes on its Path.
+func path_relic_bearers(uid: String) -> Array:
+	var pid := str(GameData.find_unique_relic(uid).get("path", ""))
+	return heroes.filter(func(h): return not h.is_champion and h.path != "" and GameData.hero_path_id(h) == pid)
+
+
+## Gives Path relic `uid` to hero `hero_id` (one of its bearers), or, with
+## "", to the strongest bearer not carrying one; with none, to the chest. A
+## relic the hero already carried goes to the chest. Returns who got it ("" = the chest).
+func give_path_relic(uid: String, hero_id: String = "") -> String:
+	path_relic_chest.erase(uid)
+	for x in heroes:
+		if x.path_relic == uid:
+			x.path_relic = ""
+	var bearers := path_relic_bearers(uid)
+	var h: Hero = null
+	if hero_id != "":
+		var pick: Array = bearers.filter(func(x): return x.id == hero_id)
+		h = pick[0] if not pick.is_empty() else null
+	else:
+		for x in bearers:
+			if x.path_relic == "" and (h == null or GameData.rank_index(x.rank) * 10 + x.level > GameData.rank_index(h.rank) * 10 + h.level):
+				h = x
+	if h == null:
+		path_relic_chest.append(uid)
+		return ""
+	if h.path_relic != "":
+		path_relic_chest.append(h.path_relic)
+	h.path_relic = uid
+	return h.id
+
+
+## Puts hero `h`'s Path relic in the chest (they left, or changed Path).
+func set_down_path_relic(h: Hero) -> void:
+	if h.path_relic != "":
+		path_relic_chest.append(h.path_relic)
+		h.path_relic = ""
+
+
+## Passing a relic at camp (the hero page): "" or why not.
+func carry_path_relic(uid: String, hero_id: String) -> String:
+	if not run.is_empty() and (run.get("hero_ids", []) as Array).has(hero_id):
+		return tr("They're on a rift right now")
+	if not path_relic_bearers(uid).any(func(x): return x.id == hero_id):
+		return tr("Only a hero of its Path can carry it")
+	give_path_relic(uid, hero_id)
 	save()
 	state_changed.emit()
 	return ""

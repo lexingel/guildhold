@@ -31,7 +31,7 @@ func start_combat(party: Array[Hero], kind: String, diff: Dictionary, floor_idx:
 	var raw_sum := 0.0
 	for h in party:
 		raw_sum += dmg_of(h)
-	var team_dmg_base: float = (raw_sum * GameState.tactical_bonus() + relic_dmg_bonus()) * (1.0 + synergy_value_for("dmg_pct") + bond_bonus_for(party, "dmg_pct"))
+	var team_dmg_base: float = (raw_sum * GameState.tactical_bonus()) * (1.0 + synergy_value_for("dmg_pct") + bond_bonus_for(party, "dmg_pct"))
 
 	var first_round_bonus: float = (0.25 if GameState.vanguard() else 0.0) + party_skill_total(party, "first_round_pct") + relic_special_total("first_round_pct") + relic_drawback_total("first_round_pct") + synergy_value_for("first_round_pct") + bond_bonus_for(party, "first_round_pct")
 	var escalate: float = party_skill_total(party, "escalate_pct") + relic_special_total("escalate_pct") + relic_drawback_total("escalate_pct") + synergy_value_for("escalate_pct")
@@ -1996,6 +1996,10 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 			var options := [gen_loot(weighted_rarity()), gen_loot(weighted_rarity())]
 			if randf() < min(0.5, drop_rate_bonus() * 2.0):
 				options.append(gen_loot(weighted_rarity()))
+			if is_elite and randf() < GameData.ELITE_UNIQUE_CHANCE:   # 0.66: an elite may hold a unique relic
+				var u := GameState.unique_or_epic()
+				if str(u["loot_type"]) == "relic":
+					options[0] = u
 			result["reward_options"] = options
 	return {"done": true, "result": result}
 
@@ -2067,9 +2071,9 @@ func _pp_log(state: Dictionary, line: String) -> void:
 func _pp_start(state: Dictionary) -> void:
 	state["_pp"] = {}
 	var pmods := {}
-	for r in equipped_relics():
-		if r.unique_id.begins_with("p_"):
-			var pd := GameData.find_unique_relic(r.unique_id)
+	for carrier in state["party"]:   # 0.66: a Path relic works while its carrier fights
+		if carrier.path_relic != "" and not carrier.is_champion:
+			var pd := GameData.find_unique_relic(carrier.path_relic)
 			if pd.has("pmod"):
 				pmods[str(pd["pmod"])] = float(pd["value"])
 			if pd.has("pmod2"):   # its drawback (0.64.1)

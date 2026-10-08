@@ -66,13 +66,6 @@ func guild_tier_info() -> Dictionary:
 	return {"name": GameData.GUILD_TIERS[idx]["name"], "total": total, "next": next}
 
 
-func relic_dmg_bonus() -> int:
-	var s := 0
-	for r in equipped_relics():
-		s += r.dmg
-	return s
-
-
 func relic_special_total(kind: String) -> float:
 	var s := 0.0
 	for r in equipped_relics():
@@ -83,13 +76,13 @@ func relic_special_total(kind: String) -> float:
 	if party_has_unique_relic("mirror_shard"):
 		var best: Relic = null
 		for r in equipped_relics():
-			if r.unique_id != "mirror_shard" and (best == null or GameData.find_rarity(r.rarity)["mult"] > GameData.find_rarity(best.rarity)["mult"] or (r.rarity == best.rarity and r.level > best.level)):
+			if r.unique_id != "mirror_shard" and (best == null or GameData.find_rarity(r.rarity)["mult"] > GameData.find_rarity(best.rarity)["mult"]):
 				best = r
 		if best:
 			for sp in best.specials:
 				if str(sp["kind"]) == kind:
 					s += float(sp["value"])
-	return s * GameState.relic_power_mult() + (boon_total(kind) if BOON_VIA_RELIC.has(kind) else 0.0)
+	return s + (boon_total(kind) if BOON_VIA_RELIC.has(kind) else 0.0)
 
 
 ## Mirrors relic_special_total but for a Legendary relic's drawback — only
@@ -522,15 +515,12 @@ func _power(heroes: Array, party_terms: bool) -> int:
 	var mend := party_skill_total(party, "mend_pct")
 	var ramp := party_skill_total(party, "escalate_pct") * 4.0 + party_skill_total(party, "first_round_pct") * 0.15
 	if party_terms:
-		dmg += relic_dmg_bonus()
 		dmg *= 1.0 + synergy_value_for("dmg_pct") + bond_bonus_for(party, "dmg_pct")
 		dodge += relic_special_total("dodge_pct") + relic_drawback_total("dodge_pct") + synergy_value_for("dodge_pct") + bond_bonus_for(party, "dodge_pct")
 		mend += relic_special_total("mend_pct") + relic_drawback_total("mend_pct") + synergy_value_for("mend_pct") + bond_bonus_for(party, "mend_pct")
 		ramp += (relic_special_total("escalate_pct") + relic_drawback_total("escalate_pct")) * 4.0 + (relic_special_total("first_round_pct") + relic_drawback_total("first_round_pct")) * 0.15
 		if party_has_unique_relic("bloodpact"):
 			mend = 0.0
-		for r in equipped_relics():
-			hp += r.hp
 		var els := {}   # Resonance (0.62): shared elements, as the fight applies them
 		for h in party:
 			if h.type != "":

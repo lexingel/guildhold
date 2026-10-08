@@ -720,22 +720,34 @@ func _render_path_relic_offer(v: VBoxContainer, sealed_dict: Dictionary) -> void
 		return
 	if sealed_dict.has("relic_taken"):
 		var got := str(sealed_dict["relic_taken"])
-		var tl := _label(tr("Path relic: %s") % tr(got) if got != "" else tr("+%d Essence instead of a relic") % int(sealed_dict.get("relic_essence", 0)), 14)
+		var to := GameState.find_hero(str(sealed_dict.get("relic_to", "")))
+		var where := tr("carried by %s") % tr(str(to.name.split(" the ")[0])) if to else tr("in the chest until a hero of its Path takes it")
+		var tl := _label(tr("Path relic: %s, %s") % [tr(got), where] if got != "" else tr("+%d Essence instead of a relic") % int(sealed_dict.get("relic_essence", 0)), 14)
 		tl.add_theme_color_override("font_color", Palette.RANK_S)
 		v.add_child(tl)
 		return
-	v.add_child(_label(tr("A Path relic answers the seal. Take one:"), 15))
+	v.add_child(_label(tr("A Path relic answers the seal. A hero of its Path carries it; it works while they fight. Take one:"), 15))
 	var row := HFlowContainer.new()
 	row.add_theme_constant_override("h_separation", 10)
 	row.add_theme_constant_override("v_separation", 10)
 	for i in offer.size():
 		var d := GameData.find_unique_relic(str(offer[i]))
 		var pid := str(d["path"])
-		var who: Array = GameState.current_party().filter(func(h): return GameData.hero_path_id(h) == pid).map(func(h): return tr(str(h.name.split(" the ")[0])))
+		var bearers: Array = GameState.path_relic_bearers(str(offer[i]))
 		var pname := tr(str(GameData.PATHS[pid]["name"]))
-		var lines: Array = [tr(str(d["desc"])), tr("%s: %s") % [pname, ", ".join(who)] if not who.is_empty() else tr("For %s heroes") % pname]
-		row.add_child(_hazard_option(GameData.RELIC_TYPE_ICON_PATH.get(str(d["type"]), GameData.CHEST_ICON_PATH), tr(str(d["name"])), lines, [],
-			func(idx=i): AudioManager.play_sfx(GameData.SFX_PATH["relic_pick"]); GameState.pick_path_relic(idx); render()))
+		var lines: Array = [tr(str(d["desc"])), tr("%s: %s") % [pname, ", ".join(bearers.map(func(h): return tr(str(h.name.split(" the ")[0])) + (" ◆" if h.path_relic != "" else "")))]]
+		var card := _hazard_option(GameData.RELIC_TYPE_ICON_PATH.get(str(d["type"]), GameData.CHEST_ICON_PATH), tr(str(d["name"])), lines, [],
+			func(idx=i): AudioManager.play_sfx(GameData.SFX_PATH["relic_pick"]); GameState.pick_path_relic(idx); render())
+		if bearers.size() > 1:   # who carries it (a hero already carrying one ◆ sets theirs down in the chest)
+			var who := HFlowContainer.new()
+			who.add_theme_constant_override("h_separation", 4)
+			for h in bearers:
+				who.add_child(_button(tr("→ %s") % tr(str(h.name.split(" the ")[0])), func(idx=i, hid=h.id):
+					AudioManager.play_sfx(GameData.SFX_PATH["relic_pick"])
+					GameState.pick_path_relic(idx, hid)
+					render()))
+			(card.get_child(0) as VBoxContainer).add_child(who)
+		row.add_child(card)
 	v.add_child(row)
 	var skip := _button(tr("Take %d Essence instead") % GameState.path_relic_essence(), func(): GameState.pick_path_relic(-1); render())
 	skip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN

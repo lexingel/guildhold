@@ -456,10 +456,10 @@ func render() -> void:
 				_locked_feature(v, "tower")
 		"rift_run": _render_rift_run(v)
 		"crafting_hall":
-			if GameState.feature_unlocked("crafting"):
+			if GameState.feature_unlocked("forge"):
 				_render_crafting_hall(v)
 			else:
-				_locked_feature(v, "crafting")
+				_locked_feature(v, "forge")
 		"settings": _render_settings(v)
 		"camp": _render_camp_screen(v)
 	if not _cinematic_on:   # the opening's narrated track plays on under any re-render
@@ -1164,7 +1164,7 @@ func _breadcrumb_for_screen() -> String:
 		"rift_run" when GameState.run.has("tower"): return tr("Tower of Trials — Floor %d") % int(GameState.run["tower"])
 		"rift_run" when GameState.run.has("descent"): return tr("The Descent — Depth %d") % int(GameState.run["descent"])
 		"rift_run": return tr("Rift Run — Floor %d/%d") % [int(GameState.run.get("pos", 0)) + 1, GameState.run.get("layers", []).size()]
-		"crafting_hall": return "Crafting"
+		"crafting_hall": return "Smithy"
 		"settings": return "Settings"
 		"camp": return tr("Camp") if term_tab == "camp" else tr("Camp — %s") % tr(str(TAB_TITLE.get(term_tab, term_tab.capitalize())))
 		_: return ""
@@ -1276,12 +1276,12 @@ func _count_label(key: String, value: int, size: int) -> Label:
 ## [label, icon id, [[screen id, sub-tab label, camp building whose attention badge it shares], ...]]
 const NAV_GROUPS := [
 	["Roster", "roster", [["roster", "Heroes"], ["recruits", "Recruits"], ["medical", "Medical Bay"], ["training", "Training Yard"], ["champions", "Champions"]]],
-	["Inventory", "inventory", [["inventory", "Items"], ["crafting", "Crafting"]]],
+	["Inventory", "inventory", [["inventory", "Items"], ["crafting", "Smithy"]]],
 	["Rift Hall", "rift", [["rift", "Rift Hall"]]],
 	["Guild", "management", [["management", "Accord Hall"], ["ledger", "Ledger"], ["quests", "Quests"], ["records", "Records"], ["memorial", "Memorial"]]],
 	["Library", "bestiary", [["bestiary", "Bestiary"], ["compendium", "Codex"]]],
 ]
-const NAV_FEATURE := {"champions": "champions", "crafting": "crafting", "quests": "quests", "management": "management", "inventory": "inventory", "medical": "medical", "bestiary": "bestiary", "training": "training"}
+const NAV_FEATURE := {"champions": "champions", "crafting": "forge", "quests": "quests", "management": "management", "inventory": "inventory", "medical": "medical", "bestiary": "bestiary", "training": "training"}
 
 
 func _quick_nav_current() -> String:
@@ -1460,7 +1460,7 @@ func _header_back() -> Array:
 			, "Rift Hall"]
 		"settings":
 			const NAMES := {"camp": "Camp", "rift_run": "Rift", "rift_hall": "Rift Hall", "tower": "Tower",
-				"party_assembly": "Party Assembly", "crafting_hall": "Crafting"}
+				"party_assembly": "Party Assembly", "crafting_hall": "Smithy"}
 			return [func(): screen = _pre_settings_screen; render(), NAMES.get(_pre_settings_screen, tr("Back"))]
 	return []
 
@@ -2209,8 +2209,6 @@ func _render_rift_hall(v: VBoxContainer) -> void:
 	var go := func(rank_id: String, endless: bool):
 		pending_party.clear()
 		_prefill_party = true
-		pending_relic_options.clear()
-		pending_relic_choice = -1
 		_pending_tower = false
 		_pending_descent = false
 		_pending_breach = false
@@ -2854,29 +2852,6 @@ func _render_party_assembly(v: VBoxContainer) -> void:
 		_coach(v, "overseer", "Your overseer", "A champion never fights in a rift run. They oversee it: their Boon lifts the whole party, and any hero can spend a turn on their Call. (In the Endless Rift champions are the party; in a defense you steer one.)")
 		v.add_child(_overseer_picker())
 	v.add_child(_hsep())
-	var choice_count := 0 if _pending_tower else GameState.relic_choice_count()
-	if choice_count > 0:
-		v.add_child(_label("Starting Relic (pick one, optional)"))
-		if pending_relic_options.is_empty():
-			# S-rank+ mapped rifts carry a "relic_rarity_floor_down" modifier —
-			# it suppresses Guild Management's inherited_power() floor-raise
-			# (which normally bumps a rolled Common up to Rare) for this
-			# starting-relic roll specifically, so an S+ rift's starting pick
-			# can't lean on that safety net the way a normal run's can.
-			var floor_suppressed: bool = _pending_rift_rank != "" and bool(GameData.find_rift_rank(_pending_rift_rank).get("relic_rarity_floor_down", false))
-			for i in choice_count:
-				var rarity := "rare" if (GameState.inherited_power() and not floor_suppressed and Combat.weighted_rarity() == "common") else Combat.weighted_rarity()
-				pending_relic_options.append(Combat.gen_relic(rarity))
-	for i in pending_relic_options.size():
-		var r: Relic = pending_relic_options[i]
-		var rb := CheckButton.new()
-		rb.button_pressed = pending_relic_choice == i
-		rb.toggled.connect(func(on: bool):
-			pending_relic_choice = i if on else -1
-			render()
-		)
-		v.add_child(_info_row("%s (%s) — %s" % [tr(str(r.name)), tr(str(r.type)), tr(str(r.desc()))], 14, [], rb))
-
 
 	var launch := _party_launch_bar()
 	v.add_child(launch)
@@ -3400,7 +3375,7 @@ func _party_launch_bar() -> Control:
 	var enter := _icon_domain_button("violet", GameData.CAMP_HUB_ICON_PATH["rift"], tr("Begin the trial") if _pending_tower else tr("Enter the Rift"), func():
 		if pending_party.is_empty():
 			return
-		var chosen: Relic = pending_relic_options[pending_relic_choice] if pending_relic_choice >= 0 else null
+		var chosen: Relic = null   # 0.66: no starting relic choice any more
 		var ids: Array[String] = []
 		ids.assign(pending_party)
 		if _pending_endless and _pending_rift_rank == "":
@@ -3425,8 +3400,6 @@ func _party_launch_bar() -> Control:
 		_pending_descent = false
 		_pending_daily = false
 		_pending_breach = false
-		pending_relic_options.clear()
-		pending_relic_choice = -1
 		_pending_rift_rank = ""
 		screen = "rift_run"
 		render()

@@ -113,14 +113,3 @@ func run() -> void:
 	check(not Combat.stun_monster(sst, 0, 1), "nor the next round")
 	sst["round_num"] = 5
 	check(Combat.stun_monster(sst, 0, 1), "but again a round later")
-
-	# Fixed Legendary relics don't take Essence for a level; old levels are refunded.
-	var coin := Combat.relic_from_unique(GameData.UNIQUE_RELICS.filter(func(d): return d["id"] == "gamblers_coin")[0])
-	GameState.relics.append(coin)
-	GameState.crystals = 1000
-	check(not GameState.relic_levels_up(coin) and GameState.upgrade_relic(coin.id) != "" and GameState.crystals == 1000, "a fixed Legendary relic can't be levelled")
-	coin.level = 3
-	GameState.save()
-	GameState.load_save()
-	var back: Relic = GameState.relics.filter(func(r): return r.unique_id == "gamblers_coin")[0]
-	check(back.level == 1 and GameState.crystals > 1000, "levels already bought on one are refunded (%d Essence)" % (GameState.crystals - 1000))

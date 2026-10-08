@@ -91,45 +91,6 @@ func gen_recruit(rank_id: String, role: String = "") -> Hero:
 	return h
 
 
-## `type_override` lets Crafting Hall recipes preserve the fed-in relics'
-## elemental type on the crafted result instead of rolling a fresh random one
-## — a player feeding in 3 Ember commons reasonably expects an Ember rare
-## back, not a coin flip across all 5 types.
-func gen_relic(rarity_id: String, type_override: String = "") -> Relic:
-	if rarity_id == "legendary":
-		return gen_unique_relic()
-	var type: String = type_override if type_override != "" else GameData.RELIC_TYPES[randi() % GameData.RELIC_TYPES.size()]
-	var rarity := GameData.find_rarity(rarity_id)
-	var noun: String = RARITY_NOUNS[randi() % RARITY_NOUNS.size()]
-	var r := Relic.new()
-	r.id = "rl" + str(GameState.next_id)
-	GameState.next_id += 1
-	r.type = type
-	r.rarity = rarity["id"]
-	r.dmg = round(2.0 * rarity["mult"])
-	r.hp = round(6.0 * rarity["mult"])
-	# Common: one special. Rare: a special and a trigger. Epic: two and a trigger.
-	r.specials = [roll_relic_special(type, r.rarity, [])]
-	if r.rarity == "epic":
-		r.specials.append(roll_relic_special(type, r.rarity, r.specials.map(func(s): return s["kind"])))
-	if r.rarity != "common":
-		r.trigger = roll_relic_trigger(r.rarity)
-	r.name = "%s %s %s" % [type, noun, GameData.RELIC_SPECIAL_SUFFIX.get(str(r.specials[0]["kind"]), "")]
-	return r
-
-
-## One special for a relic of `type` (60% its element's home domain), never a
-## kind in `exclude`. The label is rebuilt from the scaled value.
-func roll_relic_special(type: String, rarity_id: String, exclude: Array) -> Dictionary:
-	var domain := domain_for_type(type)
-	var pool: Array = GameData.RELIC_SPECIALS.filter(func(x): return x["domain"] == domain and not exclude.has(x["kind"]))
-	if pool.is_empty():
-		pool = GameData.RELIC_SPECIALS.filter(func(x): return not exclude.has(x["kind"]))
-	var s: Dictionary = pool[randi() % pool.size()]
-	var v := snappedf(float(s["value"]) * float(GameData.find_rarity(rarity_id)["mult"]), 0.001)
-	return {"kind": s["kind"], "value": v, "label": relic_special_label(str(s["kind"]), v)}
-
-
 func relic_special_label(kind: String, v: float) -> String:
 	var pct := ("%.1f%%" % (v * 100.0)) if v < 0.1 else ("%d%%" % int(round(v * 100.0)))
 	match kind:
@@ -147,24 +108,12 @@ func relic_special_label(kind: String, v: float) -> String:
 	return describe_skill(kind, v)
 
 
-func roll_relic_trigger(rarity_id: String) -> Dictionary:
-	var t: Dictionary = GameData.RELIC_TRIGGERS[randi() % GameData.RELIC_TRIGGERS.size()].duplicate()
-	# Triggers scale gentler than stats (sqrt of the rarity mult) — they fire
-	# repeatedly, so a full epic multiplier made them dominate.
-	t["value"] = snappedf(float(t["value"]) * sqrt(float(GameData.find_rarity(rarity_id)["mult"])), 0.001)
-	return t
-
-
 ## A fixed pick from GameData.UNIQUE_RELICS — no rarity-mult scaling, the
 ## effect/value/drawback are exactly as authored. "Twin Embers" is the one
 ## entry whose own effect is a normal rollable-style special (escalate_pct)
 ## rather than a bespoke mechanic, so it reuses special_kind/special_value
 ## instead of `effect` — Combat.resolve_round only dispatches on unique_id
 ## for the entries that actually need bespoke behavior.
-func gen_unique_relic() -> Relic:
-	return relic_from_unique(GameData.UNIQUE_RELICS[randi() % GameData.UNIQUE_RELICS.size()])
-
-
 ## A Legendary relic built exactly from a UNIQUE_RELICS/TOWER_RELICS entry.
 func relic_from_unique(def: Dictionary) -> Relic:
 	var r := Relic.new()
@@ -173,8 +122,6 @@ func relic_from_unique(def: Dictionary) -> Relic:
 	r.name = str(def["name"])
 	r.type = str(def["type"])
 	r.rarity = "legendary"
-	r.dmg = 0
-	r.hp = 0
 	r.unique_id = str(def["id"])
 	r.combo_with = str(def.get("combo_with", ""))
 	if def.has("special_kind"):
@@ -289,11 +236,10 @@ func gen_unique_item() -> Item:
 	return it
 
 
-## Returns {"loot_type": "item"|"relic", "obj": Item|Relic}
+## A fight's loot: always an item (0.66: relics come as uniques, see
+## GameState.unique_or_epic). {"loot_type": "item", "obj": Item}
 func gen_loot(rarity_id: String) -> Dictionary:
-	if not GameState.feature_unlocked("relics") or randf() < GameData.LOOT_GEAR_SHARE:   # relics come with Act I's finale
-		return {"loot_type": "item", "obj": gen_item(rarity_id)}
-	return {"loot_type": "relic", "obj": gen_relic(rarity_id)}
+	return {"loot_type": "item", "obj": gen_item(rarity_id)}
 
 ## Branching rift path: first layer forced combat, last forced boss, middle
 ## layers each offer 2 different node-type options (a fork the player picks

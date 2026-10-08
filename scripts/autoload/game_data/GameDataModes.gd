@@ -720,7 +720,7 @@ const BRANCHES := [
 	]},
 	{"id": "log", "name": "Logistics Branch", "sub": "Trade & Recruiting", "nodes": [
 		{"id": "trade", "name": "Trade Network", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "+1 feast seat; -6% shop prices, -2% auction fees, +5% Rift Cache chance",
-			"perks": {2: "Order: Requisition — reroll a fight's loot choices", 3: "Black Market: Rift Caches hold 30% more Gold", 5: "Every rift shop stocks an Epic relic"}},
+			"perks": {2: "Order: Requisition — reroll a fight's loot choices", 3: "Black Market: Rift Caches hold 30% more Gold", 5: "Every rift shop offers a unique relic"}},
 		{"id": "scouts", "name": "Scouts' Lodge", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "Recruit board: +1 offer at Lv1 and Lv4",
 			"perks": {2: "Order: Scout Ahead — reroll the next fork's paths", 3: "Headhunter: every recruit refresh has a Rank C+ hero", 5: "Recruit rerolls cost half"}},
 	]},
@@ -737,10 +737,10 @@ const BRANCHES := [
 			"perks": {1: "+1 day of warning before a rift breaks", 3: "+1 more day of warning"}},
 	]},
 	{"id": "res", "name": "Research Branch", "sub": "Relics & Theory", "nodes": [
-		{"id": "vault", "name": "Relic Vault", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "Starting relic choices (2 at Lv1, 3 at Lv2, 4 at Lv4)",
-			"perks": {3: "+1 equipped relic slot", 5: "+1 more relic slot, and starting relics are Rare or better"}},
-		{"id": "lab", "name": "Arcane Lab", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "+5% to every relic effect; Lv1 unlocks relic scrapping and trait/scar removal",
-			"perks": {3: "Skill respecs and quirk treatments cost 30% less", 5: "Relic upgrades cost 25% fewer Essence"}},
+		{"id": "vault", "name": "Relic Vault", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "+1 equipped relic slot at Lv1, Lv3 and Lv5",
+			"perks": {}},
+		{"id": "lab", "name": "Arcane Lab", "max": 5, "cost_base": 50, "cost_step": 50, "currency": "gold", "every": "Treatments and respecs cost 10% less; salvage returns 10% more Essence",
+			"perks": {1: "Treat bad quirks and scars"}},
 	]},
 ]
 

@@ -7,15 +7,7 @@ extends "res://scripts/autoload/game_state/GameStateModes.gd"
 ## starting-relic roll, which happens before the run exists.
 func start_run(diff_id: String, hero_ids: Array[String], starting_relic: Relic, rift_rank: String = "") -> void:
 	last_party = hero_ids.duplicate()
-	var shield := 0
-	for r in Combat.equipped_relics():
-		shield += r.hp
-	if starting_relic:
-		shield += starting_relic.hp
-		starting_relic.id = "rl" + str(next_id)
-		next_id += 1
-		starting_relic.equipped = false
-		relics.append(starting_relic)
+	var shield := 0   # 0.66: no relic wards; events and Wardstones carry that job
 	var diff: Dictionary = GameData.DIFFICULTIES[0]
 	for d in GameData.DIFFICULTIES:
 		if d["id"] == diff_id:
@@ -700,7 +692,7 @@ func _apply_event_effect(e: Dictionary) -> Array[String]:
 			var rr := Combat.weighted_rarity()
 			if _rarity_order(rr) < _rarity_order(str(e[kind])):
 				rr = str(e[kind])
-			var lt: Dictionary = {"loot_type": "item", "obj": Combat.gen_item(rr)} if kind == "item" or not feature_unlocked("relics") else {"loot_type": "relic", "obj": Combat.gen_relic(rr)}
+			var lt: Dictionary = {"loot_type": "item", "obj": Combat.gen_item(rr)} if kind == "item" else unique_or_epic()
 			_grant_loot(lt)
 			log.append(tr("You receive: %s (%s).") % [tr(str(lt["obj"].name)), tr(str(rr.capitalize()))])
 	if e.has("loot"):
@@ -715,21 +707,6 @@ func _apply_event_effect(e: Dictionary) -> Array[String]:
 
 func _rarity_order(r: String) -> int:
 	return ["common", "rare", "epic", "legendary"].find(r)
-
-
-## Adds a rolled loot entry ({loot_type, obj}) to the guild's stash.
-func _grant_loot(loot: Dictionary) -> void:
-	if loot["loot_type"] == "item":
-		var it: Item = loot["obj"]
-		it.id = "it" + str(next_id)
-		next_id += 1
-		items.append(it)
-	else:
-		var r: Relic = loot["obj"]
-		r.id = "rl" + str(next_id)
-		next_id += 1
-		r.equipped = Combat.equipped_relics().size() < relic_slot_cap()
-		relics.append(r)
 
 
 ## Treasure: pick one of two loot drops, no fight.
@@ -997,7 +974,13 @@ func ensure_shop_offers() -> void:
 	var boosted := pending_shop_boost
 	var offers: Array = []
 	for i in 3:
-		offers.append(_gen_shop_offer((boosted or shop_guaranteed_epic()) and i == 0))
+		offers.append(_gen_shop_offer(boosted and i == 0))
+	if shop_guaranteed_epic() or randf() < GameData.SHOP_UNIQUE_CHANCE:   # 0.66: a unique relic (every shop at Trade Network Lv5)
+		var u := unique_or_epic()
+		if str(u["loot_type"]) == "relic":
+			u["price"] = int(round(_shop_price("epic") * GameData.SHOP_UNIQUE_MULT))
+			u["bought"] = false
+			offers.append(u)
 	if boosted:
 		pending_shop_boost = false
 	run["node_state"] = {"type": "shop", "offers": offers, "rerolls": 0}
@@ -1005,11 +988,14 @@ func ensure_shop_offers() -> void:
 
 func _gen_shop_offer(force_epic: bool = false) -> Dictionary:
 	var rarity := "epic" if force_epic else Combat.weighted_rarity()
-	var loot: Dictionary = {"loot_type": "relic", "obj": Combat.gen_relic(rarity)} if force_epic else Combat.gen_loot(rarity)
-	var rar := GameData.find_rarity(rarity)
-	loot["price"] = max(4, int(round((10.0 + 15.0 * float(rar["mult"])) * (1.0 - merchant_price_reduction()))))
+	var loot: Dictionary = Combat.gen_loot(rarity)
+	loot["price"] = _shop_price(rarity)
 	loot["bought"] = false
 	return loot
+
+
+func _shop_price(rarity: String) -> int:
+	return max(4, int(round((10.0 + 15.0 * float(GameData.find_rarity(rarity)["mult"])) * (1.0 - merchant_price_reduction()))))
 
 
 ## Rerolling a shop costs more each time in the same shop.
@@ -1312,42 +1298,40 @@ func path_relic_eligible() -> bool:
 		and not run.has("tower") and not run.has("breach") and not run.has("descent") and not run.get("training", false)
 
 
-## Up to 3 Path relic ids the guild doesn't own: two for Paths in the party
-## when it can, the rest from anywhere.
+## Up to 3 Path relic ids (4 with the Reliquary) the guild doesn't hold,
+## for the Paths its heroes walk (0.66), the party's first.
 func roll_path_relic_offer() -> Array:
-	var owned := {}
-	for r in relics:
-		owned[r.unique_id] = true
-	var paths := {}
+	var walked := {}
+	for h in heroes:
+		if not h.is_champion and h.path != "":
+			walked[GameData.hero_path_id(h)] = true
+	var in_party := {}
 	for h in current_party():
-		paths[GameData.hero_path_id(h)] = true
-	var pool: Array = GameData.PATH_RELICS.filter(func(d): return not owned.has(str(d["id"])))
+		in_party[GameData.hero_path_id(h)] = true
+	var pool: Array = GameData.PATH_RELICS.filter(func(d): return walked.has(str(d["path"])) and not owns_relic(str(d["id"])))
 	pool.shuffle()
-	var offer: Array = []
-	for d in pool:
-		if offer.size() < 2 and paths.has(str(d["path"])):
-			offer.append(str(d["id"]))
-	for d in pool:
-		if offer.size() < (4 if has_wing("reliquary") else 3) and not offer.has(str(d["id"])):
-			offer.append(str(d["id"]))
-	return offer
+	pool.sort_custom(func(a, b): return in_party.has(str(a["path"])) and not in_party.has(str(b["path"])))
+	return pool.slice(0, 4 if has_wing("reliquary") else 3).map(func(d): return str(d["id"]))
 
 
-## The Essence a sealed rift pays instead of its Path relic.
+## The Essence a sealed rift pays instead of its Path relic (0.66: all of
+## the seal's, not half).
 func path_relic_essence() -> int:
-	return maxi(10, int(round(float(_diff()["seal_essence"]) * 0.5)))
+	return maxi(10, int(round(float(_diff()["seal_essence"]))))
 
 
-## Takes offered Path relic `idx`, or Essence instead (idx < 0).
-func pick_path_relic(idx: int) -> void:
+## Takes offered Path relic `idx` for hero `hero_id` (one of its Path; ""
+## = the strongest without one, else the chest), or Essence (idx < 0).
+func pick_path_relic(idx: int, hero_id: String = "") -> void:
 	var s = run.get("sealed")
 	if not s is Dictionary or (s.get("path_relics", []) as Array).is_empty() or s.has("relic_taken"):
 		return
 	var offer: Array = s["path_relics"]
 	if idx >= 0 and idx < offer.size():
-		var r := Combat.relic_from_unique(GameData.find_unique_relic(str(offer[idx])))
-		_grant_loot({"loot_type": "relic", "obj": r})
-		s["relic_taken"] = r.name
+		var uid := str(offer[idx])
+		var who := give_path_relic(uid, hero_id)
+		s["relic_taken"] = str(GameData.find_unique_relic(uid)["name"])
+		s["relic_to"] = who
 	else:
 		var e := path_relic_essence()
 		crystals += e
@@ -1357,11 +1341,11 @@ func pick_path_relic(idx: int) -> void:
 	state_changed.emit()
 
 
-## The value of an equipped Path relic's "pmod" outside a fight (0 if none).
+## The value of a Path relic's "pmod" carried in the party, outside a fight (0 if none).
 func path_relic_value(key: String) -> float:
-	for r in Combat.equipped_relics():
-		if r.unique_id.begins_with("p_"):
-			var d := GameData.find_unique_relic(r.unique_id)
+	for h in current_party():
+		if h.path_relic != "":
+			var d := GameData.find_unique_relic(h.path_relic)
 			if str(d.get("pmod", "")) == key:
 				return float(d["value"])
 	return 0.0
@@ -1579,6 +1563,7 @@ func _lose_left_behind() -> void:
 			if it.equipped_to == h.id:
 				it.equipped_to = ""
 				it.equipped_idx = -1
+		set_down_path_relic(h)
 		push_toast(h, tr("Lost in the rift"), tr("%s was left behind and never came back") % tr(str(h.name.split(" the ")[0])))
 		_memorialize(h, tr("Left behind in a %s") % tr(str(_run_label())))
 		heroes.erase(h)

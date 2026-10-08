@@ -28,18 +28,33 @@ func toggle_equip_relic(relic_id: String) -> void:
 			return
 
 
-func scrap_relic(relic_id: String) -> void:
-	if not recycle_unlocked():
-		return
-	for r in relics:
-		if r.id == relic_id and not r.equipped:
-			var rar := GameData.find_rarity(r.rarity)
-			var gain := int(round(6.0 * float(rar["mult"])))
-			crystals += gain
-			relics.erase(r)
-			save()
-			state_changed.emit()
-			return
+## Adds a rolled loot entry ({loot_type, obj}) to the guild's stash.
+func _grant_loot(loot: Dictionary) -> void:
+	if loot["loot_type"] == "item":
+		var it: Item = loot["obj"]
+		it.id = "it" + str(next_id)
+		next_id += 1
+		items.append(it)
+	else:
+		var r: Relic = loot["obj"]
+		r.id = "rl" + str(next_id)
+		next_id += 1
+		r.equipped = Combat.equipped_relics().size() < relic_slot_cap()
+		relics.append(r)
+
+
+## Whether the guild holds relic `uid` (a GameData unique id), on a hero or not.
+func owns_relic(uid: String) -> bool:
+	return relics.any(func(r): return r.unique_id == uid) or heroes.any(func(h): return h.path_relic == uid) or path_relic_chest.has(uid)
+
+
+## A relic reward (0.66): a unique relic the guild doesn't hold yet, else an
+## epic item. Before relics are revealed, always the item.
+func unique_or_epic() -> Dictionary:
+	var pool: Array = GameData.UNIQUE_RELICS.filter(func(u): return not owns_relic(str(u["id"])))
+	if pool.is_empty() or not feature_unlocked("relics"):
+		return {"loot_type": "item", "obj": Combat.gen_item("epic")}
+	return {"loot_type": "relic", "obj": Combat.relic_from_unique(pool[randi() % pool.size()])}
 
 
 func sell_relic(relic_id: String) -> void:
@@ -89,23 +104,6 @@ func craft_items(category: String, rarity: String) -> void:
 func item_roll(it: Item) -> float:
 	var base := float(GameData.ITEM_KIND_BASE.get(it.kind, 0.0)) * float(GameData.find_rarity(it.rarity)["mult"]) * float(GameData.ITEM_AFFIX_VALUE_SHARE[0]) 		* float(GameData.ITEM_RANK_MULT[GameData.rift_rank_index(it.item_rank)])
 	return it.value / base if base > 0.0 else 0.0
-
-
-func craft_relics(type: String, rarity: String) -> void:
-	if not CRAFT_RARITY_UP.has(rarity):
-		return
-	var matches: Array[Relic] = []
-	for r in relics:
-		if r.type == type and r.rarity == rarity and not r.equipped:
-			matches.append(r)
-	if matches.size() < 3:
-		return
-	for i in 3:
-		relics.erase(matches[i])
-	relics.append(Combat.gen_relic(str(CRAFT_RARITY_UP[rarity]), type))
-	crafts_performed += 1
-	save()
-	state_changed.emit()
 
 
 ## A won fight counts toward every equipped item on the heroes still standing.
@@ -206,11 +204,11 @@ func reforge_item(item_id: String, line: int) -> String:
 
 
 func salvage_value(it: Item) -> int:
-	return int(round(GameData.SALVAGE_CRYSTALS * float(GameData.find_rarity(it.rarity)["mult"])))
+	return int(round(GameData.SALVAGE_CRYSTALS * float(GameData.find_rarity(it.rarity)["mult"]) * salvage_mult()))
 
 
 func salvage_item(item_id: String) -> void:
-	if not recycle_unlocked():
+	if not feature_unlocked("forge"):   # the Smithy's (0.66)
 		return
 	for it in items:
 		if it.id == item_id and it.equipped_to == "":
@@ -382,85 +380,3 @@ func equip_item(hero_id: String, slot_type: String, idx: int, item_id: String) -
 	target.equipped_idx = idx
 	save()
 	state_changed.emit()
-
-
-func relic_reroll_cost(r: Relic) -> int:
-	return int(round(GameData.RELIC_REROLL_CRYSTALS * float(GameData.find_rarity(r.rarity)["mult"]) * (r.rerolls + 1)))
-
-
-## Rerolls one effect of a normal relic: special `idx`, or its trigger (idx -1).
-func reroll_relic(relic_id: String, idx: int) -> String:
-	for r in relics:
-		if r.id != relic_id:
-			continue
-		if r.unique_id != "":
-			return tr("Legendaries can't be rerolled")
-		var cost := relic_reroll_cost(r)
-		if crystals < cost:
-			return tr("Not enough Essence")
-		if idx < 0:
-			if r.trigger.is_empty():
-				return tr("No trigger")
-			crystals -= cost
-			var lvl_mult := pow(1.1, r.level - 1)
-			r.trigger = Combat.roll_relic_trigger(r.rarity)
-			r.trigger["value"] = snappedf(float(r.trigger["value"]) * lvl_mult, 0.001)
-		else:
-			if idx >= r.specials.size():
-				return tr("No such effect")
-			crystals -= cost
-			var others: Array = []
-			for i in r.specials.size():
-				if i != idx:
-					others.append(r.specials[i]["kind"])
-			var s := Combat.roll_relic_special(r.type, r.rarity, others)
-			s["value"] = snappedf(float(s["value"]) * pow(1.12, r.level - 1), 0.001)
-			s["label"] = Combat.relic_special_label(str(s["kind"]), float(s["value"]))
-			r.specials[idx] = s
-			if idx == 0:
-				var words := r.name.split(" of ")[0]
-				r.name = "%s %s" % [words, GameData.RELIC_SPECIAL_SUFFIX.get(str(s["kind"]), "")]
-		r.rerolls += 1
-		save()
-		state_changed.emit()
-		return ""
-	return ""
-
-
-## Whether levelling `r` changes anything. Most Legendary relics are a fixed
-## rule (Gambler's Coin, Phoenix Feather...) with no number to grow, and a
-## level used to take the Essence and do nothing.
-func relic_levels_up(r: Relic) -> bool:
-	return r.unique_id == "" or not r.specials.is_empty() or not r.trigger.is_empty()
-
-
-func upgrade_relic(relic_id: String) -> String:
-	for r in relics:
-		if r.id != relic_id:
-			continue
-		if r.level >= RELIC_MAX_LEVEL:
-			return tr("Already max level")
-		if not relic_levels_up(r):
-			return tr("This Legendary relic's power is fixed: a level wouldn't change it")
-		var cost := relic_upgrade_cost(r)
-		if crystals < cost:
-			return tr("Not enough Essence")
-		crystals -= cost
-		r.dmg = int(round(r.dmg * 1.15))
-		r.hp = int(round(r.hp * 1.15))
-		var next_lvl := r.level + 1
-		for sp in r.specials:
-			sp["value"] = snappedf(float(sp["value"]) * 1.12, 0.001)
-			sp["label"] = Combat.relic_special_label(str(sp["kind"]), float(sp["value"]))
-		if not r.trigger.is_empty():
-			r.trigger["value"] = snappedf(float(r.trigger["value"]) * 1.1, 0.001)
-		# Level 5 awakens a normal relic: one more special.
-		if next_lvl >= RELIC_MAX_LEVEL and r.unique_id == "" and not r.awakened:
-			r.awakened = true
-			r.specials.append(Combat.roll_relic_special(r.type, r.rarity, r.specials.map(func(x): return x["kind"])))
-			pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("Relic awakened"), "text": tr("%s gains a new power") % tr(str(r.name))})
-		r.level = next_lvl
-		save()
-		state_changed.emit()
-		return ""
-	return ""

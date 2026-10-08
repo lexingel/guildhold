@@ -83,13 +83,15 @@ func run() -> void:
 	check(back.attune_level == 1 and back.attune_wins == it.attune_wins and back.reforges == it.reforges, "item upkeep fields saved")
 	var junk := Combat.gen_item("rare")
 	GameState.items.append(junk)
+	var was_seen: Array = GameState.features_seen.duplicate()
+	GameState.features_seen.erase("forge")
 	GameState.salvage_item(junk.id)
-	check(GameState.items.has(junk), "salvage locked without Recycling")
-	GameState.upgrades["res.lab"] = 1
-	if GameState.recycle_unlocked():
-		cr0 = GameState.crystals
-		GameState.salvage_item(junk.id)
-		check(not GameState.items.has(junk) and GameState.crystals > cr0, "salvage gives crystals")
+	check(GameState.items.has(junk), "salvage waits for the Smithy (0.66)")
+	GameState.features_seen.append("forge")
+	cr0 = GameState.crystals
+	GameState.salvage_item(junk.id)
+	check(not GameState.items.has(junk) and GameState.crystals > cr0, "salvage gives Essence")
+	GameState.features_seen = was_seen
 
 	# ---- Rift nodes
 	var h1: Hero = GameState.find_hero(ids[1])

@@ -238,9 +238,7 @@ func _init(party: Array, biome_id: String = "vale", seed_val: int = 0) -> void:
 	typed.assign(party)
 	dodge = clampf(Combat.party_skill_total(typed, "dodge_pct") + Combat.relic_special_total("dodge_pct"), 0.0, 0.2)
 	mend = clampf(Combat.party_skill_total(typed, "mend_pct") + Combat.relic_special_total("mend_pct"), 0.0, 0.4)
-	var ward := 0.0
-	for r in Combat.equipped_relics():
-		ward += r.hp
+	var ward := 0.0   # relic wards are gone (0.66)
 	var n: float = maxf(1.0, party.size())
 	for i in party.size():
 		var h: Hero = party[i]
@@ -250,7 +248,7 @@ func _init(party: Array, biome_id: String = "vale", seed_val: int = 0) -> void:
 		heroes.append({"hero": h, "role": GameData.hero_role(h), "pos": Vector2(-40.0 * i, 30.0 * (i % 2)), "hp": mhp, "max_hp": mhp,
 			"alive": true, "lead": i == 0, "cd": rng.randf() * 0.5, "ab_cd": ABILITY_CD * (0.5 + 0.2 * i), "facing": 1.0,
 			"has_ability": not ab.is_empty(), "ability_name": str(ab.get("name", "")), "style": str(ABILITY_STYLE.get(str(ab.get("effect", "")), "")),
-			"bonus_dmg": float(Combat.relic_dmg_bonus()) / n, "haste": 1.0 + 0.5 * maxf(0.0, Combat.hero_skill_total(h, "speed_pct")),
+			"bonus_dmg": 0.0, "haste": 1.0 + 0.5 * maxf(0.0, Combat.hero_skill_total(h, "speed_pct")),
 			"skills": {}, "ab_rank": 0, "taunt_t": 0.0,
 			"champ": h.id.trim_prefix("champ:") if h.is_champion else "", "mods": [], "fused": -1,
 			"ab_icon": str(GameData.ABILITY_EFFECT_ICON.get(str(ab.get("effect", "")), "res://assets/skills/sword_a.png"))})

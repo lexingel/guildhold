@@ -99,6 +99,7 @@ func reset() -> void:
 	halls_restored = []
 	hall_works = []
 	wing_offer = []
+	path_relic_chest = []
 	tide_count = 0
 	tides_held = 0
 	tidewalls = 0
@@ -136,6 +137,31 @@ func reset() -> void:
 	bonds = {}
 
 
+## Relics are rules only (0.66): a rolled relic becomes Essence (twice its
+## salvage), the Essence spent on relic levels comes back, and a Path relic
+## goes to the strongest hero of its Path (or the chest). Heroes load first.
+func _convert_relics_066() -> void:
+	var essence := 0
+	var rolled := 0
+	var keep: Array[Relic] = []
+	for r in relics:
+		for l in range(1, r.level):   # what its levels cost (15 x rarity mult x level, the old price)
+			essence += int(round(15.0 * float(GameData.find_rarity(r.rarity)["mult"]) * l))
+		if r.unique_id == "":
+			essence += int(round(GameData.SALVAGE_CRYSTALS * float(GameData.find_rarity(r.rarity)["mult"]) * GameData.OLD_RELIC_ESSENCE_MULT))
+			rolled += 1
+		elif r.unique_id.begins_with("p_"):
+			give_path_relic(r.unique_id)
+		else:
+			r.level = 1
+			keep.append(r)
+	relics.assign(keep)
+	crystals += essence
+	if rolled > 0 or essence > 0:
+		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("Relics have changed"),
+			"text": tr("Relics bend rules now; stats live on gear. %d rolled relics and every relic level became %d Essence, and Path relics went to heroes of their Path.") % [rolled, essence]})
+
+
 ## Brings a save dict up to SAVE_VERSION, one step at a time. Version 1 is
 ## every save written before versioning existed; its missing fields are all
 ## handled by per-model defaults, so 1 -> 2 only stamps the version.
@@ -162,7 +188,11 @@ func _migrate_save(data: Dictionary) -> Dictionary:
 		# The reveal schedule (0.65): what was open before stays open (after load).
 		data["_reveal_migrate"] = true
 		v = 5
-	# if v < 6: ...next migration goes here, then v = 6
+	if v < 6:
+		# Gear (0.66): rolled relics retired, relic levels gone, Path relics on heroes (after load).
+		data["_relics66"] = true
+		v = 6
+	# if v < 7: ...next migration goes here, then v = 7
 	data["save_version"] = max(v, SAVE_VERSION)
 	return data
 
@@ -220,12 +250,10 @@ func load_save() -> bool:
 		# 4 offers, so a genuinely empty pool only ever means "missing data,"
 		# never "no offers today."
 		refresh_recruit_pool()
+	path_relic_chest = (data.get("path_relic_chest", []) as Array).duplicate()   # before the relics: the 0.66 conversion adds to it
 	relics.assign(data.get("relics", []).map(func(d): return Relic.from_dict(d)))
-	# Levels bought on a fixed Legendary relic (they did nothing): the Essence comes back.
-	for r in relics:
-		while r.level > 1 and not relic_levels_up(r):
-			r.level -= 1
-			crystals += relic_upgrade_cost(r)
+	if data.has("_relics66"):
+		_convert_relics_066()
 	items.assign(data.get("items", []).map(func(d): return Item.from_dict(d)))
 	var tn = data.get("tonics", {})
 	tonics = tn if tn is Dictionary else ({"healing": int(tn)} if int(tn) > 0 else {})
@@ -599,8 +627,6 @@ func start_tower(hero_ids: Array[String]) -> void:
 	ids.assign(hero_ids.slice(0, int(info["party_cap"])))
 	last_party = ids.duplicate()
 	var shield := 0
-	for r in Combat.equipped_relics():
-		shield += r.hp
 	run = {
 		"diff_id": "tower",
 		"layers": [{"options": [info["kind"]]}], "pos": 0, "chosen": {},

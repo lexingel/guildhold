@@ -202,10 +202,11 @@ func _complete_act(act_num: int) -> void:
 	var reward: Dictionary = act["reward"]
 	var first_card := pending_stories.size()
 	crystals += int(reward.get("crystals", 0))
-	var relic := Combat.gen_unique_relic()
-	relics.append(relic)
-	campaign_act = act_num + 1
+	campaign_act = act_num + 1   # first: Act I's finale is what reveals relics
 	act_since = day
+	var lt := unique_or_epic()   # 0.66: one the guild doesn't hold yet
+	_grant_loot(lt)
+	var relic: Variant = lt["obj"]
 	var subtitle := tr("Act %s complete — +%d Essence, %s") % [tr(str(_roman(act_num))), int(reward.get("crystals", 0)), tr(str(relic.name))]
 	if str(act["opens"]) != "":
 		subtitle += tr(" · %s unlocked") % tr(str(act["opens"]))
@@ -283,10 +284,8 @@ func choose_vaelith(choice: String) -> void:
 	var card: Dictionary = pending_stories.pop_front()
 	if choice == "spare":
 		branches["vaelith"] = "spared"
-		for i in relics.size():
-			if relics[i].id == str(card.get("relic", "")):
-				relics.remove_at(i)
-				break
+		relics.assign(relics.filter(func(r): return r.id != str(card.get("relic", ""))))   # the finale's prize (a relic, or the item in its place)
+		items.assign(items.filter(func(it): return it.id != str(card.get("relic", ""))))
 		crystals = maxi(0, crystals - branch_cost(GameData.VAELITH_SPARE_ESSENCE))
 		unlock_champion("vaelith")
 		if rival_name == "The Iron Chorus":
@@ -1356,12 +1355,8 @@ func apply_legacy_gifts(ids: Array) -> Array:
 				coins += 300
 			"hero":
 				heroes.append(Combat.gen_recruit("D"))
-			"relic":
-				var r := Combat.gen_relic("rare")
-				r.id = "rl" + str(next_id)
-				next_id += 1
-				r.equipped = true
-				relics.append(r)
+			"relic":   # a unique relic (0.66)
+				_grant_loot(unique_or_epic())
 			"barracks":
 				upgrades["ops.barracks"] = maxi(1, int(upgrades.get("ops.barracks", 0)))
 			"contacts":
@@ -1408,11 +1403,11 @@ func _veteran_start() -> void:
 		it.id = "i%d" % next_id
 		next_id += 1
 		items.append(it)
-	for i in 2:
-		var rl := Combat.gen_relic("rare")
-		rl.id = "rl" + str(next_id)
+	for i in 2:   # 0.66: gear, not rolled relics (Act I's finale below brings the first relic)
+		var it2 := Combat.gen_item("rare")
+		it2.id = "i%d" % next_id
 		next_id += 1
-		relics.append(rl)
+		items.append(it2)
 	for h in heroes:
 		equip_best(h.id)
 	runs_started = maxi(runs_started, 4)
@@ -1615,13 +1610,6 @@ func power_advice() -> Array:
 	# Mastery rank; Gold into power: the cheapest room that strengthens the
 	# party (the Drill Yard is above). Not slots or income: the sim's guilds
 	# took the cheapest of any room, swelled to 16 heroes and hoarded Gold.
-	var relic: Relic = null
-	for r in relics:
-		if r.equipped and r.level < RELIC_MAX_LEVEL and relic_levels_up(r) and relic_upgrade_cost(r) <= crystals and (relic == null or relic_upgrade_cost(r) < relic_upgrade_cost(relic)):
-			relic = r
-	if relic:
-		out.append({"kind": "relic", "id": relic.id,
-			"text": tr("Upgrade %s on the Relic Altar to level %d: %d Essence.") % [tr(str(relic.name)), relic.level + 1, relic_upgrade_cost(relic)]})
 	var mh := mastery_pick()
 	if mh:
 		out.append({"kind": "mastery", "id": mh.id,
@@ -1674,8 +1662,6 @@ func follow_advice(a: Dictionary) -> String:
 			return start_subclass_training(str(a["id"]), str(a["choice"]))
 		"hall_work":
 			return build_hall_work(str(a["id"]))
-		"relic":
-			return upgrade_relic(str(a["id"]))
 		"management":
 			return upgrade_node(str(a["id"]))
 		"forge":
