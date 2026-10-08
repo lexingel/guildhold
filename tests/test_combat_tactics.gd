@@ -111,6 +111,18 @@ func run() -> void:
 		Combat._resolve_hero_action(st, cle)
 		check(int(st["momentum"]) <= 4 - GameData.ABILITY_MOMENTUM_COST + 4, "the Ability spends %d Momentum" % GameData.ABILITY_MOMENTUM_COST)
 
+	# A raising Ability raises once a fight, then only heals (0.62.1).
+	var cle_pool := cle.pool_id
+	cle.pool_id = "rift-medic"
+	for i in 2:
+		ran.hp = 0
+		st["momentum"] = 20
+		st["pending_actions"][cle.id] = {"action": "ability", "target": 0}
+		Combat._resolve_hero_action(st, cle)
+		check((ran.hp > 0) == (i == 0), "Faster Than the Wounds raises the fallen" if i == 0 else "…but only once a fight")
+	ran.hp = Combat.max_hp(ran)
+	cle.pool_id = cle_pool
+
 	# Defending against a hit builds Momentum.
 	st = _state(party)
 	m = st["monsters"][0]

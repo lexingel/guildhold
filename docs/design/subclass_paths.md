@@ -88,7 +88,7 @@ In the tables, stage I/II/III = stage 1/2/3 (trained at D/B/S).
 **Marksman** — waits for the clean shot.
 - **Rule, Steady Aim:** not attacked last round → the next shot does +35%.
 - **Technique, Called Shot:** pick a foe; the next Steady shot at it also cancels its wind-up.
-- **Signature, Overwatch:** the first time she uses Called Shot, she holds her turn and fires at the first foe to act next round, with double the Steady bonus.
+- **Signature, Held Breath:** the first time she uses Called Shot, she holds her turn and fires at the first foe to act next round, with double the Steady bonus.
 - **Legend (Rift-Eclipsed Warden):** Steady Aim holds even when she's attacked.
 
 | Stage | Subclass | Twist |
@@ -98,7 +98,7 @@ In the tables, stage I/II/III = stage 1/2/3 (trained at D/B/S).
 | I | Longshot | Needs two quiet rounds, but gives +70%. |
 | II | Blade-Dancer | Called Shot also hits every foe under 40% HP. |
 | II | Gale Marksman | Can use Called Shot from the front row. |
-| III | Rift-Piercer | Overwatch shots ignore wards. |
+| III | Rift-Piercer | Held Breath shots ignore wards. |
 
 **Trapper** — controls the ground.
 - **Rule, Snares:** each round the first foe to act steps in a snare: light damage, and it acts last next round.

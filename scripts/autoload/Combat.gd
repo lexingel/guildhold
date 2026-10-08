@@ -1097,7 +1097,9 @@ func _resolve_hero_action(state: Dictionary, h: Hero) -> void:
 				log.append(tr("%s will not fall this round.") % tr(str(h.name)))
 			"revive":
 				var fallen: Array = party.filter(func(x): return x.hp <= 0)
-				if not fallen.is_empty():
+				var raised: Dictionary = state.get_or_add("_raised", {})   # 0.62.1: one raise a fight, then it heals
+				if not fallen.is_empty() and not raised.has(h.id):
+					raised[h.id] = true
 					var rv: Hero = fallen[0]
 					rv.hp = maxi(1, int(round(max_hp(rv) * val)))
 					log.append(tr("%s is raised back to their feet!") % tr(str(rv.name)))
@@ -1727,7 +1729,7 @@ func _end_round_effects(state: Dictionary) -> void:
 		for h in living:
 			if h.hp > 0 and h.hp < max_hp(h):
 				var heal: int = max(1, int(round(max_hp(h) * float(state["mend"]))))
-				_pp_heal(state, h, heal)
+				_pp_heal(state, h, heal, false)   # the party mend: no Overflow ward
 				mended = true
 		if mended:
 			log.append(tr("The party mends its wounds."))
@@ -2089,7 +2091,7 @@ func _pp_round_start(state: Dictionary) -> void:
 		if int(_pp(state, g).get("lastwall", 0)) > 0:
 			state["_taunt"] = g.id
 			state["_taunt_cut"] = 0.0
-	# Marksman Overwatch: the held shot fires at the first foe to act.
+	# Marksman Held Breath: the held shot fires at the first foe to act.
 	for mk in _on_path(state, "marksman", 3):
 		var p2 := _pp(state, mk)
 		if p2.get("overwatch", false):
@@ -2097,7 +2099,7 @@ func _pp_round_start(state: Dictionary) -> void:
 			for e in state["turn_order"]:
 				if e["type"] == "monster" and float(monsters[int(e["id"])]["hp"]) > 0:
 					p2["ow_shot"] = true
-					_pp_log(state, tr("%s fires from overwatch!") % tr(str(mk.name)))
+					_pp_log(state, tr("%s lets the held shot fly!") % tr(str(mk.name)))
 					_hero_hit(state, mk, int(e["id"]), 1.0, _tw(mk, "rift-piercer"))
 					p2["ow_shot"] = false
 					break
@@ -2432,7 +2434,7 @@ func _pp_technique(state: Dictionary, h: Hero, pid: String, target_idx: int) -> 
 			if _st(h) >= 3 and not p.get("ow_used", false):
 				p["ow_used"] = true
 				p["overwatch"] = true
-				_pp_log(state, tr("%s settles into overwatch.") % tr(str(h.name)))
+				_pp_log(state, tr("%s holds their breath.") % tr(str(h.name)))
 		"trapper":
 			state["_trap"] = dmg_of(h) / float(state["raw_sum"]) * float(state["team_dmg_base"]) * 0.6
 			state["_trap_by"] = h.id
@@ -2745,16 +2747,16 @@ func _pp_stun_immune(state: Dictionary, h: Hero) -> bool:
 
 
 # ---------------- Healing ----------------
-## Heals `h` by `amount`: Mercy's Overflow turns the excess into a ward,
+## Heals `h` by `amount`: Mercy's Overflow turns the excess into a ward (not the party mend's),
 ## Red Mist refuses it. Returns the HP restored.
-func _pp_heal(state: Dictionary, h: Hero, amount: int) -> int:
+func _pp_heal(state: Dictionary, h: Hero, amount: int, overflow := true) -> int:
 	if amount <= 0 or h.hp <= 0 or int(_pp(state, h).get("mist", 0)) > 0:
 		return 0
 	var room := max_hp(h) - h.hp
 	var healed := mini(room, amount)
 	h.hp += healed
 	var over := amount - healed
-	if over > 0:
+	if over > 0 and overflow:
 		for c in _on_path(state, "mercy"):
 			var ward := float(over) * 0.5 * (1.5 if _tw(c, "peddler") else 1.0)
 			var sh: Dictionary = state["hero_shields"]
