@@ -421,6 +421,10 @@ func _guild_status_lines() -> Array:
 		out.append([tr("A Rank %s rift breaks in %d day%s") % [tr(GameState.breach_rank_id()), dl, tr(str(_pl(dl)))], Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
 	if not GameState.damaged.is_empty():
 		out.append([tr("%d building%s damaged: repair in Manage") % [GameState.damaged.size(), tr(str(_pl(GameState.damaged.size())))], Palette.HAZARD, go_term.call("management")])
+	if not GameState.camp_event.is_empty():
+		out.append([GameState.camp_event_title() + tr(" — answer today"), Palette.EMBER_BRIGHT, go_term.call("ledger")])
+	if not GameState.camp_omen.is_empty():
+		out.append([tr("Tomorrow: %s") % tr(str(GameData.CAMP_EVENTS[str(GameState.camp_omen["id"])]["title"])), Palette.HAZARD, go_term.call("ledger")])
 	if not GameState.heroes.is_empty():
 		if not GameState.hero_request.is_empty():
 			out.append([GameState.request_title() + tr(" — answer before payday"), Palette.EMBER_BRIGHT, go_term.call("ledger")])
@@ -508,10 +512,10 @@ func _guild_goals() -> Array:
 
 func _render_records(v: VBoxContainer) -> void:
 	v.add_child(_label("Records", 20))
-	var done := GameData.MILESTONES.filter(func(m): return GameState.milestones_claimed.has(str(m["id"]))).size()
+	var done := GameData.milestones().filter(func(m): return GameState.milestones_claimed.has(str(m["id"]))).size()
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override("separation", 6)
-	for t in [["achievements", tr("Achievements %d/%d") % [done, GameData.MILESTONES.size()]], ["stats", "Statistics"], ["history", "Run history"]]:
+	for t in [["achievements", tr("Achievements %d/%d") % [done, GameData.milestones().size()]], ["stats", "Statistics"], ["history", "Run history"]]:
 		var b := _button(str(t[1]), func(id=t[0]):
 			records_tab = id
 			render()
@@ -545,7 +549,7 @@ func _render_records(v: VBoxContainer) -> void:
 
 
 func _render_achievements(v: VBoxContainer) -> void:
-	for m in GameData.MILESTONES:
+	for m in GameData.milestones():
 		var got := GameState.milestones_claimed.has(str(m["id"]))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
@@ -595,7 +599,6 @@ func _render_stats(v: VBoxContainer) -> void:
 		["Feats done", str(GameState.feats_done)],
 		["Campaign", "complete" if GameState.campaign_done() else tr("Act %s") % tr(str(GameState._roman(GameState.campaign_act)))],
 		["Tower of Trials, best floor", str(GameState.tower_best)],
-		["Endless Rift, best time", "%d:%02d" % [GameState.best_endless_time / 60, GameState.best_endless_time % 60]],
 		["Daily twists sealed", tr("%d (streak %d)") % [GameState.daily_clears, GameState.daily_streak]],
 		["Items and relics crafted", str(GameState.crafts_performed)],
 		["Renown", str(GameState.reputation)],
@@ -603,6 +606,8 @@ func _render_stats(v: VBoxContainer) -> void:
 		["Strongest hero", best_hero if best_hero != "" else "—"],
 		["Most-defeated foe", "%s (%d)" % [tr(str(top_foe)), top_n] if top_foe != "" else "—"],
 	]
+	if GameData.ENDLESS_ENABLED:
+		rows.append(["Endless Rift, best time", "%d:%02d" % [GameState.best_endless_time / 60, GameState.best_endless_time % 60]])
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 24)
@@ -698,6 +703,26 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 		opts = [[ro[0], tr("Not enough Gold.") if gear_short else ""], [ro[1], ""]]
 		foot = "No answer by payday counts as a no."
 		answer = GameState.answer_request
+	elif kind == "event":   # a camp event (0.64): options by index, not yes/no
+		var eid := str(GameState.camp_event["id"])
+		var cd: Dictionary = GameState.camp_event.get("data", {})
+		var art := ""
+		if eid == "wanderer":
+			var rec := Hero.from_dict(cd["hero"])
+			faces.add_child(_hero_icon(rec, 64))
+		elif eid == "merchant":
+			for w in cd["wares"]:
+				if not w["sold"]:
+					faces.add_child(_item_tile(Item.from_dict(w["item"]), 48))
+		else:
+			art = {"opportunity": "res://assets/skills/star.png", "dilemma": "res://assets/skills/eye_gem.png"}.get(str(GameData.CAMP_EVENTS[eid]["kind"]), "res://assets/skills/gem_red.png")
+			faces.add_child(_icon(art, 48))
+		title = GameState.camp_event_title()
+		body = GameState.camp_event_text()
+		opts = GameState.camp_event_options()
+		var lastopt: String = str(opts[opts.size() - 1][0]) if not opts.is_empty() else ""
+		foot = tr("No answer by tomorrow: %s.") % lastopt.to_lower() if lastopt != "" else ""
+		answer = GameState.answer_camp_event
 	else:
 		var ev: Dictionary = GameState.rival_event
 		var lead := GameState.rival_leader()
@@ -718,7 +743,7 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 	var col := _vbox(6)
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var t := _wrap_label(title, 16)
-	t.add_theme_color_override("font_color", Palette.EMBER_BRIGHT if kind == "request" else Palette.RANK_S)
+	t.add_theme_color_override("font_color", Palette.EMBER_BRIGHT if kind in ["request", "event"] else Palette.RANK_S)
 	col.add_child(t)
 	col.add_child(_wrap_label(body, 13))
 	var letter := GameState.rival_letter() if kind == "rival" else ""
@@ -735,7 +760,7 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 	for k in opts.size():
 		var yes := k == 0
 		var b := _button(str(opts[k][0]), func():
-			var err: String = answer.call(yes)
+			var err: String = answer.call(k) if kind == "event" else answer.call(yes)
 			if err != "":
 				_flavor_toast = err
 			render())
@@ -747,13 +772,15 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 		btns.add_child(_button("Decide later", func():
 			if kind == "request":
 				GameState.hero_request["seen"] = true
+			elif kind == "event":
+				GameState.camp_event["seen"] = true
 			else:
 				GameState.rival_event["seen"] = true
 			GameState.save()
 			render()))
 	col.add_child(btns)
 	if foot != "":
-		col.add_child(_label(foot + (tr(" Answer in Guild > Ledger.") if popup else ""), 11, true))
+		col.add_child(_wrap_label(foot + (tr(" Answer in Guild > Ledger.") if popup else ""), 11, true))
 	row.add_child(col)
 	p.add_child(row)
 	return p
@@ -762,6 +789,8 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 ## The matter the camp should pop up now: "request", "rival" or "" (each
 ## once, until it's answered or put off with Decide later).
 func _unseen_matter() -> String:
+	if not GameState.camp_event.is_empty() and not GameState.camp_event.get("seen", false):
+		return "event"
 	if not GameState.hero_request.is_empty() and not GameState.hero_request.get("seen", false):
 		return "request"
 	if not GameState.rival_event.is_empty() and not GameState.rival_event.get("seen", false):
@@ -786,6 +815,10 @@ func _week_board() -> Control:
 				events.append([tr("Request closes"), Palette.EMBER_BRIGHT, GameState.request_title()])
 			if not GameState.rival_event.is_empty():
 				events.append([tr("Dare due") if GameState.rival_event.get("accepted", false) else tr("Rival waits"), Palette.RANK_S, GameState.rival_event_title()])
+		if d == today and not GameState.camp_event.is_empty():
+			events.append([GameState.camp_event_title(), Palette.EMBER_BRIGHT, GameState.camp_event_text()])
+		if not GameState.camp_omen.is_empty() and int(GameState.camp_omen["day"]) == d:
+			events.append([tr("Foretold: %s") % tr(str(GameData.CAMP_EVENTS[str(GameState.camp_omen["id"])]["title"])), Palette.HAZARD, tr(str(GameData.CAMP_EVENTS[str(GameState.camp_omen["id"])]["omen"]))])
 		for q in GameState.active_quests():
 			if int(q.get("due", -1)) == d:
 				events.append([tr("Contract due"), Palette.HAZARD, GameState.quest_desc(q)])
@@ -830,6 +863,8 @@ func _render_ledger(v: VBoxContainer) -> void:
 	v.add_child(_label("Guild Ledger", 20))
 	_coach(v, "ledger", "Paying the guild", tr("A day passes with every rift run or rest; wages are due every %d days. An unpaid hero loses %d morale, and a hero unpaid twice in a row, or at rock-bottom morale on payday, walks out. Every Guild Management level also costs %d Gold a week in upkeep.") % [GameData.PAYDAY_DAYS, -GameData.MORALE_UNPAID, GameData.UPKEEP_PER_LEVEL])
 	v.add_child(_week_board())
+	if not GameState.camp_event.is_empty():
+		v.add_child(_matter_card("event"))
 	if not GameState.hero_request.is_empty():
 		v.add_child(_matter_card("request"))
 	if not GameState.rival_event.is_empty():
@@ -1063,17 +1098,17 @@ func _rival_card() -> PanelContainer:
 	rv.add_child(_hsep())
 	rv.add_child(_label("Guild Standings", 14))
 	var table := GridContainer.new()
-	table.columns = 5
+	table.columns = 5 if GameData.ENDLESS_ENABLED else 4
 	table.add_theme_constant_override("h_separation", 18)
 	table.add_theme_constant_override("v_separation", 4)
-	for head in ["", "Guild", "Renown", "Tower floor", "Endless best"]:
+	for head in (["", "Guild", "Renown", "Tower floor", "Endless best"] if GameData.ENDLESS_ENABLED else ["", "Guild", "Renown", "Tower floor"]):
 		table.add_child(_label(head, 12, true))
 	var rows: Array = GameState.guild_standings()
 	for k in rows.size():
 		var r: Dictionary = rows[k]
 		var col: Color = Palette.EMBER_BRIGHT if r["you"] else Palette.TEXT
 		for cell in ["#%d" % (k + 1), tr(str(r["name"])) + (tr(" (you)") if r["you"] else (tr(" — rival") if r["name"] == GameState.rival_name else "")),
-				str(r["renown"]), str(r["tower"]), "%d:%02d" % [int(r["endless"]) / 60, int(r["endless"]) % 60]]:
+				str(r["renown"]), str(r["tower"]), "%d:%02d" % [int(r["endless"]) / 60, int(r["endless"]) % 60]].slice(0, 5 if GameData.ENDLESS_ENABLED else 4):
 			var l := _label(cell, 13)
 			l.add_theme_color_override("font_color", col)
 			table.add_child(l)
@@ -1220,7 +1255,7 @@ func _champion_card(id: String) -> PanelContainer:
 		else:
 			for e in GameState.lost_champions():
 				if str(e[0]) == id:
-					hint = tr("Lost in the Endless Rift: survive past %d:%02d to find their light.") % [int(e[1]) / 60, int(e[1]) % 60]
+					hint = tr("Lost in the Endless Rift: survive past %d:%02d to find their light.") % [int(e[1]) / 60, int(e[1]) % 60] if GameData.ENDLESS_ENABLED else tr("Lost in the Endless Rift: their light waits in a pillar of the Descent, or of a Rank B+ rift.")
 		col.add_child(_wrap_label(hint, 12, true))
 		row.add_child(col)
 		card.add_child(row)
@@ -1260,7 +1295,7 @@ func _champion_card(id: String) -> PanelContainer:
 				_payoff(tr("%s reaches level %d") % [GameData.champion_full_name(i), GameState.champion_level(i)], tr("Boon and Call grow stronger"), Palette.CRYSTALS, "level_up")
 		)
 		up.disabled = GameState.crystals < cost
-		up.tooltip_text = tr("Each level: Boon and Call +%d%%, and +%d%% HP and damage in the Endless Rift. At level %d the Call works twice a rift.") % [int(GameData.CHAMPION_LEVEL_POWER * 100), int(GameData.CHAMPION_LEVEL_STATS * 100), GameData.CHAMPION_EXTRA_CALL_LEVEL]
+		up.tooltip_text = (tr("Each level: Boon and Call +%d%%, and +%d%% HP and damage in the Endless Rift. At level %d the Call works twice a rift.") % [int(GameData.CHAMPION_LEVEL_POWER * 100), int(GameData.CHAMPION_LEVEL_STATS * 100), GameData.CHAMPION_EXTRA_CALL_LEVEL] if GameData.ENDLESS_ENABLED else tr("Each level: Boon and Call +%d%%. At level %d the Call works twice a rift.") % [int(GameData.CHAMPION_LEVEL_POWER * 100), GameData.CHAMPION_EXTRA_CALL_LEVEL])
 		btns.add_child(up)
 	col.add_child(btns)
 	row.add_child(col)
@@ -2173,7 +2208,7 @@ func _render_compendium_relics(v: VBoxContainer) -> void:
 		legends.append([u, "An act's finale, or a very rare drop"])
 	for f in GameData.TOWER_RELICS:
 		legends.append([GameData.TOWER_RELICS[f], tr("Tower of Trials, floor %d guardian") % int(f)])
-	for k in GameData.ENDLESS_RELICS:
+	for k in (GameData.ENDLESS_RELICS if GameData.ENDLESS_ENABLED else {}):
 		legends.append([GameData.ENDLESS_RELICS[k], "An Endless Rift milestone"])
 	var found_n: int = legends.filter(func(e): return GameState.relics_found.has(str(e[0]["id"]))).size()
 	v.add_child(_hsep())
@@ -2256,11 +2291,11 @@ func _render_compendium_crafting(v: VBoxContainer) -> void:
 
 func _render_compendium_systems(v: VBoxContainer) -> void:
 	var entries := [
-		["Guild Management", "Spend Essence on 9 upgrades across 4 branches, and Gold on the Defenses branch (Armory, Engineering, Palisade, Watchtower) for Riftbreaks. Every level adds its effect; some levels unlock a perk (a first-strike bonus, a boss Essence cache, extra relic slots, tier 3 towers…). Guild Tier tracks total levels. A building damaged in a Riftbreak works a level lower until you repair it with Gold."],
+		["Guild Management", "Spend Essence on 9 upgrades across 4 branches, and Gold on Wardcraft (Armory, Quartermaster, Palisade, Watchtower), which softens breaches. Every level adds its effect; some levels unlock a perk (a first-strike bonus, a boss Essence cache, extra relic slots…). Guild Tier tracks total levels. A building damaged by a breach works a level lower until you repair it with Gold."],
 		["Daily twist", "Once you have sealed a rift, the Rift Ladder offers a twist each day: a rule and a starting boon that come from the date, so every guild faces the same one. Tick it and your next ladder rift (any rank) carries it; one try a day. Sealing it pays bonus Essence and grows your streak. Records (in the Guild Hall) track achievements, lifetime statistics and your last 30 runs; the Memorial remembers heroes lost for good."],
-		["Endless Rift", "A real-time survival run in the region you pick, and only champions go in (up to 4). You steer the first (WASD, arrows, drag or stick); the rest follow and fight on their own, and each fires their signature move on a timer (the ring over their head fills as it recharges). Your equipped relics come along. Every five minutes the rift runs the same cycle: the horde, a swarm, an elite pack (its leader carries a chest), archers and casters, then a lull with a chest nearby, and a warden at the end of it. At 20:00 the Rift Warden comes: beat it to seal the rift. The rift's strength (shown before you enter) starts gentle and grows with every champion you free and every act you pass. A run pays Essence and a little Gold, and costs the guild a day."],
-		["Endless picks", "Collect shards to level up and pick 1 of 3; one card is always a signature pick while any are left. Party upgrades (damage, speed, health…), a champion's role skill, a rank in their signature (up to 3: sooner and harder), or one of their two signature mods once it has a rank (Aftershock, Kindled, Frostbite, Expose, Stagger, Leech, Shrapnel, Radiance, Bulwark, Fervor, Renewal, Smokescreen). From level 10, two champions whose signatures are rank 2 can fuse: they fire together, 25% harder, and carry each other's mods. Max an upgrade and the matching role's attack can evolve (Whirlwind, Thousand Cuts, Arrow Storm, Starfall, Sanctum). Chests give one of three rift relics for the run."],
-		["Endless ground", "The Vale has pillars that block foes, the Marches have pools that slow everyone, the Wastes have lava that burns foes and your lead. Braziers break when you walk into or hit them, dropping a heal, a magnet for shards or a bomb. Elites and wardens slam: step out of the red circle before it fills. Your first 5, 10 and 15 minutes and your first sealed rift each pay once, with two Endless relics and guild titles."],
+		[] if not GameData.ENDLESS_ENABLED else ["Endless Rift", "A real-time survival run in the region you pick, and only champions go in (up to 4). You steer the first (WASD, arrows, drag or stick); the rest follow and fight on their own, and each fires their signature move on a timer (the ring over their head fills as it recharges). Your equipped relics come along. Every five minutes the rift runs the same cycle: the horde, a swarm, an elite pack (its leader carries a chest), archers and casters, then a lull with a chest nearby, and a warden at the end of it. At 20:00 the Rift Warden comes: beat it to seal the rift. The rift's strength (shown before you enter) starts gentle and grows with every champion you free and every act you pass. A run pays Essence and a little Gold, and costs the guild a day."],
+		[] if not GameData.ENDLESS_ENABLED else ["Endless picks", "Collect shards to level up and pick 1 of 3; one card is always a signature pick while any are left. Party upgrades (damage, speed, health…), a champion's role skill, a rank in their signature (up to 3: sooner and harder), or one of their two signature mods once it has a rank (Aftershock, Kindled, Frostbite, Expose, Stagger, Leech, Shrapnel, Radiance, Bulwark, Fervor, Renewal, Smokescreen). From level 10, two champions whose signatures are rank 2 can fuse: they fire together, 25% harder, and carry each other's mods. Max an upgrade and the matching role's attack can evolve (Whirlwind, Thousand Cuts, Arrow Storm, Starfall, Sanctum). Chests give one of three rift relics for the run."],
+		[] if not GameData.ENDLESS_ENABLED else ["Endless ground", "The Vale has pillars that block foes, the Marches have pools that slow everyone, the Wastes have lava that burns foes and your lead. Braziers break when you walk into or hit them, dropping a heal, a magnet for shards or a bomb. Elites and wardens slam: step out of the red circle before it fills. Your first 5, 10 and 15 minutes and your first sealed rift each pay once, with two Endless relics and guild titles."],
 		["Hero voices", "A hero's born quirk sets their personality (Bold, Quick, Stoic, Nervous, Devout or Scholarly), shown on their sheet. They speak up in fights when they land a big kill, hang on at low health or see an ally fall, and one of them sums up every win."],
 		["Boss phases", "Every boss changes once it drops to half health: Call the Horde (two foes join), Fury (hits 20% harder and winds up more often) or Last Bastion (a ward worth 12% of its health). Its plate shows which, and the warning bar calls it out as it gets close, so save burst and Defend for the turn."],
 		["Elite affixes", "Elites roll an affix: Vampiric, Thorned, Shielded, Venomous, Juggernaut, Blazing, Hasted (acts twice) or Commander (brings two escorts). Rank B+ rifts give them two. Hover the badges on their plate to read them."],
@@ -2281,15 +2316,17 @@ func _render_compendium_systems(v: VBoxContainer) -> void:
 		["Campaign", "Three acts, each ending in a finale rift against a named foe. Meet an act\'s objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a Legendary relic. Act I opens Greater Rifts, Act II the Endless Rift."],
 		["Relics", "Relics sit on the Relic Altar (Inventory) and empower the whole party. Every relic has a special; rare and epic ones also have a trigger that fires in battle (on a kill, every third round, when an ally falls...). Level a relic to 5 to awaken a new effect, or reroll any effect for Essence. Legendary relics have unique powers."],
 		["Quirks", "Everything personal about a hero beyond class, skills and gear: at most one born quirk (it sets their voice), up to 2 scars from being knocked out (a wound with a small upside), and quirks earned by what they've done. Bad born quirks and scars can be treated for Gold at the Arcane Lab."],
-		["Riftbreaks", "From Act II a rift swells every so often: a rank, a place and a countdown in days (Rift Hall and the camp's status board). Seal a rift of that rank or higher before it runs out to close it, for a little Essence. Otherwise it breaks, and every rift run waits until your guild defends. Ranks below S break out in a region; from S up they break at your camp. Holding pays Gold and Essence. Losing costs a share of your Essence and of the Gold beyond the coming payday's wages, damages a building (two at the camp) and wounds the posted heroes who fell."],
-		["Defending", "Foes walk the roads toward the goal. Build towers on the round pads with supplies (you start with some and earn more for every kill); click a tower to upgrade or sell it. Ballistas shoot far, Fire Braziers splash and burn, Frost Totems slow, Ward Stones shield nearby heroes, Chapels mend them; research in the Defenses branch opens the last three and tier 3. Idle heroes stand at posts: warriors and rogues hold foes in place, rangers and mages shoot. Steer one champion by clicking where to go. Every foe that gets through costs integrity (an elite 3, a warden 10); at 0 the defense is lost. Call a wave early for bonus supplies."],
+		["Riftbreaks", "From Act II a rift swells every so often: a rank, a place and a countdown in days (Rift Hall and the camp's status board). Seal a rift of that rank or higher before it runs out to close it, for a little Essence. Otherwise it breaks, and every rift run waits until your guild holds it: a breach rift of back-to-back fights (a fight, an elite and the breach's warden; the Inverted City's gate adds an elite) with no camp, shop or campfire between them. Ranks below S break out in a region; from S up they break at your camp. Holding pays Gold and Essence. Falling or turning back costs a share of your Essence and of the Gold beyond the coming payday's wages, and damages a building (two at the camp). Wardcraft in Guild Management softens all of it."],
+		[] if not GameData.DEFENSE_TD_ENABLED else ["Defending", "Foes walk the roads toward the goal. Build towers on the round pads with supplies (you start with some and earn more for every kill); click a tower to upgrade or sell it. Ballistas shoot far, Fire Braziers splash and burn, Frost Totems slow, Ward Stones shield nearby heroes, Chapels mend them; research in the Defenses branch opens the last three and tier 3. Idle heroes stand at posts: warriors and rogues hold foes in place, rangers and mages shoot. Steer one champion by clicking where to go. Every foe that gets through costs integrity (an elite 3, a warden 10); at 0 the defense is lost. Call a wave early for bonus supplies."],
 		["Champions", "Each new guild meets twelve champions, drawn from a pool of twenty-four: three are freed at the end of Acts I, II and III, and nine are lost in the Endless Rift, where a pillar of light marks each one (stand in it to free them). A champion never joins the roster. In rift runs one oversees the party: their Boon lifts everyone, and any hero can spend a turn on their Call (once a rift, twice from level 3). In the Endless Rift your champions are the party, each with their Call as a signature move. Essence levels them up (to 5)."],
 		["Attributes", "Might (damage, HP), Agility (speed, dodge, first strike) and Focus (ability power, mend). Heroes gain 3 points per level to spend on the Roster's Hero tab; gear adds more, and better gear needs a minimum in its attribute to equip. Train up to 8 extra points with Gold, or reset a hero's points for 5 Essence per level (gear they no longer qualify for comes off)."],
 		["Quests & Milestones", "The quest board posts 6 quests (hunts, boss bounties, rift seals, trials); take up to 3 at a time. Unaccepted postings are replaced every 3 days (a day passes with each rift run or rest). Milestones are a static checklist, auto-granted the moment they're met. Renown occasionally arms a guaranteed Epic relic at the next Shop. A rare escort NPC can also tag along on a fight — surviving pays a small bonus."],
 		["Wages, morale and the rival", "Every 7 days (a day = one rift run or rest) heroes draw wages by rank and level, and every Guild Management level costs upkeep; see Guild > Ledger. Unpaid upkeep costs Renown. The Training Yard trains only a few attribute points a week (more with the Drill Yard), and a feast seats a limited number of heroes, lowest morale first (more with the Trade Network). The unpaid lose morale, and a hero unpaid twice in a row, or at rock-bottom morale on payday, walks out. Morale (0-100) rises with sealed rifts and feasts and falls with defeats, knockouts, idle weeks and failed contracts: Inspired heroes deal +10% damage, Shaken -10%, Breaking -20%. Taken contracts are due in 6-10 days. A rival guild gains Renown daily, and once a week it may make a move you answer before payday: court one of your heroes (match their offer, or they choose, staying only at morale 50 or above), dare you to seal a rift by payday (Renown rides on it), or go for a posted contract (take it on or lose it). Requests and the rival's moves pop up at camp and wait in the Ledger, whose week board shows each day to payday. At payday, the leader on Renown gets the better recruits. Every 28 days, whichever guild gained more Renown wins a prize."],
 		["Hero requests", "Mid-week a hero may ask for something: time off (away a few days), a raise (a bigger wage for good), Gold for kit, a Training Yard slot, or your side in a feud with another hero. Saying yes costs something; saying no costs morale. Answer in the Ledger before payday, or it counts as a no."],
+		["Camp events", "On about a third of days something happens at camp, and each is a choice: a travelling merchant, a renowned hero who drills one of yours, a wandering recruit, a relic peddler, a smith's apprentice, a scholar; a festival, refugees, a debt, the rival's quartermaster. Threats (fire, fever, bandits, a storm, a rift tremor) are foretold the evening before (the status board and the week's calendar): pay, send a hero who stays home that day, or take the loss. An event left unanswered takes its last option the next day. Act I brings only opportunities."],
+		["The rift map", "A ranked rift is a map of lanes: Ranks F-E have 3, D-B 4, A and up 5. Each node leads on to its own lane and one or both neighbours on the next floor, so plan a route: an elite on the way to a treasure, a shop before the boss. Every route ends at a campfire before the boss. Anvils temper a worn piece for free, a Path's shrine teaches the party (its Path's heroes most), and a trainer's echo gives one hero a level. From Rank S, floors more than two ahead are unseen unless a Trapper or a Stalker scouts."],
 	]
-	for entry in entries:
+	for entry in entries.filter(func(e): return not e.is_empty()):
 		v.add_child(_label(str(entry[0]), 15))
 		v.add_child(_wrap_label(str(entry[1]), 12, true))
 		v.add_child(_hsep())
@@ -2360,7 +2397,7 @@ func _render_quests(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 
 	v.add_child(_label("Milestones", 16))
-	for m in GameData.MILESTONES:
+	for m in GameData.milestones():
 		var mid := str(m["id"])
 		var claimed: bool = GameState.milestones_claimed.has(mid)
 		var mprogress := GameState.milestone_progress(m)

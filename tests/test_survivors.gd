@@ -302,4 +302,4 @@ func run() -> void:
 	rt.time = 1250.0
 	rt.won = true
 	GameState.finish_survivors(rt)
-	check(GameState.endless_title() == "Rift Sealers", "sealing the rift earns the top title")
+	check((GameState.endless_title() == "Rift Sealers") == GameData.ENDLESS_ENABLED, "sealing the rift earns the top title (none while Endless is parked)")

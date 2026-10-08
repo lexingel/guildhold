@@ -107,19 +107,72 @@ func dismiss_hint(id: String) -> void:
 	save()
 
 
+## The kinds the party can take on this floor: on a lane map, only the
+## nodes linked from where they stand (each kind once).
 func current_layer_options() -> Array:
 	var layers: Array = run["layers"]
-	return layers[int(run["pos"])]["options"]
+	var opts: Array = layers[int(run["pos"])]["options"]
+	var reach := reachable_options()
+	if reach.size() == opts.size():
+		return opts
+	var out: Array = []
+	for i in reach:
+		if not out.has(opts[i]):
+			out.append(opts[i])
+	return out
+
+
+## The node indices on this floor the party can step to (0.65 lane map):
+## the ones linked from their node on the floor before; every node otherwise.
+func reachable_options() -> Array:
+	var layers: Array = run["layers"]
+	var pos := int(run["pos"])
+	var all: Array = range((layers[pos]["options"] as Array).size())
+	var at: Dictionary = run.get("at", {})
+	if pos == 0 or not (layers[pos - 1] as Dictionary).has("next") or not at.has(pos - 1):
+		return all
+	var links: Array = layers[pos - 1]["next"]
+	var from := int(at[pos - 1])
+	if from < 0 or from >= links.size():
+		return all
+	var out: Array = []
+	for i in links[from]:
+		if int(i) < all.size() and not out.has(int(i)):
+			out.append(int(i))
+	return out if not out.is_empty() else all
+
+
+## A Trapper or a Stalker in the party scouts the whole rift (0.65).
+func party_scouts() -> bool:
+	return current_party().any(func(h): return (h.path if h.path != "" else GameData.path_of(h.pool_id)) in ["trapper", "stalker"])
+
+
+## Steps onto node `idx` of this floor (the lane map's click).
+func choose_node(idx: int) -> void:
+	if not reachable_options().has(idx):
+		return
+	var at: Dictionary = run.get("at", {})
+	at[int(run["pos"])] = idx
+	run["at"] = at
+	choose_node_type(str(run["layers"][int(run["pos"])]["options"][idx]))
 
 
 func auto_resolve_single_option() -> void:
-	var options := current_layer_options()
+	var reach := reachable_options()
 	var chosen: Dictionary = run["chosen"]
-	if options.size() == 1 and not chosen.has(int(run["pos"])):
-		choose_node_type(options[0])
+	if reach.size() == 1 and not chosen.has(int(run["pos"])):
+		choose_node(int(reach[0]))
 
 
 func choose_node_type(kind: String) -> void:
+	var pos := int(run["pos"])
+	var at: Dictionary = run.get("at", {})
+	if not at.has(pos):   # by kind (the sims, tests, Auto): the first linked node of it
+		for i in reachable_options():
+			if str(run["layers"][pos]["options"][i]) == kind:
+				at[pos] = i
+				break
+		run["at"] = at
 	var chosen: Dictionary = run["chosen"]
 	chosen[int(run["pos"])] = kind
 	run["chosen"] = chosen
@@ -674,6 +727,93 @@ func pick_treasure(idx: int) -> void:
 	state_changed.emit()
 
 
+## The lane map's own nodes (0.65): an anvil (one free Forge level on a
+## piece the party wears), a Path's shrine (XP for the party, more for its
+## Path's heroes) and a trainer's echo (one hero gains a level).
+func ensure_lane_node() -> void:
+	var ns: Dictionary = run.get("node_state", {})
+	if ns.has("lane"):
+		return
+	ns["lane"] = current_node_kind()
+	ns["done"] = false
+	if ns["lane"] == "shrine":   # usually a Path someone in the party walks
+		var walked: Array = []
+		for h in current_party():
+			var p := h.path if h.path != "" else GameData.path_of(h.pool_id)
+			if p != "" and not walked.has(p):
+				walked.append(p)
+		var keys: Array = GameData.PATHS.keys()
+		ns["path"] = walked[randi() % walked.size()] if not walked.is_empty() and randf() < 0.7 else keys[randi() % keys.size()]
+	run["node_state"] = ns
+
+
+## The party's worn pieces an anvil can temper (most forging left first).
+func anvil_items() -> Array:
+	var ids: Array = run.get("hero_ids", [])
+	var out: Array = items.filter(func(it): return ids.has(it.equipped_to) and forge_cost(it) > 0)
+	out.sort_custom(func(a, b): return a.forge_level < b.forge_level)
+	return out.slice(0, 6)
+
+
+func use_anvil(item_id: String) -> void:
+	var ns: Dictionary = run.get("node_state", {})
+	var it := find_item(item_id)
+	if ns.get("done", false) or it == null or forge_cost(it) <= 0:
+		return
+	coins += forge_cost(it)   # the anvil is free: forge_item takes its price back
+	forge_item(item_id)
+	ns["done"] = true
+	ns["note"] = tr("%s is tempered on the old anvil.") % tr(it.name)
+	save()
+	state_changed.emit()
+
+
+## XP share of a level a shrine gives: its Path's heroes / everyone else.
+const SHRINE_XP := [0.5, 0.15]
+
+
+func pray_at_shrine() -> void:
+	var ns: Dictionary = run.get("node_state", {})
+	if ns.get("done", false):
+		return
+	var names: Array = []
+	for h in current_party():
+		if h.hp <= 0 or h.level >= 10:
+			continue
+		var own := (h.path if h.path != "" else GameData.path_of(h.pool_id)) == str(ns.get("path", ""))
+		Combat.gain_xp(h, int(round(Combat.xp_to_next(h.level, h.rank) * float(SHRINE_XP[0 if own else 1]))))
+		if own:
+			names.append(h.name.split(" the ")[0])
+	ns["done"] = true
+	ns["note"] = tr("The shrine answers: %s learn the most.") % ", ".join(names) if not names.is_empty() else tr("The shrine answers, faintly: a little XP for everyone.")
+	save()
+	state_changed.emit()
+
+
+func train_with_echo(hero_id: String) -> void:
+	var ns: Dictionary = run.get("node_state", {})
+	var h := find_hero(hero_id)
+	if ns.get("done", false) or h == null:
+		return
+	if h.level < 10:
+		Combat.gain_xp(h, Combat.xp_to_next(h.level, h.rank) - h.xp)
+		ns["note"] = tr("%s trains with the echo: level %d.") % [h.name.split(" the ")[0], h.level]
+	else:
+		h.attr_points += GameData.ATTR_PER_STEP
+		ns["note"] = tr("%s trains with the echo: +%d attribute points.") % [h.name.split(" the ")[0], GameData.ATTR_PER_STEP]
+	ns["done"] = true
+	save()
+	state_changed.emit()
+
+
+func skip_lane_node() -> void:
+	var ns: Dictionary = run.get("node_state", {})
+	ns["done"] = true
+	ns["note"] = tr("You move on.")
+	save()
+	state_changed.emit()
+
+
 func ensure_hazard() -> void:
 	var ns: Dictionary = run.get("node_state", {})
 	if ns.has("hazard"):
@@ -1090,6 +1230,7 @@ func start_descent(hero_ids: Array[String], starting_relic: Relic) -> void:
 func _descent_layers(depth: int) -> Array:
 	var d := _diff().duplicate()
 	d["floors"] = GameData.DESCENT_FLOORS
+	d["lanes"] = 0   # the Descent keeps its two-way forks
 	var layers: Array = Combat.build_layers(d)
 	if depth > 1:
 		layers[0] = {"options": ["campfire"]}
@@ -1143,6 +1284,8 @@ func _add_pillar() -> void:
 ## The guild's Endless Rift title (the last milestone title earned), or "".
 func endless_title() -> String:
 	var t := ""
+	if not GameData.ENDLESS_ENABLED:
+		return t
 	for m in GameData.ENDLESS_MILESTONES:
 		if m.has("title") and endless_milestones.has(int(m["at"])):
 			t = str(m["title"])
@@ -1368,6 +1511,7 @@ func pass_time() -> void:
 			h.hp = mx if (h.bedded and not sworn("no_rest")) or full_heal_between_runs() else min(mx, h.hp + int(ceil(mx * GameData.WOUND_HEAL_PER_RUN)))
 			if h.hp >= mx:
 				h.bedded = false
+	camp_day()
 	resolve_guild_board()
 	_on_day_passed()
 
@@ -1420,6 +1564,8 @@ func retreat_now() -> void:
 		return
 	if run.has("descent"):
 		_news(tr("The party climbed out of the Descent at depth %d.") % int(run["descent"]))
+	if run.has("breach"):   # leaving a breach rift gives the breach up
+		_breach_outcome(false)
 	_record_run("Retreated")
 	_lose_left_behind()
 	run = {}
@@ -1440,6 +1586,8 @@ func finish_run() -> void:
 		_drop_haul("fell")   # usually already dropped when the fight ended
 	elif outcome == "Retreated":
 		_drop_haul("fled")
+	if run.has("breach"):
+		_breach_outcome(outcome == "Sealed")
 	_record_run(outcome)
 	_lose_left_behind()
 	for h in current_party():   # an evolution's XP boost lasts XP_BOOST_RUNS rift runs

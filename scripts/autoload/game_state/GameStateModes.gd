@@ -22,6 +22,8 @@ func _apply_rift_rank_modifiers(diff: Dictionary, rift_rank: String) -> Dictiona
 	out["elite_chance_up"] = bool(mods.get("elite_chance_up", false))
 	out["shop_chance_down"] = bool(mods.get("shop_chance_down", false))
 	out["boss_double_mechanic"] = bool(mods.get("boss_double_mechanic", false))
+	out["lanes"] = int(GameData.RANK_LANES.get(rift_rank, 0))   # a lane map (0.65)
+	out["floors"] = int(out["floors"]) + int(GameData.RANK_EXTRA_FLOORS.get(rift_rank, 0))
 	return out
 
 
@@ -51,6 +53,12 @@ func _diff() -> Dictionary:
 		if stirred:
 			diff["monster_hp"] = float(diff["monster_hp"]) * float(GameData.VALE_STIRRED["hp"])
 			diff["crystal"] = [int(round(float(diff["crystal"][0]) * float(GameData.VALE_STIRRED["essence"]))), int(round(float(diff["crystal"][1]) * float(GameData.VALE_STIRRED["essence"])))]
+	if run.has("breach"):   # a tide's strength, Wardcraft
+		var bm := breach_foe_mult()
+		diff = diff.duplicate()
+		diff["name"] = tr("Breach Rift")
+		diff["monster_hp"] = float(diff["monster_hp"]) * float(bm[0])
+		diff["monster_dmg"] = float(diff["monster_dmg"]) * float(bm[1])
 	if run.has("descent"):   # each depth harder, and better paid
 		var g := float(int(run["descent"]) - 1)
 		var pay := 1.0 + GameData.DESCENT_PAY_GROWTH * g

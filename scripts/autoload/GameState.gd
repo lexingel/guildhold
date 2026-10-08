@@ -38,6 +38,9 @@ func reset() -> void:
 	endless_milestones = []
 	week_start_coins = -1
 	hero_request = {}
+	camp_event = {}
+	camp_omen = {}
+	camp_event_last = {}
 	breach = {}
 	breach_next_day = -1
 	damaged = {}
@@ -269,6 +272,9 @@ func load_save() -> bool:
 	endless_best = (data.get("endless_best", {}) as Dictionary).duplicate()
 	week_start_coins = int(data.get("week_start_coins", -1))
 	hero_request = (data.get("hero_request", {}) as Dictionary).duplicate(true)
+	camp_event = (data.get("camp_event", {}) as Dictionary).duplicate(true)
+	camp_omen = (data.get("camp_omen", {}) as Dictionary).duplicate(true)
+	camp_event_last = (data.get("camp_event_last", {}) as Dictionary).duplicate(true)
 	breach = (data.get("breach", {}) as Dictionary).duplicate(true)
 	breach_next_day = int(data.get("breach_next_day", -1))
 	damaged = (data.get("damaged", {}) as Dictionary).duplicate()
@@ -402,6 +408,15 @@ func load_save() -> bool:
 		if run_data.has("tower"):
 			run["tower"] = int(run_data["tower"])
 			run["tower_snap"] = run_data.get("tower_snap", {})
+		if run_data.has("descent"):
+			run["descent"] = int(run_data["descent"])
+		for key in ["morrow", "breach"]:
+			if run_data.has(key):
+				run[key] = bool(run_data[key])
+		var at_fixed := {}
+		for k in (run_data.get("at", {}) as Dictionary):   # JSON keys come back as strings
+			at_fixed[int(k)] = int(run_data["at"][k])
+		run["at"] = at_fixed
 	return true
 
 

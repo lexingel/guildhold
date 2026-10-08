@@ -84,6 +84,8 @@ func _ready() -> void:
 				GameData.FIGHT_THREAT[bits[0]] = [float(bits[1]), float(bits[2])]
 		elif a.begins_with("haul="):   # haul=0 turns the haul loss off
 			GameData.HAUL_LOSS = {"fell": float(a.substr(5)), "fled": float(a.substr(5)) * 0.5}
+		elif a.begins_with("camp="):   # camp event chance (0.63): camp=0 turns them off
+			GameData.CAMP_EVENT_CHANCE = float(a.substr(5))
 		elif a.begins_with("mendcap="):
 			GameData.MEND_CAP = float(a.substr(8))
 		elif a.begins_with("mend="):
@@ -424,6 +426,25 @@ func _answer_stories() -> void:
 
 
 func _answer_matters() -> void:
+	# Damaged buildings get repaired when the Gold is there (the status board asks).
+	for key in GameState.damaged.keys():
+		if GameState.coins > int(GameState.payday_forecast()["bill"]) + GameState.repair_cost(str(key)):
+			GameState.repair_building(str(key))
+	# Camp events (0.64): a threat sends a hero if one is free, else pays when
+	# there's Gold to spare; anything else is taken when the guild is flush.
+	if not GameState.camp_event.is_empty():
+		var opts: Array = GameState.camp_event_options()
+		var flush := GameState.coins > int(GameState.payday_forecast()["bill"]) * 1.5
+		var threat := str(GameData.CAMP_EVENTS[str(GameState.camp_event["id"])]["kind"]) == "threat"
+		var order: Array = [1, 0] if threat else range(opts.size() - 1)
+		var took := false
+		for k in order:
+			if int(k) < opts.size() - 1 and str(opts[k][1]) == "" and (flush or (threat and int(k) == 1)):
+				GameState.answer_camp_event(int(k))
+				took = true
+				break
+		if not took and not GameState.camp_event.is_empty():
+			GameState.answer_camp_event(opts.size() - 1)
 	if not GameState.hero_request.is_empty() and randf() < 0.9:
 		if GameState.answer_request(randf() < 0.6) != "":
 			GameState.answer_request(false)
@@ -617,9 +638,9 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 			return "left with the haul"
 		if kind == "":
 			var opts := GameState.current_layer_options()
-			var prefs := ["boss", "pillar", "combat", "event", "shop", "elite", "treasure", "campfire", "hazard"]
+			var prefs := ["boss", "pillar", "combat", "echo", "event", "shop", "anvil", "elite", "treasure", "shrine", "campfire", "hazard"]
 			if _party_hp() < 0.55:
-				prefs = ["boss", "campfire", "event", "treasure", "shop", "combat", "hazard", "elite"]
+				prefs = ["boss", "campfire", "echo", "anvil", "shrine", "event", "treasure", "shop", "combat", "hazard", "elite"]
 			for pr in prefs:
 				if opts.has(pr):
 					kind = pr
@@ -631,6 +652,9 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 		var ns: Dictionary = GameState.run.get("node_state", {})
 		match kind:
 			"combat", "elite", "boss", "pillar":
+				if not ns.has("result") and not GameState.current_party().any(func(h): return not h.is_downed() and h.hp > 0):
+					GameState.retreat_now()   # everyone fell to a hazard: nobody can engage
+					return "nobody left to fight"
 				if not ns.has("result"):
 					if hand:
 						_hand_fight()
@@ -694,6 +718,18 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 			"treasure":
 				GameState.ensure_treasure()
 				GameState.pick_treasure(0)
+				GameState.advance_node()
+			"anvil", "shrine", "echo":   # the lane map's nodes (0.65)
+				GameState.ensure_lane_node()
+				if kind == "anvil" and not GameState.anvil_items().is_empty():
+					GameState.use_anvil(GameState.anvil_items()[0].id)
+				elif kind == "shrine":
+					GameState.pray_at_shrine()
+				elif kind == "echo":
+					var low: Array = GameState.current_party().filter(func(h): return h.hp > 0)
+					low.sort_custom(func(a, b): return a.level < b.level)
+					if not low.is_empty():
+						GameState.train_with_echo(low[0].id)
 				GameState.advance_node()
 			"shop":
 				GameState.ensure_shop_offers()
@@ -821,6 +857,20 @@ func _best_pick(o: Array) -> String:
 
 
 func _defend() -> void:
+	if not GameData.DEFENSE_TD_ENABLED:   # 0.63: a breach rift, played like any run
+		var tide0 := int(GameState.breach.get("tide", 0))
+		var gate0 := bool(GameState.breach.get("gate", false))
+		var party := _pick_party()
+		if party.is_empty():
+			GameState.rest_guild()
+			return
+		GameState.start_breach_rift(party)
+		var held := _play_run(GameState.breach_rank_id()) == "sealed"
+		if gate0:
+			gate_tries[0 if held else 1] += 1
+		if tide0 > 0:
+			tides.append([tide0, held])
+		return
 	var posted: Array = GameState.defense_candidates().slice(0, 2)
 	var r := DefenseRun.new(str(GameState.breach["region"]), int(GameState.breach["rank"]), posted, null, 7, GameState.defense_opts())
 	_run_defense(r)

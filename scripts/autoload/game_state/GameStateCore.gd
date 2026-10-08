@@ -165,6 +165,9 @@ func note_milestone(id: String) -> void:
 		session["milestones"] = m
 var rival_event: Dictionary = {}   # the rival's move waiting for an answer ({type, day, ...}; see maybe_rival_move)
 var contest_start: Dictionary = {}   # both guilds' Renown when this month's contest began ({ours, theirs}; empty: not started)
+var camp_event: Dictionary = {}       # today's camp event {id, day, data}, or empty (0.64)
+var camp_omen: Dictionary = {}        # a threat foretold {id, day it strikes}, or empty
+var camp_event_last: Dictionary = {}  # event id -> the day it last came (cooldowns)
 var hero_request: Dictionary = {}   # this week's request: {type, ids, day}, or empty
 var wage_raise: Dictionary = {}     # hero id -> extra wage share from granted raises
 var pay_rate: Dictionary = {}       # hero id -> "half"/"bonus" set in the Ledger (absent = full pay)
@@ -196,6 +199,19 @@ func lvl(key: String) -> int:
 
 ## Hooks for GameStateBreach (later in the chain): a day passed, a ladder rift was sealed.
 func _on_day_passed() -> void:
+	pass
+
+
+## Breach hooks the Modes and Runs layers call (GameStateBreach overrides them).
+func breach_foe_mult() -> Array:
+	return [1.0, 1.0]
+
+
+func _breach_outcome(_held: bool) -> void:
+	pass
+
+
+func camp_day() -> void:
 	pass
 
 
@@ -642,6 +658,9 @@ func _run_for_save() -> Dictionary:
 	if run.has("tower"):
 		out["tower"] = run["tower"]
 		out["tower_snap"] = run.get("tower_snap", {})
+	for key in ["descent", "morrow", "breach", "at"]:   # 0.65: these were lost on a reload
+		if run.has(key):
+			out[key] = run[key]
 	return out
 
 
@@ -845,7 +864,7 @@ func save() -> void:
 		"subclass_known": subclass_known, "subclass_carried": subclass_carried, "tower_week": tower_week, "tower_week_cleared": tower_week_cleared,
 		"daily_attempt_day": daily_attempt_day, "daily_clears": daily_clears, "daily_streak": daily_streak, "daily_last_clear": daily_last_clear,
 		"run_history": run_history, "runs_finished": runs_finished, "fallen": fallen, "heroes_lost_total": heroes_lost_total, "best_endless_time": best_endless_time, "endless_runs": endless_runs, "endless_best": endless_best, "endless_milestones": endless_milestones, "boon_set4_reached": boon_set4_reached,
-		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
+		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "camp_event": camp_event, "camp_omen": camp_omen, "camp_event_last": camp_event_last, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
 		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "hall_works": hall_works, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,

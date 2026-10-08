@@ -56,6 +56,53 @@ func defense_opts() -> Dictionary:
 		"hero_hp": 1.0 + 0.06 * lvl("def.watch"), "foe_mult": tide_strength() / tidewall_factor() if breach.has("tide") else 1.0}
 
 
+## A breach rift (0.63): the breach's rank, its region when it's a rift
+## region, and fixed floors with no camp, shop or campfire between them.
+func start_breach_rift(hero_ids: Array[String]) -> void:
+	if not breach_broken():
+		return
+	var rank := breach_rank_id()
+	start_run(str(GameData.find_rift_rank(rank)["base"]), hero_ids, null, rank)
+	if run.is_empty():
+		return
+	run["breach"] = true
+	var region := str(breach.get("region", ""))
+	if GameData.BIOMES.has(region):
+		run["biome"] = region
+	run["layers"] = (GameData.GATE_RIFT_LAYERS if breach.has("gate") else GameData.BREACH_RIFT_LAYERS).map(func(k): return {"options": [k]})
+	run["chosen"] = {}
+	run["node_kind"] = ""
+	run["node_state"] = {}
+	auto_resolve_single_option()
+	save()
+	state_changed.emit()
+
+
+## Breach foes' [HP, damage] multipliers: a tide's strength over the
+## tidewalls, less Wardcraft (Armory: both; Watchtower: damage).
+func breach_foe_mult() -> Array:
+	var m := (tide_strength() / tidewall_factor()) if breach.has("tide") else 1.0
+	m *= 1.0 - 0.05 * lvl("def.armory")
+	return [m, m * (1.0 - 0.04 * lvl("def.watch"))]
+
+
+## A breach rift's end: the breach held or lost (resolve_breach without its
+## day; the run's own day passes after), told in a toast.
+func _breach_outcome(held: bool) -> void:
+	var gate := breach.has("gate")
+	var out := resolve_breach({"held": held}, false)
+	if held:
+		var text := tr("+%d Gold, +%d Essence.") % [int(out["coins"]), int(out["crystals"])]
+		if out.has("laurels"):
+			text += " " + tr("+%d Laurels.") % int(out["laurels"])
+		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("The gate held!") if gate else tr("The breach is held!"), "text": text})
+	else:
+		var lost := tr("Lost %d Gold and %d Essence.") % [int(out["lost_coins"]), int(out["lost_crystals"])]
+		if not (out["damaged"] as Array).is_empty():
+			lost += " " + tr("Damaged: %s.") % ", ".join(out["damaged"])
+		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("The breach overran the guild"), "text": lost})
+
+
 ## Idle heroes fit to stand at a post (not wounded), strongest first.
 func defense_candidates() -> Array[Hero]:
 	var out: Array[Hero] = idle_heroes().filter(func(h): return h.down_runs == 0 and h.hp > 0)
@@ -200,12 +247,13 @@ func _close_breach() -> void:
 ## fallen: [hero ids of posted heroes who fell; wounded only on a loss]}. Returns what happened, for the results screen:
 ## {held, coins, crystals, lost_coins, lost_crystals, damaged: [names], wounded: [names]}.
 ## A defense takes the guild's day.
-func resolve_breach(result: Dictionary) -> Dictionary:
+func resolve_breach(result: Dictionary, take_day := true) -> Dictionary:
 	note_milestone("first Riftbreak")
 	var held := bool(result.get("held", false))
-	_resolving = true   # the day passing below mustn't tick breaches
-	pass_time()   # the defense takes the day; its wounds come after
-	_resolving = false
+	if take_day:   # a breach rift's day passes in finish_run instead
+		_resolving = true   # the day passing below mustn't tick breaches
+		pass_time()   # the defense takes the day; its wounds come after
+		_resolving = false
 	var out := {"held": held, "coins": 0, "crystals": 0, "lost_coins": 0, "lost_crystals": 0, "damaged": [], "wounded": []}
 	# Defenders who fell are only hurt for real when the defense is lost.
 	for hid in ([] if held else result.get("fallen", [])):
@@ -215,8 +263,9 @@ func resolve_breach(result: Dictionary) -> Dictionary:
 			(out["wounded"] as Array).append(h.name)
 	if held:
 		var keep := clampf(float(result.get("integrity", 1.0)), 0.0, 1.0)
-		out["coins"] = int(round(GameData.BREACH_HELD_GOLD * breach_scale() * (0.5 + 0.5 * keep) * year_mult("breach_pay")))
-		out["crystals"] = int(round(GameData.BREACH_HELD_ESSENCE * breach_scale() * (0.5 + 0.5 * keep) * year_mult("breach_pay")))
+		var quarter := 1.0 + 0.1 * lvl("def.engineering")   # Wardcraft's Quartermaster
+		out["coins"] = int(round(GameData.BREACH_HELD_GOLD * breach_scale() * (0.5 + 0.5 * keep) * year_mult("breach_pay") * quarter))
+		out["crystals"] = int(round(GameData.BREACH_HELD_ESSENCE * breach_scale() * (0.5 + 0.5 * keep) * year_mult("breach_pay") * quarter))
 		coins += int(out["coins"])
 		crystals += int(out["crystals"])
 		if breach.has("gate"):
@@ -231,12 +280,12 @@ func resolve_breach(result: Dictionary) -> Dictionary:
 		riftbreak_best = maxi(riftbreak_best, GameData.rift_rank_index(breach_rank_id()))
 	else:
 		# Never the coming payday's wages: the loss comes out of what's above the bill.
-		var share: float = GameData.TIDE_LOSS_SHARE if breach.has("tide") else GameData.BREACH_LOSS_SHARE
+		var share: float = (GameData.TIDE_LOSS_SHARE if breach.has("tide") else GameData.BREACH_LOSS_SHARE) * (1.0 - 0.1 * lvl("def.palisade"))
 		out["lost_coins"] = int(maxi(0, coins - int(payday_forecast()["bill"])) * share)
 		out["lost_crystals"] = int(crystals * share)
 		coins -= int(out["lost_coins"])
 		crystals -= int(out["lost_crystals"])
-		for k in (2 if str(breach.get("region", "")) == "camp" else 1):
+		for k in (2 if str(breach.get("region", "")) == "camp" and lvl("def.palisade") < 5 else 1):
 			var name := _damage_building()
 			if name != "":
 				(out["damaged"] as Array).append(name)
@@ -300,5 +349,417 @@ func day_preview() -> Array[String]:
 			out.append(tr("%s is back on their feet") % h.name.split(" the ")[0])
 	if breach_active() and not breach_broken() and breach_days_left() <= 1:
 		out.append(tr("The rift near %s breaks open") % breach_place())
+	if not camp_omen.is_empty():   # a foretold threat strikes (0.64)
+		out.append(tr("%s (foretold)") % tr(str(GameData.CAMP_EVENTS[str(camp_omen["id"])]["title"])))
 	return out
 
+
+# ---------------- Camp events (0.64) ----------------
+## The world acts on its own days: at most one event a day (GameData.
+## CAMP_EVENTS). A threat is foretold the day before. An event left
+## unanswered when the next day comes takes its last option.
+
+
+## Event amounts grow with the act.
+func camp_scale() -> float:
+	return 1.0 + 0.6 * (clampi(campaign_act, 1, 6) - 1)
+
+
+func camp_gold(base: int) -> int:
+	return int(round(base * camp_scale()))
+
+
+func camp_day() -> void:
+	if not run.is_empty() or heroes.is_empty():
+		return   # a day passing mid-rift (carrying someone out) brings no event
+	if not camp_event.is_empty() and int(camp_event["day"]) < day:
+		answer_camp_event(camp_event_options().size() - 1)   # no answer: the last option
+	if not camp_omen.is_empty():
+		if int(camp_omen["day"]) <= day:
+			var id := str(camp_omen["id"])
+			camp_omen = {}
+			if camp_event_possible(id):
+				_offer_camp_event(id)
+		return
+	if not camp_event.is_empty() or randf() >= GameData.CAMP_EVENT_CHANCE:
+		return
+	var pool: Array = []
+	var total := 0.0
+	for id in GameData.CAMP_EVENTS:
+		var ev: Dictionary = GameData.CAMP_EVENTS[id]
+		if campaign_act < 2 and str(ev["kind"]) != "opportunity":
+			continue   # Act I: opportunities only
+		if campaign_act < int(ev.get("min_act", 1)) or day - int(camp_event_last.get(id, -999)) < GameData.CAMP_EVENT_COOLDOWN:
+			continue
+		if not camp_event_possible(id):
+			continue
+		pool.append(id)
+		total += float(ev["weight"])
+	if pool.is_empty():
+		return
+	var roll := randf() * total
+	var pick := str(pool[0])
+	for id in pool:
+		roll -= float(GameData.CAMP_EVENTS[id]["weight"])
+		if roll <= 0.0:
+			pick = str(id)
+			break
+	camp_event_last[pick] = day
+	if str(GameData.CAMP_EVENTS[pick]["kind"]) == "threat":
+		camp_omen = {"id": pick, "day": day + 1}
+		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("An omen"), "text": tr(str(GameData.CAMP_EVENTS[pick]["omen"])) + " " + tr("Something will come of it tomorrow.")})
+		_news(tr(str(GameData.CAMP_EVENTS[pick]["omen"])))
+	else:
+		_offer_camp_event(pick)
+
+
+## Whether event `id` can happen with the guild as it is.
+func camp_event_possible(id: String) -> bool:
+	match id:
+		"smith":
+			return _camp_smith_item() != null
+		"rival_buyer":
+			return _camp_spare_item() != null and rival_name != ""
+		"visitor":
+			return not _camp_trainees().is_empty()
+		"wanderer":
+			return heroes.size() < hero_slot_cap()
+		"fire", "storm":
+			return not _built_buildings().is_empty()
+	return true
+
+
+func _offer_camp_event(id: String) -> void:
+	var data := {}
+	match id:
+		"merchant":
+			var wares: Array = []
+			for rar in ["rare", "rare", "epic"]:
+				var it := Combat.gen_item(rar, "", str(GameData.RIFT_RANKS[clampi(best_rift_rank_sealed, 0, GameData.RIFT_RANKS.size() - 1)]["id"]) if best_rift_rank_sealed >= 0 else "F")
+				wares.append({"item": it.to_dict(), "price": camp_gold(35 if rar == "rare" else 80), "sold": false})
+			data["wares"] = wares
+		"visitor":
+			data["who"] = GameData.CAMP_VISITORS[randi() % GameData.CAMP_VISITORS.size()]
+			data["ids"] = _camp_trainees().slice(0, 2).map(func(h): return h.id)
+		"wanderer":
+			var ri := clampi(best_rift_rank_sealed + 1, 1, 5)
+			var rec := Combat.gen_recruit(str(GameData.RANKS[ri]["id"]))
+			data["hero"] = rec.to_dict()
+			data["price"] = int(round(float(GameData.RANKS[ri]["cost"]) * 0.75))
+		"peddler":
+			data["relic"] = Combat.gen_relic("epic").to_dict()
+			data["price"] = camp_gold(160)
+		"smith":
+			data["item"] = _camp_smith_item().id
+		"rival_buyer":
+			var sp := _camp_spare_item()
+			data["item"] = sp.id
+			data["price"] = int(round(15.0 * float(GameData.find_rarity(sp.rarity)["mult"]) * 2.0 * camp_scale()))
+		"fire", "storm":
+			var built := _built_buildings()
+			data["building"] = built[randi() % built.size()]
+	camp_event = {"id": id, "day": day, "data": data}
+	_news(camp_event_title() + ".")
+
+
+func _built_buildings() -> Array:
+	var out: Array = []
+	for br in GameData.BRANCHES:
+		for n in br["nodes"]:
+			if lvl("%s.%s" % [br["id"], n["id"]]) > 0:
+				out.append("%s.%s" % [br["id"], n["id"]])
+	return out
+
+
+func _building_name(key: String) -> String:
+	for br in GameData.BRANCHES:
+		for n in br["nodes"]:
+			if "%s.%s" % [br["id"], n["id"]] == key:
+				return tr(str(n["name"]))
+	return key
+
+
+## The heroes a visitor would drill: at camp, not champions, lowest level first.
+func _camp_trainees() -> Array:
+	var out: Array = idle_heroes().filter(func(h): return not h.is_champion and h.hp > 0)
+	out.sort_custom(func(a, b): return a.level < b.level)
+	return out
+
+
+## The worn piece with the most forging left (a smith's half-price offer).
+func _camp_smith_item() -> Item:
+	var best: Item = null
+	for it in items:
+		if it.equipped_to != "" and forge_cost(it) > 0 and (best == null or it.forge_level < best.forge_level):
+			best = it
+	return best
+
+
+## The best unworn item (the rival's quartermaster wants it).
+func _camp_spare_item() -> Item:
+	var best: Item = null
+	for it in items:
+		if it.equipped_to == "" and (best == null or float(GameData.find_rarity(it.rarity)["mult"]) > float(GameData.find_rarity(best.rarity)["mult"])):
+			best = it
+	return best
+
+
+## An idle hero fit for a job: `roles` limits who ("" = anyone), strongest first.
+func _camp_helper(roles: Array = []) -> Hero:
+	var out: Array = idle_heroes().filter(func(h): return not h.is_champion and h.hp > 0 and (roles.is_empty() or roles.has(GameData.hero_role(h))))
+	out.sort_custom(func(a, b): return Combat.power_of(a) > Combat.power_of(b))
+	return out[0] if not out.is_empty() else null
+
+
+func camp_event_title() -> String:
+	if camp_event.is_empty():
+		return ""
+	return tr(str(GameData.CAMP_EVENTS[str(camp_event["id"])]["title"]))
+
+
+func camp_event_text() -> String:
+	var id := str(camp_event["id"])
+	var d: Dictionary = camp_event.get("data", {})
+	var t := tr(str(GameData.CAMP_EVENTS[id]["text"]))
+	match id:
+		"visitor":
+			return t % tr(str(d["who"]))
+		"wanderer":
+			var h := Hero.from_dict(d["hero"])
+			return t % [tr(h.rank), tr(str(h.cls_id.capitalize()))]
+		"smith":
+			var it := find_item(str(d["item"]))
+			return t % (tr(it.name) if it else "?")
+		"rival_buyer":
+			var it2 := find_item(str(d["item"]))
+			return t % [tr(rival_name), tr(it2.name) if it2 else "?"]
+		"fire", "storm":
+			return t % _building_name(str(d["building"]))
+	return t
+
+
+## [[button text, why it can't be chosen ("" when it can)], ...]; the last
+## is what happens with no answer.
+func camp_event_options() -> Array:
+	if camp_event.is_empty():
+		return []
+	var id := str(camp_event["id"])
+	var d: Dictionary = camp_event.get("data", {})
+	var gold := func(n: int) -> String: return "" if coins >= n else tr("Needs %d Gold") % n
+	var ess := func(n: int) -> String: return "" if crystals >= n else tr("Needs %d Essence") % n
+	var out: Array = []
+	match id:
+		"merchant":
+			for w in d["wares"]:
+				var it := Item.from_dict(w["item"])
+				out.append([tr("Buy %s (%d Gold)") % [tr(it.name), int(w["price"])], tr("Sold") if w["sold"] else gold.call(int(w["price"]))])
+			out.append([tr("Send them on"), ""])
+		"visitor":
+			for hid in d["ids"]:
+				var h := find_hero(str(hid))
+				out.append([tr("Drill %s (%d Essence)") % [h.name.split(" the ")[0] if h else "?", camp_gold(40)], ess.call(camp_gold(40)) if h else tr("Gone")])
+			out.append([tr("Thank them"), ""])
+		"wanderer":
+			out.append([tr("Hire them (%d Gold)") % int(d["price"]), tr("Roster is full.") if heroes.size() >= hero_slot_cap() else gold.call(int(d["price"]))])
+			out.append([tr("Let them go"), ""])
+		"peddler":
+			var rl := Relic.from_dict(d["relic"])
+			out.append([tr("Buy %s (%d Gold)") % [tr(rl.name), int(d["price"])], gold.call(int(d["price"]))])
+			out.append([tr("Send them on"), ""])
+		"smith":
+			var it3 := find_item(str(d["item"]))
+			var half := int(ceil(forge_cost(it3) * 0.5)) if it3 else 0
+			out.append([tr("Temper it (%d Gold)") % half, gold.call(half) if it3 and half > 0 else tr("Gone")])
+			out.append([tr("Not today"), ""])
+		"scholar":
+			out.append([tr("Pay for the lecture (%d Gold)") % camp_gold(60), gold.call(camp_gold(60))])
+			out.append([tr("Not today"), ""])
+		"festival":
+			out.append([tr("Pay for the feast (%d Gold)") % camp_gold(50), gold.call(camp_gold(50))])
+			out.append([tr("Stay away"), ""])
+		"refugees":
+			out.append([tr("Shelter them (%d Gold)") % camp_gold(45), gold.call(camp_gold(45))])
+			out.append([tr("Send them on"), ""])
+		"debt":
+			out.append([tr("Pay the debt (%d Gold)") % camp_gold(70), gold.call(camp_gold(70))])
+			out.append([tr("Refuse"), ""])
+		"rival_buyer":
+			out.append([tr("Sell it (%d Gold)") % int(d["price"]), "" if find_item(str(d["item"])) else tr("Gone")])
+			out.append([tr("Refuse"), ""])
+		"fire":
+			out.append([tr("Pay a bucket line (%d Gold)") % camp_gold(80), gold.call(camp_gold(80))])
+			out.append(_camp_helper_option([], tr("%s fights the fire (busy today)")))
+			out.append([tr("Let it burn (the building is damaged)"), ""])
+		"fever":
+			out.append([tr("Pay a healer (%d Gold)") % camp_gold(70), gold.call(camp_gold(70))])
+			out.append(_camp_helper_option(["cleric"], tr("%s tends the sick (busy today)")))
+			out.append([tr("Let it run (a hero is laid up 2 days)"), ""])
+		"bandits":
+			out.append([tr("Pay them off (%d Gold)") % camp_gold(60), gold.call(camp_gold(60))])
+			out.append(_camp_helper_option(["warrior", "rogue"], tr("%s drives them off (busy today)")))
+			out.append([tr("Let them take it (15% of the Gold above the bill)"), ""])
+		"storm":
+			out.append([tr("Pay to shore up (%d Gold)") % camp_gold(60), gold.call(camp_gold(60))])
+			out.append(_camp_helper_option([], tr("%s holds the roof (busy today)")))
+			out.append([tr("Ride it out (the building is damaged)"), ""])
+		"tremor":
+			out.append([tr("Hire sellswords (%d Gold)") % camp_gold(90), gold.call(camp_gold(90))])
+			out.append(_camp_helper_option([], tr("%s fights it (busy today, comes back hurt; Essence)")))
+			out.append([tr("Let it roam (Essence lost, the camp damaged)"), ""])
+	return out
+
+
+func _camp_helper_option(roles: Array, label: String) -> Array:
+	var h := _camp_helper(roles)
+	if h == null:
+		var who := tr("No idle cleric") if roles == ["cleric"] else (tr("No idle warrior or rogue") if not roles.is_empty() else tr("No idle hero"))
+		return [label % tr("A hero"), who]
+	return [label % h.name.split(" the ")[0], ""]
+
+
+## Takes option `k` of today's event. "" on success, else why not.
+func answer_camp_event(k: int) -> String:
+	if camp_event.is_empty():
+		return ""
+	var opts := camp_event_options()
+	if k < 0 or k >= opts.size():
+		return ""
+	if str(opts[k][1]) != "":
+		return str(opts[k][1])
+	var id := str(camp_event["id"])
+	var d: Dictionary = camp_event.get("data", {})
+	var last := k == opts.size() - 1
+	var done := true
+	var note := ""
+	match id:
+		"merchant":
+			if not last:
+				var w: Dictionary = d["wares"][k]
+				coins -= int(w["price"])
+				var it := Item.from_dict(w["item"])
+				it.id = "it%d" % next_id
+				next_id += 1
+				items.append(it)
+				w["sold"] = true
+				note = tr("Bought: %s.") % tr(it.name)
+				done = (d["wares"] as Array).all(func(x): return x["sold"])
+		"visitor":
+			if not last:
+				var h := find_hero(str(d["ids"][k]))
+				crystals -= camp_gold(40)
+				if h.level < 10:
+					Combat.gain_xp(h, Combat.xp_to_next(h.level, h.rank) - h.xp)
+				else:
+					h.attr_points += GameData.ATTR_PER_STEP
+				note = tr("%s trained with %s.") % [h.name.split(" the ")[0], tr(str(d["who"]))]
+		"wanderer":
+			if not last:
+				coins -= int(d["price"])
+				var rec := Hero.from_dict(d["hero"])
+				rec.id = "h%d" % next_id
+				next_id += 1
+				heroes.append(rec)
+				note = tr("%s joins the guild.") % rec.name
+		"peddler":
+			if not last:
+				coins -= int(d["price"])
+				var rl := Relic.from_dict(d["relic"])
+				rl.id = "rl%d" % next_id
+				next_id += 1
+				rl.equipped = false
+				relics.append(rl)
+				note = tr("Bought: %s.") % tr(rl.name)
+		"smith":
+			if not last:
+				var it2 := find_item(str(d["item"]))
+				var half := int(ceil(forge_cost(it2) * 0.5))
+				coins += forge_cost(it2) - half   # forge_item takes the full price
+				forge_item(it2.id)
+				note = tr("%s is tempered.") % tr(it2.name)
+		"scholar":
+			if not last:
+				coins -= camp_gold(60)
+				for h2 in _camp_trainees():
+					Combat.gain_xp(h2, int(round(Combat.xp_to_next(h2.level, h2.rank) * 0.3)))
+				note = tr("Every hero at camp learned something.")
+		"festival":
+			if not last:
+				coins -= camp_gold(50)
+				for h3 in heroes:
+					change_morale(h3, 10)
+				add_reputation(2)
+				note = tr("The guild feasts with the village: morale up.")
+			else:
+				for h3 in heroes:
+					change_morale(h3, -3)
+		"refugees":
+			if not last:
+				coins -= camp_gold(45)
+				add_reputation(5)
+				note = tr("The families are sheltered. Word travels: +5 Renown.")
+		"debt":
+			if not last:
+				coins -= camp_gold(70)
+			else:
+				add_reputation(-5)
+				note = tr("The guild's name suffers: -5 Renown.")
+		"rival_buyer":
+			if not last:
+				var it4 := find_item(str(d["item"]))
+				coins += int(d["price"])
+				items.erase(it4)
+				rival_renown += 3
+				note = tr("Sold, and %s grows stronger.") % tr(rival_name)
+		"fire", "storm", "fever", "bandits", "tremor":
+			note = _camp_threat(id, k, d)
+	if note != "":
+		pending_toasts.append({"cls_id": "", "pool_id": "", "title": camp_event_title(), "text": note})
+	if done:
+		camp_event = {}
+	save()
+	state_changed.emit()
+	return ""
+
+
+## A threat's answer: 0 = pay, 1 = send a hero, 2 = take the loss.
+func _camp_threat(id: String, k: int, d: Dictionary) -> String:
+	var costs := {"fire": 80, "fever": 70, "bandits": 60, "storm": 60, "tremor": 90}
+	if k == 0:
+		coins -= camp_gold(int(costs[id]))
+		return tr("Paid, and it passed.")
+	if k == 1:
+		var h := _camp_helper(["cleric"] if id == "fever" else (["warrior", "rogue"] if id == "bandits" else []))
+		h.busy_runs = maxi(h.busy_runs, 1)
+		var who := h.name.split(" the ")[0]
+		if id == "bandits":
+			var bounty := camp_gold(25)
+			coins += bounty
+			return tr("%s drove them off and took their purse: +%d Gold.") % [who, bounty]
+		if id == "tremor":
+			var ess := camp_gold(20)
+			crystals += ess
+			h.hp = maxi(1, int(Combat.max_hp(h) * 0.5))
+			return tr("%s closed the tear, hurt but alive: +%d Essence.") % [who, ess]
+		return tr("%s saw to it.") % who
+	match id:
+		"fire", "storm":
+			damaged[str(d["building"])] = int(damaged.get(str(d["building"]), 0)) + 1
+			return tr("The %s is damaged: it works a level lower until repaired.") % _building_name(str(d["building"]))
+		"fever":
+			var sick: Array = heroes.filter(func(x): return not x.is_champion and x.down_runs == 0 and x.hp > 0)
+			sick.shuffle()
+			var names: Array = []
+			for x in sick.slice(0, 1):
+				x.down_runs = maxi(x.down_runs, 2)
+				names.append(x.name.split(" the ")[0])
+			return tr("Laid up with fever for 2 days: %s.") % ", ".join(names) if not names.is_empty() else ""
+		"bandits":
+			var lost := int(maxi(0, coins - int(payday_forecast()["bill"])) * 0.15)
+			coins -= lost
+			return tr("The bandits took %d Gold.") % lost
+		"tremor":
+			var lost_e := int(crystals * 0.05)
+			crystals -= lost_e
+			var dmg := _damage_building()
+			return tr("It roamed the camp: -%d Essence%s.") % [lost_e, tr(", the %s damaged") % dmg if dmg != "" else ""]
+	return ""

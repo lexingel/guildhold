@@ -76,14 +76,18 @@ func run() -> void:
 	# above lets clicks through; other screens keep a normal UI over a backdrop.
 	await _show(main, "camp", "camp")
 	check(main._scene_ui.get_child_count() > 0 and main.root.mouse_filter == Control.MOUSE_FILTER_IGNORE, "the camp fills the window and its buildings take clicks")
-	# The Endless Rift's gate offers both ways in: the Descent and the real-time run.
+	# The Endless Rift's gate: the Descent and the real-time run, or (0.63,
+	# Endless parked) straight down the Descent.
 	await _show(main, "rift_hall")
 	var gate: Array = main.find_children("*", "Button", true, false).filter(func(b): return b.tooltip_text == "Endless Rift")
 	if not gate.is_empty():
 		gate[0].pressed.emit()
 		await _frames()
-	var picks: Array = main.root.find_children("*", "Label", true, false).filter(func(l): return l.text == "The Descent")
-	check(not gate.is_empty() and not picks.is_empty(), "the Endless Rift's gate offers the Descent and the real-time run")
+	if GameData.ENDLESS_ENABLED:
+		var picks: Array = main.root.find_children("*", "Label", true, false).filter(func(l): return l.text == "The Descent")
+		check(not gate.is_empty() and not picks.is_empty(), "the Endless Rift's gate offers the Descent and the real-time run")
+	else:
+		check(not gate.is_empty() and main.screen == "party_assembly" and main._pending_descent, "the Endless Rift's gate leads down the Descent")
 	await _show(main, "camp", "camp")
 
 	# Past guilds' banners: the newest six hang in camp; a click opens the Hall of Guilds.

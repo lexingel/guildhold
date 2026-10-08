@@ -246,7 +246,7 @@ func milestone_progress(m: Dictionary) -> int:
 ## granted this call (usually 0 or 1) so the caller can show a flavor toast.
 func check_milestones() -> Array[String]:
 	var newly: Array[String] = []
-	for m in GameData.MILESTONES:
+	for m in GameData.milestones():
 		var mid := str(m["id"])
 		if milestones_claimed.has(mid):
 			continue

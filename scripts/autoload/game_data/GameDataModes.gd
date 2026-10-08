@@ -103,6 +103,31 @@ const TOWER_BOSSES := {
 ## Weekly hero requests: on this day of the week (day % PAYDAY_DAYS) one
 ## hero (two for a feud) asks for something. Each answer costs something;
 ## no answer by payday counts as "no". %s in the texts is the hero's name.
+## Camp events (0.64, docs/design/revamp_2026_10.md): at most one a day, on
+## about a third of days, each a decision. Opportunities and dilemmas come
+## the same day; a threat is foretold the evening before (its "omen") and
+## strikes the next day. Act I sees opportunities only. The options and their
+## effects live in GameStateBreach (camp_*); amounts grow with the act.
+var CAMP_EVENT_CHANCE := 0.35   # a var so campaign_sim can turn events off (camp=0)
+const CAMP_EVENT_COOLDOWN := 12   # days before the same event can come again
+const CAMP_VISITORS := ["Ser Corwen of the Third Post", "Old Maud, the Lantern-Keeper", "Halric Twice-Sworn", "Ysolde the Unbowed", "Brother Anselm of the Chapel Road"]
+const CAMP_EVENTS := {
+	"merchant": {"kind": "opportunity", "weight": 3, "title": "A travelling merchant", "text": "A merchant's cart rolls into camp with three fine pieces. They leave at dusk."},
+	"visitor": {"kind": "opportunity", "weight": 2, "title": "A renowned hero visits", "text": "%s, a name from the old guild songs, stops for the night and offers to drill one of your heroes."},
+	"wanderer": {"kind": "opportunity", "weight": 2, "title": "A wandering recruit", "text": "A Rank %s %s asks for a place in the guild, for less than the recruit board would charge."},
+	"peddler": {"kind": "opportunity", "weight": 1, "min_act": 2, "title": "A relic peddler", "text": "A hooded peddler unwraps a single relic and names a steep price."},
+	"smith": {"kind": "opportunity", "weight": 2, "title": "A smith's apprentice", "text": "A journeyman smith offers to temper your %s at half the forge's price."},
+	"scholar": {"kind": "opportunity", "weight": 1, "title": "A scholar of the Accord", "text": "A scholar offers a lecture on the old guilds' tactics. Every hero at camp would learn from it."},
+	"festival": {"kind": "dilemma", "weight": 2, "title": "The village festival", "text": "The village holds its harvest festival and hopes the guild will pay for the feast."},
+	"refugees": {"kind": "dilemma", "weight": 2, "title": "Refugees at the gate", "text": "Families fleeing a broken rift ask for shelter and bread. Word of it would travel."},
+	"debt": {"kind": "dilemma", "weight": 1, "title": "A debt collector", "text": "A clerk arrives with a debt the guild's founders left unpaid, with interest. Refusing would be talked about."},
+	"rival_buyer": {"kind": "dilemma", "weight": 1, "title": "The rival's quartermaster", "text": "%s's quartermaster wants to buy your %s, at twice what a merchant pays. They would fight with it."},
+	"fire": {"kind": "threat", "weight": 1, "title": "Fire!", "omen": "The forge chimney threw sparks all evening.", "text": "Fire has caught in the %s."},
+	"fever": {"kind": "threat", "weight": 1, "title": "Fever in the barracks", "omen": "Two of the guild woke up coughing.", "text": "A fever is spreading through the barracks. A cleric could keep it from taking anyone down."},
+	"bandits": {"kind": "threat", "weight": 1, "title": "Bandits on the road", "omen": "Strangers were seen watching the camp from the treeline.", "text": "Bandits have come for the guild's strongbox."},
+	"storm": {"kind": "threat", "weight": 1, "title": "A storm hits the camp", "omen": "The sky over the hills has turned the colour of a bruise.", "text": "A storm is tearing at the roofs of the %s."},
+	"tremor": {"kind": "threat", "weight": 1, "title": "A rift tremor", "omen": "The ground hummed under the camp all night.", "text": "A small rift has torn open by the well, and something is climbing out."},
+}
 const REQUEST_DAY := 3
 const REQUEST_RAISE := 0.25       # a granted raise: +25% wage for good
 const REQUEST_GEAR_COST := 60
@@ -488,6 +513,12 @@ const RIFT_RANKS := [
 	{"id": "SSS", "rec": 2830, "base": "greater", "hp": 6.0, "dmg": 3.8, "reward": 3.5, "elite_chance_up": true, "hazard_severity_up": 2, "shop_chance_down": true, "relic_rarity_floor_down": true, "boss_double_mechanic": true},
 ]
 
+## The lane map (0.65): how many lanes a rank's rift has, and floors added
+## on top of its base length (width grows faster than length).
+const RANK_LANES := {"F": 3, "E": 3, "D": 4, "C": 4, "B": 4, "A": 5, "S": 5, "SS": 5, "SSS": 5}
+const RANK_EXTRA_FLOORS := {}   # 0.63: width only for now; longer top ranks need the readout recalibrated (campaign_sim)
+
+
 ## What each rank's extra rules read as on the Rift Hall.
 const RIFT_RANK_RULE_TEXT := {
 	"elite_chance_up": "more elites", "hazard_severity_up": "harsher hazards", "shop_chance_down": "fewer shops",
@@ -547,14 +578,16 @@ const BRANCHES := [
 		{"id": "scouts", "name": "Scouts' Lodge", "max": 5, "cost_base": 50, "cost_step": 50, "every": "Recruit board: +1 offer at Lv1 and Lv4",
 			"perks": {2: "Order: Scout Ahead — reroll the next fork's paths", 3: "Headhunter: every recruit refresh has a Rank C+ hero", 5: "Recruit rerolls cost half"}},
 	]},
-	{"id": "def", "name": "Defenses Branch", "sub": "Riftbreaks (paid in Gold)", "nodes": [
-		{"id": "armory", "name": "Armory", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "+6% tower damage",
-			"perks": {1: "Towers: Frost Totem", 2: "Towers: Ward Stone", 3: "Towers: Wayside Chapel"}},
-		{"id": "engineering", "name": "Engineering", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "-6% tower costs",
-			"perks": {3: "Towers can reach tier 3", 5: "Selling a tower refunds all of it"}},
-		{"id": "palisade", "name": "Palisade", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "+2 integrity and +20 starting supplies",
+	# 0.63: Wardcraft (the node ids stay, so saved levels carry over): it
+	# softens breach rifts instead of building towers.
+	{"id": "def", "name": "Wardcraft", "sub": "Breaches (paid in Gold)", "nodes": [
+		{"id": "armory", "name": "Armory", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "breach foes -5% HP and damage",
 			"perks": {}},
-		{"id": "watch", "name": "Watchtower", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "posted heroes +6% max HP",
+		{"id": "engineering", "name": "Quartermaster", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "+10% Gold and Essence for holding a breach",
+			"perks": {}},
+		{"id": "palisade", "name": "Palisade", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "a lost defense costs 10% less",
+			"perks": {5: "A lost defense damages one building at most"}},
+		{"id": "watch", "name": "Watchtower", "max": 5, "cost_base": 80, "cost_step": 80, "currency": "gold", "every": "breach foes deal -4% damage",
 			"perks": {1: "+1 day of warning before a rift breaks", 3: "+1 more day of warning"}},
 	]},
 	{"id": "res", "name": "Research Branch", "sub": "Relics & Theory", "nodes": [
@@ -807,6 +840,17 @@ const QUEST_TYPE_LABEL := {
 ## other guilds whose records grow with the days: [strength] scales their
 ## Renown pace, Tower climb and Endless survival.
 const STANDING_STRENGTH := [0.7, 0.95, 1.2]
+
+## 0.63: the real-time Endless (scripts/survivors) is parked, not deleted:
+## the Endless Rift's gate leads into the Descent, and its achievement,
+## records and guide pages are hidden. True brings it all back.
+const ENDLESS_ENABLED := false
+
+
+## MILESTONES without the ones a parked mode can't reach.
+static func milestones() -> Array:
+	return MILESTONES if ENDLESS_ENABLED else MILESTONES.filter(func(m): return str(m["type"]) != "endless_time")
+
 
 const MILESTONES := [
 	{"id": "first_seal", "label": "First Blood — seal your first Rift", "type": "rifts_sealed", "target": 1, "reward": {"crystals": 10}},

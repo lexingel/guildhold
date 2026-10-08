@@ -17,6 +17,9 @@ re-run it after changing rewards or costs and update the tables.
 A failed run still pays for every fight it won, so newcomers earn most of an
 invested party's coins.
 
+(0.63: the real-time Endless is parked behind GameData.ENDLESS_ENABLED; its
+numbers below stay for when it returns.)
+
 The Endless Rift is a real-time survival run (scripts/survivors). It pays
 45 coins and 7 crystals a minute survived, 0.15 coins a kill, 3 crystals an
 elite and 20 a warden, 12 XP a minute to every hero, and an item or relic per
@@ -62,6 +65,29 @@ the walls. The recommended power is fit to those numbers
 | | Relic effect reroll / item reforge | 10 × mult × n / 8 × mult × n |
 | Seal Tokens | Attribute reset | 5 × hero level |
 | Evolution Stones | Evolution, Stonebound skill node | 1 each |
+
+## Camp events and Wardcraft (0.63)
+
+Camp events (GameStateBreach, camp_*) scale with the act: x(1 + 0.6 x (act - 1)),
+so Act I x1.0, Act III x2.2, Act VI x4.0.
+
+| Event | Cost (Act I) | What it buys |
+|---|---|---|
+| Merchant | 35 Gold a rare, 80 an epic | gear at the best sealed rank |
+| Visiting hero | 40 Essence | one hero gains a level (at 10: attribute points) |
+| Wandering recruit | 75% of the rank's recruit price | a base class one rank above the best seal |
+| Relic peddler | 160 Gold | an epic relic (Act II+) |
+| Smith's apprentice | half a Forge level | one Forge level on a worn piece |
+| Scholar | 60 Gold | 30% of a level for every hero at camp |
+| Festival | 50 Gold | +10 morale for all, +2 Renown (skipping: -3 morale) |
+| Refugees | 45 Gold | +5 Renown |
+| Debt | 70 Gold | or -5 Renown |
+| Rival's quartermaster | (pays) 2x sale value | the rival +3 Renown |
+| Threats | pay 60-90 Gold, send a hero, or the loss | fire/storm: a damaged building; fever: two heroes down 2 days; bandits: 25% of Gold above the bill; tremor: 10% Essence + a building |
+
+Wardcraft (the old Defenses branch, Gold): Armory -5% breach foe HP/damage,
+Quartermaster +10% breach pay, Palisade -10% of a lost defense (Lv5: one
+building at most), Watchtower -4% breach foe damage (+warning days at 1/3).
 
 ## Target curve
 

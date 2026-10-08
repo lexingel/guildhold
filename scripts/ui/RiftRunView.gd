@@ -18,6 +18,10 @@ const MAP_NODE_DESC := {
 	"event": "Event — a strange encounter with a few choices; each says what it does.",
 	"treasure": "Treasure — pick one of two loot drops. No fighting.",
 	"pillar": "Pillar — a lost champion is held in this light. Its keeper fights like a rift warden; win to free them.",
+	"anvil": "Anvil — temper one piece your party wears, one Forge level, free. No fighting.",
+	"shrine": "Shrine — a Path's shrine: XP for the party, most for heroes on that Path. No fighting.",
+	"echo": "Trainer's echo — one hero trains with an old master's echo and gains a level. No fighting.",
+	"unknown": "Unseen — too deep to make out. A Trapper or a Stalker in the party scouts the whole rift.",
 }
 
 
@@ -53,7 +57,7 @@ func _path_node_marker(kind: String, is_current: bool, cb: Callable) -> Control:
 		wrap.add_child(icon_node)
 	else:
 		var l := _label(MAP_NODE_LABEL.get(kind, "?"), 13)
-		l.add_theme_color_override("font_color", Color(0, 0, 0, 1))
+		l.add_theme_color_override("font_color", Palette.MUTED if kind == "unknown" else Color(0, 0, 0, 1))
 		l.position = Vector2(MARKER_SIZE * 0.32, MARKER_SIZE * 0.16)
 		wrap.add_child(l)
 
@@ -87,6 +91,9 @@ func _path_node_marker(kind: String, is_current: bool, cb: Callable) -> Control:
 ## replaces the separate "Choose your path" button list that used to render
 ## further down in _render_rift_run.
 func _render_rift_map(v: VBoxContainer) -> void:
+	if (GameState.run["layers"] as Array).any(func(l): return (l as Dictionary).has("next")):
+		_render_lane_map(v)
+		return
 	var layers: Array = GameState.run["layers"]
 	var chosen: Dictionary = GameState.run.get("chosen", {})
 	var pos: int = int(GameState.run["pos"])
@@ -202,6 +209,114 @@ func _render_rift_map(v: VBoxContainer) -> void:
 	v.add_child(legend)
 
 
+## The lane map (0.65): floors left to right, each floor's nodes stacked in
+## lanes, links drawn from every node to the ones it leads to. The route
+## walked is gold; on the current floor only the nodes linked from where the
+## party stands can be clicked. From Rank S, floors more than two ahead are
+## unseen unless a Trapper or a Stalker scouts.
+func _render_lane_map(v: VBoxContainer) -> void:
+	var layers: Array = GameState.run["layers"]
+	var at: Dictionary = GameState.run.get("at", {})
+	var chosen: Dictionary = GameState.run.get("chosen", {})
+	var pos: int = int(GameState.run["pos"])
+	var n := layers.size()
+	var lanes := 1
+	for l in layers:
+		lanes = maxi(lanes, (l["options"] as Array).size())
+	var map_size := Vector2(maxf(700.0, v.custom_minimum_size.x), 30.0 + 38.0 * lanes)
+	var map_ctrl := Control.new()
+	map_ctrl.custom_minimum_size = map_size
+	var bg := TextureRect.new()
+	bg.texture = load("res://assets/screens/riftpath_bg.png")
+	bg.custom_minimum_size = map_size
+	bg.size = map_size
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	map_ctrl.add_child(bg)
+	var margin := 34.0
+	var step: float = (map_size.x - margin * 2.0) / float(max(1, n - 1))
+	var top := 8.0
+	var avail := map_size.y - 26.0
+	var spot := func(i: int, j: int) -> Vector2:
+		var k := (layers[i]["options"] as Array).size()
+		return Vector2(margin + step * i, top + avail * (float(j) + 0.5) / float(k))
+	var rank := str(GameState.run.get("rift_rank", ""))
+	var deep_fog := rank != "" and GameData.rift_rank_index(rank) >= GameData.rift_rank_index("S") and not GameState.party_scouts()
+	var reach: Array = GameState.reachable_options()
+	# Links under the markers: gold where the party walked.
+	for i in n - 1:
+		var links: Array = layers[i].get("next", [])
+		for j in links.size():
+			for t in links[j]:
+				var walked: bool = i + 1 <= pos and int(at.get(i, -1)) == j and int(at.get(i + 1, -1)) == int(t)
+				var ahead: bool = i >= pos   # the links still to choose from read brighter than the old ones
+				for pass_i in 2:   # a dark stroke under a light one, so links read on the busy ground
+					var line := Line2D.new()
+					line.width = (5.0 if walked else 4.0) if pass_i == 0 else (3.0 if walked else 2.0)
+					var c: Color = Color(0, 0, 0, 0.55) if pass_i == 0 else (Palette.EMBER_BRIGHT if walked else (Palette.VIOLET_BRIGHT if ahead else Palette.MUTED))
+					line.default_color = c if pass_i == 0 else Color(c.r, c.g, c.b, 0.95 if walked or ahead else 0.45)
+					line.add_point(spot.call(i, j))
+					line.add_point(spot.call(i + 1, int(t)))
+					map_ctrl.add_child(line)
+	for i in n:
+		var num := _label(str(i + 1), 10, true)
+		num.position = Vector2(margin + step * i - 4, map_size.y - 16)
+		map_ctrl.add_child(num)
+		var opts: Array = layers[i]["options"]
+		for j in opts.size():
+			var kind := str(opts[j])
+			var hidden := deep_fog and i > pos + 2 and opts.size() > 1
+			var cb := Callable()
+			if i == pos and not chosen.has(pos) and reach.has(j):
+				cb = func(idx=j):
+					GameState.choose_node(idx)
+					render()
+			var marker := _path_node_marker("unknown" if hidden else kind, i == pos and (reach.has(j) or opts.size() == 1), cb)
+			marker.position = spot.call(i, j) - marker.size * 0.5
+			var walked_here := int(at.get(i, -1)) == j and i <= pos
+			if i < pos and not walked_here:
+				marker.modulate = Color(1, 1, 1, 0.25)
+			elif i == pos and not reach.has(j):
+				marker.modulate = Color(1, 1, 1, 0.3)
+			elif i < pos:
+				marker.modulate = Color(1, 1, 1, 0.7)
+			map_ctrl.add_child(marker)
+	v.add_child(map_ctrl)
+	var legend := HBoxContainer.new()
+	legend.add_theme_constant_override("separation", 14)
+	if pos < n and not chosen.has(pos) and reach.size() > 1:
+		var hint := _label("Choose your path — click a lit node on the map.", 13)
+		hint.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+		legend.add_child(hint)
+	var spacer := Control.new()
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	legend.add_child(spacer)
+	var kinds: Array[String] = []
+	for i in n:
+		if deep_fog and i > pos + 2:
+			continue
+		for k in layers[i]["options"]:
+			if not kinds.has(str(k)):
+				kinds.append(str(k))
+	for k in ["combat", "elite", "shop", "hazard", "campfire", "event", "treasure", "anvil", "shrine", "echo", "boss"]:
+		if not kinds.has(k):
+			continue
+		var item := HBoxContainer.new()
+		item.add_theme_constant_override("separation", 4)
+		item.tooltip_text = MAP_NODE_DESC.get(k, "")
+		item.mouse_filter = Control.MOUSE_FILTER_STOP
+		item.add_child(_icon(MAP_NODE_ICON[k], 16))
+		var kl := _label({"echo": "Echo", "anvil": "Anvil", "shrine": "Shrine"}.get(k, k.capitalize()), 12)
+		kl.add_theme_color_override("font_color", MAP_NODE_COLOR.get(k, Palette.TEXT))
+		item.add_child(kl)
+		legend.add_child(item)
+	var scroll := ScrollContainer.new()   # a phone can't fit eleven kinds in a row
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size.y = 26
+	scroll.add_child(legend)
+	v.add_child(scroll)
+
+
 # ---------------- Rift Run ----------------
 ## The strip at the top of every rift screen (StS/Hades-style run HUD):
 ## rift name, node pips, run tags (rank, relic ward),
@@ -246,7 +361,8 @@ func _run_bar(in_combat: bool, at_door := false) -> Control:
 		pips.add_child(pip)
 	var pip_wrap := CenterContainer.new()
 	pip_wrap.add_child(pips)
-	top.add_child(pip_wrap)
+	if in_combat or not _compact():   # the phone's path screen has the map for that, and no room
+		top.add_child(pip_wrap)
 	var tags: Array[String] = []
 	var rank: String = str(GameState.run.get("rift_rank", ""))
 	if int(GameState.run.get("shield", 0)) > 0:
@@ -353,9 +469,9 @@ func _run_bar(in_combat: bool, at_door := false) -> Control:
 		bottom.add_child(hp)
 	if bottom.get_child_count() > 0:
 		if _compact() and not in_combat:
-			# One row on the phone canvas: the party sits beside the floor pips.
+			# One row on the phone canvas: the party sits beside the rift's name.
 			top.add_child(bottom)
-			top.move_child(bottom, 2)
+			top.move_child(bottom, 1)   # beside the rift's name
 		else:
 			col.add_child(bottom)
 	panel.add_child(col)
@@ -495,6 +611,7 @@ func _render_rift_run(v: VBoxContainer) -> void:
 		"campfire": _render_campfire_node(v)
 		"event": _render_event_node(v)
 		"treasure": _render_treasure_node(v)
+		"anvil", "shrine", "echo": _render_lane_node(v, kind)
 
 
 
@@ -747,6 +864,48 @@ func _render_treasure_node(v: VBoxContainer) -> void:
 			render()
 		, "" if is_relic else _item_card(obj, note[2]), note))
 	v.add_child(row)
+
+
+## The lane map's own nodes (0.65): anvil, shrine, trainer's echo.
+func _render_lane_node(v: VBoxContainer, kind: String) -> void:
+	GameState.ensure_lane_node()
+	var ns: Dictionary = GameState.run["node_state"]
+	v = _node_split(v, GameData.CRAFTING_BG if kind == "anvil" else GameData.CAMP_BG)
+	var path_name := tr(str(GameData.PATHS.get(str(ns.get("path", "")), {}).get("name", "")))
+	v.add_child(_label({"anvil": tr("An old anvil"), "shrine": tr("Shrine of %s") % path_name, "echo": tr("A trainer's echo")}[kind], 18))
+	if ns.get("done", false):
+		v.add_child(_wrap_label(str(ns.get("note", "")), 13, true))
+		_node_continue(v)
+		return
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 8)
+	flow.add_theme_constant_override("v_separation", 6)
+	match kind:
+		"anvil":
+			v.add_child(_wrap_label("A smith's anvil, still warm, left in the rift. One piece your party wears can be tempered here, free.", 13, true))
+			var its := GameState.anvil_items()
+			for it in its:
+				var owner := GameState.find_hero(it.equipped_to)
+				flow.add_child(_button(tr("%s (%s) → +%d") % [tr(it.name), owner.name.split(" the ")[0] if owner else "?", it.forge_level + 1], func(id=it.id):
+					GameState.use_anvil(id)
+					render()))
+			if its.is_empty():
+				v.add_child(_label("Nothing the party wears can take more tempering.", 12, true))
+		"shrine":
+			v.add_child(_wrap_label(tr("A shrine to the %s Path, its candles still lit. Kneel, and the party learns: %d%% of a level for heroes on this Path, %d%% for the rest.") % [path_name, int(GameState.SHRINE_XP[0] * 100), int(GameState.SHRINE_XP[1] * 100)], 13, true))
+			flow.add_child(_button("Kneel", func():
+				GameState.pray_at_shrine()
+				render()))
+		"echo":
+			v.add_child(_wrap_label("The echo of an old guild's trainer still drills in this hall. One hero can train with it and gain a level (at level 10: attribute points).", 13, true))
+			for h in GameState.current_party().filter(func(x): return x.hp > 0):
+				flow.add_child(_button(tr("%s (Lv%d)") % [h.name.split(" the ")[0], h.level], func(id=h.id):
+					GameState.train_with_echo(id)
+					render()))
+	flow.add_child(_button("Move on", func():
+		GameState.skip_lane_node()
+		render()))
+	v.add_child(flow)
 
 
 ## Shop and hazard nodes: the node's art on the left at its own 320x200

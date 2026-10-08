@@ -1551,6 +1551,7 @@ var _pending_diff_id: String = "lesser"
 
 
 var _pending_endless: bool = false
+var _pending_breach := false   # 0.63: the party screen is for holding a broken rift
 var _endless_biome := ""   # the Endless Rift region picked on the party screen
 var _pending_finale: bool = false   # Party Assembly is for the current act's finale
 var _pending_tower: bool = false    # Party Assembly is for the next Tower of Trials floor
@@ -1580,11 +1581,11 @@ const MAP_NODE_COLOR := {
 	"combat": Palette.HAZARD, "elite": Palette.ELITE, "shop": Palette.COINS,
 	"hazard": Palette.CRYSTALS, "boss": Palette.TOKENS,
 	"campfire": Palette.RANK_E, "event": Palette.VIOLET_BRIGHT, "treasure": Palette.RANK_S,
-	"pillar": Palette.RANK_S,
+	"pillar": Palette.RANK_S, "anvil": Palette.COINS, "shrine": Palette.VIOLET_BRIGHT, "echo": Palette.RANK_D, "unknown": Palette.LINE,
 }
 
 
-const MAP_NODE_LABEL := {"combat": "C", "elite": "E", "shop": "S", "hazard": "H", "boss": "B", "campfire": "R", "event": "?", "treasure": "T", "pillar": "P"}
+const MAP_NODE_LABEL := {"combat": "C", "elite": "E", "shop": "S", "hazard": "H", "boss": "B", "campfire": "R", "event": "?", "treasure": "T", "pillar": "P", "anvil": "A", "shrine": "W", "echo": "X"}
 
 
 const MAP_NODE_ICON := {
@@ -1597,6 +1598,9 @@ const MAP_NODE_ICON := {
 	"event": "res://assets/skills/eye_gem.png",
 	"treasure": "res://assets/dungeon/chest_icon.png",
 	"pillar": "res://assets/survivors/pillar.png",
+	"anvil": "res://assets/skills/gear.png",
+	"shrine": "res://assets/skills/gem_red.png",
+	"echo": "res://assets/skills/star.png",
 }
 
 

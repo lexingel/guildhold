@@ -1212,6 +1212,16 @@ func _render_combat_node(v: VBoxContainer) -> void:
 			var stake := _wrap_label(tr("At stake: if the party falls, %d Gold and %d Essence of this run's haul are lost. Party power %d of %d recommended. Retreat keeps it all.") % [int(haul.x * float(GameData.HAUL_LOSS["fell"])), int(haul.y * float(GameData.HAUL_LOSS["fell"])), Combat.party_power(GameState.current_party()), Combat.recommended_power(str(GameState.run.get("diff_id", "")), str(GameState.run.get("rift_rank", "")))], 13)
 			stake.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
 			v.add_child(stake)
+		if not GameState.current_party().any(func(h): return not h.is_downed() and h.hp > 0):
+			# Everyone fell before the fight (a hazard): nobody can engage (0.63).
+			var nobody := _wrap_label("No one in the party can fight. Leave the rift: you keep your loot.", 14)
+			nobody.add_theme_color_override("font_color", Palette.HAZARD)
+			v.add_child(nobody)
+			v.add_child(_icon_domain_button("ember", "res://assets/skills/wing.png", tr("Leave rift"), func():
+				GameState.retreat_now()
+				screen = "camp"
+				render()))
+			return
 		_combat_hotkeys["Space"] = func(): GameState.engage_node()
 		v.add_child(_icon_domain_button("ember", "res://assets/skills/sword_a.png", _no_keys(tr("Engage  (Space)")), func():
 			# engage_node() already emits state_changed, which render() is

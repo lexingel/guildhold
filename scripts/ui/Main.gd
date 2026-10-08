@@ -1084,7 +1084,7 @@ func _breadcrumb_for_screen() -> String:
 		"rift_hall": return "Rift Hall"
 		"tower": return "Tower of Trials"
 		"party_assembly": return "Party Assembly"
-		"defense": return "Riftbreak"
+		"defense": return "Riftbreak" if GameData.DEFENSE_TD_ENABLED else "Hold the breach"
 		"rift_run" when GameState.run.has("tower"): return tr("Tower of Trials — Floor %d") % int(GameState.run["tower"])
 		"rift_run" when GameState.run.has("descent"): return tr("The Descent — Depth %d") % int(GameState.run["descent"])
 		"rift_run": return tr("Rift Run — Floor %d/%d") % [int(GameState.run.get("pos", 0)) + 1, GameState.run.get("layers", []).size()]
@@ -1479,7 +1479,7 @@ func _topbar(container: Control, breadcrumb: String = "") -> void:
 		var title_lbl := _label(" · ".join(titles), 12)
 		title_lbl.add_theme_color_override("font_color", Palette.RANK_S)
 		title_lbl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		title_lbl.tooltip_text = tr("Guild titles — Tower of Trials (best floor %d) and the Endless Rift (best %d:%02d)") % [GameState.tower_best, GameState.best_endless_time / 60, GameState.best_endless_time % 60]
+		title_lbl.tooltip_text = tr("Guild titles — Tower of Trials (best floor %d) and the Endless Rift (best %d:%02d)") % [GameState.tower_best, GameState.best_endless_time / 60, GameState.best_endless_time % 60] if GameData.ENDLESS_ENABLED else tr("Guild title — Tower of Trials (best floor %d)") % GameState.tower_best
 		title_lbl.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(title_lbl)
 	if _nav_bar != null and not _compact():
@@ -2109,6 +2109,7 @@ func _render_rift_hall(v: VBoxContainer) -> void:
 		pending_relic_choice = -1
 		_pending_tower = false
 		_pending_descent = false
+		_pending_breach = false
 		_pending_daily = not endless and _ladder_twist and GameState.daily_available()
 		screen = "party_assembly"
 		_pending_rift_rank = rank_id
@@ -2133,7 +2134,7 @@ func _render_rift_hall(v: VBoxContainer) -> void:
 	var gates := [
 		[tr("Rank %s Rift") % tr(str(lesser_pick)), Rect2(0, 0, 230, 340), Rect2(18, 65, 68, 98), go.bind(lesser_pick, false)],
 		["Endless Rift" if endless_open else tr("Endless Rift — locked"), Rect2(230, 0, 240, 340), Rect2(110, 20, 97, 130),
-			(func(): _endless_choice_overlay(go)) if endless_open else Callable()],
+			((func(): _endless_choice_overlay(go)) if GameData.ENDLESS_ENABLED else _rift_mode_defs(go)[0][3]) if endless_open else Callable()],
 		[tr("Rank %s Rift") % tr(str(greater_pick)) if greater_open else (tr("Ranks C-SSS — locked") if not unlocked else tr("Rank C — %s") % tr(str(GameState.ladder_rank_lock("C")))),
 			Rect2(470, 0, 230, 340), Rect2(230, 30, 78, 140), go.bind(greater_pick, false) if greater_open else Callable()],
 	]
@@ -2316,7 +2317,7 @@ func _rift_mode_defs(go: Callable) -> Array:
 		_pending_descent = true
 		_pending_daily = false
 		render()
-	return [
+	var defs := [
 		["The Descent", tr("Turn-based, with your heroes: depth after depth, each harder; lost champions wait in pillars · deepest %d") % GameState.descent_best, Combat.recommended_power("", GameState.descent_rank()), descend,
 			"" if GameState.endless_unlocked() else tr("Opens when you complete Act II"), "Assemble party"],
 		["Endless Rift", tr("Real-time, with your champions: steer them through endless waves · best %d:%02d") % [GameState.best_endless_time / 60, GameState.best_endless_time % 60], Combat.recommended_power("endless"), go.bind("", true),
@@ -2324,6 +2325,9 @@ func _rift_mode_defs(go: Callable) -> Array:
 		["Tower of Trials", tr("100 fixed floors · best floor %d") % GameState.tower_best, GameState.tower_recommended_power(maxi(1, GameState.tower_next_floor())),
 			func(): screen = "tower"; render(), "" if GameState.feature_unlocked("tower") else tr("Opens when you complete Act I"), "Enter the Tower"],
 	]
+	if not GameData.ENDLESS_ENABLED:
+		defs.remove_at(1)
+	return defs
 
 
 ## The other modes as cards: what each is, how your strongest party measures
@@ -2655,7 +2659,17 @@ func _render_party_assembly(v: VBoxContainer) -> void:
 				var lh := GameState.find_hero(id)
 				if lh and not lh.is_champion and not lh.is_downed() and not lh.is_away() and not pending_party.has(id) and pending_party.size() < _party_cap():
 					pending_party.append(id)
-	if GameState.breach_blocks_runs():
+	if GameState.breach_blocks_runs() and not GameData.DEFENSE_TD_ENABLED:
+		# A broken rift comes first: this party goes to hold it (0.63).
+		_pending_breach = true
+		_pending_rift_rank = GameState.breach_rank_id()   # the readout measures the breach's rank
+		_pending_diff_id = str(GameData.find_rift_rank(_pending_rift_rank)["base"])
+		_pending_tower = false
+		_pending_descent = false
+		_pending_daily = false
+		_pending_finale = false
+		_pending_endless = false
+	elif GameState.breach_blocks_runs():
 		screen = "defense"   # a broken rift comes first
 		_render_defense_setup(v)
 		return
@@ -2663,7 +2677,13 @@ func _render_party_assembly(v: VBoxContainer) -> void:
 		_render_endless_assembly(v)
 		return
 	var tower_info := GameState.tower_floor_info(GameState.tower_next_floor()) if _pending_tower else {}
-	if _pending_daily:
+	if _pending_breach:
+		var gate := GameState.breach.has("gate")
+		var bt := _label(tr("Hold the breach — Rank %s near %s") % [tr(GameState.breach_rank_id()), GameState.breach_place()], 20)
+		bt.add_theme_color_override("font_color", Palette.HAZARD)
+		v.add_child(bt)
+		v.add_child(_wrap_label(tr("%d fights in a row with no camp, shop or campfire between them, the last against the breach's warden. Hold, and the guild is paid; fall or turn back, and it costs part of your Essence and of the Gold above the coming bill, and damages a building. Up to 4 heroes; it takes the day.") % (GameData.GATE_RIFT_LAYERS if gate else GameData.BREACH_RIFT_LAYERS).size(), 12, true))
+	elif _pending_daily:
 		var dinfo := GameState.daily_info()
 		v.add_child(_label(tr("Rank %s Rift — today's twist: %s") % [tr(str(_pending_rift_rank)), tr(str(dinfo["rule"]["name"]))], 20))
 		v.add_child(_wrap_label(tr("Rule: %s Starting boon: %s (%s). Sealing it pays +%d Essence. Up to 4 heroes.") % [tr(str(dinfo["rule"]["desc"])), tr(str(GameData.find_boon(str(dinfo["boon"]))["name"])), tr(str(GameData.find_boon(str(dinfo["boon"]))["desc"])), GameData.DAILY_CLEAR_CRYSTALS + GameData.DAILY_CLEAR_CRYSTALS_PER_ACT * mini(GameState.campaign_act, 3)], 12, true))
@@ -3279,7 +3299,9 @@ func _party_launch_bar() -> Control:
 		if _pending_endless and _pending_rift_rank == "":
 			_start_survivors(ids)
 			return
-		if _pending_tower:
+		if _pending_breach:
+			GameState.start_breach_rift(ids)
+		elif _pending_tower:
 			GameState.start_tower(ids)
 		elif _pending_descent:
 			GameState.start_descent(ids, chosen)
@@ -3295,6 +3317,7 @@ func _party_launch_bar() -> Control:
 		_pending_tower = false
 		_pending_descent = false
 		_pending_daily = false
+		_pending_breach = false
 		pending_relic_options.clear()
 		pending_relic_choice = -1
 		_pending_rift_rank = ""
@@ -3389,7 +3412,7 @@ func _breach_card() -> PanelContainer:
 		var days := GameState.breach_days_left()
 		var r := tr(GameState.breach_rank_id())
 		var chip := _rule_chip(tr("⚠ A Rank %s rift near %s breaks in %d day%s — seal a Rank %s rift or higher to close it") % [r, GameState.breach_place(), days, tr(str(_pl(days))), r],
-			tr("Or let it break and defend: build towers, post idle heroes, steer a champion (Guild > Manage > Defenses researches towers)."), Palette.EMBER_BRIGHT)
+			tr("Or let it break and hold it: back-to-back fights with no camp between them (Guild > Manage > Wardcraft softens them)."), Palette.EMBER_BRIGHT)
 		(chip.get_child(0) as Label).add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
 		chip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		return chip
@@ -3421,6 +3444,11 @@ func _breach_card() -> PanelContainer:
 
 ## Before a defense: who stands at the posts, which champion goes, and what's at stake.
 func _render_defense_setup(v: VBoxContainer) -> void:
+	if not GameData.DEFENSE_TD_ENABLED:   # 0.63: a breach rift, from the party screen
+		screen = "party_assembly"
+		_prefill_party = true
+		_render_party_assembly(v)
+		return
 	if not GameState.breach_broken():
 		screen = "rift_hall"
 		_render_rift_hall(v)

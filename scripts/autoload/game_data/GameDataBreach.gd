@@ -5,6 +5,13 @@ extends "res://scripts/autoload/game_data/GameDataChampions.gd"
 ## higher first to prevent it; otherwise it breaks, rift runs wait, and the
 ## guild defends in a tower-defense fight.
 
+## 0.63: a breach is defended in a breach rift (back-to-back fights in the
+## normal combat); the tower defense (scripts/defense) is parked, not deleted.
+const DEFENSE_TD_ENABLED := false
+## A breach rift's floors: a gate (Act VI) holds one more elite.
+const BREACH_RIFT_LAYERS := ["combat", "elite", "boss"]
+const GATE_RIFT_LAYERS := ["combat", "elite", "elite", "boss"]
+
 const BREACH_UNLOCK_ACT := 2       # campaign_act from which rifts swell (Act I done)
 const BREACH_FIRST_DELAY := 3      # days after that until the first one
 const BREACH_EVERY_MIN := 8        # days between one breach being dealt with and the next

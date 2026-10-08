@@ -296,9 +296,14 @@ func gen_loot(rarity_id: String) -> Dictionary:
 ## Campfire / event / treasure are one entry each, so fights stay about half
 ## of every fork.
 const FORK_POOL := ["combat", "combat", "combat", "shop", "hazard", "elite", "campfire", "event", "treasure"]
+## Nodes only a lane map deals (0.65): a free Forge level, a Path's shrine, a
+## trainer's echo.
+const LANE_EXTRAS := ["anvil", "shrine", "echo"]
 
 
 func build_layers(diff: Dictionary) -> Array:
+	if int(diff.get("lanes", 0)) >= 3 and int(diff["floors"]) >= 5:
+		return _build_lane_map(diff, int(diff["lanes"]))
 	var layers: Array = [{"options": ["combat"]}]
 	var mid_count: int = int(diff["floors"]) - 2
 	var pool: Array = FORK_POOL.duplicate()
@@ -333,6 +338,57 @@ func build_layers(diff: Dictionary) -> Array:
 			opts[oi] = "elite"
 	layers.append({"options": ["boss"]})
 	return layers
+
+## A lane map (0.65, docs/design/revamp_2026_10.md): an opening fight, then
+## floors of `lanes` nodes, each linked to the same lane and sometimes a
+## neighbour on the next floor (so routes cross and can be planned), a
+## campfire every route passes before the boss, and the boss. A floor's
+## "next" holds, per node, the node indices it leads to.
+func _build_lane_map(diff: Dictionary, lanes: int) -> Array:
+	var pool: Array = FORK_POOL.duplicate() + LANE_EXTRAS
+	if diff.get("elite_chance_up", false):
+		pool.append("elite")
+	if diff.get("shop_chance_down", false):
+		pool.erase("shop")
+	var mid: int = maxi(1, int(diff["floors"]) - 3)
+	var all_lanes: Array = range(lanes)
+	var layers: Array = [{"options": ["combat"], "next": [all_lanes.duplicate()]}]
+	for f in mid:
+		var opts: Array = []
+		for l in lanes:
+			var k: String = pool[randi() % pool.size()]
+			for guard in 8:   # two of a kind at most on a floor; one hazard, one elite (so a route can go around)
+				if opts.count(k) < (1 if k in ["hazard", "elite"] else 2):
+					break
+				k = pool[randi() % pool.size()]
+			opts.append(k)
+		layers.append({"options": opts})
+	# At least one elite somewhere, as before.
+	if not layers.any(func(l): return (l["options"] as Array).has("elite")):
+		var ef := 1 + randi() % mid
+		(layers[ef]["options"] as Array)[randi() % lanes] = "elite"
+	for f in range(1, mid + 1):
+		var nxt: Array = []
+		if f == mid:   # the last floor all leads to the campfire
+			for l in lanes:
+				nxt.append([0])
+		else:
+			for l in lanes:   # the same lane, and each neighbour half the time (about two ways on, as the old forks)
+				var to: Array = [l]
+				for side in [l - 1, l + 1]:
+					if side >= 0 and side < lanes and randf() < 0.5:
+						to.append(side)
+				if to.size() == 1:   # never a corridor: at least one neighbour
+					to.append(l + 1 if l + 1 < lanes else l - 1)
+				nxt.append(to)
+			for t in lanes:   # every node can be reached
+				if not nxt.any(func(x): return (x as Array).has(t)):
+					(nxt[clampi(t + (1 if randf() < 0.5 else -1), 0, lanes - 1)] as Array).append(t)
+		layers[f]["next"] = nxt
+	layers.append({"options": ["campfire"], "next": [[0]]})
+	layers.append({"options": ["boss"]})
+	return layers
+
 
 ## Difficulty knobs, tuned with a full-run simulation (HP carrying across a
 ## rift's floors): the pressure sits on later floors, elites, bosses and the
