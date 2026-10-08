@@ -168,6 +168,9 @@ var contest_start: Dictionary = {}   # both guilds' Renown when this month's con
 var camp_event: Dictionary = {}       # today's camp event {id, day, data}, or empty (0.64)
 var camp_omen: Dictionary = {}        # a threat foretold {id, day it strikes}, or empty
 var camp_event_last: Dictionary = {}  # event id -> the day it last came (cooldowns)
+var hardship: int = 0   # -1 Story, 0 Standard, 1-10 Hardship (0.67; GameData.HARDSHIPS)
+var next_resolve: int = 0
+var key_binds: Dictionary = {}   # a fight key's default name -> the key the player moved it to (0.68; settings, not the save)             # Resolve the next party sets out with, on top (0.66: camp events, requests)
 var hero_request: Dictionary = {}   # this week's request: {type, ids, day}, or empty
 var wage_raise: Dictionary = {}     # hero id -> extra wage share from granted raises
 var pay_rate: Dictionary = {}       # hero id -> "half"/"bonus" set in the Ledger (absent = full pay)
@@ -441,20 +444,54 @@ func keepers() -> bool:
 	return accord_ending in ["renew", "rewrite"]
 
 
-## "The Vale this year": the product of the year's `key` multipliers.
+## "The Vale this year": the product of the year's `key` multipliers, and of
+## the guild's Hardship (0.67).
 func year_mult(key: String) -> float:
 	var m := 1.0
 	for y in vale_year.get("mods", []):
 		m *= float(GameData.VALE_YEARS.get(str(y["id"]), {}).get("mult", {}).get(key, 1.0))
+	for hd in hardship_mods():
+		m *= float(hd.get("mult", {}).get(key, 1.0))
 	return m
 
 
-## "The Vale this year": the sum of the year's `key` additions.
+## "The Vale this year": the sum of the year's `key` additions, and the Hardship's.
 func year_add(key: String) -> float:
 	var a := 0.0
 	for y in vale_year.get("mods", []):
 		a += float(GameData.VALE_YEARS.get(str(y["id"]), {}).get("add", {}).get(key, 0.0))
+	for hd in hardship_mods():
+		a += float(hd.get("add", {}).get(key, 0.0))
 	return a
+
+
+## The Hardship levels in force (Story's one entry, or levels 1..hardship).
+func hardship_mods() -> Array:
+	return [GameData.HARDSHIP_STORY] if hardship < 0 else GameData.HARDSHIPS.slice(0, clampi(hardship, 0, GameData.HARDSHIPS.size()))
+
+
+## "Story", "Standard", "Hardship 4".
+func hardship_name(h: int = -99) -> String:
+	var v := hardship if h == -99 else h
+	return tr("Story") if v < 0 else (tr("Standard") if v == 0 else tr("Hardship %d") % v)
+
+
+## How much stronger a party must be at this Hardship (the readout scales with it).
+func hardship_rec_mult() -> float:
+	return sqrt(year_mult("foe_hp") * year_mult("foe_dmg")) if hardship != 0 else 1.0
+
+
+## The highest Hardship a new guild may choose: one above the highest a past
+## guild reached an ending at (Hardship 1 also opens at Act IV).
+func hardship_unlocked() -> int:
+	var top := 0
+	for g in legacy.get("guilds", []):
+		var h := int(g.get("hardship", 0))
+		if str(g.get("ending", "")) != "":
+			top = maxi(top, h + 1)
+		elif int(g.get("act", 0)) >= 4 and h <= 0:
+			top = maxi(top, 1)
+	return clampi(top, 0, GameData.HARDSHIPS.size())
 
 
 ## The region the Hollow stirs in this year, or "".
@@ -658,7 +695,7 @@ func _run_for_save() -> Dictionary:
 	if run.has("tower"):
 		out["tower"] = run["tower"]
 		out["tower_snap"] = run.get("tower_snap", {})
-	for key in ["descent", "morrow", "breach", "at"]:   # 0.65: these were lost on a reload
+	for key in ["descent", "morrow", "breach", "at", "resolve"]:   # 0.65: these were lost on a reload
 		if run.has(key):
 			out[key] = run[key]
 	return out
@@ -768,6 +805,7 @@ func slot_summary(slot: int) -> Dictionary:
 		"empty": false,
 		"guild_name": parsed.get("guild_name", ""),
 		"rifts_sealed": parsed.get("rifts_sealed", 0),
+		"hardship": int(parsed.get("hardship", 0)),
 	}
 
 
@@ -783,28 +821,90 @@ func save_settings() -> void:
 	if f:
 		f.store_string(JSON.stringify({
 			"music_volume": music_volume, "sfx_volume": sfx_volume, "voice_volume": voice_volume, "voice_on": voice_on, "resolution_idx": resolution_idx, "fullscreen": fullscreen, "combat_speed": combat_speed, "ui_scale": ui_scale,
-			"reduce_motion": reduce_motion, "colorblind": colorblind, "hearing_aid": hearing_aid, "language": language, "key_hints": key_hints,
+			"reduce_motion": reduce_motion, "colorblind": colorblind, "hearing_aid": hearing_aid, "language": language, "key_hints": key_hints, "key_binds": key_binds,
 		}))
+
+
+## The fight keys that can be moved (Settings > Controls), [default, what it does].
+const BINDABLE_KEYS := [["1", "Attack, or the first choice"], ["2", "First skill, or the second choice"], ["3", "Second skill, or the third choice"], ["4", "Ability, or the fourth choice"],
+	["5", "Defend"], ["6", "Guard"], ["7", "Move"], ["8", "Tonics"], ["9", "Champion's Call"], ["M", "More"], ["Space", "Repeat the last action"], ["Tab", "Next target"], ["A", "Auto"], ["Q", "Quick fight"]]
+
+
+## The key a fight command answers to now (its default unless moved).
+func bound_key(default_key: String) -> String:
+	return str(key_binds.get(default_key, default_key))
+
+
+## The command a pressed key means: the default whose binding it is, "" if
+## that key's own command was moved elsewhere, else the key itself.
+func unbind_key(pressed: String) -> String:
+	for d in key_binds:
+		if str(key_binds[d]) == pressed:
+			return str(d)
+	return "" if key_binds.has(pressed) else pressed
+
+
+## Moves command `default_key` to `key`; "" or why not (the key is taken).
+func bind_key(default_key: String, key: String) -> String:
+	for pair in BINDABLE_KEYS:
+		var d := str(pair[0])
+		if d != default_key and bound_key(d) == key:
+			return tr("%s is already used for: %s") % [key, tr(str(pair[1]))]
+	if key == default_key:
+		key_binds.erase(default_key)
+	else:
+		key_binds[default_key] = key
+	save_settings()
+	return ""
 
 
 ## Switches every translated line to `language` (the next render redraws).
 func apply_language() -> void:
-	if _names == null:
-		# Hero, item, relic and warden names, assembled from translated parts.
-		_names = load("res://scripts/autoload/NameTranslation.gd").new("tr")
-		TranslationServer.add_translation(_names)
+	if _names.is_empty():
+		# Hero, item, relic and warden names, assembled from translated parts:
+		# one per language, each in that language's word order (0.70).
+		for pair in GameData.LANGUAGES:
+			if str(pair[0]) != "en":
+				var t: Translation = load("res://scripts/autoload/NameTranslation.gd").new(str(pair[0]))
+				TranslationServer.add_translation(t)
+				_names.append(t)
 	TranslationServer.set_locale(language)
+	_apply_cjk_font()
 
 
-var _names: Translation = null
+var _names: Array = []
+
+
+## Chinese needs a CJK font (0.70): when its file is in assets/fonts it backs
+## every font up; without it, desktops fall back to a system font.
+const CJK_FONT := "res://assets/fonts/" + "NotoSansSC-Regular.otf"   # optional, like PENDING_MUSIC (the media test checks literal paths)
+var _cjk_added := false
+
+
+func _apply_cjk_font() -> void:
+	if _cjk_added or not language.begins_with("zh") or not ResourceLoader.exists(CJK_FONT):
+		return
+	_cjk_added = true
+	var cjk: Font = load(CJK_FONT)
+	for path in ["res://assets/fonts/Lato-Regular.ttf", "res://assets/fonts/Cinzel-Bold.ttf", "res://assets/fonts/Alegreya-Variable.ttf", "res://assets/fonts/Overpass-Regular.ttf"]:
+		var f: FontFile = load(path)
+		if f and not f.fallbacks.has(cjk):
+			var fb := f.fallbacks.duplicate()
+			fb.append(cjk)
+			f.fallbacks = fb
+
+
+## Whether a language can be shown here (Chinese needs its font on the web).
+func language_ready(code: String) -> bool:
+	return not code.begins_with("zh") or ResourceLoader.exists(CJK_FONT) or not OS.has_feature("web")
 
 
 # A script-backed Translation left in the TranslationServer crashes the engine
 # at shutdown (its script is freed first), so take it out on the way out.
 func _exit_tree() -> void:
-	if _names != null:
-		TranslationServer.remove_translation(_names)
-		_names = null
+	for t in _names:
+		TranslationServer.remove_translation(t)
+	_names.clear()
 
 
 func load_settings() -> void:
@@ -822,6 +922,7 @@ func load_settings() -> void:
 		reduce_motion = bool(parsed.get("reduce_motion", false))
 		colorblind = bool(parsed.get("colorblind", false))
 		key_hints = bool(parsed.get("key_hints", false))
+		key_binds = (parsed.get("key_binds", {}) as Dictionary).duplicate()
 		hearing_aid = bool(parsed.get("hearing_aid", false))
 		language = str(parsed.get("language", "en"))
 		sfx_volume = parsed.get("sfx_volume", 1.0)
@@ -864,7 +965,7 @@ func save() -> void:
 		"subclass_known": subclass_known, "subclass_carried": subclass_carried, "tower_week": tower_week, "tower_week_cleared": tower_week_cleared,
 		"daily_attempt_day": daily_attempt_day, "daily_clears": daily_clears, "daily_streak": daily_streak, "daily_last_clear": daily_last_clear,
 		"run_history": run_history, "runs_finished": runs_finished, "fallen": fallen, "heroes_lost_total": heroes_lost_total, "best_endless_time": best_endless_time, "endless_runs": endless_runs, "endless_best": endless_best, "endless_milestones": endless_milestones, "boon_set4_reached": boon_set4_reached,
-		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "camp_event": camp_event, "camp_omen": camp_omen, "camp_event_last": camp_event_last, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
+		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "camp_event": camp_event, "camp_omen": camp_omen, "camp_event_last": camp_event_last, "next_resolve": next_resolve, "hardship": hardship, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,
 		"guide_hidden": guide_hidden, "last_party": last_party, "relics_found": relics_found, "accord_pages": accord_pages, "accord_ending": accord_ending, "line_piece_seen": line_piece_seen, "skipped_act1": skipped_act1, "ledger_dry": ledger_dry, "act_since": act_since, "crossings_answered": crossings_answered, "crossings_through": crossings_through, "gates_held": gates_held, "sky_ending": sky_ending, "book2_started": book2_started, "branches": branches, "lore_dry": lore_dry, "lore_found_here": lore_found_here, "chosen_region": chosen_region, "echoes_seen": echoes_seen, "charter_choice": charter_choice, "charter_result": charter_result, "morrow_defeated": morrow_defeated, "legacy_written": legacy_written, "founding": founding, "oaths": oaths, "halls_restored": halls_restored, "hall_works": hall_works, "tide_count": tide_count, "tides_held": tides_held, "tidewalls": tidewalls, "descent_best": descent_best, "vale_year": vale_year, "board_claimed": board_claimed, "echoes_returned": echoes_returned, "accord_hero": accord_hero,

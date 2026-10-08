@@ -12,5 +12,9 @@ artisticdude (opengameart.org): "RPG Sound Pack"
   coin (coin), attack (swing), knockout (giant3), windup (sword-unsheathe),
   shield (chainmail1), heal (bubble2)
 Synthesized for the game (tools/gen_sfx.py): burn, chill
+Made from the sounds above (0.69, tools/derive_sfx.py: pitch, filters, layers, a little synthesis):
+  path_* (one per Path), foe_hit_* / foe_down_* (by region), dodge, guard, ward, boss_down,
+  elite_down, camp_event, camp_dilemma, camp_omen, tab, node_pick, resolve_down, resolve_waver,
+  relic_pick, title, payday
 
 Each was trimmed and gain-matched to sit with the rest.

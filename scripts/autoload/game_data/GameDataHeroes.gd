@@ -71,6 +71,12 @@ const QUIRKS := {
 	"Accord-Sworn": {"origin": "accord", "stats": {"hp_pct": 0.08, "dmg_pct": 0.04}, "voice": "devout"},
 	"Tide-Hardened": {"origin": "tide", "stats": {"hazard_guard_pct": 0.2, "hp_pct": 0.06}, "voice": "stoic"},
 	"Heir": {"origin": "heir", "stats": {"dmg_pct": 0.05, "hp_pct": 0.05}},
+	# Hero requests (0.66): what a granted request leaves behind.
+	"Steady Nerves": {"origin": "story", "stats": {"dodge_pct": 0.05}},
+	"Mentor": {"origin": "story", "stats": {"first_round_pct": 0.08}},
+	"Spark of Genius": {"origin": "story", "stats": {"ability_power": 0.06}},
+	"Hearth-Warmed": {"origin": "story", "stats": {"hp_pct": 0.06}},
+	"Grudge-Bearer": {"origin": "story", "stats": {"dmg_pct": 0.06, "mend_pct": -0.02}},
 }
 const SCARS_MAX := 2
 const QUIRK_TREAT_COST := 30
@@ -329,7 +335,8 @@ static func keyword_regexes() -> Array:
 			if local != pat:
 				pat += "|" + local
 			var re := RegEx.new()
-			re.compile("(*UCP)(?i)\\b(" + pat + ")\\b")
+			# Chinese has no spaces, so no word edges to anchor on (0.70).
+			re.compile(("(*UCP)(?i)(" + pat + ")") if loc.begins_with("zh") else ("(*UCP)(?i)\\b(" + pat + ")\\b"))
 			_keyword_res.append([str(k[1]), str(k[2]), re])
 	return _keyword_res
 

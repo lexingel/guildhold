@@ -37,7 +37,8 @@ static func hero_portrait(h) -> String:
 ## ponytail: suffix-only plurals; switch call sites to tr_n() when a language
 ## with real plural forms (German, Russian...) is added.
 static func pl(n: int, suffix: String = "s") -> String:
-	return "" if n == 1 or not TranslationServer.get_locale().begins_with("en") else suffix
+	var loc := TranslationServer.get_locale()
+	return "" if n == 1 or not (loc.begins_with("en") or loc.begins_with("es")) else suffix   # Spanish nouns take the -s too (0.70)
 
 
 static func find_role(role_id: String) -> Dictionary:

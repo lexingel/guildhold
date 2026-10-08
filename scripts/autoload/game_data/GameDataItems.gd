@@ -164,10 +164,76 @@ static func relic_icon(r) -> String:
 
 
 static func find_unique_relic(unique_id: String) -> Dictionary:
-	for u in UNIQUE_RELICS + TOWER_RELICS.values() + ENDLESS_RELICS.values():
+	for u in UNIQUE_RELICS + TOWER_RELICS.values() + ENDLESS_RELICS.values() + PATH_RELICS:
 		if u["id"] == unique_id:
 			return u
 	return {}
+
+## Path relics (0.65): each bends one Path's rule (Combat._pm reads "pmod").
+## Sealing a Rank D+ ladder rift offers 1 of 3 (two for the party's Paths).
+## Legendary, fixed power, no drawback; same lookup as the uniques.
+const PATH_RELICS := [
+	{"id": "p_bulwark_chain", "name": "Bulwark Chain", "type": "Ember", "path": "shieldwall", "pmod": "guard_share", "value": 0.15,
+	 "desc": "Guardian takes 40% of the blows aimed at the back row (was 25%)."},
+	{"id": "p_oathplate_rivets", "name": "Oathplate Rivets", "type": "Ember", "path": "shieldwall", "pmod": "guard_momentum", "value": 1.0,
+	 "desc": "When the Guardian takes a share of a blow: +1 Momentum, once a round."},
+	{"id": "p_red_tooth_torc", "name": "Red Tooth Torc", "type": "Ember", "path": "bloodrage", "pmod": "rage_cap", "value": 0.2,
+	 "desc": "Bloodrage climbs to +60% damage (was +40%)."},
+	{"id": "p_grudge_knot", "name": "Grudge Knot", "type": "Ember", "path": "bloodrage", "pmod": "rage_pierce", "value": 0.3,
+	 "desc": "Below 30% HP, a Bloodrage hero's hits ignore armour and wards."},
+	{"id": "p_whetstone_of_habit", "name": "Whetstone of Habit", "type": "Ember", "path": "weaponmaster", "pmod": "combo_cap", "value": 2.0,
+	 "desc": "Combo stacks two higher."},
+	{"id": "p_duelists_ribbon", "name": "Duelist's Ribbon", "type": "Ember", "path": "weaponmaster", "pmod": "combo_pierce", "value": 1.0,
+	 "desc": "At 4 Combo, hits on the same foe ignore armour and wards."},
+	{"id": "p_owl_feather", "name": "Owl-Feather Fletching", "type": "Verdant", "path": "marksman", "pmod": "steady_keep", "value": 1.0,
+	 "desc": "Steady Aim shrugs off the first hit each fight."},
+	{"id": "p_long_sightline", "name": "Long Sightline", "type": "Verdant", "path": "marksman", "pmod": "steady_back", "value": 0.2,
+	 "desc": "Steady Aim gives +55% from the back row (was +35%)."},
+	{"id": "p_bramble_coil", "name": "Bramble Coil", "type": "Verdant", "path": "trapper", "pmod": "snare_two", "value": 1.0,
+	 "desc": "In round 1 the snares take two foes."},
+	{"id": "p_tripwire_bells", "name": "Tripwire Bells", "type": "Verdant", "path": "trapper", "pmod": "snare_dmg", "value": 0.15,
+	 "desc": "Snared foes take 15% more damage from everyone."},
+	{"id": "p_hunters_chalk", "name": "Hunter's Chalk", "type": "Verdant", "path": "stalker", "pmod": "mark_jump", "value": 1.0,
+	 "desc": "When a marked foe falls, the Mark jumps to the next foe."},
+	{"id": "p_blood_scent", "name": "Blood Scent", "type": "Verdant", "path": "stalker", "pmod": "mark_bonus", "value": 0.1,
+	 "desc": "The party deals +25% to a marked foe (was +15%)."},
+	{"id": "p_kindling_box", "name": "Kindling Box", "type": "Arcane", "path": "evocation", "pmod": "heat_start", "value": 2.0,
+	 "desc": "Evocation heroes start every fight with 2 Heat."},
+	{"id": "p_cinder_glass", "name": "Cinder Glass", "type": "Arcane", "path": "evocation", "pmod": "heat_at", "value": 1.0,
+	 "desc": "Heat detonates one step sooner."},
+	{"id": "p_loomed_sigil", "name": "Loomed Sigil", "type": "Arcane", "path": "warding", "pmod": "ward_two", "value": 1.0,
+	 "desc": "Ward Weave covers the two most-hurt allies."},
+	{"id": "p_thrice_knotted_thread", "name": "Thrice-Knotted Thread", "type": "Arcane", "path": "warding", "pmod": "ward_frac", "value": 0.04,
+	 "desc": "Ward Weave wards 12% of max HP (was 8%)."},
+	{"id": "p_second_sight", "name": "Second Sight", "type": "Arcane", "path": "augury", "pmod": "cancels", "value": 1.0,
+	 "desc": "Foresight cancels one more heavy blow each fight."},
+	{"id": "p_omen_bones", "name": "Omen Bones", "type": "Arcane", "path": "augury", "pmod": "cancel_momentum", "value": 2.0,
+	 "desc": "A blow cancelled by Foresight gives +2 Momentum."},
+	{"id": "p_brimming_chalice", "name": "Brimming Chalice", "type": "Frost", "path": "mercy", "pmod": "overflow", "value": 0.5,
+	 "desc": "Overflow turns all overheal into a ward (was half)."},
+	{"id": "p_saints_tally", "name": "Saint's Tally", "type": "Frost", "path": "mercy", "pmod": "miracle_hp", "value": 0.15,
+	 "desc": "A Miracle raises the fallen with 15% more HP."},
+	{"id": "p_hallowed_mortar", "name": "Hallowed Mortar", "type": "Frost", "path": "aegis", "pmod": "sanctuary", "value": 0.03,
+	 "desc": "Sanctuary cuts damage to the party by 9% (was 6%)."},
+	{"id": "p_sanctum_chime", "name": "Sanctum Chime", "type": "Frost", "path": "aegis", "pmod": "aegis_hazard", "value": 0.25,
+	 "desc": "With an Aegis hero in the party, hazards deal 25% less."},
+	{"id": "p_burning_psalter", "name": "Burning Psalter", "type": "Frost", "path": "zeal", "pmod": "fervor", "value": 0.1,
+	 "desc": "Fervor heals 35% of damage dealt (was 25%)."},
+	{"id": "p_judgment_nail", "name": "Judgment Nail", "type": "Frost", "path": "zeal", "pmod": "zeal_momentum", "value": 1.0,
+	 "desc": "A Zeal hero's kill gives +1 Momentum."},
+	{"id": "p_widows_thread", "name": "Widow's Thread", "type": "Umbral", "path": "assassin", "pmod": "execute_at", "value": 0.1,
+	 "desc": "Execute works below 45% HP (was 35%)."},
+	{"id": "p_quiet_coin", "name": "Quiet Coin", "type": "Umbral", "path": "assassin", "pmod": "execute_resolve", "value": 1.0,
+	 "desc": "The first Assassin kill each fight restores 1 Resolve."},
+	{"id": "p_feather_step", "name": "Feather-Step Wraps", "type": "Umbral", "path": "skirmisher", "pmod": "evasion", "value": 0.1,
+	 "desc": "Evasion gives +25% dodge (was +15%)."},
+	{"id": "p_riposte_cord", "name": "Riposte Cord", "type": "Umbral", "path": "skirmisher", "pmod": "jab", "value": 0.6,
+	 "desc": "The dodge jab hits 60% harder."},
+	{"id": "p_brawlers_knuckle", "name": "Brawler's Knuckle", "type": "Umbral", "path": "scrapper", "pmod": "scrappy", "value": 0.1,
+	 "desc": "Scrappy heals 25% of damage dealt (was 15%)."},
+	{"id": "p_pit_fighters_tape", "name": "Pit-Fighter's Tape", "type": "Umbral", "path": "scrapper", "pmod": "scrap_back", "value": 1.0,
+	 "desc": "Scrappy's patch-up works in the back row too."},
+]
 
 ## Relics only the Endless Rift gives (its milestones, see ENDLESS_MILESTONES).
 const ENDLESS_RELICS := {

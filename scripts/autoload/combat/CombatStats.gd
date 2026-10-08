@@ -157,7 +157,7 @@ func recommended_power(diff_id: String, rift_rank: String = "") -> int:
 	if diff_id == "endless":
 		return GameData.ENDLESS_REC_POWER
 	if rift_rank != "":
-		return int(GameData.find_rift_rank(rift_rank)["rec"])
+		return int(round(int(GameData.find_rift_rank(rift_rank)["rec"]) * GameState.hardship_rec_mult()))
 	var diff: Dictionary = GameData.DIFFICULTIES[0]
 	for d in GameData.DIFFICULTIES:
 		if d["id"] == diff_id:

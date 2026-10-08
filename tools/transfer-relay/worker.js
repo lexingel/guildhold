@@ -1,12 +1,19 @@
 // Guildhold save transfer relay (Cloudflare Worker + KV).
 // POST /send  body = exported save text -> {"code": "KX74QP"}; kept 15 minutes.
 // GET  /take/<code>                     -> the save text, once (then deleted).
-// Saves are a few dozen KB of game state; nothing else is stored.
+// Saves are a few dozen KB of game state.
+// POST /daily/<day> body = {"guild": name, "score": n} -> {"rank": r, "top": [...]}
+// GET  /daily/<day>                                     -> {"top": [...]}
+// The daily board (0.70): a guild name and a score per entry, best kept,
+// 50 per day, gone after 8 days. Nothing else about the player is stored.
 
 const TTL = 900;                 // seconds a code stays valid
 const MAX_BYTES = 512 * 1024;
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // no 0/O, 1/I
 const ORIGINS = ["https://lexingel.github.io"];
+const BOARD_TTL = 8 * 86400;
+const BOARD_SIZE = 50;
+const SCORE_MAX = 10000;
 
 function cors(req) {
   const o = req.headers.get("Origin") || "";
@@ -42,6 +49,30 @@ export default {
       for (let i = 0; i < 4 && (await env.SAVES.get(code)) !== null; i++) code = newCode();
       await env.SAVES.put(code, text, { expirationTtl: TTL });
       return reply(req, JSON.stringify({ code, ttl: TTL }));
+    }
+    const dm = url.pathname.match(/^\/daily\/(\d{5})$/);
+    if (dm) {
+      const day = parseInt(dm[1], 10);
+      const today = Math.floor(Date.now() / 86400000);
+      if (Math.abs(day - today) > 1) return reply(req, '{"error":"day"}', 400);
+      const key = "daily:" + day;
+      const list = JSON.parse((await env.SAVES.get(key)) || "[]");
+      if (req.method === "GET") return reply(req, JSON.stringify({ top: list.slice(0, 20) }));
+      if (req.method !== "POST") return reply(req, '{"error":"method"}', 405);
+      let entry;
+      try { entry = JSON.parse(await req.text()); } catch { return reply(req, '{"error":"json"}', 400); }
+      const guild = String(entry.guild || "").replace(/[\u0000-\u001f<>]/g, "").trim().slice(0, 24);
+      const score = Math.floor(Number(entry.score));
+      if (!guild || !(score >= 0 && score <= SCORE_MAX)) return reply(req, '{"error":"entry"}', 400);
+      // ponytail: read-modify-write on KV; two posts in the same second can drop one. A Durable Object fixes that if it ever matters.
+      const old = list.find((e) => e.guild === guild);
+      if (old) old.score = Math.max(old.score, score);
+      else list.push({ guild, score });
+      list.sort((a, b) => b.score - a.score);
+      const kept = list.slice(0, BOARD_SIZE);
+      await env.SAVES.put(key, JSON.stringify(kept), { expirationTtl: BOARD_TTL });
+      const rank = kept.findIndex((e) => e.guild === guild) + 1;
+      return reply(req, JSON.stringify({ rank, top: kept.slice(0, 20) }));
     }
     const m = url.pathname.match(/^\/take\/([A-Za-z0-9]{6})$/);
     if (req.method === "GET" && m) {

@@ -56,6 +56,10 @@ var bill_paid := {}      # week -> wages + upkeep paid
 var fights := {}         # rank -> [won, lost]
 var left_with_haul := 0
 var sustain := [0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0]   # mend/round sum, start hp sum, end hp sum, won fights
+var take_path_relics := true   # relics=0: always take the Essence
+var path_relics_taken := 0
+var resolve_doors := [0, 0, 0, 0, 0]   # boss doors with Resolve on: [doors, wavering, broken, won from wavering/broken, sum of Resolve]
+var lost_high := [0, 0]   # lost fights / of them from above 90% party HP
 var by_kind := {}        # fight kind -> [won, lost, start hp % sum of lost, of won] (all guilds)
 var runs := {}           # rank -> [sealed, lost]
 var rounds := {}         # rank -> [fights, total rounds, fights over in round 1]
@@ -84,6 +88,15 @@ func _ready() -> void:
 				GameData.FIGHT_THREAT[bits[0]] = [float(bits[1]), float(bits[2])]
 		elif a.begins_with("haul="):   # haul=0 turns the haul loss off
 			GameData.HAUL_LOSS = {"fell": float(a.substr(5)), "fled": float(a.substr(5)) * 0.5}
+		elif a.begins_with("resolve="):   # resolve=0 turns the drain off; resolve=2 doubles it (0.64)
+			for k in GameData.RESOLVE_DRAIN:
+				GameData.RESOLVE_DRAIN[k] = int(round(float(GameData.RESOLVE_DRAIN[k]) * float(a.substr(8))))
+		elif a == "relics=0":
+			take_path_relics = false
+		elif a.begins_with("rstart="):
+			GameData.RESOLVE_START = int(a.substr(7))
+		elif a.begins_with("waver="):
+			GameData.RESOLVE_WAVER = int(a.substr(6))
 		elif a.begins_with("camp="):   # camp event chance (0.63): camp=0 turns them off
 			GameData.CAMP_EVENT_CHANCE = float(a.substr(5))
 		elif a.begins_with("mendcap="):
@@ -171,6 +184,11 @@ func _ready() -> void:
 		print("   fight length (avg rounds, %% over in round 1): %s" % "  ".join(ranks.filter(func(r): return all_rounds.has(r)).map(func(r): return "%s %.1f/%d%%" % [r, float(all_rounds[r][1]) / maxf(1.0, all_rounds[r][0]), int(100.0 * all_rounds[r][2] / maxf(1.0, all_rounds[r][0]))])))
 		print("   by fight kind (won/all, party HP at the start: lost vs won): %s" % "  ".join(by_kind.keys().map(func(k): return "%s %d/%d (%d%% vs %d%%)" % [k, by_kind[k][0], by_kind[k][0] + by_kind[k][1], int(100.0 * by_kind[k][2] / maxf(1.0, by_kind[k][1])), int(100.0 * by_kind[k][3] / maxf(1.0, by_kind[k][0]))])))
 		by_kind = {}
+		print("   Resolve at boss doors: %d doors, avg %.1f left, wavering %d, broken %d (won %d of those) · lost fights %d, %d from above 90%% HP" % [resolve_doors[0], float(resolve_doors[4]) / maxf(1, resolve_doors[0]), resolve_doors[1], resolve_doors[2], resolve_doors[3], lost_high[0], lost_high[1]])
+		resolve_doors = [0, 0, 0, 0, 0]
+		print("   Path relics taken: %d" % path_relics_taken)
+		path_relics_taken = 0
+		lost_high = [0, 0]
 		print("   left a run early to keep the haul: %d times" % left_with_haul)
 		print("   won fights: party mend %.1f%%/round, dodge %d%%, wipe guard %d%%, %.1f rounds, party HP %d%% before, %d%% after" % [100.0 * sustain[0] / maxf(1, sustain[3]), int(100.0 * sustain[4] / maxf(1, sustain[3])), int(100.0 * sustain[5] / maxf(1, sustain[3])), sustain[6] / maxf(1, sustain[3]), int(100.0 * sustain[1] / maxf(1, sustain[3])), int(100.0 * sustain[2] / maxf(1, sustain[3]))])
 		sustain = [0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0]
@@ -622,6 +640,18 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 			GameState.retreat_now()
 			return "climbed out at depth %d" % depth
 		if GameState.run.get("sealed") is Dictionary and not (GameState.run["sealed"] as Dictionary).is_empty():
+			var offer: Array = GameState.run["sealed"].get("path_relics", [])
+			if not offer.is_empty() and take_path_relics:   # the Path relic most of the party can use (0.65)
+				var best := 0
+				var best_n := -1
+				for i in offer.size():
+					var pid := str(GameData.find_unique_relic(str(offer[i]))["path"])
+					var n := GameState.current_party().filter(func(h): return GameData.hero_path_id(h) == pid).size()
+					if n > best_n:
+						best = i
+						best_n = n
+				GameState.pick_path_relic(best)
+				path_relics_taken += 1
 			GameState.finish_run()
 			return "sealed"
 		if not GameState.pending_injuries().is_empty():
@@ -639,7 +669,7 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 		if kind == "":
 			var opts := GameState.current_layer_options()
 			var prefs := ["boss", "pillar", "combat", "echo", "event", "shop", "anvil", "elite", "treasure", "shrine", "campfire", "hazard"]
-			if _party_hp() < 0.55:
+			if _party_hp() < 0.55 or (GameState.resolve_on() and GameState.resolve_now() <= GameData.RESOLVE_WAVER + 1):
 				prefs = ["boss", "campfire", "echo", "anvil", "shrine", "event", "treasure", "shop", "combat", "hazard", "elite"]
 			for pr in prefs:
 				if opts.has(pr):
@@ -668,6 +698,18 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 					var bk: Array = by_kind.get(kind, [0, 0, 0.0, 0.0])
 					var won_now := bool(result.get("won", false))
 					bk[0 if won_now else 1] += 1
+					if not won_now:
+						lost_high[0] += 1
+						if float(ns.get("combat_state", {}).get("_start_hp_pct", 1.0)) > 0.9:
+							lost_high[1] += 1
+					if kind == "boss" and GameState.resolve_on():
+						var wv := int(ns.get("combat_state", {}).get("_waver", 0))
+						resolve_doors[0] += 1
+						resolve_doors[4] += GameState.resolve_now()
+						if wv > 0:
+							resolve_doors[wv] += 1
+							if won_now:
+								resolve_doors[3] += 1
 					bk[3 if won_now else 2] += float(ns.get("combat_state", {}).get("_start_hp_pct", 1.0))
 					by_kind[kind] = bk
 					if won_now:
@@ -713,7 +755,7 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 					GameState.resolve_event(ci)
 				GameState.advance_node()
 			"campfire":
-				GameState.campfire_choose("rest" if _party_hp() < 0.8 else "train")
+				GameState.campfire_choose("rest" if _party_hp() < 0.8 or (GameState.resolve_on() and GameState.resolve_now() <= GameData.RESOLVE_WAVER + 2) else "train")
 				GameState.advance_node()
 			"treasure":
 				GameState.ensure_treasure()

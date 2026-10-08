@@ -261,6 +261,8 @@ func _drain_toasts() -> void:
 	_toast_box.offset_bottom = 300.0 if compact else -20.0
 	while not GameState.pending_toasts.is_empty() and _toast_box.get_children().filter(func(c): return not c.is_queued_for_deletion()).size() < (1 if compact else TOAST_MAX):
 		var t: Dictionary = GameState.pending_toasts.pop_front()
+		if str(t.get("title", "")).begins_with(tr("Title earned: %s").split("%s")[0]):
+			AudioManager.play_sfx(GameData.SFX_PATH["title"])
 		# A card in the corner: the title over its text. Click to dismiss.
 		var card := PanelContainer.new()
 		card.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -315,6 +317,18 @@ func render() -> void:
 	if _combat_animating and screen == "rift_run":
 		return
 	_coached_this_render = false
+	if GameState.run.is_empty():
+		_resolve_heard = -1
+	if screen != _screen_heard:   # moving between camp screens (0.69)
+		var quiet := ["title", "load_game", "credits", "onboard", "rift_run", ""]
+		if not quiet.has(screen) and not quiet.has(_screen_heard):
+			AudioManager.play_sfx(GameData.SFX_PATH["tab"])
+		_screen_heard = screen
+	var pd := int(GameState.payday_report.get("day", -1))
+	if pd != _payday_heard:   # a payday just went out (0.69)
+		if _payday_heard >= 0 and pd > _payday_heard:
+			AudioManager.play_sfx(GameData.SFX_PATH["payday"])
+		_payday_heard = pd
 	GameState.session_live = screen not in ["title", "load_game", "credits", "onboard"]
 	var was_focused := get_viewport().gui_get_focus_owner() if is_inside_tree() else null
 	if was_focused is Button:
@@ -739,6 +753,7 @@ var _pending_colour := "crest"   # the banner colour picked at founding (BANNER_
 var _pending_founding := "free"  # the founding charter picked
 var _pending_oaths: Array = []   # oaths to swear at founding
 var _pending_year: Dictionary = {}   # the year rolled on the founding screen
+var _pending_hardship: int = 0   # Story (-1), Standard (0) or a Hardship (0.67)
 var _pending_skip := false   # the playtest shortcut: found with Act I done
 var _founding_open := false   # the founding screen's optional section, opened
 
@@ -901,6 +916,42 @@ func _arc_name(truth: String) -> String:
 		if str(a[0]) == arc:
 			return str(a[1])
 	return arc
+
+
+## The founding screen's difficulty (0.67): Story, Standard, and every
+## Hardship a past guild has opened; each line says what it adds.
+func _founding_hardship() -> Control:
+	var col := _vbox(4)
+	var head := _label("Difficulty", 14)
+	head.add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
+	col.add_child(head)
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 6)
+	row.add_theme_constant_override("v_separation", 6)
+	for lv in range(-1, GameState.hardship_unlocked() + 1):
+		var b := Button.new()
+		b.toggle_mode = true
+		b.button_pressed = _pending_hardship == lv
+		b.text = GameState.hardship_name(lv)
+		b.pressed.connect(func(k=lv):
+			_pending_hardship = k
+			render())
+		row.add_child(b)
+	col.add_child(row)
+	var lines: Array = []
+	if _pending_hardship < 0:
+		lines.append(tr(str(GameData.HARDSHIP_STORY["desc"])))
+	elif _pending_hardship == 0:
+		lines.append(tr("The game as designed."))
+	else:
+		for i in _pending_hardship:
+			lines.append(tr("%d. %s") % [i + 1, tr(str(GameData.HARDSHIPS[i]["desc"]))])
+		lines.append(tr("+%d%% Laurels.") % int(round(GameData.HARDSHIP_LAURELS * 100 * _pending_hardship)))
+	for ln in lines:
+		col.add_child(_wrap_label(str(ln), 12, true))
+	if GameState.hardship_unlocked() < GameData.HARDSHIPS.size():
+		col.add_child(_wrap_label(tr("Reach an ending at your highest Hardship to open the next.") if GameState.hardship_unlocked() > 0 else tr("Hardships open once a guild reaches Act IV or an ending."), 12, true))
+	return col
 
 
 ## The founding screen's year in the Vale (for a returning player): two
@@ -1422,7 +1473,7 @@ func _topbar(container: Control, breadcrumb: String = "") -> void:
 	var bar_v := _vbox(4)
 
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
+	row.add_theme_constant_override("separation", 8)   # 0.70: Spanish labels run wider
 	var back := _header_back()
 	if not back.is_empty():
 		var bb := _button("" if _compact() else str(back[1]), back[0])
@@ -1455,6 +1506,9 @@ func _topbar(container: Control, breadcrumb: String = "") -> void:
 				row.add_child(ti)
 			var tl := _label(tr(str(tier["name"])), 12, true)
 			tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			tl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS   # a long tier name (Spanish) shortens, like the guild's name
+			tl.clip_text = true
+			tl.custom_minimum_size.x = minf(110.0, _text_w(tl.text, 12) + 2.0)
 			# A long guild name keeps the room: the tier shows as its icon (tooltip has it all).
 			tl.visible = GameState.guild_name.length() <= 12
 			var tip := tr("%d Guild Management levels") % int(tier["total"])
@@ -1679,6 +1733,8 @@ func _language_row() -> HBoxContainer:
 	row.add_theme_constant_override("separation", 6)
 	for lang in GameData.LANGUAGES:
 		var code := str(lang[0])
+		if not GameState.language_ready(code):
+			continue   # Chinese waits for its font on the web (0.70)
 		var b := _button(str(lang[1]), func():
 			GameState.language = code
 			GameState.apply_language()
@@ -1912,6 +1968,8 @@ func _render_onboard(v: VBoxContainer) -> void:
 		_pending_founding = "free"
 		GameState.oaths = _pending_oaths.duplicate()
 		_pending_oaths.clear()
+		GameState.hardship = clampi(_pending_hardship, -1, GameState.hardship_unlocked())
+		_pending_hardship = 0
 		GameState.vale_year = _pending_year.duplicate(true) if not (GameState.legacy.get("guilds", []) as Array).is_empty() else {}
 		_pending_year = {}
 		GameState.hire_starters()
@@ -1978,6 +2036,7 @@ func _render_onboard(v: VBoxContainer) -> void:
 					render())
 				colour_row.add_child(cb)
 			ov.add_child(colour_row)
+		ov.add_child(_founding_hardship())
 		if returning:
 			ov.add_child(_founding_charters())
 			ov.add_child(_founding_oaths())
@@ -3620,6 +3679,49 @@ func _switch_slot(slot: int) -> void:
 	render()
 
 
+## Settings > Controls (0.68): each fight key, click and press a new one.
+func _render_controls(v: VBoxContainer) -> void:
+	v.add_child(_label("Controls", 15))
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 4)
+	for pair in GameState.BINDABLE_KEYS:
+		var d := str(pair[0])
+		var kb := _button(tr("Press a key…") if _rebinding == d else GameState.bound_key(d), func():
+			_rebinding = d
+			render())
+		kb.custom_minimum_size.x = 120
+		grid.add_child(kb)
+		grid.add_child(_label(tr(str(pair[1])), 13, true))
+	v.add_child(grid)
+	var reset := _button(tr("Reset keys"), func():
+		GameState.key_binds.clear()
+		GameState.save_settings()
+		_rebinding = ""
+		render())
+	reset.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	reset.disabled = GameState.key_binds.is_empty()
+	v.add_child(reset)
+
+
+var _rebinding := ""   # the fight key waiting for its new key (Settings > Controls)
+
+
+func _input(event: InputEvent) -> void:
+	if _rebinding == "" or not (event is InputEventKey) or not event.pressed or event.echo:
+		super(event)
+		return
+	get_viewport().set_input_as_handled()
+	var k := OS.get_keycode_string(event.keycode)
+	if k != "Escape":
+		var err := GameState.bind_key(_rebinding, k)
+		if err != "":
+			_flavor_toast = err
+	_rebinding = ""
+	render()
+
+
 func _render_settings(v: VBoxContainer) -> void:
 	v.add_child(_label("Settings", 20))
 	v.add_child(_language_row())
@@ -3746,6 +3848,9 @@ func _render_settings(v: VBoxContainer) -> void:
 	ha.tooltip_text = "Sounds that tell you something also show as captions at the bottom of the screen (a boss arriving, a heavy blow, a hero going down, a wind-up, a chest dropping), and the biggest ones pulse the screen's edges"
 	acc_row.add_child(ha)
 	v.add_child(acc_row)
+	if not _compact():
+		v.add_child(_hsep())
+		_render_controls(v)
 
 	v.add_child(_hsep())
 	v.add_child(_label("Tips", 15))
@@ -4075,6 +4180,8 @@ func _render_slot_list(v: VBoxContainer) -> void:
 		if not is_empty:
 			var sealed := int(summary.get("rifts_sealed", 0))
 			text = tr("Slot %d — %s (%d rift%s sealed)") % [slot + 1, tr(str(summary.get("guild_name", ""))), sealed, tr(str(_pl(sealed)))]
+			if int(summary.get("hardship", 0)) != 0:
+				text += " · " + GameState.hardship_name(int(summary["hardship"]))
 		if is_active:
 			text += tr("  (Active)")
 		var actions: Array[Control] = []

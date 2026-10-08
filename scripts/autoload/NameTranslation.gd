@@ -14,10 +14,19 @@ var _nouns := {}
 var _suffixes := {}
 var _relic_types := {}
 var _relic_nouns := {}
+## How each language orders a built name (0.70): a hero's class and name, a
+## warden's name/rank/title, an item's adjective and noun, the "of" part.
+const SHAPES := {
+	"tr": {"hero": "{cls} {name}", "warden": "{name}, {rank} {warden}", "item": "{adj} {noun}", "of": " ({suffix})"},
+	"es": {"hero": "{name}, {cls}", "warden": "{name}, {warden} {rank}", "item": "{noun} {adj}", "of": " ({suffix})"},
+	"zh_CN": {"hero": "{cls}·{name}", "warden": "{name}，{rank}{warden}", "item": "{adj}{noun}", "of": "（{suffix}）"},
+}
+var _shape: Dictionary = SHAPES["tr"]
 
 
 func _init(lang: String = "tr") -> void:
 	locale = lang
+	_shape = SHAPES.get(lang, SHAPES["tr"])
 	for c in GameData.CLASSES:
 		_classes[str(c["name"])] = true
 	for c in GameData.CLASS_POOL:
@@ -55,12 +64,12 @@ func _get_message(src_message: StringName, _context: StringName) -> StringName:
 	if at > 0:
 		var cls := s.substr(at + 5)
 		if _classes.has(cls):
-			return StringName("%s %s" % [_t(cls), s.substr(0, at)])
+			return StringName(str(_shape["hero"]).format({"cls": _t(cls), "name": s.substr(0, at)}))
 	# A rift warden: "Grelm, Greater Warden" -> "Grelm, Büyük Bekçi"
 	if s.ends_with(" Warden") and s.contains(", "):
 		var parts := s.trim_suffix(" Warden").rsplit(", ", true, 1)
 		if parts.size() == 2 and not parts[1].contains(" "):
-			return StringName("%s, %s %s" % [parts[0], _t(parts[1]), _t("Warden")])
+			return StringName(str(_shape["warden"]).format({"name": parts[0], "rank": _t(parts[1]), "warden": _t("Warden")}))
 	# An item or relic: "<prefix> <noun>[ <of suffix>]" -> "<prefix> <noun> (<suffix>)"
 	var suffix := ""
 	var head := s
@@ -80,7 +89,7 @@ func _get_message(src_message: StringName, _context: StringName) -> StringName:
 	var noun := _t("item:" + words[1])   # a noun that clashes with another word
 	if noun.begins_with("item:"):
 		noun = _t(words[1])
-	var out := "%s %s" % [_t(words[0]), noun]
+	var out := str(_shape["item"]).format({"adj": _t(words[0]), "noun": noun})
 	if suffix != "":
-		out += " (%s)" % _t(suffix)
+		out += str(_shape["of"]).format({"suffix": _t(suffix)})
 	return StringName(out)

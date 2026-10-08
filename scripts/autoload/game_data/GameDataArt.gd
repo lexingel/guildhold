@@ -95,6 +95,48 @@ const SFX_PATH := {
 	"knockout": "res://assets/audio/sfx/knockout.ogg",
 	"victory": "res://assets/audio/sfx/victory.ogg",
 	"craft": "res://assets/audio/sfx/craft.ogg",
+	# 0.69: made from the sounds here by tools/derive_sfx.py (a Path's moment,
+	# foes by region, camp, the map, Resolve).
+	"path_shieldwall": "res://assets/audio/sfx/path_shieldwall.ogg",
+	"path_bloodrage": "res://assets/audio/sfx/path_bloodrage.ogg",
+	"path_weaponmaster": "res://assets/audio/sfx/path_weaponmaster.ogg",
+	"path_marksman": "res://assets/audio/sfx/path_marksman.ogg",
+	"path_trapper": "res://assets/audio/sfx/path_trapper.ogg",
+	"path_stalker": "res://assets/audio/sfx/path_stalker.ogg",
+	"path_evocation": "res://assets/audio/sfx/path_evocation.ogg",
+	"path_warding": "res://assets/audio/sfx/path_warding.ogg",
+	"path_augury": "res://assets/audio/sfx/path_augury.ogg",
+	"path_mercy": "res://assets/audio/sfx/path_mercy.ogg",
+	"path_aegis": "res://assets/audio/sfx/path_aegis.ogg",
+	"path_zeal": "res://assets/audio/sfx/path_zeal.ogg",
+	"path_assassin": "res://assets/audio/sfx/path_assassin.ogg",
+	"path_skirmisher": "res://assets/audio/sfx/path_skirmisher.ogg",
+	"path_scrapper": "res://assets/audio/sfx/path_scrapper.ogg",
+	"foe_hit_vale": "res://assets/audio/sfx/foe_hit_vale.ogg",
+	"foe_hit_marsh": "res://assets/audio/sfx/foe_hit_marsh.ogg",
+	"foe_hit_ashen": "res://assets/audio/sfx/foe_hit_ashen.ogg",
+	"foe_hit_glass": "res://assets/audio/sfx/foe_hit_glass.ogg",
+	"foe_hit_city": "res://assets/audio/sfx/foe_hit_city.ogg",
+	"foe_down_vale": "res://assets/audio/sfx/foe_down_vale.ogg",
+	"foe_down_marsh": "res://assets/audio/sfx/foe_down_marsh.ogg",
+	"foe_down_ashen": "res://assets/audio/sfx/foe_down_ashen.ogg",
+	"foe_down_glass": "res://assets/audio/sfx/foe_down_glass.ogg",
+	"foe_down_city": "res://assets/audio/sfx/foe_down_city.ogg",
+	"dodge": "res://assets/audio/sfx/dodge.ogg",
+	"guard": "res://assets/audio/sfx/guard.ogg",
+	"ward": "res://assets/audio/sfx/ward.ogg",
+	"boss_down": "res://assets/audio/sfx/boss_down.ogg",
+	"elite_down": "res://assets/audio/sfx/elite_down.ogg",
+	"camp_event": "res://assets/audio/sfx/camp_event.ogg",
+	"camp_dilemma": "res://assets/audio/sfx/camp_dilemma.ogg",
+	"camp_omen": "res://assets/audio/sfx/camp_omen.ogg",
+	"tab": "res://assets/audio/sfx/tab.ogg",
+	"node_pick": "res://assets/audio/sfx/node_pick.ogg",
+	"resolve_down": "res://assets/audio/sfx/resolve_down.ogg",
+	"resolve_waver": "res://assets/audio/sfx/resolve_waver.ogg",
+	"relic_pick": "res://assets/audio/sfx/relic_pick.ogg",
+	"title": "res://assets/audio/sfx/title.ogg",
+	"payday": "res://assets/audio/sfx/payday.ogg",
 	# CC0 sounds picked by ear (see assets/audio/sfx/CREDITS.txt); burn and
 	# chill are still synthesized by tools/gen_sfx.py.
 	"windup": "res://assets/audio/sfx/windup.ogg",
@@ -115,9 +157,10 @@ const SFX_PATH := {
 ## The tester build: what changed lately and what to try, shown on the title
 ## screen (newest first, a few lines each).
 ## The languages the game speaks: [locale, its own name for itself].
-const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
+const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"], ["es", "Español (beta)"], ["zh_CN", "简体中文 (beta)"]]
 
 const WHATS_NEW := [
+	"Deeper rifts and a busier guild. Resolve: a party sets out with 8 and loses some with every floor, elite, risky hazard and fled fight; campfires, shrines and some events give it back. At 3 or less foes strike first; at 0 the heroes also lose their Momentum. Sealing a Rank D or higher rift offers one of 30 Path relics, each bending a Path's rule (or Essence instead). The camp has 15 new events and heroes 20 new requests, twice a week, that leave quirks, bonds and titles; heroes earn titles for their deeds and can be renamed on their page. A new guild picks its difficulty: Story, Standard, or a Hardship once a guild has reached Act IV. Hovering a fight command shows the damage it would deal, and Settings > Controls moves the fight keys. About 40 new sounds. The game speaks Spanish, and Simplified Chinese on desktop (both beta). A sealed daily twist has a score you can post to the day's board.",
 	"A simpler, deeper guild. Rifts are maps now: lanes that cross (3 at the low ranks, up to 5 at the top), so you plan a route, with a campfire before every boss and new stops along the way (an anvil that tempers a piece for free, a Path's shrine, a trainer's echo); from Rank S the far floors stay unseen unless a Trapper or a Stalker scouts. The camp lives: on about a third of days a merchant, a visiting hero, a wandering recruit or a dilemma turns up, and threats like fire, fever, bandits and storms are foretold the evening before, so you can pay, send a hero, or take the loss. Breaches are held in a breach rift (fights back to back, no camp between them) instead of the tower defense, and the Defenses research is now Wardcraft, which softens them. The real-time Endless Rift is resting for now: its gate leads down the Descent. A saved Descent also remembers its depth now.",
 	"Attack and skill animations no longer snap back to the stance after the blow: heroes and foes now play the motion back out, so every swing, shot and cast finishes.",
 	"Attacks hit harder on screen: warriors and rogues wind up before they dash in and the blow lands with a jolt; rangers draw and the arrow leaves the bow on the release; mages and clerics gather light in the hand before the bolt flies. New attack animations: the base Ranger, Mage and Cleric, seven rangers who now raise and draw their bows, the Ashen Templar and the Hearth-Warden.",

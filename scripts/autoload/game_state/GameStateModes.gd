@@ -19,9 +19,9 @@ func _apply_rift_rank_modifiers(diff: Dictionary, rift_rank: String) -> Dictiona
 	out["seal_essence"] = int(round(float(out["seal_essence"]) * rw))
 	out["rec_power"] = int(mods["rec"])
 	out["hazard_severity_up"] = int(mods.get("hazard_severity_up", 0))
-	out["elite_chance_up"] = bool(mods.get("elite_chance_up", false))
+	out["elite_chance_up"] = bool(mods.get("elite_chance_up", false)) or year_add("elite_up") > 0
 	out["shop_chance_down"] = bool(mods.get("shop_chance_down", false))
-	out["boss_double_mechanic"] = bool(mods.get("boss_double_mechanic", false))
+	out["boss_double_mechanic"] = bool(mods.get("boss_double_mechanic", false)) or year_add("boss_double") > 0
 	out["lanes"] = int(GameData.RANK_LANES.get(rift_rank, 0))   # a lane map (0.65)
 	out["floors"] = int(out["floors"]) + int(GameData.RANK_EXTRA_FLOORS.get(rift_rank, 0))
 	return out
@@ -145,7 +145,7 @@ func finale_recommended_power() -> int:
 	if act.is_empty():
 		return 0
 	var grow := (1.0 + (GameData.TERMS_PER_POST * posts_freed() if int(act["act"]) == 4 else 0.0)) * _terms_cut(int(act["act"]))   # as _apply_finale
-	return int(round(int(GameData.FINALE_REC[int(act["act"]) - 1]) * grow))
+	return int(round(int(GameData.FINALE_REC[int(act["act"]) - 1]) * grow * hardship_rec_mult()))
 
 
 ## A biome for a new rift: the Vale in Act I, the Vale or the Marshes in Act
@@ -960,7 +960,20 @@ func _complete_daily() -> Dictionary:
 	daily_last_clear = day
 	var cr := GameData.DAILY_CLEAR_CRYSTALS + GameData.DAILY_CLEAR_CRYSTALS_PER_ACT * mini(campaign_act, 3)
 	crystals += cr
-	return {"crystals": cr, "streak": daily_streak}
+	return {"crystals": cr, "streak": daily_streak, "score": daily_score(), "day": day}
+
+
+## A sealed daily's score for the board (0.70): the rank taken, the party's HP
+## and Resolve left, a short boss fight, nobody lost.
+func daily_score() -> int:
+	var hp := 0.0
+	var mx := 0.0
+	for h in current_party():
+		hp += maxf(0, h.hp)
+		mx += Combat.max_hp(h)
+	var rr := maxi(0, GameData.rift_rank_index(str(run.get("rift_rank", "F"))))
+	return maxi(0, 1000 + rr * 150 + int(500.0 * hp / maxf(1.0, mx)) + int(run.get("resolve", 0)) * 25
+		+ maxi(0, 200 - int(run.get("boss_rounds", 0)) * 10) - int(run.get("heroes_lost", 0)) * 200)
 
 
 # ---------------- Records: run history, memorial ----------------
@@ -1008,7 +1021,7 @@ func _run_outcome() -> String:
 func _memorialize(h: Hero, cause: String) -> void:
 	fallen.push_front({"name": h.name, "cls_id": h.cls_id, "pool_id": h.pool_id, "rank": h.rank, "level": h.level,
 		"day": day, "cause": cause, "rifts": int(h.history.get("rifts_cleared", 0)), "kills": int(h.history.get("kills", 0)),
-		"line": memorial_line(h)})
+		"line": memorial_line(h), "title": h.titles[-1] if not h.titles.is_empty() else ""})
 	heroes_lost_total += 1
 	note_milestone("first hero lost")
 
@@ -1217,7 +1230,8 @@ func laurels_earned() -> int:
 	n += int(L["morrow"]) if morrow_defeated else 0
 	n += echoes_returned * int(L["echo"])
 	n += GameData.GRUDGE_LAURELS if grudge != "" and charter_result == "won" and str(branches.get("hearing", "")) != "bought" else 0   # an old score settled
-	return int(round(n * (1.0 + oath_bonus()) * (GameData.EPILOGUE_READ_LAURELS if moot() else 1.0)))
+	var hard := GameData.STORY_LAURELS if hardship < 0 else 1.0 + GameData.HARDSHIP_LAURELS * hardship
+	return int(round(n * (1.0 + oath_bonus()) * (GameData.EPILOGUE_READ_LAURELS if moot() else 1.0) * hard))
 
 
 ## The Laurels bonus for the oaths sworn (GameData.OATHS, capped).
@@ -1284,7 +1298,7 @@ func write_legacy(hero_ids: Array, retired: bool = false) -> int:
 		"rifts": rifts_sealed, "laurels": earned, "remembered": names, "fallen": fallen.size(), "charter": charter_result,
 		"quiet": charter_choice == "quiet", "founding": founding, "oaths": oaths.duplicate(), "year": vale_year.duplicate(true),
 		"branches": branches.duplicate(), "fragments": lore_found_here.size(), "vale": vale_verdict() if echoes_seen.size() >= 3 else "",
-		"rival": rival_name, "beat_rival": charter_result == "won", "colour": banner_colour})
+		"rival": rival_name, "beat_rival": charter_result == "won", "colour": banner_colour, "hardship": hardship})
 	for key in [["bestiary", monsters_seen], ["beaten", bosses_defeated]]:   # one Bestiary across every guild
 		var have: Array = legacy.get(key[0], [])
 		for m in key[1]:

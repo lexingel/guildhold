@@ -41,6 +41,8 @@ func reset() -> void:
 	camp_event = {}
 	camp_omen = {}
 	camp_event_last = {}
+	next_resolve = 0
+	hardship = 0
 	breach = {}
 	breach_next_day = -1
 	damaged = {}
@@ -275,6 +277,8 @@ func load_save() -> bool:
 	camp_event = (data.get("camp_event", {}) as Dictionary).duplicate(true)
 	camp_omen = (data.get("camp_omen", {}) as Dictionary).duplicate(true)
 	camp_event_last = (data.get("camp_event_last", {}) as Dictionary).duplicate(true)
+	next_resolve = int(data.get("next_resolve", 0))
+	hardship = int(data.get("hardship", 0))
 	breach = (data.get("breach", {}) as Dictionary).duplicate(true)
 	breach_next_day = int(data.get("breach_next_day", -1))
 	damaged = (data.get("damaged", {}) as Dictionary).duplicate()
@@ -410,6 +414,8 @@ func load_save() -> bool:
 			run["tower_snap"] = run_data.get("tower_snap", {})
 		if run_data.has("descent"):
 			run["descent"] = int(run_data["descent"])
+		if run_data.has("resolve"):
+			run["resolve"] = int(run_data["resolve"])
 		for key in ["morrow", "breach"]:
 			if run_data.has(key):
 				run[key] = bool(run_data[key])

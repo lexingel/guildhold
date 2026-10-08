@@ -127,23 +127,158 @@ const CAMP_EVENTS := {
 	"bandits": {"kind": "threat", "weight": 1, "title": "Bandits on the road", "omen": "Strangers were seen watching the camp from the treeline.", "text": "Bandits have come for the guild's strongbox."},
 	"storm": {"kind": "threat", "weight": 1, "title": "A storm hits the camp", "omen": "The sky over the hills has turned the colour of a bruise.", "text": "A storm is tearing at the roofs of the %s."},
 	"tremor": {"kind": "threat", "weight": 1, "title": "A rift tremor", "omen": "The ground hummed under the camp all night.", "text": "A small rift has torn open by the well, and something is climbing out."},
+	# 0.66: events written as data. Each option: "label" (%d = its cost, %s = the
+	# hero sent), "gold"/"ess" (scaled by the act), "hero" (roles; [] = anyone,
+	# who is busy that day), "chance" with "fx"/"fail", and "note"/"fail_note".
+	# Effects (GameStateBreach._camp_fx): coins, crystals (scaled), renown,
+	# morale_all, resolve (the next party), tonic, item, relic, xp_camp.
+	"chaplain": {"kind": "opportunity", "weight": 2, "title": "A wandering chaplain", "text": "A chaplain of the old Accord chapels offers to bless the next party that goes out.", "opts": [
+		{"label": "Accept the blessing (%d Gold offering)", "gold": 20, "fx": {"resolve": 3}, "note": "The next party sets out blessed: +3 Resolve."},
+		{"label": "Decline politely"}]},
+	"old_veteran": {"kind": "opportunity", "weight": 2, "title": "An old veteran", "text": "A retired adventurer with one eye and a hundred stories sits down at the guild's fire.", "opts": [
+		{"label": "Buy them drinks (%d Gold)", "gold": 25, "fx": {"morale_all": 3, "resolve": 1}, "note": "A good night of stories: morale up, +1 Resolve for the next party."},
+		{"label": "Not tonight"}]},
+	"reed_sellers": {"kind": "opportunity", "weight": 2, "min_act": 2, "title": "Fever-reed sellers", "text": "Two marsh folk come up the road with bundles of fever-reed. Boiled, it keeps a wound from turning.", "opts": [
+		{"label": "Buy a bundle (%d Gold)", "gold": 40, "fx": {"tonic": 2}, "note": "+2 Healing Tonics."},
+		{"label": "Send them on"}]},
+	"marsh_guide": {"kind": "opportunity", "weight": 1, "min_act": 2, "title": "A marsh guide", "text": "An old guide from the Drowned Marches offers to walk your next party to the rift by the dry paths.", "opts": [
+		{"label": "Hire the guide (%d Gold)", "gold": 45, "fx": {"resolve": 3}, "note": "The next party sets out fresh: +3 Resolve."},
+		{"label": "Not needed"}]},
+	"war_drummer": {"kind": "opportunity", "weight": 1, "min_act": 2, "title": "A war drummer", "text": "A drummer who marched with the old guilds offers to play the next party to the rift's edge.", "opts": [
+		{"label": "Hire the drummer (%d Gold)", "gold": 70, "fx": {"resolve": 4}, "note": "The next party marches out to the drum: +4 Resolve."},
+		{"label": "Not today"}]},
+	"nightmares": {"kind": "threat", "weight": 1, "min_act": 2, "title": "Rift nightmares", "omen": "Someone screamed in their sleep last night.", "text": "The heroes are dreaming of the rifts, and nobody is sleeping.", "opts": [
+		{"label": "Buy a sleeping draught (%d Gold)", "gold": 50, "note": "Everyone sleeps through the night."},
+		{"label": "%s sits with them (busy today)", "hero": ["cleric"], "fx": {"morale_all": 3}, "note": "A quiet word at the right bedside: morale up."},
+		{"label": "Let it pass (the next party sets out with -3 Resolve)", "fx": {"resolve": -3}}]},
+	"lost_child": {"kind": "dilemma", "weight": 1, "title": "A child at the rift's edge", "text": "A village child wandered toward a rift scar and hasn't come back.", "opts": [
+		{"label": "%s goes after them (busy today)", "hero": [], "fx": {"renown": 6}, "note": "The child is home by dark. The village won't forget it: +6 Renown."},
+		{"label": "Pay the village hunters (%d Gold)", "gold": 40, "fx": {"renown": 3}},
+		{"label": "It's not the guild's concern", "fx": {"morale_all": -4, "renown": -2}}]},
+	"gambling_night": {"kind": "dilemma", "weight": 1, "title": "A gambling night", "text": "The heroes want a night of cards and dice, with the guild's purse as the bank.", "opts": [
+		{"label": "Bankroll it (%d Gold)", "gold": 40, "chance": 0.5, "fx": {"coins": 90, "morale_all": 6}, "fail": {"morale_all": 6}, "note": "The house wins: +90 Gold, and a good night.", "fail_note": "The heroes clean out the bank, and love every minute of it."},
+		{"label": "Forbid it", "fx": {"morale_all": -4}}]},
+	"assessor": {"kind": "dilemma", "weight": 1, "min_act": 2, "title": "The Crown's assessor", "text": "An assessor from the Crown wants to inspect the guild's books, and hints that a gift would speed things up.", "opts": [
+		{"label": "Pay the levy (%d Gold)", "gold": 60, "fx": {"renown": 3}},
+		{"label": "Slip him a gift (%d Gold)", "gold": 30, "chance": 0.6, "fx": {}, "fail": {"renown": -6}, "note": "He leaves happy.", "fail_note": "Word of the gift gets out: -6 Renown."},
+		{"label": "Refuse", "fx": {"renown": -5}}]},
+	"salt_caravan": {"kind": "dilemma", "weight": 2, "min_act": 3, "title": "A salt caravan", "text": "A caravan bound for the Ashen Wastes asks for an escort past the old rift scars.", "opts": [
+		{"label": "%s rides with them (busy today)", "hero": [], "fx": {"coins": 45, "renown": 2}, "note": "The caravan pays well, and talks about it."},
+		{"label": "Refuse", "fx": {"renown": -1}}]},
+	"ash_prophet": {"kind": "dilemma", "weight": 1, "min_act": 3, "title": "An ash-prophet at the gate", "text": "A man covered in ash preaches the end of the Vale at the camp gate. The heroes are listening.", "opts": [
+		{"label": "Pay him to move on (%d Gold)", "gold": 30},
+		{"label": "Let him preach", "fx": {"morale_all": -4}, "note": "The heroes sleep badly: morale down."}]},
+	"smugglers": {"kind": "dilemma", "weight": 1, "min_act": 5, "title": "Glass Coast smugglers", "text": "Smugglers offer rift-glass relics pulled from a wreck. Nobody asks where the crew went.", "opts": [
+		{"label": "Buy one (%d Gold)", "gold": 110, "fx": {"relic": "epic", "renown": -3}},
+		{"label": "Report them to the Crown", "fx": {"renown": 4}},
+		{"label": "Ignore them"}]},
+	"lighthouse": {"kind": "opportunity", "weight": 1, "min_act": 5, "title": "The lighthouse keeper", "text": "The Glass Coast's lighthouse keeper sells charts of where the rifts will break.", "opts": [
+		{"label": "Buy the charts (%d Gold)", "gold": 60, "fx": {"resolve": 3, "xp_camp": 0.1}, "note": "The heroes study the charts: some XP, +3 Resolve for the next party."},
+		{"label": "Not today"}]},
+	"pilgrims": {"kind": "opportunity", "weight": 2, "min_act": 6, "title": "Pilgrims of the Inverted City", "text": "Pilgrims walking to the Inverted City ask to rest at the guild's fire.", "opts": [
+		{"label": "Host them (%d Gold)", "gold": 60, "fx": {"renown": 6, "morale_all": 5}},
+		{"label": "Turn them away"}]},
+	"mirror_trader": {"kind": "opportunity", "weight": 1, "min_act": 6, "title": "A mirror-steel trader", "text": "A trader from the far side of the City sells blades that show what's behind you.", "opts": [
+		{"label": "Buy a piece (%d Gold)", "gold": 120, "fx": {"item": "epic"}},
+		{"label": "Send them on"}]},
 }
+## Hardships (0.67): a guild's difficulty, chosen at founding. Story (-1) is
+## gentler (and pays half the Laurels); Hardship N stacks levels 1..N, each
+## +HARDSHIP_LAURELS. Read through year_mult/year_add like the Vale's year:
+## foe_hp, foe_dmg, breach_sooner, resolve_start, wages, elite_up, mend_cap,
+## haul_fell, boss_double, campfire_heal, rival_renown.
+const HARDSHIP_STORY := {"desc": "Foes are weaker, the haul is never at risk, breaches come later, and Resolve doesn't count. Half the Laurels.",
+	"mult": {"foe_hp": 0.8, "foe_dmg": 0.8}, "add": {"breach_sooner": -2}}
+const HARDSHIPS := [
+	{"desc": "Foes have 10% more HP.", "mult": {"foe_hp": 1.1}},
+	{"desc": "Breaches come 2 days sooner.", "add": {"breach_sooner": 2}},
+	{"desc": "Parties set out with 2 less Resolve.", "add": {"resolve_start": -2}},
+	{"desc": "Wages cost 25% more.", "mult": {"wages": 1.25}},
+	{"desc": "Ranked rifts hold more elites.", "add": {"elite_up": 1}},
+	{"desc": "Mending is capped at 30% a round.", "add": {"mend_cap": -0.1}},
+	{"desc": "A party that falls loses 75% of its haul.", "add": {"haul_fell": 0.25}},
+	{"desc": "Every ranked boss has a second mechanic.", "add": {"boss_double": 1}},
+	{"desc": "Campfires heal 15% (from 25%).", "add": {"campfire_heal": -0.1}},
+	{"desc": "Foes deal 10% more damage, and the rival's Renown grows 20% faster.", "mult": {"foe_dmg": 1.1, "rival_renown": 1.2}},
+]
+const HARDSHIP_LAURELS := 0.05
+const STORY_LAURELS := 0.5
+
 const REQUEST_DAY := 3
+const REQUEST_DAYS := [3, 6]     # twice a week (0.66)
 const REQUEST_RAISE := 0.25       # a granted raise: +25% wage for good
 const REQUEST_GEAR_COST := 60
 const REQUEST_LEAVE_DAYS := 3
 const HERO_REQUESTS := {
 	"week_off": {"title": "%s asks for time off", "text": "%s has been in the rifts a lot and wants a few days away from the guild.",
-		"yes": "Grant it: away %d days, +15 morale" % REQUEST_LEAVE_DAYS, "no": "Refuse: -10 morale", "yes_morale": 15, "no_morale": -10},
+		"yes": "Grant it: away %d days, +15 morale", "yes_n": REQUEST_LEAVE_DAYS, "no": "Refuse: -10 morale", "yes_morale": 15, "no_morale": -10},
 	"raise": {"title": "%s asks for a raise", "text": "%s says the rifts are worth more than the guild pays and wants a bigger share.",
-		"yes": "Raise their wage %d%%: +20 morale" % int(REQUEST_RAISE * 100), "no": "Refuse: -12 morale", "yes_morale": 20, "no_morale": -12},
+		"yes": "Raise their wage %d%%: +20 morale", "yes_n": int(REQUEST_RAISE * 100), "no": "Refuse: -12 morale", "yes_morale": 20, "no_morale": -12},
 	"gear": {"title": "%s wants better kit", "text": "%s says their gear is falling apart and asks for Gold for repairs.",
-		"yes": "Pay %d Gold: +15 morale" % REQUEST_GEAR_COST, "no": "Refuse: -8 morale", "yes_morale": 15, "no_morale": -8},
+		"yes": "Pay %d Gold: +15 morale", "yes_n": REQUEST_GEAR_COST, "no": "Refuse: -8 morale", "yes_morale": 15, "no_morale": -8},
 	"train": {"title": "%s wants extra drills", "text": "%s asks for a free day at the Training Yard.",
 		"yes": "Give them a station: a free day of training, +5 morale", "no": "Not this week: -6 morale", "yes_morale": 5, "no_morale": -6},
 	"feud": {"title": "%s and %s are feuding", "text": "An argument over the last rift's spoils has turned sour. Each wants you on their side.",
 		"yes": "Side with %s", "no": "Side with %s", "yes_morale": 10, "no_morale": -12},
+	# 0.66: requests written as data. "need" picks who can ask (role, path ["any"
+	# = trained], quirk_origin, morale_below/above, rank_min, level_max,
+	# knockouts_min, rival, act_min, worn_forgeable); "pair" adds a second hero
+	# (bonded, junior, same_role). "yes_gold"/"yes_ess" cost, "yes_chance" with
+	# "yes_fail". Effects: GameStateQuests._request_fx.
+	"flashpoint": {"title": "%s wants to test a new spell", "text": "%s wants to try something loud on the training dummies. The yard may need a sweep afterwards.", "need": {"path": "evocation"},
+		"yes": "Let them (%d Gold): +15 morale, some XP", "yes_gold": 40, "yes_fx": {"morale": 15, "xp": 0.3}, "no": "Not near the buildings: -6 morale", "no_fx": {"morale": -6}},
+	"shared_tent": {"title": "%s and %s ask to share a tent", "text": "Two heroes who have been through a lot together want to bunk side by side.", "need": {}, "pair": "bonded",
+		"yes": "Let them: their bond grows, +8 morale each", "yes_fx": {"bond": 2, "morale_pair": 8}, "no": "Barracks rules: -5 morale each", "no_fx": {"morale_pair": -5}},
+	"memorial": {"title": "%s wants to visit the memorial", "text": "%s still carries the last bad rift and asks for a day to visit the fallen.", "need": {"quirk_origin": "scar"},
+		"yes": "Give them the day (busy today): +20 morale, Steady Nerves", "yes_fx": {"busy": 1, "morale": 20, "quirk": "Steady Nerves"}, "no": "Not now: -8 morale", "no_fx": {"morale": -8}},
+	"mentor": {"title": "%s offers to mentor %s", "text": "An experienced hero wants to take a newer one under their wing for a day.", "need": {"rank_min": "C"}, "pair": "junior",
+		"yes": "Agree (both busy today): the junior gains a level's XP, Mentor", "yes_fx": {"busy_pair": 1, "xp2": 1.0, "quirk": "Mentor"}, "no": "Not this week: -4 morale", "no_fx": {"morale": -4}},
+	"homesick": {"title": "%s is homesick", "text": "%s hasn't seen home since joining. A letter and a little coin would help.", "need": {"morale_below": 45},
+		"yes": "Send %d Gold home: +20 morale", "yes_gold": 30, "yes_fx": {"morale": 20}, "no": "Not now: -6 morale", "no_fx": {"morale": -6}},
+	"relics_study": {"title": "%s wants to study the relics", "text": "%s asks for a night alone with the guild's relics and swears nothing will break.", "need": {"role": "mage"},
+		"yes": "Allow it (%d Essence): some XP, Spark of Genius", "yes_ess": 20, "yes_fx": {"xp": 0.2, "quirk": "Spark of Genius"}, "no": "Refuse: -5 morale", "no_fx": {"morale": -5}},
+	"duel": {"title": "%s wants to duel the rival's champion", "text": "The rival guild's champion has been mocking us in the tavern. %s wants to settle it in the ring.", "need": {"role": "warrior", "rival": true},
+		"yes": "Let them fight (3 in 5: Renown and a title)", "yes_chance": 0.6, "yes_fx": {"renown": 6, "morale": 15, "title": "Ring-Champion"}, "yes_fail": {"morale": -10, "hurt": 0.4},
+		"no": "Forbid it: -8 morale", "no_fx": {"morale": -8}},
+	"hunting": {"title": "%s wants to go hunting", "text": "%s knows a quiet valley with deer and would bring back meat for the whole guild.", "need": {"role": "ranger"},
+		"yes": "Let them go (busy today): +5 morale for everyone", "yes_fx": {"busy": 1, "morale_all": 5}, "no": "Not now: -5 morale", "no_fx": {"morale": -5}},
+	"confessions": {"title": "%s offers to hear confessions", "text": "%s offers to sit with anyone who wants to talk about what they've seen in the rifts.", "need": {"role": "cleric"},
+		"yes": "Allow it (busy today): +6 morale for everyone", "yes_fx": {"busy": 1, "morale_all": 6}, "no": "Not now: -4 morale", "no_fx": {"morale": -4}},
+	"charm": {"title": "%s found a lucky charm", "text": "%s won a charm off a sailor at dice. It may well be stolen.", "need": {"role": "rogue"},
+		"yes": "Let them keep it: +10 morale, -2 Renown", "yes_fx": {"morale": 10, "renown": -2}, "no": "Return it: +3 Renown, -6 morale", "no_fx": {"renown": 3, "morale": -6}},
+	"old_wound": {"title": "%s's old wound aches", "text": "%s has been knocked out too often and the wound never healed right. A healer could help.", "need": {"knockouts_min": 2},
+		"yes": "Pay a healer (%d Gold): Hearth-Warmed", "yes_gold": 50, "yes_fx": {"quirk": "Hearth-Warmed", "morale": 8}, "no": "Not now: -6 morale", "no_fx": {"morale": -6}},
+	"lead": {"title": "%s wants to lead the next rift", "text": "%s is in high spirits and wants to be first through the next rift.", "need": {"morale_above": 75},
+		"yes": "Yes: the next party sets out with +2 Resolve", "yes_fx": {"resolve": 2, "morale": 5}, "no": "Not this time: -4 morale", "no_fx": {"morale": -4}},
+	"grudge": {"title": "%s holds a grudge", "text": "%s wants the next rift to pay for the last one, and talks about little else.", "need": {"knockouts_min": 1},
+		"yes": "Promise them: Grudge-Bearer", "yes_fx": {"quirk": "Grudge-Bearer"}, "no": "Tell them to let it go: +5 morale", "no_fx": {"morale": 5}},
+	"pilgrimage": {"title": "%s wants to visit a shrine of their Path", "text": "%s has heard of an old shrine to their Path two valleys over.", "need": {"path": "any"},
+		"yes": "Send them (busy 2 days, %d Essence): a level's XP, a title", "yes_ess": 25, "yes_fx": {"busy": 2, "xp": 1.0, "title": "Pilgrim of the Path"}, "no": "Not now: -5 morale", "no_fx": {"morale": -5}},
+	"nightwatch": {"title": "%s volunteers for the night watch", "text": "%s can't sleep and offers to keep watch over the camp.", "need": {},
+		"yes": "Let them (busy today): +1 Resolve for the next party, +5 morale", "yes_fx": {"busy": 1, "resolve": 1, "morale": 5}, "no": "Get some sleep: +2 morale", "no_fx": {"morale": 2}},
+	"song": {"title": "%s wrote a song about the guild", "text": "%s wants to sing it at the village tavern. It is... enthusiastic.", "need": {},
+		"yes": "Let them (%d Gold for a round): +4 Renown, a title", "yes_gold": 20, "yes_fx": {"renown": 4, "morale": 8, "title": "the Songmaker"}, "no": "Please don't: -6 morale", "no_fx": {"morale": -6}},
+	"sparring": {"title": "%s challenges %s to a sparring match", "text": "Two heroes want to settle who's better. It could get heated.", "need": {}, "pair": "same_role",
+		"yes": "Allow it: both gain XP, their bond grows", "yes_fx": {"xp_pair": 0.25, "bond": 1}, "no": "Not in my yard: -3 morale each", "no_fx": {"morale_pair": -3}},
+	"spoils": {"title": "%s asks for a share of the spoils", "text": "%s thinks the heroes deserve a cut of what the last rifts brought home.", "need": {"act_min": 2},
+		"yes": "Share a tenth of the Gold (up to 150): +10 morale for everyone", "yes_fx": {"gold_pct": 0.1, "morale_all": 10}, "no": "Refuse: -8 morale", "no_fx": {"morale": -8}},
+	"smithing": {"title": "%s wants to learn smithing", "text": "%s has been watching the forge and wants to temper their own gear.", "need": {"worn_forgeable": true},
+		"yes": "Let them (busy today): their best piece is tempered once", "yes_fx": {"busy": 1, "forge": 1}, "no": "Leave it to the smiths: -4 morale", "no_fx": {"morale": -4}},
+	"nerves": {"title": "%s is afraid of the next rift", "text": "%s is new and has heard too many of the veterans' stories. They want to stay back once more.", "need": {"level_max": 3},
+		"yes": "Let them sit it out (busy today): +10 morale", "yes_fx": {"busy": 1, "morale": 10}, "no": "Send them anyway: -8 morale, some XP from facing it", "no_fx": {"morale": -8, "xp": 0.2}},
 }
+## Titles a hero earns by deeds (0.66): history counter >= need (and "none"
+## still 0). Requests can give more (Ring-Champion, the Songmaker, ...).
+const TITLE_DEEDS := [
+	{"title": "Kingslayer", "stat": "boss_kills", "need": 5},
+	{"title": "Elite-Breaker", "stat": "elite_kills", "need": 15},
+	{"title": "Hundred-Slayer", "stat": "kills", "need": 150},
+	{"title": "the Unbroken", "stat": "rifts_cleared", "need": 10, "none": "knockouts"},
+	{"title": "Old Hand", "stat": "rifts_cleared", "need": 30},
+	{"title": "the Undying", "stat": "knockouts", "need": 5},
+	{"title": "Breach-Holder", "stat": "breaches_held", "need": 1},
+	{"title": "Lanternbearer", "stat": "sealed_wavering", "need": 1},
+]
 
 ## A fight won by hand (Auto never on) with no hero down pays this share
 ## of its Gold and its Essence again, where GameState.hand_bonus_here says.
@@ -229,7 +364,7 @@ const RIFT_EVENTS := [
 		]},
 	{"id": "shrine", "name": "Quiet Shrine", "text": "A small shrine the rift somehow left untouched. The air is calm here.",
 		"choices": [
-			{"label": "Pray", "desc": "Every hero heals 20% HP", "effect": {"heal_pct": 0.20}},
+			{"label": "Pray", "desc": "Every hero heals 20% HP", "effect": {"heal_pct": 0.20, "resolve": 2}},
 			{"label": "Take the offerings", "desc": "+6-12 Essence · -1 Renown", "effect": {"crystals": [6, 12], "reputation": -1}},
 		]},
 	{"id": "armory", "name": "Collapsed Armory", "text": "A rack of weapons lies pinned under fallen stone. Something good might still be under there.",
@@ -281,7 +416,7 @@ const RIFT_EVENTS := [
 		]},
 	{"id": "chapel", "name": "Ruined Chapel", "text": "Half a chapel, the other half somewhere in the rift. The altar still holds warmth.",
 		"choices": [
-			{"label": "Restore the altar", "desc": "Costs 20 Gold · every hero heals 50% HP · +2 Renown", "cost": {"coins": 20}, "effect": {"heal_pct": 0.5, "reputation": 2}},
+			{"label": "Restore the altar", "desc": "Costs 20 Gold · every hero heals 50% HP · +2 Renown", "cost": {"coins": 20}, "effect": {"heal_pct": 0.5, "reputation": 2, "resolve": 2}},
 			{"label": "Rest a while", "desc": "Every hero heals 20% HP", "effect": {"heal_pct": 0.20}},
 		]},
 	{"id": "peddler", "name": "Ghostly Peddler", "text": "A translucent merchant lays out wares that flicker in and out of existence.",
@@ -317,7 +452,7 @@ const RIFT_EVENTS := [
 	{"id": "crossroads", "name": "Rift Crossroads", "text": "Two paths: one dives deeper into raw rift energy, one leads to a quiet alcove.",
 		"choices": [
 			{"label": "Push deeper", "desc": "Everyone loses 8% HP · +10-16 Essence", "effect": {"hurt_pct": 0.08, "crystals": [10, 16]}},
-			{"label": "Regroup", "desc": "Every hero heals 15% HP · +3 Momentum next fight", "effect": {"heal_pct": 0.15, "ready": true}},
+			{"label": "Regroup", "desc": "Every hero heals 15% HP · +3 Momentum next fight", "effect": {"heal_pct": 0.15, "ready": true, "resolve": 1}},
 		]},
 	{"id": "banner", "name": "Fallen Banner", "text": "A guild banner lies in the dust, its bearer long gone. The cloth is still good.",
 		"choices": [
@@ -343,11 +478,11 @@ const RIFT_EVENTS := [
 	{"id": "sparring", "name": "Old Sparring Ring", "text": "Chalk lines and battered practice dummies. Someone trained here once, and the rift kept it.",
 		"choices": [
 			{"label": "Spar", "desc": "Everyone loses 10% HP · every hero gains 35 XP", "effect": {"hurt_pct": 0.10, "xp_all": 35}},
-			{"label": "Rest in the ring", "desc": "Every hero heals 10% HP", "effect": {"heal_pct": 0.10}},
+			{"label": "Rest in the ring", "desc": "Every hero heals 10% HP", "effect": {"heal_pct": 0.10, "resolve": 2}},
 		]},
 	{"id": "hermit", "name": "Rift Hermit", "text": "An old man lives here, somehow. He offers tea and a story.",
 		"choices": [
-			{"label": "Drink the tea", "desc": "Every hero heals 25% HP", "effect": {"heal_pct": 0.25}},
+			{"label": "Drink the tea", "desc": "Every hero heals 25% HP", "effect": {"heal_pct": 0.25, "resolve": 1}},
 			{"label": "Buy his charm", "desc": "Costs 20 Gold · a 25-point shield against the next hazard", "cost": {"coins": 20}, "effect": {"shield": 25}},
 		]},
 	{"id": "bones", "name": "Pile of Bones", "text": "Adventurers' bones, their packs still strapped on.",
@@ -362,7 +497,7 @@ const RIFT_EVENTS := [
 		]},
 	{"id": "starlight", "name": "Rift Starlight", "text": "A shaft of pale light falls through a crack in the rift. It feels like home.",
 		"choices": [
-			{"label": "Bask in it", "desc": "Every hero heals 15% HP · +3 Momentum next fight", "effect": {"heal_pct": 0.15, "ready": true}},
+			{"label": "Bask in it", "desc": "Every hero heals 15% HP · +3 Momentum next fight", "effect": {"heal_pct": 0.15, "ready": true, "resolve": 1}},
 			{"label": "Bottle it", "desc": "+10 Essence", "effect": {"crystals": 10}},
 		]},
 	{"id": "cart", "name": "Overturned Cart", "text": "A merchant's cart lies on its side. The merchant is nowhere to be seen.",
@@ -447,12 +582,12 @@ const RIFT_EVENTS := [
 		]},
 	{"id": "rain_up", "min_act": 2, "name": "Rain That Falls Up", "text": "Here the rain falls toward the sky, slow and warm, and collects in the air above your heads like a lake seen from underneath.",
 		"choices": [
-			{"label": "Stand in it", "desc": "Every hero heals 15% HP · +3 Momentum next fight", "effect": {"heal_pct": 0.15, "ready": true}},
+			{"label": "Stand in it", "desc": "Every hero heals 15% HP · +3 Momentum next fight", "effect": {"heal_pct": 0.15, "ready": true, "resolve": 1}},
 			{"label": "Bottle it", "desc": "+8-14 Essence", "effect": {"crystals": [8, 14]}},
 		]},
 	{"id": "dark_post", "min_act": 2, "name": "A Dark Post", "text": "A pillar of glass stands in the rift, cracked and empty. Scratched into its base: a name, and the Accord's oath. Whoever held this post let go a long time ago.",
 		"choices": [
-			{"label": "Read the oath aloud", "desc": "Every hero heals 10% HP · +2 Renown", "effect": {"heal_pct": 0.10, "reputation": 2}},
+			{"label": "Read the oath aloud", "desc": "Every hero heals 10% HP · +2 Renown", "effect": {"heal_pct": 0.10, "reputation": 2, "resolve": 2}},
 			{"label": "Chip out the crystal", "desc": "+10-16 Essence · -2 Renown", "effect": {"crystals": [10, 16], "reputation": -2}},
 		]},
 ]
@@ -466,6 +601,15 @@ const EVENT_CHECK_PER_LEVEL := 1.4   # target rises with the party's average lev
 ## Campfire: heal share for Rest, XP for Train.
 const CAMPFIRE_HEAL_PCT := 0.25
 const CAMPFIRE_TRAIN_XP := 15
+## Resolve (0.64): the party's grit over one rift. It drains as the party goes
+## deeper and takes risks, and comes back at campfires and shrines; a party
+## that runs low lets foes strike first. vars so campaign_sim can sweep them.
+var RESOLVE_START := 8
+var RESOLVE_MAX := 10
+var RESOLVE_DRAIN := {"floor": 1, "elite": 1, "hazard": 1, "risk": 2, "fled": 2}
+var RESOLVE_GAIN := {"rest": 3, "campfire": 1, "shrine": 2}
+var RESOLVE_WAVER := 3          # at or below: Wavering (foes act first in round 1)
+var RESOLVE_BROKEN_DMG := 0.15  # at 0: Broken, also no starting Momentum and -15% damage
 const DOWNED_RECOVERY_RUNS := 2
 const WOUND_HEAL_PER_RUN := 0.5
 ## The rift ladder, F to SSS. Each rank sits on a base difficulty (Lesser for

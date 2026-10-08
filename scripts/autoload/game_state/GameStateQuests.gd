@@ -336,22 +336,106 @@ func payday_forecast() -> Dictionary:
 
 ## Mid-week, maybe a hero asks for something (see HERO_REQUESTS).
 func maybe_hero_request() -> void:
-	if not hero_request.is_empty() or day % GameData.PAYDAY_DAYS != GameData.REQUEST_DAY:
+	if not hero_request.is_empty() or not GameData.REQUEST_DAYS.has(day % GameData.PAYDAY_DAYS):
 		return
 	var in_rift: Array = run.get("hero_ids", []) if not run.is_empty() else []
-	var pool: Array = heroes.filter(func(h): return not h.is_champion and not in_rift.has(h.id) and not h.is_downed())
+	var pool: Array = heroes.filter(func(h): return not h.is_champion and not in_rift.has(h.id) and not h.is_downed() and h.busy_runs <= 0)
 	if pool.is_empty():
 		return
 	pool.shuffle()
-	var types: Array = ["week_off", "raise", "gear"]
-	if training_free() > 0:
-		types.append("train")
-	if pool.size() >= 2:
-		types.append("feud")
-	var t: String = types[randi() % types.size()]
-	var ids: Array = [pool[0].id] if t != "feud" else [pool[0].id, pool[1].id]
-	hero_request = {"type": t, "ids": ids, "day": day}
+	# Every request someone could make, weighted: a request about who a hero is
+	# (their Path, a scar, a bond) comes up twice as often as a generic one.
+	var cands: Array = []   # [type, ids, weight]
+	var total := 0.0
+	for t in GameData.HERO_REQUESTS:
+		var ids := _request_heroes(str(t), pool)
+		if ids.is_empty():
+			continue
+		var def: Dictionary = GameData.HERO_REQUESTS[t]
+		var w := 2.0 if not (def.get("need", {}) as Dictionary).is_empty() else 1.0
+		cands.append([t, ids, w])
+		total += w
+	if cands.is_empty():
+		return
+	var roll := randf() * total
+	var pick: Array = cands[0]
+	for c in cands:
+		roll -= float(c[2])
+		if roll <= 0.0:
+			pick = c
+			break
+	hero_request = {"type": pick[0], "ids": pick[1], "day": day}
 	_news(request_title() + ".")   # it pops up at camp (Main._matter_overlay)
+
+
+## Who would make request `t` (ids, the asker first), or [] if nobody fits.
+func _request_heroes(t: String, pool: Array) -> Array:
+	var def: Dictionary = GameData.HERO_REQUESTS[t]
+	match t:
+		"week_off", "raise", "gear":
+			return [pool[0].id]
+		"train":
+			return [pool[0].id] if training_free() > 0 else []
+		"feud":
+			return [pool[0].id, pool[1].id] if pool.size() >= 2 else []
+	for h in pool:
+		if not _request_need_ok(h, def.get("need", {})):
+			continue
+		if not def.has("pair"):
+			return [h.id]
+		var mate := _request_mate(h, str(def["pair"]), pool)
+		if mate:
+			return [h.id, mate.id]
+	return []
+
+
+func _request_need_ok(h: Hero, need: Dictionary) -> bool:
+	for k in need:
+		var v = need[k]
+		var ok := true
+		match k:
+			"role": ok = GameData.hero_role(h) == str(v)
+			"path": ok = GameData.hero_path_id(h) != "" if str(v) == "any" else GameData.hero_path_id(h) == str(v)
+			"quirk_origin": ok = h.quirks.any(func(q): return str(GameData.quirk(q).get("origin", "")) == str(v))
+			"morale_below": ok = h.morale < int(v)
+			"morale_above": ok = h.morale > int(v)
+			"rank_min": ok = GameData.rank_index(h.rank) >= GameData.rank_index(str(v))
+			"level_max": ok = h.level <= int(v) and h.seasoned == 0
+			"knockouts_min": ok = int(h.history.get("knockouts", 0)) >= int(v)
+			"rival": ok = rival_name != ""
+			"act_min": ok = campaign_act >= int(v)
+			"worn_forgeable": ok = _request_forge_item(h) != null
+		if not ok:
+			return false
+	return true
+
+
+## The second hero of a two-hero request.
+func _request_mate(h: Hero, kind: String, pool: Array) -> Hero:
+	var best: Hero = null
+	for x in pool:
+		if x == h:
+			continue
+		match kind:
+			"bonded":
+				if bond_rifts(h.id, x.id) >= GameData.BOND_LEVEL_RIFTS[0] and (best == null or bond_rifts(h.id, x.id) > bond_rifts(h.id, best.id)):
+					best = x
+			"junior":
+				if x.level <= h.level - 3 and x.seasoned <= h.seasoned and (best == null or x.level < best.level):
+					best = x
+			"same_role":
+				if GameData.hero_role(x) == GameData.hero_role(h):
+					return x
+	return best
+
+
+## The worn piece a hero would temper themself (most forging left).
+func _request_forge_item(h: Hero) -> Item:
+	var best: Item = null
+	for it in items:
+		if it.equipped_to == h.id and forge_cost(it) > 0 and (best == null or it.forge_level < best.forge_level):
+			best = it
+	return best
 
 
 func _request_names() -> Array:
@@ -366,17 +450,50 @@ func request_title() -> String:
 	if hero_request.is_empty():
 		return ""
 	var def: Dictionary = GameData.HERO_REQUESTS[hero_request["type"]]
-	var n := _request_names()
-	return str(def["title"]) % (n if hero_request["type"] == "feud" else [n[0]])
+	return _request_fmt(tr(str(def["title"])))
 
 
-## The two answers' button texts.
+## The request's story line, names filled in.
+func request_text() -> String:
+	if hero_request.is_empty():
+		return ""
+	return _request_fmt(tr(str(GameData.HERO_REQUESTS[hero_request["type"]]["text"])))
+
+
+## Fills a translated line's %s with the heroes' names (one or two).
+func _request_fmt(s: String) -> String:
+	var n := _request_names().map(func(x): return tr(str(x)))
+	match s.count("%s"):
+		0:
+			return s
+		1:
+			return s % n[0]
+	return s % [n[0], n[1] if n.size() > 1 else n[0]]
+
+
+## The two answers' button texts (translated, then filled in).
 func request_options() -> Array:
 	var def: Dictionary = GameData.HERO_REQUESTS[hero_request["type"]]
-	var n := _request_names()
+	var n := _request_names().map(func(x): return tr(str(x)))
 	if hero_request["type"] == "feud":
-		return [str(def["yes"]) % n[0], str(def["no"]) % n[1]]
-	return [str(def["yes"]), str(def["no"])]
+		return [tr(str(def["yes"])) % n[0], tr(str(def["no"])) % n[1]]
+	var yes := tr(str(def["yes"]))
+	if yes.contains("%d"):
+		yes = yes % int(def.get("yes_n", def.get("yes_gold", def.get("yes_ess", 0))))
+	return [yes, tr(str(def["no"]))]
+
+
+## Why "yes" can't be chosen right now, or "".
+func request_blocked() -> String:
+	if hero_request.is_empty():
+		return ""
+	var def: Dictionary = GameData.HERO_REQUESTS[hero_request["type"]]
+	var gold := int(def.get("yes_gold", GameData.REQUEST_GEAR_COST if hero_request["type"] == "gear" else 0))
+	if coins < gold:
+		return tr("Not enough Gold.")
+	if crystals < int(def.get("yes_ess", 0)):
+		return tr("Not enough Essence.")
+	return ""
 
 
 ## Answers this week's request. For a feud, "yes" sides with the first hero,
@@ -391,7 +508,18 @@ func answer_request(yes: bool) -> String:
 		hero_request = {}
 		return ""
 	var h: Hero = hs[0]
-	if t == "feud":
+	if def.has("yes_fx"):   # a 0.66 request: data-driven
+		var fx: Dictionary = def["yes_fx"] if yes else def.get("no_fx", {})
+		if yes:
+			var why := request_blocked()
+			if why != "":
+				return why
+			coins -= int(def.get("yes_gold", 0))
+			crystals -= int(def.get("yes_ess", 0))
+			if def.has("yes_chance") and randf() >= float(def["yes_chance"]):
+				fx = def.get("yes_fail", {})
+		_request_fx(fx, hs)
+	elif t == "feud":
 		if hs.size() >= 2:
 			var winner: Hero = hs[0] if yes else hs[1]
 			var loser: Hero = hs[1] if yes else hs[0]
@@ -420,6 +548,64 @@ func answer_request(yes: bool) -> String:
 	save()
 	state_changed.emit()
 	return ""
+
+
+## A 0.66 request's effects on its heroes (`hs`: the asker first).
+func _request_fx(fx: Dictionary, hs: Array) -> void:
+	var h: Hero = hs[0]
+	var h2: Hero = hs[1] if hs.size() > 1 else null
+	for k in fx:
+		var v = fx[k]
+		match k:
+			"morale":
+				change_morale(h, int(v))
+			"morale_pair":
+				for x in hs:
+					change_morale(x, int(v))
+			"morale_all":
+				for x in heroes:
+					if not x.is_champion:
+						change_morale(x, int(v))
+			"xp":
+				_xp_share(h, float(v))
+			"xp_pair":
+				for x in hs:
+					_xp_share(x, float(v))
+			"xp2":
+				if h2:
+					_xp_share(h2, float(v))
+			"quirk":
+				give_quirk(h, str(v))
+			"title":
+				give_title(h, str(v))
+			"bond":
+				if h2:
+					var key := _bond_key(h.id, h2.id)
+					bonds[key] = int(bonds.get(key, 0)) + int(v)
+			"renown":
+				add_reputation(int(v))
+			"resolve":
+				next_resolve += int(v)
+			"busy":
+				h.busy_runs = maxi(h.busy_runs, int(v))
+			"busy_pair":
+				for x in hs:
+					x.busy_runs = maxi(x.busy_runs, int(v))
+			"hurt":
+				h.hp = maxi(1, h.hp - int(Combat.max_hp(h) * float(v)))
+			"forge":
+				var it := _request_forge_item(h)
+				if it:
+					coins += forge_cost(it)   # forge_item takes the price; this one is free
+					forge_item(it.id)
+			"gold_pct":
+				coins -= mini(150, int(coins * float(v)))   # ponytail: a flat cap; scale with the act if it bites late
+
+
+## `share` of a level's XP (nothing at level 10).
+func _xp_share(h: Hero, share: float) -> void:
+	if h.level < 10:
+		Combat.gain_xp(h, int(round(Combat.xp_to_next(h.level, h.rank) * share)))
 
 
 func change_morale(h: Hero, delta: int) -> void:

@@ -2,7 +2,7 @@ extends "res://tests/base_test.gd"
 ## Rift events: all are well-formed, every choice resolves, attribute
 ## checks scale with the party, and a run doesn't repeat an event.
 
-const KEYS := ["coins", "crystals", "reputation", "xp_all", "heal_pct", "hurt_pct", "ready", "loot", "item", "relic", "tonic", "shield"]
+const KEYS := ["resolve", "coins", "crystals", "reputation", "xp_all", "heal_pct", "hurt_pct", "ready", "loot", "item", "relic", "tonic", "shield"]
 
 
 func _keys_ok(e: Dictionary) -> bool:

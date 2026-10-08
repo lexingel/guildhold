@@ -33,7 +33,11 @@ func start_run(diff_id: String, hero_ids: Array[String], starting_relic: Relic, 
 		"start_coins": coins, "start_crystals": crystals, "heroes_lost": 0, "start_snap": run_snapshot(hero_ids),
 		"rift_rank": rift_rank, "seed": randi(), "training": training, "biome": pick_biome(true),
 		"overseer": overseer if champions.has(overseer) else "",
+		"resolve": GameData.RESOLVE_START + int(year_add("resolve_start")),
 	}
+	if next_resolve != 0 and resolve_on():   # a blessing (or a bad night) at camp
+		run["resolve"] = clampi(int(run["resolve"]) + next_resolve, 0, GameData.RESOLVE_MAX)
+		next_resolve = 0
 	if training:
 		# No elites in the training rift — a campfire takes their place.
 		for layer in run["layers"]:
@@ -378,6 +382,8 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 			result["defeat_reasons"] = Combat.defeat_reasons(state)
 		if not result["won"]:
 			_drop_haul("fled" if bool(result.get("retreated", false)) else "fell")
+			if bool(result.get("retreated", false)):
+				change_resolve(-int(GameData.RESOLVE_DRAIN["fled"]))
 		if run.has("tower"):
 			# The Tower pays per floor (first clear), not per fight.
 			result["reward_options"] = []
@@ -388,6 +394,8 @@ func _apply_combat_outcome(outcome: Dictionary) -> void:
 		if result["won"]:
 			coins += int(result["coin"])
 			crystals += int(result["crystal"]) + int(result["bonus_crystal"])
+			if kind == "elite":
+				change_resolve(-int(GameData.RESOLVE_DRAIN["elite"]))
 			_attune_gear(state.get("party", []))
 			var breath := GameData.POST_FIGHT_MEND + work_bonus("mend")   # the Chapel
 			if breath > 0.0 and not run.has("tower"):   # a breath between fights
@@ -534,8 +542,8 @@ func campfire_choose(choice: String) -> void:
 	match choice:
 		"rest":
 			for h in party:
-				h.hp = min(Combat.max_hp(h), h.hp + int(ceil(Combat.max_hp(h) * GameData.CAMPFIRE_HEAL_PCT)))
-			log.append(tr("The party rests by the fire and recovers %d%% HP.") % int(GameData.CAMPFIRE_HEAL_PCT * 100))
+				h.hp = min(Combat.max_hp(h), h.hp + int(ceil(Combat.max_hp(h) * campfire_heal_pct())))
+			log.append(tr("The party rests by the fire and recovers %d%% HP.") % int(round(campfire_heal_pct() * 100)))
 		"train":
 			for h in party:
 				Combat.gain_xp(h, GameData.CAMPFIRE_TRAIN_XP)
@@ -543,6 +551,9 @@ func campfire_choose(choice: String) -> void:
 		"sharpen":
 			run["momentum_bonus"] = int(run.get("momentum_bonus", 0)) + 4
 			log.append(tr("Weapons sharpened, focus restored — the next fight starts with +4 Momentum."))
+	var gain := change_resolve(int(GameData.RESOLVE_GAIN["rest" if choice == "rest" else "campfire"]))
+	if gain != 0:
+		log.append(tr("%+d Resolve.") % gain)
 	ns["type"] = "campfire"
 	ns["resolved"] = true
 	ns["log"] = log
@@ -662,6 +673,10 @@ func _apply_event_effect(e: Dictionary) -> Array[String]:
 	if e.get("ready", false):
 		run["momentum_bonus"] = int(run.get("momentum_bonus", 0)) + 3
 		log.append(tr("The next fight starts with +3 Momentum."))
+	if e.has("resolve"):
+		var rg := change_resolve(int(e["resolve"]))
+		if rg != 0:
+			log.append(tr("%+d Resolve.") % rg)
 	if e.has("tonic"):
 		var add := add_tonic("healing", int(e["tonic"]))
 		log.append(tr("+%d Healing Tonic.") % add if add > 0 else tr("You can't carry another tonic."))
@@ -785,6 +800,7 @@ func pray_at_shrine() -> void:
 		if own:
 			names.append(h.name.split(" the ")[0])
 	ns["done"] = true
+	change_resolve(int(GameData.RESOLVE_GAIN["shrine"]))
 	ns["note"] = tr("The shrine answers: %s learn the most.") % ", ".join(names) if not names.is_empty() else tr("The shrine answers, faintly: a little XP for everyone.")
 	save()
 	state_changed.emit()
@@ -857,6 +873,8 @@ func hazard_preview(dmg_scale: float) -> Dictionary:
 	var rank_scale: float = float(_diff()["monster_dmg"]) / float(GameData.DIFFICULTIES[0]["monster_dmg"])
 	var dmg: float = (6.0 + int(_diff()["floors"]) * 2.0) * float(hz["dmg_mult"]) * dmg_scale * rank_scale
 	var guard: float = min(0.9, hazard_severity_reduction() + Combat.party_skill_total(party, "hazard_guard_pct") + Combat.relic_special_total("hazard_guard_pct") + Combat.relic_drawback_total("hazard_guard_pct") + Combat.synergy_value_for("hazard_guard_pct") + Combat.bond_bonus_for(party, "hazard_guard_pct"))
+	if party.any(func(h): return GameData.hero_path_id(h) == "aegis"):   # Sanctum Chime (0.65)
+		dmg *= 1.0 - path_relic_value("aegis_hazard")
 	dmg = round(dmg * (1.0 - guard))
 	var absorbed: int = min(int(run.get("shield", 0)), int(dmg))
 	dmg -= absorbed
@@ -874,6 +892,9 @@ func _apply_hazard(dmg_scale: float, bonus_chance_override: float) -> void:
 	var ns: Dictionary = run["node_state"]
 	var hz: Dictionary = ns["hazard"]
 	var log: Array[String] = []
+	var rl := change_resolve(-int(GameData.RESOLVE_DRAIN["risk" if dmg_scale > 1.0 else "hazard"]))
+	if rl != 0:
+		log.append(tr("%+d Resolve.") % rl)
 	if pv["anchor"]:
 		run["anchor_used"] = true
 		log.append(tr("The Anchor Artifact snuffs the hazard before it strikes."))
@@ -1030,6 +1051,7 @@ func advance_node() -> void:
 		(run["layers"] as Array).append_array(_descent_layers(int(run["descent"])))
 		if int(run["descent"]) >= 6:   # the story web: a deep pillar's height marks
 			lore_event("descent", "6")
+	change_resolve(-int(GameData.RESOLVE_DRAIN["floor"]))
 	run["pos"] = int(run["pos"]) + 1
 	run["node_state"] = {}
 	auto_resolve_single_option()
@@ -1112,12 +1134,21 @@ func seal_rift() -> void:
 				push_toast(sealers[i], tr("Bond deepened — Lv%d") % (before + 1), tr("%s & %s: +%d%% party damage while both stand") % [tr(str(sealers[i].name.split(" the ")[0])), tr(str(sealers[j].name.split(" the ")[0])), int(round(GameData.BOND_DMG_PER_LEVEL * (before + 1) * 100))])
 	if not deepened.is_empty():
 		flavor += " " + tr("Bonds deepen: %s.") % ", ".join(deepened)
+	var wavering := resolve_on() and resolve_tier() > 0
 	for h in sealers:
 		change_morale(h, GameData.MORALE_SEAL)
-		for line in check_earned_quirks(h):
+		if run.has("breach"):
+			h.history["breaches_held"] = int(h.history.get("breaches_held", 0)) + 1
+		if wavering:
+			h.history["sealed_wavering"] = int(h.history.get("sealed_wavering", 0)) + 1
+		for line in check_earned_quirks(h) + check_titles(h):
 			flavor += " " + line
 	triage_used_this_cycle = false
 	run["sealed"] = {"essence": earned, "fast_clear": fast_clear, "cache": cache, "flavor": flavor}
+	if path_relic_eligible():
+		var offer := roll_path_relic_offer()
+		if not offer.is_empty():
+			run["sealed"]["path_relics"] = offer
 	if run.has("daily"):
 		run["sealed"]["daily"] = _complete_daily()
 	save()
@@ -1247,7 +1278,109 @@ func haul() -> Vector2i:
 
 ## Whether a lost or fled fight costs part of the haul (GameData.HAUL_LOSS).
 func haul_at_risk() -> bool:
-	return not run.is_empty() and not run.has("tower") and not run.get("training", false) 		and (run.has("descent") or rifts_sealed >= GameData.HAUL_GRACE_SEALS)
+	return not run.is_empty() and not run.has("tower") and not run.get("training", false) and hardship >= 0 \
+		and (run.has("descent") or rifts_sealed >= GameData.HAUL_GRACE_SEALS)
+
+
+## A campfire's Rest (Hardship 9 lowers it).
+func campfire_heal_pct() -> float:
+	return maxf(0.05, GameData.CAMPFIRE_HEAL_PCT + year_add("campfire_heal"))
+
+
+## Path relics (0.65): sealing a Rank D+ ladder rift (not a breach, the
+## Descent, the Tower or a finale) offers 1 of 3 GameData.PATH_RELICS.
+func path_relic_eligible() -> bool:
+	var rr := str(run.get("rift_rank", ""))
+	return rr != "" and GameData.rift_rank_index(rr) >= GameData.rift_rank_index("D") and int(run.get("finale", 0)) == 0 \
+		and not run.has("tower") and not run.has("breach") and not run.has("descent") and not run.get("training", false)
+
+
+## Up to 3 Path relic ids the guild doesn't own: two for Paths in the party
+## when it can, the rest from anywhere.
+func roll_path_relic_offer() -> Array:
+	var owned := {}
+	for r in relics:
+		owned[r.unique_id] = true
+	var paths := {}
+	for h in current_party():
+		paths[GameData.hero_path_id(h)] = true
+	var pool: Array = GameData.PATH_RELICS.filter(func(d): return not owned.has(str(d["id"])))
+	pool.shuffle()
+	var offer: Array = []
+	for d in pool:
+		if offer.size() < 2 and paths.has(str(d["path"])):
+			offer.append(str(d["id"]))
+	for d in pool:
+		if offer.size() < 3 and not offer.has(str(d["id"])):
+			offer.append(str(d["id"]))
+	return offer
+
+
+## The Essence a sealed rift pays instead of its Path relic.
+func path_relic_essence() -> int:
+	return maxi(10, int(round(float(_diff()["seal_essence"]) * 0.5)))
+
+
+## Takes offered Path relic `idx`, or Essence instead (idx < 0).
+func pick_path_relic(idx: int) -> void:
+	var s = run.get("sealed")
+	if not s is Dictionary or (s.get("path_relics", []) as Array).is_empty() or s.has("relic_taken"):
+		return
+	var offer: Array = s["path_relics"]
+	if idx >= 0 and idx < offer.size():
+		var r := Combat.relic_from_unique(GameData.find_unique_relic(str(offer[idx])))
+		_grant_loot({"loot_type": "relic", "obj": r})
+		s["relic_taken"] = r.name
+	else:
+		var e := path_relic_essence()
+		crystals += e
+		s["relic_taken"] = ""
+		s["relic_essence"] = e
+	save()
+	state_changed.emit()
+
+
+## The value of an equipped Path relic's "pmod" outside a fight (0 if none).
+func path_relic_value(key: String) -> float:
+	for r in Combat.equipped_relics():
+		if r.unique_id.begins_with("p_"):
+			var d := GameData.find_unique_relic(r.unique_id)
+			if str(d.get("pmod", "")) == key:
+				return float(d["value"])
+	return 0.0
+
+
+## Resolve (0.64) counts once the haul does (after the first seals), and only
+## in runs that started with it (an older saved run has none).
+func resolve_on() -> bool:
+	return haul_at_risk() and run.has("resolve")
+
+
+func resolve_now() -> int:
+	return int(run.get("resolve", GameData.RESOLVE_START))
+
+
+## 0 Steady, 1 Wavering (foes act first in round 1), 2 Broken (also no
+## starting Momentum and less damage).
+func resolve_tier() -> int:
+	if not resolve_on():
+		return 0
+	var r := resolve_now()
+	return 2 if r <= 0 else (1 if r <= GameData.RESOLVE_WAVER else 0)
+
+
+## Moves Resolve by `n` (clamped); returns the real change (0 when it's off).
+func change_resolve(n: int) -> int:
+	if not resolve_on() or n == 0:
+		return 0
+	var before := resolve_now()
+	run["resolve"] = clampi(before + n, 0, GameData.RESOLVE_MAX)
+	return int(run["resolve"]) - before
+
+
+## A choice card's "+3 Resolve" line, or "" while Resolve is off.
+func resolve_hint(n: int) -> String:
+	return tr("%+d Resolve") % n if resolve_on() and n != 0 else ""
 
 
 ## A lost ("fell") or fled fight drops its share of the haul, once per run.
@@ -1255,7 +1388,8 @@ func _drop_haul(why: String) -> void:
 	if not haul_at_risk() or run.has("haul_lost"):
 		return
 	var h := haul()
-	var lost := Vector2i(int(h.x * float(GameData.HAUL_LOSS[why])), int(h.y * float(GameData.HAUL_LOSS[why])))
+	var share := minf(1.0, float(GameData.HAUL_LOSS[why]) + (year_add("haul_fell") if why == "fell" else 0.0))
+	var lost := Vector2i(int(h.x * share), int(h.y * share))
 	coins -= lost.x
 	crystals -= lost.y
 	run["haul_lost"] = [lost.x, lost.y]
@@ -1576,6 +1710,8 @@ func retreat_now() -> void:
 
 
 func finish_run() -> void:
+	if run.get("sealed") != null:
+		pick_path_relic(-1)   # an offer left untaken pays its Essence
 	if run.has("tower"):
 		_end_tower()
 		return

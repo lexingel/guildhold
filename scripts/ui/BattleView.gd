@@ -388,7 +388,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
-	var key := OS.get_keycode_string(event.keycode)
+	var key := GameState.unbind_key(OS.get_keycode_string(event.keycode))   # Settings > Controls (0.68)
 	if _combat_hotkeys.has(key):
 		get_viewport().set_input_as_handled()
 		_combat_hotkeys[key].call()
@@ -429,8 +429,21 @@ func _pad_focus() -> void:
 		first.grab_focus()
 
 
+## A foe struck ("hit") or felled ("down"), as its region sounds (0.69).
+func _foe_sfx(state: Dictionary, kind: String) -> String:
+	var b := str(state.get("diff", {}).get("biome", ""))
+	if b == "" and not GameState.run.is_empty():
+		b = GameState.run_biome()
+	return str(GameData.SFX_PATH.get("foe_%s_%s" % [kind, b], GameData.SFX_PATH["hit" if kind == "hit" else "knockout"]))
+
+
 func _spawn_procs(state: Dictionary, hero_wrappers: Dictionary) -> void:
 	var per_hero := {}
+	var procs: Array = state.get("_procs", [])
+	if not procs.is_empty():   # the first Path moment this turn is heard (0.69)
+		var ph := GameState.find_hero(str(procs[0]["hero"]))
+		if ph and GameData.SFX_PATH.has("path_" + GameData.hero_path_id(ph)):
+			AudioManager.play_sfx(GameData.SFX_PATH["path_" + GameData.hero_path_id(ph)])
 	for p in state.get("_procs", []):
 		var wrapper: Control = hero_wrappers.get(str(p["hero"]))
 		if wrapper == null or not is_instance_valid(wrapper):
@@ -654,7 +667,7 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 				var mw: Control = monster_wrappers[i]
 				var heavy: bool = dmg >= float(monsters[i]["max_hp"]) * 0.25
 				var burst_color: Color = Palette.ELEMENT_PARTICLE_COLOR.get(h.type, Color(1, 1, 1))
-				AudioManager.play_sfx(GameData.SFX_PATH["hit_heavy" if heavy else "hit"])
+				AudioManager.play_sfx(GameData.SFX_PATH["hit_heavy"] if heavy else _foe_sfx(state, "hit"))
 				var hit_role := GameData.hero_role(h)
 				if hit_role in MELEE_ROLES or action != "attack":
 					Fx.burst(arena, "impact", _center(mw), mw.custom_minimum_size.y * (0.7 if heavy else 0.45), burst_color.lerp(Color.WHITE, 0.4), 26.0)
@@ -682,6 +695,8 @@ func _play_turn(state: Dictionary, hero_wrappers: Dictionary, hero_rects: Dictio
 					var mp = _monster_plates.get(i)
 					if mp != null and is_instance_valid(mp):
 						mp.visible = false
+					var tier := str(monsters[i].get("tier", ""))
+					AudioManager.play_sfx(GameData.SFX_PATH["boss_down"] if tier == "boss" else (GameData.SFX_PATH["elite_down"] if tier == "elite" else _foe_sfx(state, "down")))
 					Fx.burst(arena, "explosion", _center(mw) + Vector2(0, mw.custom_minimum_size.y * 0.15), mw.custom_minimum_size.y * 0.8, Color(0.75, 0.7, 0.8), 18.0)
 					await _tween_dissolve(mw)
 
@@ -1141,6 +1156,11 @@ func _room_preview() -> Control:
 		fc.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(fc)
 	col.add_child(row)
+	var tier := GameState.resolve_tier()
+	if tier > 0:
+		var wl := _label(tr("Resolve %d: foes strike first this fight.") % GameState.resolve_now() if tier == 1 else tr("Resolve broken: foes strike first, no starting Momentum, %d%% less damage.") % int(GameData.RESOLVE_BROKEN_DMG * 100), 12)
+		wl.add_theme_color_override("font_color", Palette.HAZARD)
+		col.add_child(wl)
 	return col
 
 
@@ -2567,7 +2587,7 @@ func _cmd_button(icon_path: String, caption: String, key: String, cb: Callable, 
 	col.add_child(cap)
 	b.add_child(col)
 	if key != "" and not _compact() and GameState.key_hints:   # a keycap (Settings > Key hints); a phone has no keys
-		var kb := _label(key, 11)
+		var kb := _label(GameState.bound_key(key), 11)
 		kb.add_theme_color_override("font_color", Palette.MUTED)
 		kb.position = Vector2(6, 3)
 		b.add_child(kb)
@@ -2615,6 +2635,43 @@ func _momentum_meter(n: int) -> Control:
 
 ## Hovering an action previews the Momentum it leaves: pips it spends turn
 ## dark red, pips it earns show pale.
+## While `b` is hovered, the share of foe `ti`'s HP it would take shows on
+## the foe's plate (0.68), with a skull when it's a kill.
+func _damage_hover(b: Control, state: Dictionary, ti: int, dmg: int) -> void:
+	if ti < 0 or dmg <= 0 or ti >= (state["monsters"] as Array).size():
+		return
+	var m: Dictionary = state["monsters"][ti]
+	var hp := int(round(float(m["hp"])))
+	var mx := maxi(1, int(m["max_hp"]))
+	var show := func(on: bool):
+		var plate = _monster_plates.get(ti)
+		if plate == null or not is_instance_valid(plate):
+			return
+		var old: Node = plate.get_node_or_null("Ghost")
+		if old:
+			old.queue_free()
+		if not on or hp <= 0:
+			return
+		var w: float = plate.size.x
+		var cut := mini(dmg, hp)
+		var ghost := ColorRect.new()
+		ghost.name = "Ghost"
+		ghost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ghost.color = Color(1.0, 0.95, 0.85, 0.75)
+		ghost.position = Vector2(w * float(hp - cut) / mx, 17)
+		ghost.size = Vector2(maxf(2.0, w * float(cut) / mx), 8)
+		plate.add_child(ghost)
+		if dmg >= hp:
+			var skull := _label("✖", 12)
+			skull.add_theme_color_override("font_color", Palette.HAZARD)
+			ghost.add_child(skull)
+			skull.position = Vector2(ghost.size.x + 2, -5)
+	b.mouse_entered.connect(show.bind(true))
+	b.mouse_exited.connect(show.bind(false))
+	b.focus_entered.connect(show.bind(true))
+	b.focus_exited.connect(show.bind(false))
+
+
 func _momentum_hover(b: Control, n: int, delta: int) -> void:
 	b.mouse_entered.connect(func(): _paint_pips(n, delta))
 	b.mouse_exited.connect(func(): _paint_pips(n, 0))
@@ -2820,7 +2877,10 @@ func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[He
 		var weak_reach: bool = current_hero.formation == "back" and GameData.MELEE_ROLES.has(current_hero.cls_id)
 		# A likely kill earns +1 more (the preview and the tip both say so).
 		var atk_kills := tgt >= 0 and Combat.attack_would_kill(state, current_hero, tgt)
+		var atk_dmg := Combat.preview_attack(state, current_hero, tgt) if tgt >= 0 else 0
 		var atk_tip := tr("Attack %s (1): +%d Momentum%s. Click a foe to pick another, Tab to cycle.") % [tr(str(tgt_name)), 2 if atk_kills else 1, tr(str(tr(" (+1 for the kill: this hit should finish it)") if atk_kills else ""))]
+		if atk_dmg > 0:
+			atk_tip = tr("About %d damage.") % atk_dmg + " " + atk_tip
 		if weak_reach:
 			atk_tip += tr("\nFrom the back row a %s hits at half strength.") % tr(str(current_hero.cls_id))
 		var mom := int(state.get("momentum", 0))
@@ -2828,6 +2888,7 @@ func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[He
 		var primary: Container = HBoxContainer.new() if compact and (_more_open or _tut_key in ["6", "7", "8", "9"] or last_action == "guard") else row
 		var ab_atk := _cmd_button("res://assets/skills/sword_a.png", "Attack" if not weak_reach else "Attack ½", "1", do_attack, atk_tip, last_action == "attack")
 		_momentum_hover(ab_atk, mom, 2 if atk_kills else 1)
+		_damage_hover(ab_atk, state, tgt, atk_dmg)
 		primary.add_child(ab_atk)
 		_combat_hotkeys["1"] = do_attack
 		if last_action == "attack":
@@ -2861,9 +2922,13 @@ func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[He
 					_ally_pick = "foe:" + act_id
 					render()
 			var tip := tr("%s (%s) — %d Momentum. %s%s") % [tr(str(d[2])), tr(str(key)), int(d[4]), tr(str(d[3])), tr(str(("\n" + block) if block != "" else ""))]
+			var sk_dmg := Combat.preview_skill(state, current_hero, act_id, tgt) if sk_target and tgt >= 0 else 0
+			if sk_dmg > 0:
+				tip = tr("About %d damage to %s.") % [sk_dmg, tr(str(tgt_name))] + " " + tip
 			var sb := _cmd_button(str(d[1]), str(d[2]), key, press_skill, tip, last_action == act_id, block, int(d[4]))
 			sb.custom_minimum_size.x = 84 if compact else 104
 			_momentum_hover(sb, mom, -int(d[4]) if block == "" else 0)
+			_damage_hover(sb, state, tgt, sk_dmg)
 			primary.add_child(sb)
 			if block == "":
 				_combat_hotkeys[key] = press_skill
@@ -3010,7 +3075,7 @@ func _battle_tools(living_heroes: Array[Hero], hero_wrappers: Dictionary) -> HBo
 ## the most notable event in its new log lines wins.
 func _turn_sfx(lines: Array) -> void:
 	var text := " ".join(lines)
-	for pair in [["gathers its strength", "windup"], ["stunned", "stun"], ["ablaze", "burn"], ["chilled", "chill"],
+	for pair in [["gathers its strength", "windup"], ["dodges", "dodge"], ["guards", "guard"], ["stunned", "stun"], ["ablaze", "burn"], ["chilled", "chill"],
 			["strikes every foe", "relic"], ["Phoenix", "relic"], ["uses ", "ability"], ["shield", "shield"],
 			["mends", "heal"], ["Tonic", "heal"]]:
 		# The log is in the player's language: look for the phrase in either.

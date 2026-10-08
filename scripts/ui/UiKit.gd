@@ -104,6 +104,14 @@ var selected_item_id: String = ""   # the Inventory item open in the pop-up ("" 
 var _confirm_retreat: bool = false   # the run bar's Retreat asks once before ending the run
 var inv_filter: String = "all"   # Inventory item filter: all | weapon | armor | focus
 var inv_view: String = "gear"
+var _daily_board: Array = []   # the day's top entries, once posted (0.70)
+var _daily_board_day := -1
+var _daily_msg := ""
+var _matter_heard := ""   # the camp event whose sound already played (0.69)
+var _resolve_heard := -1   # the Resolve the run bar last showed (0.69)
+var _payday_heard := -1
+var _screen_heard := ""    # the payday whose coins were last heard (0.69)
+var _rename_id: String = ""   # hero whose name is being edited on their page (0.66)
 var _dismiss_confirm: String = ""   # hero id awaiting a second click on Dismiss (hero page and payroll)
 var _confirm_respec_id: String = ""   # the hero whose attribute Reset is awaiting confirmation   # Inventory items page: gear | supplies
 var roster_tab: String = "hero"   # overview | gear | skills | history — the hero card's open tab
@@ -135,6 +143,11 @@ func _flush_render() -> void:
 ## Turkish, where a noun after a number stays singular ("3 gün").
 ## ponytail: suffix-only plurals; switch these call sites to tr_n() when a
 ## language with real plural forms (German, Russian...) is added.
+## How wide `text` sets in the body font at `size` px (for labels that clip).
+func _text_w(text: String, size: int) -> float:
+	return BODY_FONT.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, ui_size(size)).x
+
+
 func _pl(n: int, suffix: String = "s") -> String:
 	return GameData.pl(n, suffix)
 

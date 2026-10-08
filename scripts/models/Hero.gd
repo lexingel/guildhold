@@ -54,6 +54,7 @@ var look_of: String = ""        # the portrait `look` was picked for; a new one 
 var path: String = ""          # GameData.PATHS id once trained (0.62); "" = base class
 var seasoned: int = 0          # ranks reached by levelling and evolving (0.62): +SEASONED_PER_RANK HP/damage each
 var xp_boost_runs: int = 0      # rift runs left at +XP_BOOST XP after an evolution
+var titles: Array[String] = []   # earned titles, newest last (0.66; GameData.TITLE_DEEDS, hero requests)
 var history: Dictionary = {}              # lifetime counters: kills/boss_kills/elite_kills/knockouts/rifts_cleared — feeds earned quirks (GameData.QUIRKS)
 
 
@@ -86,7 +87,7 @@ func to_dict() -> Dictionary:
 		"prior_innate_kind": prior_innate_kind, "prior_innate_value": prior_innate_value,
 "ability_awakened": ability_awakened, "look": look, "look_of": look_of,
 		"path": path, "seasoned": seasoned, "xp_boost_runs": xp_boost_runs,
-		"history": history, "morale": morale, "unpaid_weeks": unpaid_weeks, "last_rift_day": last_rift_day,
+		"history": history, "titles": titles, "morale": morale, "unpaid_weeks": unpaid_weeks, "last_rift_day": last_rift_day,
 	}
 
 
@@ -98,6 +99,7 @@ static func from_dict(d: Dictionary) -> Hero:
 	h.pool_id = d.get("pool_id", "")
 	h.type = d.get("type", "")
 	h.flavor = d.get("flavor", "")
+	h.titles.assign(d.get("titles", []))
 	h.rank = d.get("rank", "F")
 	h.innate_kind = d.get("innate_kind", "")
 	h.innate_value = d.get("innate_value", 0.0)

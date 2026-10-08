@@ -28,6 +28,55 @@ func check_earned_quirks(h: Hero) -> Array[String]:
 	return gained
 
 
+## Gives `h` quirk `q` (a granted request, 0.66) with a toast; "" if they had it.
+func give_quirk(h: Hero, q: String) -> String:
+	if h.quirks.has(q) or not GameData.QUIRKS.has(q):
+		return ""
+	h.quirks.append(q)
+	push_toast(h, tr("Quirk: %s") % tr(q), "%s — %s" % [tr(str(h.name.split(" the ")[0])), tr(str(quirk_text(q)))])
+	return tr("%s gains %s.") % [tr(str(h.name.split(" the ")[0])), tr(q)]
+
+
+## Gives `h` a title (0.66); "" if they had it.
+func give_title(h: Hero, t: String) -> String:
+	if h.titles.has(t):
+		return ""
+	h.titles.append(t)
+	push_toast(h, tr("Title earned: %s") % tr(t), tr(str(h.name)))
+	return tr("%s is now called %s.") % [tr(str(h.name.split(" the ")[0])), tr(t)]
+
+
+## Every deed title (GameData.TITLE_DEEDS) `h` now qualifies for.
+func check_titles(h: Hero) -> Array[String]:
+	var out: Array[String] = []
+	for d in GameData.TITLE_DEEDS:
+		if not h.titles.has(str(d["title"])) and int(h.history.get(str(d["stat"]), 0)) >= int(d["need"]) and (not d.has("none") or int(h.history.get(str(d["none"]), 0)) == 0):
+			out.append(give_title(h, str(d["title"])))
+	return out
+
+
+## A hero's newest title, or "".
+func hero_title(h: Hero) -> String:
+	return tr(str(h.titles[-1])) if not h.titles.is_empty() else ""
+
+
+## Renames a hero's first name (0.66); "" or why not. The class part stays.
+func rename_hero(hero_id: String, first: String) -> String:
+	var h := find_hero(hero_id)
+	first = first.strip_edges()
+	if h == null:
+		return tr("No such hero.")
+	if first.length() < 2 or first.length() > 14:
+		return tr("A name needs 2 to 14 letters.")
+	if first.to_lower().contains(" the ") or first.contains("%"):
+		return tr("That name can't be used.")
+	var parts := h.name.split(" the ", true, 1)
+	h.name = first + (" the " + parts[1] if parts.size() > 1 else "")
+	save()
+	state_changed.emit()
+	return ""
+
+
 ## "+10% damage; +15% dodge while below 40% HP" for a quirk.
 func quirk_text(q: String) -> String:
 	var t := GameData.quirk(q)

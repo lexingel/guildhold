@@ -4,6 +4,7 @@ translation, where it's used) for review in a spreadsheet.
 
   python tools/i18n_extract.py            # tr
   python tools/i18n_extract.py --stats    # counts only
+  python tools/i18n_extract.py --lang es  # another language (es, zh_CN)
 
 A line is translatable when it goes through tr() / TranslationServer.translate()
 or is prose text in the UI code (Labels and Buttons translate their own text).
@@ -14,7 +15,8 @@ import csv, glob, os, re, sys
 from collections import OrderedDict
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LANG = "tr"
+LANG = sys.argv[sys.argv.index("--lang") + 1] if "--lang" in sys.argv else "tr"   # --lang es / zh_CN (0.70)
+LANG_NAME = {"tr": "Türkçe", "es": "Español", "zh_CN": "简体中文"}.get(LANG, LANG)
 PO = os.path.join(ROOT, "locale", LANG + ".po")
 CSV = os.path.join(ROOT, "docs", "translation", LANG + "_review.csv")   # outside the Godot project tree (docs/ has a .gdignore)
 
@@ -202,7 +204,7 @@ def main():
             f.write('msgstr "%s"\n\n' % have.get(msgid, ""))
     with open(CSV, "w", encoding="utf-8-sig", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["English", "Türkçe", "Where"])
+        w.writerow(["English", LANG_NAME, "Where"])
         for msgid, where in found.items():
             w.writerow([msgid.replace("\\n", "\n").replace('\\"', '"'), have.get(msgid, "").replace("\\n", "\n").replace('\\"', '"'), sorted(where)[0]])
     done = sum(1 for k in found if have.get(k))

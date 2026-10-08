@@ -660,7 +660,7 @@ func _render_memorial(v: VBoxContainer) -> void:
 			ic.modulate = Color(0.55, 0.55, 0.6)
 			row.add_child(ic)
 		var col := _vbox(2)
-		col.add_child(_label(tr("%s — Rank %s, Level %d") % [tr(str(f["name"])), tr(str(f["rank"])), int(f["level"])], 14))
+		col.add_child(_label(tr("%s — Rank %s, Level %d") % [tr(str(f["name"])) + (", " + tr(str(f["title"])) if str(f.get("title", "")) != "" else ""), tr(str(f["rank"])), int(f["level"])], 14))
 		col.add_child(_wrap_label(tr("%s, on day %d. %d rift%s sealed, %d foe%s felled.") % [tr(str(f["cause"])), int(f["day"]), int(f["rifts"]), tr(str(_pl(int(f["rifts"])))), int(f["kills"]), tr(str(_pl(int(f["kills"]))))], 12, true))
 		if str(f.get("line", "")) != "":   # Wen's line (the Guildhold Chronicle)
 			var wl := _wrap_label("“%s”  — %s" % [str(f["line"]), "Wen"], 12)
@@ -688,19 +688,14 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 	var answer: Callable
 	if kind == "request":
 		var req: Dictionary = GameState.hero_request
-		var def: Dictionary = GameData.HERO_REQUESTS[req["type"]]
 		for id in req["ids"]:
 			var h := GameState.find_hero(str(id))
 			if h:
 				faces.add_child(_hero_icon(h, 64))
 		title = GameState.request_title()
-		var first := GameState.find_hero(str(req["ids"][0]))
-		body = tr(str(def["text"]))
-		if body.contains("%s") and first:
-			body = body % tr(str(first.name.split(" the ")[0]))
+		body = GameState.request_text()
 		var ro: Array = GameState.request_options()
-		var gear_short: bool = req["type"] == "gear" and GameState.coins < GameData.REQUEST_GEAR_COST
-		opts = [[ro[0], tr("Not enough Gold.") if gear_short else ""], [ro[1], ""]]
+		opts = [[ro[0], GameState.request_blocked()], [ro[1], ""]]
 		foot = "No answer by payday counts as a no."
 		answer = GameState.answer_request
 	elif kind == "event":   # a camp event (0.64): options by index, not yes/no
@@ -719,6 +714,11 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 			faces.add_child(_icon(art, 48))
 		title = GameState.camp_event_title()
 		body = GameState.camp_event_text()
+		var heard := "%s:%d" % [eid, int(GameState.camp_event.get("day", 0))]
+		if heard != _matter_heard:   # once per event (0.69)
+			_matter_heard = heard
+			var ek := str(GameData.CAMP_EVENTS[eid]["kind"])
+			AudioManager.play_sfx(GameData.SFX_PATH["camp_omen" if ek == "threat" else ("camp_dilemma" if ek == "dilemma" else "camp_event")])
 		opts = GameState.camp_event_options()
 		var lastopt: String = str(opts[opts.size() - 1][0]) if not opts.is_empty() else ""
 		foot = tr("No answer by tomorrow: %s.") % lastopt.to_lower() if lastopt != "" else ""
@@ -763,6 +763,7 @@ func _matter_card(kind: String, popup: bool = false) -> PanelContainer:
 			var err: String = answer.call(k) if kind == "event" else answer.call(yes)
 			if err != "":
 				_flavor_toast = err
+				AudioManager.play_sfx(GameData.SFX_PATH["ui_error"])
 			render())
 		if str(opts[k][1]) != "":
 			b.disabled = true

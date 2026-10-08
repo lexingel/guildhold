@@ -24,6 +24,9 @@ func _ready() -> void:
 	main = load("res://scenes/Main.tscn").instantiate()
 	add_child(main)
 	await _wait(0.5)
+	if a.size() > 3:   # a language to check for overflow (0.70): capture.tscn -- dir W H es
+		GameState.language = a[3]
+		GameState.apply_language()
 	get_window().mode = Window.MODE_WINDOWED
 	get_window().size = Vector2i(w, h)
 	await _wait(0.5)

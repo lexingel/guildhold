@@ -606,6 +606,16 @@ func camp_event_options() -> Array:
 			out.append([tr("Hire sellswords (%d Gold)") % camp_gold(90), gold.call(camp_gold(90))])
 			out.append(_camp_helper_option([], tr("%s fights it (busy today, comes back hurt; Essence)")))
 			out.append([tr("Let it roam (Essence lost, the camp damaged)"), ""])
+		_:
+			for o in GameData.CAMP_EVENTS[id].get("opts", []):
+				if o.has("hero"):
+					out.append(_camp_helper_option(o["hero"], tr(str(o["label"]))))
+				elif o.has("gold"):
+					out.append([tr(str(o["label"])) % camp_gold(int(o["gold"])), gold.call(camp_gold(int(o["gold"])))])
+				elif o.has("ess"):
+					out.append([tr(str(o["label"])) % camp_gold(int(o["ess"])), ess.call(camp_gold(int(o["ess"])))])
+				else:
+					out.append([tr(str(o["label"])), ""])
 	return out
 
 
@@ -712,6 +722,8 @@ func answer_camp_event(k: int) -> String:
 				note = tr("Sold, and %s grows stronger.") % tr(rival_name)
 		"fire", "storm", "fever", "bandits", "tremor":
 			note = _camp_threat(id, k, d)
+		_:
+			note = _camp_opt(GameData.CAMP_EVENTS[id]["opts"][k])
 	if note != "":
 		pending_toasts.append({"cls_id": "", "pool_id": "", "title": camp_event_title(), "text": note})
 	if done:
@@ -719,6 +731,57 @@ func answer_camp_event(k: int) -> String:
 	save()
 	state_changed.emit()
 	return ""
+
+
+## A data-driven option (0.66): pay, send a hero, roll its chance, apply its effects.
+func _camp_opt(o: Dictionary) -> String:
+	if o.has("gold"):
+		coins -= camp_gold(int(o["gold"]))
+	if o.has("ess"):
+		crystals -= camp_gold(int(o["ess"]))
+	if o.has("hero"):
+		var h := _camp_helper(o["hero"])
+		if h:
+			h.busy_runs = maxi(h.busy_runs, 1)
+	var won := not o.has("chance") or randf() < float(o["chance"])
+	var notes: Array = _camp_fx(o.get("fx", {}) if won else o.get("fail", {}))
+	var told := str(o.get("note" if won else "fail_note", ""))
+	return tr(told) if told != "" else " ".join(notes)
+
+
+## Camp effects; returns what happened, a line each.
+func _camp_fx(fx: Dictionary) -> Array:
+	var out: Array = []
+	for k in fx:
+		var v = fx[k]
+		match k:
+			"coins":
+				coins += camp_gold(int(v))
+				out.append(tr("%+d Gold.") % camp_gold(int(v)))
+			"crystals":
+				crystals += camp_gold(int(v))
+				out.append(tr("%+d Essence.") % camp_gold(int(v)))
+			"renown":
+				add_reputation(int(v))
+				out.append(tr("%+d Renown.") % int(v))
+			"morale_all":
+				for h in heroes:
+					if not h.is_champion:
+						change_morale(h, int(v))
+				out.append(tr("Morale up.") if int(v) > 0 else tr("Morale down."))
+			"resolve":
+				next_resolve += int(v)
+				out.append(tr("%+d Resolve for the next party.") % int(v))
+			"tonic":
+				add_tonic("healing", int(v))
+			"xp_camp":
+				for h in _camp_trainees():
+					_xp_share(h, float(v))
+			"item", "relic":
+				var lt: Dictionary = {"loot_type": "item", "obj": Combat.gen_item(str(v))} if k == "item" else {"loot_type": "relic", "obj": Combat.gen_relic(str(v))}
+				_grant_loot(lt)
+				out.append(tr("You receive: %s.") % tr(str(lt["obj"].name)))
+	return out
 
 
 ## A threat's answer: 0 = pay, 1 = send a hero, 2 = take the loss.

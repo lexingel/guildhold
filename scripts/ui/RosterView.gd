@@ -192,9 +192,42 @@ func _hero_card(h: Hero) -> PanelContainer:
 	# title bar); each number appears once on the page.
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 14)
-	var nm := _label(h.name, 18)
-	nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	head.add_child(nm)
+	if _rename_id == h.id:   # rename (0.66): the first name only
+		var le := LineEdit.new()
+		le.name = "RenameField"
+		le.text = h.name.split(" the ")[0]
+		le.max_length = 14
+		le.custom_minimum_size.x = 160
+		le.select_all_on_focus = true
+		var commit := func(_t := ""):
+			var err := GameState.rename_hero(h.id, le.text)
+			if err != "":
+				_flavor_toast = err
+			else:
+				_rename_id = ""
+			render()
+		le.text_submitted.connect(commit)
+		head.add_child(le)
+		head.add_child(_button(tr("Save"), commit))
+		head.add_child(_button(tr("Cancel"), func(): _rename_id = ""; render()))
+		le.call_deferred("grab_focus")
+	else:
+		var nm := _label(h.name, 18)
+		nm.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		head.add_child(nm)
+		var ttl := GameState.hero_title(h)
+		if ttl != "":
+			var tl := _label(ttl, 14)
+			tl.add_theme_color_override("font_color", Palette.RANK_S)
+			tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			tl.tooltip_text = tr("Titles: %s") % ", ".join(h.titles.map(func(t): return tr(str(t))))
+			tl.mouse_filter = Control.MOUSE_FILTER_STOP
+			head.add_child(tl)
+		if not h.is_champion:
+			var rb := _button(tr("Rename"), func(): _rename_id = h.id; render())
+			rb.flat = true
+			rb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			head.add_child(rb)
 	var facts := _rich_line("%s · [color=#%s]%s[/color] · %s" % [tr("Lv%d %s") % [h.level, tr(str(h.cls_id.capitalize()))], Palette.rank_color(h.rank).to_html(false), tr("Rank %s") % tr(str(h.rank)), tr("Power %d") % Combat.power_of(h)], 14, true)
 	facts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	facts.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -545,7 +578,11 @@ func _attr_panel(h: Hero) -> PanelContainer:
 		row.add_child(_attr_bar(total))
 		var note := ", ".join(bits) if not bits.is_empty() else (tr("at the baseline") if total == GameData.ATTR_BASELINE else (tr("below the baseline") if total < GameData.ATTR_BASELINE else tr("small gains")))
 		var nlab := _label(note, 12, true)
-		nlab.custom_minimum_size.x = 150
+		nlab.custom_minimum_size.x = clampf(_text_w(note, 12) + 2.0, 150.0, 290.0)
+		nlab.clip_text = true   # a long effect line (Spanish) shortens instead of widening the page (0.70)
+		nlab.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		nlab.tooltip_text = note
+		nlab.mouse_filter = Control.MOUSE_FILTER_STOP
 		row.add_child(nlab)
 		var plus := _button("+", func(id=h.id, at=a): GameState.spend_attr_point(id, at); render())
 		plus.custom_minimum_size = Vector2(36, 30)
