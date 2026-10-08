@@ -118,6 +118,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"]]
 
 const WHATS_NEW := [
+	"Attack and skill animations no longer snap back to the stance after the blow: heroes and foes now play the motion back out, so every swing, shot and cast finishes.",
 	"Attacks hit harder on screen: warriors and rogues wind up before they dash in and the blow lands with a jolt; rangers draw and the arrow leaves the bow on the release; mages and clerics gather light in the hand before the bolt flies. New attack animations: the base Ranger, Mage and Cleric, seven rangers who now raise and draw their bows, the Ashen Templar and the Hearth-Warden.",
 	"Raising Abilities (Faster Than the Wounds, One More Round) raise a fallen ally once a fight now, at 35% and 30% HP; after that they heal. Mercy's Overflow no longer counts the party's mend, and its tree's mend nodes are lower. The Marksman's Signature is now called Held Breath, so it isn't confused with the ranger's Overwatch row bonus.",
 	"A hero's page has a Path tab now: their Path's three stages side by side, the Twist, and the rank and XP bar with Evolve and training. The Skills tab is shorter, so the skill tree starts higher up. Base-class heroes animate in fights. Tuning: Called Shot hits harder, snares bite harder, Benediction heals 10% (was 15%) and Overflow turns half the overhealing into a ward.",

@@ -56,6 +56,15 @@ func _play_frames(rect: TextureRect, frames: Array[String], frame_time: float = 
 			on_strike.call()
 		var t: float = frame_time * (float(ACTION_BEAT[k]) if beat and frames.size() == ACTION_BEAT.size() else 1.0)
 		await _await_or_timeout(get_tree().create_timer(t).timeout, t + 1.0)
+	# The generated action frames stop at the strike; play them back to the
+	# stance, quicker than the way out, so the motion doesn't snap (0.62.4).
+	if beat and frames.size() == ACTION_BEAT.size():
+		for k in [3, 2, 1, 0]:
+			if not is_instance_valid(rect):
+				return
+			rect.texture = load(frames[k])
+			if k > 0:
+				await _await_or_timeout(get_tree().create_timer(frame_time * 0.6).timeout, 1.0)
 
 
 ## Fallback for the two combos with no usable AI-generated motion (Warrior's
@@ -895,8 +904,6 @@ func _anim_hero_attack(h: Hero, hw: Control, rect: TextureRect, tw: Control, tin
 		shot.append(Fx.projectile(arena, "arrow" if arrow else "bolt", hand, _center(tw), 44.0 if arrow else 34.0, col, 0.22))
 	if not frames.is_empty() and rect:
 		await _play_frames(rect, frames, 0.065 if arrow else 0.06, true, release)
-		if is_instance_valid(rect):
-			rect.texture = load(frames[0])   # the shot is gone: back to the stance, not held at full draw
 	else:
 		await _tween_lunge(hw)
 	if not is_instance_valid(arena):
