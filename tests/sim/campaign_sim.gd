@@ -68,6 +68,7 @@ var exp_stats := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 var _run_party := 0           # heroes in today's rift run (0: no run today)
 var _run_ess := 0             # Essence the run brought in
 var _exp_paid_today := [0, 0] # expedition Gold, Essence that came home today
+var short_runs := [0, 0, 0]    # runs with under 4 heroes, of them with an expedition out, runs stepped down a rank
 var resolve_doors := [0, 0, 0, 0, 0]   # boss doors with Resolve on: [doors, wavering, broken, won from wavering/broken, sum of Resolve]
 var lost_high := [0, 0]   # lost fights / of them from above 90% party HP
 var by_kind := {}        # fight kind -> [won, lost, start hp % sum of lost, of won] (all guilds)
@@ -205,6 +206,8 @@ func _ready() -> void:
 		var es := exp_stats
 		print("   expeditions: %d sent (%d success, %d partial, %d failed), %d Gold %d Essence over %d hero-days = %.0f Gold %.1f Essence a hero-day · about %d heroes hurt, %d parties came back with a scar" % [es[0], es[1], es[2], es[3], es[4], es[5], es[6], es[4] / maxf(1, es[6]), es[5] / maxf(1, es[6]), es[7], es[8]])
 		print("   rifts: %d run days, %d hero-days = %.0f Gold %.1f Essence a hero-day (gross, before wages)" % [es[9], es[10], es[11] / maxf(1, es[10]), es[12] / maxf(1, es[10])])
+		print("   short parties: %d runs with under 4 heroes (%d of them with an expedition out) · %d runs stepped below the top open rank" % short_runs)
+		short_runs = [0, 0, 0]
 		exp_stats = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 		lost_high = [0, 0]
 		print("   left a run early to keep the haul: %d times" % left_with_haul)
@@ -379,14 +382,14 @@ func _day(p: String) -> void:
 		ending_day = GameState.day
 		ending_laurels = GameState.write_legacy([])
 	_quests()
-	if expeditions_on:
-		_send_expeditions()
 	var g0 := GameState.coins
 	if p == "investor":
 		_invest()
 	else:
 		_idle_spend()
 	_spent += maxi(0, g0 - GameState.coins)
+	if expeditions_on:   # after training: a capped hero's Path course needs the bench to fill the party
+		_send_expeditions()
 	if GameState.breach_broken():
 		var da: Array = act_runs.get(GameState.campaign_act, [0, 0, 0, 0])
 		da[3] += 1
@@ -421,6 +424,10 @@ func _day(p: String) -> void:
 			GameState.start_daily(rank, party, null)
 		else:
 			GameState.start_ladder_rift(rank, party, null)
+	if party.size() < 4:   # a short party, and was the bench away on an expedition?
+		short_runs[0] += 1
+		short_runs[1] += 1 if not GameState.expeditions.is_empty() else 0
+	short_runs[2] += 1 if rank != GameState.highest_open_rank() and rank != "finale" else 0
 	var e_run := GameState.crystals
 	var res := _play_run(rank)
 	_run_party = party.size()
