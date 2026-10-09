@@ -1779,25 +1779,32 @@ func _title_scene() -> void:
 		_scene_art.add_child(shade)
 
 
-## One button per language, each named in its own language (so it's found
-## whichever one is showing); the current one is lit.
+## A drop-down of languages (playtest 2026-10-09: the row of buttons grew
+## too wide), each named in its own language so it's found whichever one is
+## showing.
 func _language_row() -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
+	var pick := OptionButton.new()
+	pick.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	pick.get_popup().auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pick.tooltip_text = tr("Language")
+	var codes: Array[String] = []
 	for lang in GameData.LANGUAGES:
 		var code := str(lang[0])
 		if not GameState.language_ready(code):
 			continue   # Chinese waits for its font on the web (0.70)
-		var b := _button(str(lang[1]), func():
-			GameState.language = code
-			GameState.apply_language()
-			GameState.save_settings()
-			render())
-		b.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
-		b.toggle_mode = true
-		b.button_pressed = GameState.language == code
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(b)
+		pick.add_item(str(lang[1]))
+		codes.append(code)
+		if GameState.language == code:
+			pick.select(codes.size() - 1)
+	pick.item_selected.connect(func(i: int):
+		GameState.language = codes[i]
+		GameState.apply_language()
+		GameState.save_settings()
+		render())
+	row.add_child(pick)
 	return row
 
 
@@ -1992,6 +1999,10 @@ const GUILD_NAME_B := ["Lantern", "Crows", "Wardens", "Blades", "Oath", "Company
 func _render_onboard(v: VBoxContainer) -> void:
 	var top_row := HBoxContainer.new()
 	top_row.add_theme_constant_override("separation", 8)
+	top_row.add_child(_icon_button(GameData.BUTTON_ICON_PATH["back"], "Main menu", func():   # playtest 2026-10-09: no way back
+		screen = "title"
+		render()
+	))
 	var slot_lbl := _label(tr("Save Slot %d") % (GameState.active_slot + 1), 12, true)
 	slot_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_row.add_child(slot_lbl)

@@ -1996,12 +1996,14 @@ func _pulse(node: CanvasItem, lo: float = 0.45, period: float = 0.7) -> void:
 	tw.tween_property(node, "modulate:a", 1.0, period).set_trans(Tween.TRANS_SINE)
 
 
-## Statuses shown under a hero's HP bar.
 ## From Rank C a heavy blow also wounds (0.68): said on the intent's tooltip.
 func _wound_warning() -> String:
-	return ("
-" + tr("It wounds too: half the damage comes off max HP unless the target is guarded or defends.")) if GameState.wounds_on() else ""
+	if not GameState.wounds_on():
+		return ""
+	return "\n" + tr("It wounds too: half the damage comes off max HP unless the target is guarded or defends.")
 
+
+## Statuses shown under a hero's HP bar.
 
 func _hero_statuses(state: Dictionary, h: Hero) -> Array:
 	var out: Array = []

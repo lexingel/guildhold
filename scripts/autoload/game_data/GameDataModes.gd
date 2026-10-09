@@ -696,7 +696,8 @@ var MEND_CAP := 0.4
 ## Fight stakes (0.68, docs/design/fight_stakes_2026_10.md): from Rank C a
 ## landed wind-up or a hit of WOUND_HEAVY_PCT of base max HP leaves a wound,
 ## WOUND_SHARE of the damage off max HP that mending can't refill (capped at
-## WOUND_CAP). Guard, Defend and a dodge never wound. Up to Rank A wounds close
+## WOUND_CAP), and every other hit a trace (WOUND_TRACE): heavy blows alone
+## left the boss door at 94-96% HP in the sim. Guard, Defend and a dodge never wound. Up to Rank A wounds close
 ## after the fight; from WOUND_PERSIST_RANK they last the run (a campfire's
 ## Rest closes WOUND_REST_CLOSE of them, a shrine WOUND_SHRINE_CLOSE of max HP).
 ## A fall from Rank C (after FALL_COST_SEALS seals) can scar (FALL_SCAR_CHANCE),
@@ -707,10 +708,12 @@ var STAKES_ON := true   # campaign_sim stakes=0: the old rules, for a baseline
 var WOUND_FROM_RANK := "C"
 var WOUND_PERSIST_RANK := "S"
 var WOUND_SHARE := 0.5
+var WOUND_TRACE := 0.0        # of any other unguarded hit; off: 0.15-0.3 slowed bosses without wearing the run (sim 2026-10-09)
 var WOUND_CAP := 0.6
 var WOUND_HEAVY_PCT := 0.25
 var WOUND_REST_CLOSE := 0.5
 var WOUND_SHRINE_CLOSE := 0.25
+var WOUND_SURE_ROUND := 2      # every C+ ordinary fight has a wind-up by this round (round 1 at 50% when 2)
 var FALL_SCAR_CHANCE := {"C": 0.15, "B": 0.2, "A": 0.25, "S": 0.3, "SS": 0.35, "SSS": 0.35}
 var FALL_DEATH_FROM_RANK := "SS"
 var FALL_DEATH_CHANCE := 0.5

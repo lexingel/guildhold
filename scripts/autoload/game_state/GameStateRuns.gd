@@ -1422,12 +1422,13 @@ func _settle_dropped(sealed: bool) -> void:
 	run["dropped"] = {}
 
 
-## A wounding blow of `dealt` damage: WOUND_SHARE of it off `h`'s max HP, up
-## to WOUND_CAP of their base max HP; HP follows the lower ceiling. The wound added.
-func add_wound(h: Hero, dealt: int) -> int:
+## A wounding blow of `dealt` damage: `share` of it (WOUND_SHARE for a heavy
+## blow, WOUND_TRACE for any other hit) off `h`'s max HP, up to WOUND_CAP of
+## their base max HP; HP follows the lower ceiling. The wound added.
+func add_wound(h: Hero, dealt: int, share: float = -1.0) -> int:
 	var cap := int(Combat.base_max_hp(h) * GameData.WOUND_CAP)
 	var before := h.wound
-	h.wound = mini(cap, h.wound + int(round(dealt * GameData.WOUND_SHARE)))
+	h.wound = mini(cap, h.wound + int(round(dealt * (GameData.WOUND_SHARE if share < 0.0 else share))))
 	h.hp = mini(h.hp, Combat.max_hp(h))
 	return h.wound - before
 

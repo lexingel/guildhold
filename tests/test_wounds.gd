@@ -78,6 +78,17 @@ func run() -> void:
 		defended_clean = defended_clean and t.wound == 0
 	check(wounded, "a landed wind-up wounds at Rank B")
 	check(defended_clean, "a defended blow never wounds")
+	t.wound = 0
+	t.hp = Combat.max_hp(t)
+	GameData.WOUND_TRACE = 0.15   # off in 0.68; the rule still works when switched on
+	var st_t := Combat.start_combat(party, "combat", GameState._diff(), 0)
+	st_t["dodge"] = 0.0
+	var hp0 := t.hp
+	for k in 10:
+		if t.wound == 0:
+			Combat._monster_strike(st_t, 0, t, 1.0, false)
+	check(t.wound > 0 and t.wound <= int(ceil((hp0 - t.hp) * GameData.WOUND_SHARE)) + 1, "an ordinary hit leaves a trace (%d)" % t.wound)
+	GameData.WOUND_TRACE = 0.0
 	t.wound = 40
 	Combat._finish_combat(Combat.start_combat(party, "combat", GameState._diff(), 0), true, false)
 	check(t.wound == 0, "up to Rank A a wound closes when the fight ends")

@@ -111,6 +111,9 @@ func _ready() -> void:
 			take_path_relics = false
 		elif a == "exped=1":
 			expeditions_on = true
+		elif a.begins_with("set="):   # set=NAME:VALUE, a GameData knob (0.68 sweeps)
+			var kv := a.substr(4).split(":")
+			GameData.set(kv[0], int(kv[1]) if not kv[1].contains(".") else float(kv[1]))
 		elif a == "stakes=0":   # the rules before fight stakes (0.68), for a baseline
 			GameData.STAKES_ON = false
 		elif a.begins_with("rstart="):

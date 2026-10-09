@@ -617,10 +617,10 @@ func _start_round(state: Dictionary) -> void:
 		if randf() < float(GameData.WINDUP_CHANCE.get(wtier, 0.0)) + float(state.get("diff", {}).get("windup_bonus", 0.0)) + float(mw.get("windup_bonus", 0.0)):
 			mw["_winding"] = true
 	# Fight stakes (0.68): from Rank C every ordinary fight has a wind-up to answer by round 2.
-	if GameState.wounds_on() and str(state.get("kind", "")) == "combat" and int(state["round_num"]) <= 2 and not state.get("_sure_windup", false):
+	if GameState.wounds_on() and str(state.get("kind", "")) == "combat" and int(state["round_num"]) <= GameData.WOUND_SURE_ROUND and not state.get("_sure_windup", false):
 		if monsters.any(func(x): return x.get("_winding", false) or x.get("_charged", false)):
 			state["_sure_windup"] = true
-		elif int(state["round_num"]) == 2 or randf() < 0.5:
+		elif int(state["round_num"]) == GameData.WOUND_SURE_ROUND or randf() < 0.5:
 			for mw in monsters:
 				if float(mw["hp"]) > 0 and not mw.get("_charged", false) and not (mw.get("affixes", []) as Array).has("hasted"):
 					mw["_winding"] = true
@@ -1531,13 +1531,16 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 			if heavy_blow and target.hp > 0 and not state["_defending"].has(target.id):
 				state.get_or_add("_stunned", {})[target.id] = true
 				log.append(tr("%s is stunned by the blow!") % tr(str(target.name)))
-			# Fight stakes (0.68): a landed wind-up or a big hit, taken unguarded and undefended, wounds.
-			if GameState.wounds_on() and not guard and not state["_defending"].has(target.id) 					and (heavy_blow or dealt_back >= base_max_hp(target) * GameData.WOUND_HEAVY_PCT):
-				var w := GameState.add_wound(target, dealt_back)
+			# Fight stakes (0.68): a landed wind-up or a big hit, taken unguarded and
+			# undefended, wounds; any other such hit leaves a trace.
+			if GameState.wounds_on() and not guard and not state["_defending"].has(target.id):
+				var big: bool = heavy_blow or dealt_back >= base_max_hp(target) * GameData.WOUND_HEAVY_PCT
+				var w := GameState.add_wound(target, dealt_back, GameData.WOUND_SHARE if big else GameData.WOUND_TRACE)
 				if w > 0:
-					_tally(state, "wounds")
 					_tally(state, "wound_hp", w)
-					log.append(tr("%s is wounded: -%d max HP.") % [tr(str(target.name)), w])
+					if big:
+						_tally(state, "wounds")
+						log.append(tr("%s is wounded: -%d max HP.") % [tr(str(target.name)), w])
 			var status := str(m.get("status", ""))
 			if status != "" and target.hp > 0 and randf() < float(GameData.STATUS_INFO[status]["chance"]):
 				var info: Dictionary = GameData.STATUS_INFO[status]

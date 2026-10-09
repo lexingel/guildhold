@@ -1,6 +1,24 @@
 # Fight stakes: wounds and the cost of falling
 
-Status: design approved section by section on 2026-10-09; spec for review. Target release: 0.68.
+Status: shipped in 0.68.0 (2026-10-09), except the run wear-down layer, which the sims showed wounds can't deliver (below).
+
+## Sim results (2026-10-09, campaign_sim advice, 45 days)
+
+| Setting | Ordinary fights won (C-A) | HP at the boss door (S+) | Boss wins (investor) | Act pace |
+|---|---|---|---|---|
+| Spec (heavy-blow wounds, 16 guilds) | 100% | 96% | 88% | about normal |
+| Harsh: share 1.0, heavy from 15%, Rest closes 25%, wind-up in round 1 (8 guilds) | 100% | 94% | 84% | slower |
+| Plus traces at 15% (8 guilds) | 100% | 95-97% | 78% | slower |
+| Plus traces at 30% (8 guilds) | 100% | 96% | 69% | much slower |
+
+- **Why HP doesn't carry:** ordinary fights land almost no damage. They last one or two rounds, and auto-fight answers about two thirds of heavy blows. Wounds and traces only bite in long fights (the bosses), which slows pacing without wearing the run down.
+- **What shipped (the user's call):**
+  - per-fight wounds from heavy blows at C+, lasting the run at S+;
+  - fall costs;
+  - traces built but switched off (`WOUND_TRACE` 0.0).
+- **What works:** a wind-up to answer in every C+ fight, and fall costs at normal pace. Per 16 guilds that's about 90 scars, about 570 drops (nearly all recovered) and 5 deaths at SS/SSS.
+- **Follow-up for run wear-down:** ordinary fights at S+ must hit harder or last longer, a change to fights themselves. Then traces (`WOUND_TRACE`) can carry it.
+- **Found while building:** every knock-out used to scar at 50%, at every rank. Now a fall below C doesn't scar, and C+ uses 15-35%.
 
 ## Why
 
