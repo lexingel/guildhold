@@ -131,6 +131,8 @@ func reset() -> void:
 	hints_seen = []
 	last_export_day = -1
 	tips_off = false
+	tips_key_only = false
+	tips_asked = false
 	board_refresh_day = 0
 	quest_tally = {}
 	milestones_claimed = []
@@ -356,6 +358,8 @@ func load_save() -> bool:
 	hints_seen = data.get("hints_seen", [])
 	last_export_day = int(data.get("last_export_day", -1))
 	tips_off = bool(data.get("tips_off", false))
+	tips_key_only = bool(data.get("tips_key_only", false))
+	tips_asked = bool(data.get("tips_asked", true))   # saves from before the question don't ask it
 	if data.has("features_seen"):
 		features_seen = data["features_seen"]
 	else:

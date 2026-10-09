@@ -96,7 +96,20 @@ func check_feature_unlocks() -> Array:
 
 
 func hint_pending(id: String) -> bool:
-	return not tips_off and not hints_seen.has(id)
+	return not tips_off and not hints_seen.has(id) and (not tips_key_only or GameData.KEY_TIPS.has(id))
+
+
+## The founding question (playtest 2026-10-09): "all" every tip, "key" only
+## the first fight and the big moments, "off" none.
+func set_tips_mode(mode: String) -> void:
+	tips_off = mode == "off"
+	tips_key_only = mode == "key"
+	tips_asked = true
+	save()
+
+
+func tips_mode() -> String:
+	return "off" if tips_off else ("key" if tips_key_only else "all")
 
 
 func _see_hint(id: String) -> void:
@@ -791,6 +804,25 @@ func pray_at_shrine() -> void:
 	ns["done"] = true
 	change_resolve(int(GameData.RESOLVE_GAIN["shrine"]))
 	ns["note"] = tr("The shrine answers: %s learn the most.") % ", ".join(names) if not names.is_empty() else tr("The shrine answers, faintly: a little XP for everyone.")
+	save()
+	state_changed.emit()
+
+
+## The shrine's other answer (playtest 2026-10-09: walking past did nothing):
+## its offerings pay about what a fight here pays, and robbing it shakes the party.
+const SHRINE_ROB_RESOLVE := -2
+
+
+func take_shrine_offerings() -> void:
+	var ns: Dictionary = run.get("node_state", {})
+	if ns.get("done", false):
+		return
+	var rng := hazard_reward_range()
+	var c := randi_range(int(rng[0]), int(rng[1]))
+	coins += c
+	change_resolve(SHRINE_ROB_RESOLVE)
+	ns["done"] = true
+	ns["note"] = tr("You pocket the offerings: +%d Gold. The candles gutter out behind you (%d Resolve).") % [c, SHRINE_ROB_RESOLVE]
 	save()
 	state_changed.emit()
 

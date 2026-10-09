@@ -19,6 +19,7 @@ var active_slot: int = 0
 
 # Player/device prefs — global across save slots, not part of any guild's
 # own save data, so they survive Reset Guild and switching slots.
+var master_volume: float = 1.0   # the Master bus: every sound at once (settings.json)
 var music_volume: float = 1.0
 var combat_speed: float = 1.0
 var reduce_motion := false   # no shakes, sways, zooms or flashes in fights (settings.json)
@@ -197,6 +198,8 @@ var features_seen: Array = []   # unlocked features already announced (see check
 var hints_seen: Array = []   # coach tips dismissed
 var last_export_day: int = -1   # day the save was last exported as a backup (-1 = never)
 var tips_off: bool = false
+var tips_key_only: bool = false   # "Help a little": only GameData.KEY_TIPS show (asked after Act I's card)
+var tips_asked: bool = false      # the founding question about tips has been answered
 var board_refresh_day: int = 0   # the day the Guild Board's unaccepted postings are replaced
 var quest_tally: Dictionary = {}   # counters only quests read: boss:<name>, map:<uid>, rank_seals:<i>, *_seals, flawless_rifts
 var milestones_claimed: Array[String] = []  # GameData.MILESTONES ids already granted
@@ -866,7 +869,7 @@ func save_settings() -> void:
 	var f := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
 	if f:
 		f.store_string(JSON.stringify({
-			"music_volume": music_volume, "sfx_volume": sfx_volume, "voice_volume": voice_volume, "voice_on": voice_on, "resolution_idx": resolution_idx, "fullscreen": fullscreen, "combat_speed": combat_speed, "ui_scale": ui_scale,
+			"master_volume": master_volume, "music_volume": music_volume, "sfx_volume": sfx_volume, "voice_volume": voice_volume, "voice_on": voice_on, "resolution_idx": resolution_idx, "fullscreen": fullscreen, "combat_speed": combat_speed, "ui_scale": ui_scale,
 			"reduce_motion": reduce_motion, "colorblind": colorblind, "hearing_aid": hearing_aid, "language": language, "key_hints": key_hints, "key_binds": key_binds,
 			"share_stats": share_stats, "install_id": install_id,
 		}))
@@ -975,6 +978,7 @@ func load_settings() -> void:
 		hearing_aid = bool(parsed.get("hearing_aid", false))
 		language = str(parsed.get("language", "en"))
 		sfx_volume = parsed.get("sfx_volume", 1.0)
+		master_volume = float(parsed.get("master_volume", 1.0))
 		voice_volume = float(parsed.get("voice_volume", 1.0))
 		voice_on = bool(parsed.get("voice_on", true))
 		resolution_idx = parsed.get("resolution_idx", 0)
@@ -1024,7 +1028,7 @@ func save() -> void:
 		"reputation": reputation, "monster_kill_counts": monster_kill_counts,
 		"crafts_performed": crafts_performed, "flawless_wins": flawless_wins, "feats_done": feats_done, "endowments": endowments, "banner_colour": banner_colour, "grudge": grudge,
 		"elites_won": elites_won, "bosses_won": bosses_won,
-		"guild_board": guild_board, "day": day, "runs_started": runs_started, "campaign_act": campaign_act, "features_seen": features_seen, "hints_seen": hints_seen, "last_export_day": last_export_day, "tips_off": tips_off, "board_refresh_day": board_refresh_day, "quest_tally": quest_tally, "milestones_claimed": milestones_claimed,
+		"guild_board": guild_board, "day": day, "runs_started": runs_started, "campaign_act": campaign_act, "features_seen": features_seen, "hints_seen": hints_seen, "last_export_day": last_export_day, "tips_off": tips_off, "tips_key_only": tips_key_only, "tips_asked": tips_asked, "board_refresh_day": board_refresh_day, "quest_tally": quest_tally, "milestones_claimed": milestones_claimed,
 		"bonds": bonds,
 	}
 	_write_slot(active_slot, JSON.stringify(data))

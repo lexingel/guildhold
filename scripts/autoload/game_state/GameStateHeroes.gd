@@ -951,7 +951,7 @@ func training_free() -> int:
 	return maxi(0, training_slots() - trainees().size())
 
 
-## The Gold a course costs, all days paid up front.
+## The Essence a course costs, all days paid up front.
 func train_fee(h: Hero, days: int) -> int:
 	return (GameData.TRAIN_FEE + GameData.TRAIN_FEE_PER_LEVEL * h.level) * days
 
@@ -981,10 +981,10 @@ func start_training(hero_id: String, program: String, days: int, free := false) 
 	if training_free() <= 0:
 		return tr("Every station is taken")
 	var fee := 0 if free else train_fee(h, days)
-	if coins < fee:
-		return tr("Not enough Gold")
-	coins -= fee
-	h.training = {"program": program, "left": days, "total": days, "fee": fee / days}
+	if crystals < fee:
+		return tr("Not enough Essence")
+	crystals -= fee
+	h.training = {"program": program, "left": days, "total": days, "fee": 0, "essence": fee / days}
 	save()
 	state_changed.emit()
 	return ""
@@ -1100,9 +1100,10 @@ func recall_training(hero_id: String) -> int:
 	var h := find_hero(hero_id)
 	if not h or h.training.is_empty():
 		return 0
-	var refund := int(h.training["fee"]) * maxi(0, int(h.training["left"]) - 1)
-	coins += refund
-	crystals += int(h.training.get("essence", 0)) * maxi(0, int(h.training["left"]) - 1)   # a subclass course's Essence too
+	var days_back := maxi(0, int(h.training["left"]) - 1)
+	coins += int(h.training["fee"]) * days_back   # old saves' Gold courses
+	var refund := int(h.training.get("essence", 0)) * days_back
+	crystals += refund
 	h.training = {}
 	save()
 	state_changed.emit()

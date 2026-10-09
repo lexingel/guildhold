@@ -59,3 +59,14 @@ Two faults in the fight loop explain 15, 16, 22 and 24:
 1. Batch A + 17 + 3 (the bugs that break play), one release.
 2. Batch B/C rest, one release.
 3. Batch D after your calls.
+
+## Built (branch claude/project-thread-hczcps)
+- **Batch 1:** 3, 14, 15, 16, 17, 21, 22, 23, 24.
+- **Batch 2:** 1 (Settings on the title, Master slider), 5, 7 (payroll in a box, blurbs to tooltips, Records as cards and tiles with done achievements folded), 8 (text pass on every stale entry; Systems shows one topic at a time), 9 (big portal = ranked rifts, left = the Descent), 10 (also in the fight line), 11, 12, 13/27 (art sized by window, at its own shape), 18 (neighbour links 0.5 → 0.3 with no forced link, one fork a floor at least; taller map, bigger nodes, legend in one row), 19 (Kneel, or Take the offerings: fight-sized Gold, -2 Resolve), 20 (banked Momentum shown), 28 ("Worn" filter).
+- **Batch 3:** 2 (crest picker), 4 (asked after Act I's card; KEY_TIPS for "Help a little"; Settings cycles all / key moments / off), 29 (fee (2 + level) Essence a day; 30-day sim: investors still train 36-48 hero-days, Act I by day 4).
+- Found on the way: Renown's "every 20 arms an Epic relic" did nothing since 0.66 (`pending_shop_boost` is never read). The text is gone; say if Renown should earn something again.
+
+## Not built
+- **25:** not reproduced. A click map of the camp at 1280x800, 1600x900 and 1920x1080 sends every building where it should. Need how it was opened (building, tab, key) to chase it.
+- **26:** needs walk frames that match the base warrior (and a check of the other base classes): a PixelLab job.
+- **6, 30:** design calls (start roster, expeditions); not started.

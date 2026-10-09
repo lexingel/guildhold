@@ -1369,6 +1369,13 @@ func _render_combat_node(v: VBoxContainer) -> void:
 		left.add_child(gains_row)
 		if result.has("heroes"):
 			left.add_child(_victory_party(result))
+			var ups: Array = (result["heroes"] as Array).filter(func(hs): return int(hs["lv1"]) > int(hs["lv0"]) and GameState.find_hero(str(hs["id"])) != null)
+			if not ups.is_empty():
+				var pages := _icon_domain_button("violet", "res://assets/skills/armor_chest.png", tr("Hero pages: spend the new points"), func():
+					rift_hero_id = str(ups[0]["id"])
+					render())
+				pages.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+				left.add_child(pages)
 		if int(result.get("feat_gold", 0)) > 0:
 			var fb := _label(tr("Feat done: +%d Gold, +%d Essence.") % [int(result["feat_gold"]), int(result.get("feat_ess", 0))], 12)
 			fb.add_theme_color_override("font_color", Palette.RANK_S)
@@ -2190,9 +2197,12 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 	for h in living_heroes:
 		if h.formation == "back" and GameData.hero_portrait(h) != "":
 			line.append(h)
+	var front: Array[Hero] = []
 	for h in living_heroes:
 		if h.formation != "back" and GameData.hero_portrait(h) != "":
-			line.append(h)
+			front.append(h)
+	front.reverse()   # the first front-row hero stands nearest the foes, as on the party screen
+	line.append_array(front)
 	var hz_x := W * 0.03
 	var hz_w := W * 0.49
 	# One pixel scale for every combatant: heroes and monsters share the same

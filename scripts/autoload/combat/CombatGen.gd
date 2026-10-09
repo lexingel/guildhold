@@ -295,6 +295,9 @@ func build_layers(diff: Dictionary) -> Array:
 ## neighbour on the next floor (so routes cross and can be planned), a
 ## campfire every route passes before the boss, and the boss. A floor's
 ## "next" holds, per node, the node indices it leads to.
+const LANE_CROSS_CHANCE := 0.3   # a node's link to each neighbouring lane (was 0.5, plus a forced one)
+
+
 func _build_lane_map(diff: Dictionary, lanes: int) -> Array:
 	var pool: Array = FORK_POOL.duplicate() + LANE_EXTRAS
 	if diff.get("elite_chance_up", false):
@@ -324,14 +327,18 @@ func _build_lane_map(diff: Dictionary, lanes: int) -> Array:
 			for l in lanes:
 				nxt.append([0])
 		else:
-			for l in lanes:   # the same lane, and each neighbour half the time (about two ways on, as the old forks)
+			# The same lane, and a neighbour now and then: some roads run on
+			# alone, so a choice closes others off (playtest 2026-10-09: every
+			# node linked to every neighbour read as a mesh, not a map).
+			for l in lanes:
 				var to: Array = [l]
 				for side in [l - 1, l + 1]:
-					if side >= 0 and side < lanes and randf() < 0.5:
+					if side >= 0 and side < lanes and randf() < LANE_CROSS_CHANCE:
 						to.append(side)
-				if to.size() == 1:   # never a corridor: at least one neighbour
-					to.append(l + 1 if l + 1 < lanes else l - 1)
 				nxt.append(to)
+			if not nxt.any(func(x): return (x as Array).size() > 1):   # at least one fork a floor
+				var fl := randi() % lanes
+				(nxt[fl] as Array).append(fl + 1 if fl + 1 < lanes else fl - 1)
 			for t in lanes:   # every node can be reached
 				if not nxt.any(func(x): return (x as Array).has(t)):
 					(nxt[clampi(t + (1 if randf() < 0.5 else -1), 0, lanes - 1)] as Array).append(t)

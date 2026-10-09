@@ -14,6 +14,7 @@ func _ready() -> void:
 	GameState.load_legacy()
 	GameState.apply_language()
 	GameState.load_active_slot()
+	AudioManager.set_master_volume(GameState.master_volume)
 	AudioManager.set_music_volume(GameState.music_volume)
 	AudioManager.set_sfx_volume(GameState.sfx_volume)
 	AudioManager.set_voice_volume(GameState.voice_volume)
@@ -629,6 +630,12 @@ func _story_overlay(card_data: Dictionary) -> void:
 		center.add_child(card)
 		root.add_child(overlay)
 		return
+	if int(card_data.get("act_intro", 0)) == 1 and not GameState.tips_asked:
+		_tips_question(cv)
+		card.add_child(cv)
+		center.add_child(card)
+		root.add_child(overlay)
+		return
 	var cont := _icon_domain_button("ember", GameData.BUTTON_ICON_PATH["confirm"], "Continue", func():
 		GameState.pending_stories.pop_front()
 		GameState.save()
@@ -640,6 +647,32 @@ func _story_overlay(card_data: Dictionary) -> void:
 	card.add_child(cv)
 	center.add_child(card)
 	root.add_child(overlay)
+
+
+## After Act I's card, a new guild picks how much the game explains.
+func _tips_question(cv: VBoxContainer) -> void:
+	cv.add_child(_hsep())
+	var q := _label("How much should the guild's old hands tell you?", 15)
+	q.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	cv.add_child(q)
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 10)
+	var n := 0
+	for opt in [["all", "Guide me through everything", "A tip on every screen the first time you open it (as now)."],
+			["key", "Help a little", "Tips only for the first fight and when a big new system turns up."],
+			["off", "No tips", "Nothing explained. Settings can turn tips back on."]]:
+		n += 1
+		var pick := func(mode=str(opt[0])):
+			GameState.set_tips_mode(mode)
+			GameState.pending_stories.pop_front()
+			GameState.save()
+			render()
+		var b := _icon_domain_button("ember" if opt[0] == "all" else "violet", "", str(opt[1]), pick)
+		b.tooltip_text = tr(str(opt[2])) + tr(" (key %d)") % n
+		row.add_child(b)
+		_combat_hotkeys[str(n)] = pick
+	cv.add_child(row)
 
 
 var _accord_pick := false   # the ending card is asking which hero takes the post
@@ -1460,7 +1493,7 @@ func _header_back() -> Array:
 			, "Rift Hall"]
 		"settings":
 			const NAMES := {"camp": "Camp", "rift_run": "Rift", "rift_hall": "Rift Hall", "tower": "Tower",
-				"party_assembly": "Party Assembly", "crafting_hall": "Smithy"}
+				"party_assembly": "Party Assembly", "crafting_hall": "Smithy", "title": "Title"}
 			return [func(): screen = _pre_settings_screen; render(), NAMES.get(_pre_settings_screen, tr("Back"))]
 	return []
 
@@ -1676,6 +1709,7 @@ func _render_title(v: VBoxContainer) -> void:
 		screen = "load_game"
 		render()
 	))
+	menu.add_child(_button("Settings", _open_settings))
 	menu.add_child(_button("Credits", func():
 		screen = "credits"
 		render()
@@ -1988,12 +2022,25 @@ func _render_onboard(v: VBoxContainer) -> void:
 		render())
 	rn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	name_row.add_child(rn)
-	var rc := _icon_button(GameData.BUTTON_ICON_PATH["dice"], "New crest", func():
-		pending_crest = 1 + randi() % GameData.CREST_PATH.size()
-		render())
-	rc.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	name_row.add_child(rc)
 	v.add_child(name_row)
+	# Every crest to pick from (playtest 2026-10-09: a dice roll was the only way).
+	var crests := HFlowContainer.new()
+	crests.add_theme_constant_override("h_separation", 6)
+	crests.add_theme_constant_override("v_separation", 6)
+	crests.add_child(_label("Crest", 13, true))
+	for ci in GameData.CREST_PATH.size():
+		var cb := Button.new()
+		cb.toggle_mode = true
+		cb.button_pressed = pending_crest == ci + 1
+		cb.icon = load(GameData.CREST_PATH[ci])
+		cb.expand_icon = true
+		cb.custom_minimum_size = Vector2(52, 52)
+		cb.tooltip_text = tr("Crest %d") % (ci + 1)
+		cb.pressed.connect(func(n=ci + 1):
+			pending_crest = n
+			render())
+		crests.add_child(cb)
+	v.add_child(crests)
 	v.add_child(_founding_hardship())   # above the button (0.65): it can't be changed later
 	var found := _icon_domain_button("violet", GameData.BUTTON_ICON_PATH["confirm"], "Found the Guild", func():
 		# The pending name, not edit.text: a click landing in the same frame as
@@ -2235,10 +2282,12 @@ func _render_rift_hall(v: VBoxContainer) -> void:
 	var greater_open: bool = unlocked and greater_pick != ""
 	# Each gate: [its name, its area on the old 700x340 stage, the gate in the
 	# 320x200 art, where it leads (an empty Callable while it's locked)].
+	# The big centre portal is the ranked rifts, the small left one the
+	# Endless (playtest 2026-10-09: the main way in should be the biggest).
 	var gates := [
-		[tr("Rank %s Rift") % tr(str(lesser_pick)), Rect2(0, 0, 230, 340), Rect2(18, 65, 68, 98), go.bind(lesser_pick, false)],
-		["Endless Rift" if endless_open else tr("Endless Rift — locked"), Rect2(230, 0, 240, 340), Rect2(110, 20, 97, 130),
+		[(tr("Endless Rift") if GameData.ENDLESS_ENABLED else tr("The Descent")) + ("" if endless_open else tr(" — locked")), Rect2(0, 0, 230, 340), Rect2(18, 65, 68, 98),
 			((func(): _endless_choice_overlay(go)) if GameData.ENDLESS_ENABLED else _rift_mode_defs(go)[0][3]) if endless_open else Callable()],
+		[tr("Rank %s Rift") % tr(str(lesser_pick)), Rect2(230, 0, 240, 340), Rect2(110, 20, 97, 130), go.bind(lesser_pick, false)],
 		[tr("Rank %s Rift") % tr(str(greater_pick)) if greater_open else (tr("Ranks C-SSS — locked") if not unlocked else tr("Rank C — %s") % tr(str(GameState.ladder_rank_lock("C")))),
 			Rect2(470, 0, 230, 340), Rect2(230, 30, 78, 140), go.bind(greater_pick, false) if greater_open else Callable()],
 	]
@@ -2906,8 +2955,25 @@ func _formation_stage() -> Control:
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 10)
+	# Rows fill toward their side (playtest 2026-10-09): the back row from the
+	# left, the front row from the right next to the foes. A slot keeps its
+	# hero's place in pending_party; an empty one adds to the end.
+	var shown: Array = []
+	shown.resize(cap)
+	shown.fill("")
+	var back_n := 0
+	var front_n := 0
+	for id in pending_party:
+		var ph := GameState.find_hero(str(id))
+		if ph and ph.formation == "back" and back_n < cap:
+			shown[back_n] = str(id)
+			back_n += 1
+		elif front_n < cap:
+			shown[cap - 1 - front_n] = str(id)
+			front_n += 1
 	for i in cap:
-		row.add_child(_party_slot(i, str(pending_party[i]) if i < pending_party.size() else "", slot_w, small))
+		var sid := str(shown[i])
+		row.add_child(_party_slot(pending_party.find(sid) if sid != "" else pending_party.size(), sid, slot_w, small))
 	var foes := _label("Foes ›", 13, true)
 	foes.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	row.add_child(foes)
@@ -3761,6 +3827,11 @@ func _render_settings(v: VBoxContainer) -> void:
 		v.add_child(_feedback_panel())
 
 	v.add_child(_label("Audio", 15))
+	v.add_child(_volume_row("Master", GameState.master_volume, func(val: float):
+		GameState.master_volume = val
+		AudioManager.set_master_volume(val)
+		GameState.save_settings()
+	))
 	v.add_child(_volume_row("Music", GameState.music_volume, func(val: float):
 		GameState.music_volume = val
 		AudioManager.set_music_volume(val)
@@ -3879,15 +3950,14 @@ func _render_settings(v: VBoxContainer) -> void:
 	v.add_child(_label("Tips", 15))
 	var tips_row := HBoxContainer.new()
 	tips_row.add_theme_constant_override("separation", 8)
-	tips_row.add_child(_button(tr("Tips: %s") % tr(str((tr("off") if GameState.tips_off else tr("on")))), func():
-		GameState.tips_off = not GameState.tips_off
-		GameState.save()
+	var mode := GameState.tips_mode()
+	tips_row.add_child(_button(tr("Tips: %s") % {"all": tr("all"), "key": tr("key moments"), "off": tr("off")}[mode], func():
+		GameState.set_tips_mode({"all": "key", "key": "off", "off": "all"}[mode])
 		render()
 	))
 	tips_row.add_child(_button("Show all tips again", func():
 		GameState.hints_seen = []
-		GameState.tips_off = false
-		GameState.save()
+		GameState.set_tips_mode("all")
 		render()
 	))
 	v.add_child(tips_row)

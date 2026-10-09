@@ -606,13 +606,14 @@ const FORGE_GOLD := 40
 ## TRAIN_DAYS days. Each day passing gives +1 point in it, up to ATTR_TRAIN_CAP
 ## points trained per hero; courses of 2+ days also give TRAIN_XP_SHARE of a
 ## level per day, never past the guild's best hero. The fee, TRAIN_FEE +
-## TRAIN_FEE_PER_LEVEL x level per day, is paid up front; a hero recalled
+## TRAIN_FEE_PER_LEVEL x level Essence per day (Gold until the 2026-10-09
+## playtest: Act I is short of Gold, and training empowers), is paid up front; a hero recalled
 ## early gets back the days not yet started. Stations by yard tier (the
 ## Drill Yard upgrade): TRAIN_SLOTS_BY_TIER.
 const ATTR_TRAIN_CAP := 8
 const TRAIN_DAYS := [1, 2, 3]
-const TRAIN_FEE := 10
-const TRAIN_FEE_PER_LEVEL := 4
+const TRAIN_FEE := 2
+const TRAIN_FEE_PER_LEVEL := 1
 const TRAIN_XP_SHARE := 0.34
 const TRAIN_SLOTS_BY_TIER := [2, 3, 4]
 

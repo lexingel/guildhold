@@ -91,7 +91,19 @@ func run() -> void:
 	GameState.run["chosen"][int(GameState.run["pos"])] = "shrine"
 	GameState.ensure_lane_node()
 	check(GameData.PATHS.has(str(GameState.run["node_state"]["path"])), "a shrine belongs to a Path")
+	# Robbing it (2026-10-09): Gold now, Resolve lost.
+	var g0 := GameState.coins
+	var r0 := int(GameState.run.get("resolve", 0))
+	GameState.take_shrine_offerings()
+	check(GameState.coins > g0 and GameState.run["node_state"]["done"] and (not GameState.resolve_on() or int(GameState.run["resolve"]) < r0), "the offerings: Gold, at a price in Resolve")
 	GameState.run = {}
+	# Tips (2026-10-09): "Help a little" keeps only the key tips.
+	GameState.hints_seen = []
+	GameState.set_tips_mode("key")
+	check(GameState.hint_pending("battle") and not GameState.hint_pending("ledger"), "Help a little: the first fight's tip, not the ledger's")
+	GameState.set_tips_mode("off")
+	check(not GameState.hint_pending("battle") and GameState.tips_mode() == "off", "No tips: none")
+	GameState.set_tips_mode("all")
 
 	# The Descent keeps its two-way forks.
 	GameState.best_rift_rank_sealed = 4

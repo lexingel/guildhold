@@ -550,7 +550,7 @@ func _invest() -> void:
 	# The bench trains (0.58): heroes outside the best four, a 3-day course in their role's attribute.
 	var lineup := _pick_party()
 	for h in GameState.heroes:
-		if GameState.training_free() > 0 and not lineup.has(h.id) and h.is_available() and not h.is_champion and GameState.coins - GameState.train_fee(h, 3) > bill + 200:
+		if GameState.training_free() > 0 and not lineup.has(h.id) and h.is_available() and not h.is_champion and GameState.crystals - GameState.train_fee(h, 3) > 40:
 			var spread: Array = GameData.ROLE_ATTR_SPREAD.get(GameData.hero_role(h), ["might"])
 			GameState.start_training(h.id, str(spread[0]), 3)
 	if GameState.accord_ending == "renew":   # Keepers of the Vale

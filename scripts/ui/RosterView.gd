@@ -495,13 +495,18 @@ func _quirk_row(h: Hero) -> Control:
 	for q in h.quirks:
 		var t := GameData.quirk(q)
 		var bad: bool = t.get("treatable", false)
-		var chip := _label(q, 12)
-		chip.add_theme_color_override("font_color", Palette.HAZARD if bad else Palette.good())
+		# Styled like the role tags (a coloured diamond, an underlined name with a
+		# hover card): as plain labels they didn't read as hoverable.
+		var chip := _rich_line(_bb(Palette.HAZARD if bad else Palette.good(), "◆") + " [u]" + _bb(Palette.TEXT, tr(str(q))) + "[/u]", 12)
+		chip.autowrap_mode = TextServer.AUTOWRAP_OFF
+		chip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		var origin := tr(str({"born": "born with it", "scar": "a scar", "earned": "earned", "hollow": "from the far side", "accord": "sworn to the Accord a past guild kept", "tide": "hardened by the tides a past guild let in"}.get(str(t.get("origin", "")), "")))
 		if str(t.get("origin", "")) == "heir":
 			origin = tr("child of %s") % str(h.history.get("heir_of", "?"))
-		chip.tooltip_text = "%s (%s) — %s" % [tr(str(q)), origin, tr(str(GameState.quirk_text(q)))]
 		chip.mouse_filter = Control.MOUSE_FILTER_STOP
+		chip.mouse_default_cursor_shape = Control.CURSOR_HELP
+		_rich_tip(chip, _bb(Palette.TEXT, tr(str(q))) + "  " + _bb(Palette.MUTED, "(" + origin + ")") + "
+" + _bb(Palette.TEXT, tr(str(GameState.quirk_text(q)))))
 		row.add_child(chip)
 		if bad and GameState.lvl("res.lab") >= 1:
 			row.add_child(_icon_button("res://assets/skills/potion_blue.png", tr("Treat (%d Gold)") % GameState.quirk_treat_cost(), func(id=h.id, qq=q):
@@ -1173,12 +1178,15 @@ func _render_inventory_items(v: VBoxContainer) -> void:
 		_render_inventory_supplies(v)
 		return
 
+	# "Worn" lists what the heroes carry (playtest 2026-10-09: the arsenal
+	# was invisible here); a click opens the wearer's page.
+	var worn: Array = GameState.items.filter(func(it): return it.equipped_to != "" and GameState.find_hero(it.equipped_to) != null)
 	var unequipped_items: Array[Item] = []
-	unequipped_items.assign(loose.filter(func(it): return inv_filter == "all" or it.category == inv_filter))
+	unequipped_items.assign(worn if inv_filter == "worn" else loose.filter(func(it): return inv_filter == "all" or it.category == inv_filter))
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 8)
-	for f in [["all", "All"], ["weapon", "Weapons"], ["armor", "Armor"], ["focus", "Focus"]]:
-		var n: int = loose.filter(func(it): return f[0] == "all" or it.category == f[0]).size()
+	for f in [["all", "All"], ["weapon", "Weapons"], ["armor", "Armor"], ["focus", "Focus"], ["worn", "Worn"]]:
+		var n: int = worn.size() if f[0] == "worn" else loose.filter(func(it): return f[0] == "all" or it.category == f[0]).size()
 		var chip := _button("%s %d" % [tr(str(f[1])), n], func(id=str(f[0])):
 			inv_filter = id
 			render()
@@ -1203,16 +1211,16 @@ func _render_inventory_items(v: VBoxContainer) -> void:
 		"name":
 			unequipped_items.sort_custom(func(a, b): return a.name < b.name)
 	if unequipped_items.is_empty():
-		v.add_child(_label("No unequipped items here — loot drops in rifts.", 13, true))
+		v.add_child(_label("Nobody wears anything yet." if inv_filter == "worn" else "No unequipped items here — loot drops in rifts.", 13, true))
 		return
-	v.add_child(_label("Click an item to see it and equip it.  + fills someone's empty slot.", 12, true))
+	v.add_child(_label("What your heroes wear. Click one to open its wearer's page." if inv_filter == "worn" else "Click an item to see it and equip it.  + fills someone's empty slot.", 12, true))
 	var grid := HFlowContainer.new()
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 8)
 	for it in unequipped_items:
 		grid.add_child(_inv_tile(it))
 	v.add_child(grid)
-	var sel: Array = unequipped_items.filter(func(it): return it.id == selected_item_id)
+	var sel: Array = loose.filter(func(it): return it.id == selected_item_id)
 	if sel.is_empty():
 		selected_item_id = ""
 	else:
@@ -1245,7 +1253,7 @@ func _inv_tile(it: Item) -> Button:
 	box.add_child(ic)
 	_rarity_letter(box, it.rarity, 60)
 	var note := _loot_fit_note(it, false, GameState.heroes)
-	if str(note[0]).begins_with("Fills"):
+	if str(note[0]).begins_with("Fills") and it.equipped_to == "":
 		var dot := _count_badge("+", str(note[0]))
 		dot.position = Vector2(46, -6)
 		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1267,6 +1275,20 @@ func _inv_tile(it: Item) -> Button:
 		col.add_child(al)
 	b.add_child(col)
 	b.tooltip_text = tr("%s — click for details") % tr(str(_loot_display_name(it)))
+	var wearer := GameState.find_hero(it.equipped_to) if it.equipped_to != "" else null
+	if wearer:
+		var wl := _label(tr("Worn by %s") % tr(str(wearer.name.split(" the ")[0])), 11, true)
+		wl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		wl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		col.add_child(wl)
+		b.custom_minimum_size.y += 16
+		for c in b.pressed.get_connections():
+			b.pressed.disconnect(c["callable"])
+		b.pressed.connect(func(hid=wearer.id):
+			selected_hero_id = hid
+			term_tab = "roster"
+			render())
+		_rich_tip(b, _item_card(it))
 	return b
 
 

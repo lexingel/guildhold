@@ -143,6 +143,10 @@ func music_ducked() -> bool:
 	return _duck_db < -0.5
 
 
+func set_master_volume(linear: float) -> void:
+	AudioServer.set_bus_volume_db(0, linear_to_db(clampf(linear, 0.0001, 1.0)))
+
+
 func set_sfx_volume(linear: float) -> void:
 	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("SFX"), linear_to_db(clampf(linear, 0.0001, 1.0)))
 

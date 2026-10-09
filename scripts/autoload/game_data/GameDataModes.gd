@@ -608,6 +608,10 @@ var RESOLVE_START := 8
 var RESOLVE_MAX := 10
 var RESOLVE_DRAIN := {"floor": 1, "elite": 1, "hazard": 1, "risk": 2, "fled": 2}
 var RESOLVE_GAIN := {"rest": 3, "campfire": 1, "shrine": 2}
+## The coach tips "Help a little" keeps: the first steps, the first fight and
+## its reward, and the first time a big system turns up. Feature reveals and
+## the training fight's guide show in every mode but "No tips".
+const KEY_TIPS := ["welcome", "rift_hall", "party", "battle", "reward", "haul", "champions", "overseer"]
 var RESOLVE_WAVER := 3          # at or below: Wavering (foes act first in round 1)
 var RESOLVE_BROKEN_DMG := 0.15  # at 0: Broken, also no starting Momentum and -15% damage
 const DOWNED_RECOVERY_RUNS := 2

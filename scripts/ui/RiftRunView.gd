@@ -46,10 +46,10 @@ func _resolve_line(kind: String) -> String:
 
 
 func _path_node_marker(kind: String, is_current: bool, cb: Callable) -> Control:
-	const MARKER_SIZE := 34.0
+	var marker_size := 34.0 if _compact() else 46.0   # bigger on a PC screen
 	var wrap := Control.new()
-	wrap.custom_minimum_size = Vector2(MARKER_SIZE, MARKER_SIZE)
-	wrap.size = Vector2(MARKER_SIZE, MARKER_SIZE)
+	wrap.custom_minimum_size = Vector2(marker_size, marker_size)
+	wrap.size = Vector2(marker_size, marker_size)
 
 	var ring := PanelContainer.new()
 	var ring_style := StyleBoxFlat.new()
@@ -65,20 +65,20 @@ func _path_node_marker(kind: String, is_current: bool, cb: Callable) -> Control:
 	ring_style.corner_radius_bottom_left = 999
 	ring_style.corner_radius_bottom_right = 999
 	ring.add_theme_stylebox_override("panel", ring_style)
-	ring.custom_minimum_size = Vector2(MARKER_SIZE, MARKER_SIZE)
-	ring.size = Vector2(MARKER_SIZE, MARKER_SIZE)
+	ring.custom_minimum_size = Vector2(marker_size, marker_size)
+	ring.size = Vector2(marker_size, marker_size)
 	wrap.add_child(ring)
 
 	var icon_path: String = MAP_NODE_ICON.get(kind, "")
 	if icon_path != "":
-		var icon_size := MARKER_SIZE * 0.6
+		var icon_size := marker_size * 0.6
 		var icon_node := _icon(icon_path, int(icon_size))
-		icon_node.position = Vector2((MARKER_SIZE - icon_size) * 0.5, (MARKER_SIZE - icon_size) * 0.5)
+		icon_node.position = Vector2((marker_size - icon_size) * 0.5, (marker_size - icon_size) * 0.5)
 		wrap.add_child(icon_node)
 	else:
 		var l := _label(MAP_NODE_LABEL.get(kind, "?"), 13)
 		l.add_theme_color_override("font_color", Palette.MUTED if kind == "unknown" else Color(0, 0, 0, 1))
-		l.position = Vector2(MARKER_SIZE * 0.32, MARKER_SIZE * 0.16)
+		l.position = Vector2(marker_size * 0.32, marker_size * 0.16)
 		wrap.add_child(l)
 
 	var desc: String = MAP_NODE_DESC.get(kind, str(kind).capitalize())
@@ -89,8 +89,8 @@ func _path_node_marker(kind: String, is_current: bool, cb: Callable) -> Control:
 	if cb.is_valid():
 		var btn := Button.new()
 		btn.flat = true
-		btn.custom_minimum_size = Vector2(MARKER_SIZE, MARKER_SIZE)
-		btn.size = Vector2(MARKER_SIZE, MARKER_SIZE)
+		btn.custom_minimum_size = Vector2(marker_size, marker_size)
+		btn.size = Vector2(marker_size, marker_size)
 		var clear_style := StyleBoxEmpty.new()
 		for style_name in ["normal", "hover", "pressed", "focus", "disabled"]:
 			btn.add_theme_stylebox_override(style_name, clear_style)
@@ -251,7 +251,8 @@ func _render_lane_map(v: VBoxContainer) -> void:
 	var lanes := 1
 	for l in layers:
 		lanes = maxi(lanes, (l["options"] as Array).size())
-	var map_size := Vector2(maxf(700.0, v.custom_minimum_size.x), 30.0 + 38.0 * lanes)
+	# Taller lanes on a PC screen (the map read small there).
+	var map_size := Vector2(maxf(700.0, v.custom_minimum_size.x), 30.0 + (38.0 if _compact() else 70.0) * lanes)
 	var map_ctrl := Control.new()
 	map_ctrl.custom_minimum_size = map_size
 	var bg := TextureRect.new()
@@ -335,6 +336,10 @@ func _render_lane_map(v: VBoxContainer) -> void:
 		kl.add_theme_color_override("font_color", MAP_NODE_COLOR.get(k, Palette.TEXT))
 		item.add_child(kl)
 		legend.add_child(item)
+	if not _compact():   # one row under the map (in the scroll box it stacked top to bottom)
+		legend.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		v.add_child(legend)
+		return
 	var scroll := ScrollContainer.new()   # a phone can't fit eleven kinds in a row
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.custom_minimum_size.y = 26
@@ -392,6 +397,8 @@ func _run_bar(in_combat: bool, at_door := false) -> Control:
 	var rank: String = str(GameState.run.get("rift_rank", ""))
 	if int(GameState.run.get("shield", 0)) > 0:
 		tags.append(tr("Relic ward %d") % int(GameState.run["shield"]))
+	if int(GameState.run.get("momentum_bonus", 0)) > 0:   # banked by a campfire or an event; it was never shown
+		tags.append(tr("Next fight +%d Momentum") % int(GameState.run["momentum_bonus"]))
 	if not tags.is_empty():
 		top.add_child(_label(" · ".join(tags), 12, true))
 	var haul := GameState.haul()
@@ -504,9 +511,10 @@ func _run_bar(in_combat: bool, at_door := false) -> Control:
 		var bsp := Control.new()
 		bsp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bottom.add_child(bsp)
-		var hp := _icon_button("res://assets/skills/armor_chest.png", "Hero pages", func():
+		var hp := _icon_domain_button("violet", "res://assets/skills/armor_chest.png", "Hero pages", func():
 			rift_hero_id = GameState.current_party()[0].id
 			render())
+		hp.custom_minimum_size = Vector2(150, 40)   # it read as plain text in the run bar (playtest 2026-10-09)
 		hp.tooltip_text = tr("Gear, attributes and skills. Or click a hero.")
 		hp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		bottom.add_child(hp)
@@ -555,7 +563,9 @@ func _render_rift_run(v: VBoxContainer) -> void:
 		render()
 		return
 	var kind := GameState.current_node_kind()
-	if kind in ["combat", "boss", "elite"] or GameState.run.get("sealed") != null:
+	# A won fight's result screen may open a hero's page (a level-up's new points).
+	var at_result: bool = (GameState.run.get("node_state", {}) as Dictionary).has("result")
+	if (kind in ["combat", "boss", "elite"] and not at_result) or GameState.run.get("sealed") != null:
 		rift_hero_id = ""
 	var fighting := kind in ["combat", "boss", "elite"]
 	# The phone canvas, mid-fight: the arena and its command bar take the whole screen;
@@ -992,16 +1002,14 @@ func _render_treasure_node(v: VBoxContainer) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	var options: Array = ns["options"]
+	# The same cards (and 1-n keys) as the loot pick after a fight: the old
+	# tiles had no visible way to take one (playtest 2026-10-09).
 	for i in options.size():
-		var opt: Dictionary = options[i]
-		var obj = opt["obj"]
-		var is_relic: bool = opt["loot_type"] == "relic"
-		var icon_path: String = GameData.relic_icon(obj) if is_relic else GameData.item_icon(obj)
-		var note := _loot_fit_note(obj, is_relic, GameState.current_party())
-		row.add_child(_reward_tile(icon_path, _loot_display_name(obj), str(obj.rarity), _loot_desc(obj, is_relic), func(idx=i):
+		var pick := func(idx=i):
 			GameState.pick_treasure(idx)
 			render()
-		, "" if is_relic else _item_card(obj, note[2]), note))
+		row.add_child(_reward_card(options[i], 200.0, i + 1, pick))
+		_combat_hotkeys[str(i + 1)] = pick
 	v.add_child(row)
 
 
@@ -1035,15 +1043,22 @@ func _render_lane_node(v: VBoxContainer, kind: String) -> void:
 			flow.add_child(_button("Kneel", func():
 				GameState.pray_at_shrine()
 				render()))
+			var rng := GameState.hazard_reward_range()
+			var rob := _button("Take the offerings", func():
+				GameState.take_shrine_offerings()
+				render())
+			rob.tooltip_text = tr("%d-%d Gold, but %d Resolve.") % [int(rng[0]), int(rng[1]), GameState.SHRINE_ROB_RESOLVE]
+			flow.add_child(rob)
 		"echo":
 			v.add_child(_wrap_label("The echo of an old guild's trainer still drills in this hall. One hero can train with it and gain a level (at level 10: attribute points).", 13, true))
 			for h in GameState.current_party().filter(func(x): return x.hp > 0):
 				flow.add_child(_button(tr("%s (Lv%d)") % [h.name.split(" the ")[0], h.level], func(id=h.id):
 					GameState.train_with_echo(id)
 					render()))
-	flow.add_child(_button("Move on", func():
-		GameState.skip_lane_node()
-		render()))
+	if kind != "shrine":   # a shrine is answered one way or the other
+		flow.add_child(_button("Move on", func():
+			GameState.skip_lane_node()
+			render()))
 	v.add_child(flow)
 
 
@@ -1055,7 +1070,11 @@ func _node_split(v: VBoxContainer, art_path: String) -> VBoxContainer:
 		return v   # no room for the art beside the choices: the choices alone
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 16)
-	var art := _banner(art_path, 320, 200)
+	# Sized by the window, at the art's own shape (a fixed 320x200 box looked
+	# small on a PC screen and cropped the wide campfire art).
+	var tex: Texture2D = load(art_path)
+	var aw := clampf(get_viewport().get_visible_rect().size.x * 0.36, 320.0, 600.0)
+	var art := _banner(art_path, aw, roundf(aw * float(tex.get_height()) / float(tex.get_width())))
 	art.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(art)
 	var right := _vbox(10)

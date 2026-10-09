@@ -23,11 +23,11 @@ func run() -> void:
 	check(GameState.training_slots() == GameData.TRAIN_SLOTS_BY_TIER[2], "%d at the yard's top tier" % GameData.TRAIN_SLOTS_BY_TIER[2])
 	GameState.upgrades = {}
 	var fee := GameState.train_fee(h, 3)
-	GameState.coins = fee - 1
-	check(GameState.start_training("h1", "might", 3) == "Not enough Gold", "the fee is paid up front")
-	GameState.coins = 10000
+	GameState.crystals = fee - 1
+	check(GameState.start_training("h1", "might", 3) == "Not enough Essence", "the fee is paid up front, in Essence")
+	GameState.crystals = 10000
 	var m0 := int(h.attrs["might"])
-	check(GameState.start_training("h1", "might", 3) == "" and GameState.coins == 10000 - fee and not h.is_available(), "a 3-day Might course: paid, and the hero sits out runs")
+	check(GameState.start_training("h1", "might", 3) == "" and GameState.crystals == 10000 - fee and not h.is_available(), "a 3-day Might course: paid, and the hero sits out runs")
 	check(GameState.start_training("h2", "focus", 1) == "" and GameState.start_training("h3", "agility", 1) == "Every station is taken", "two stations, both in use")
 	b.level = 9
 	var lv0 := h.level
@@ -36,9 +36,9 @@ func run() -> void:
 	check(b.training.is_empty() and b.attr_trained == 1, "a 1-day course ends after a day")
 	var back0 := Hero.from_dict(JSON.parse_string(JSON.stringify(h.to_dict())))
 	check(int(back0.training.get("left", 0)) == 2, "a course in progress is saved")
-	var c0 := GameState.coins
+	var c0 := GameState.crystals
 	var refund := GameState.recall_training("h1")
-	check(refund == fee / 3 and GameState.coins == c0 + refund and h.training.is_empty() and h.is_available(), "recalled with 2 days left: the day under way is lost, the last one refunded (%d)" % refund)
+	check(refund == fee / 3 and GameState.crystals == c0 + refund and h.training.is_empty() and h.is_available(), "recalled with 2 days left: the day under way is lost, the last one refunded (%d)" % refund)
 	# End day (0.59): the preview says who finishes tomorrow and what payday asks; resting passes a day.
 	GameState.start_training("h2", "focus", 1)
 	GameState.day = GameData.PAYDAY_DAYS - 1
