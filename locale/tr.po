@@ -1207,7 +1207,7 @@ msgstr "İlk eşyanı bulunca açılır"
 msgid "Loot you find is kept here — equip items on the Roster's Hero tab."
 msgstr "Bulduğun ganimet burada saklanır — eşyaları Kadro'nun Kahraman sekmesinde kuşan."
 
-#: scripts/autoload/game_data/GameDataArt.gd:71 scripts/autoload/game_data/GameDataModes.gd:853 scripts/ui/Main.gd:1188
+#: scripts/autoload/game_data/GameDataArt.gd:71 scripts/autoload/game_data/GameDataModes.gd:880 scripts/ui/Main.gd:1188
 msgid "Medical Bay"
 msgstr "Revir"
 
@@ -1231,7 +1231,7 @@ msgstr "İlk dövüşünden sonra açılır"
 msgid "Every foe you meet is recorded here."
 msgstr "Karşılaştığın her düşman buraya kaydedilir."
 
-#: scripts/autoload/game_data/GameDataArt.gd:73 scripts/autoload/game_data/GameDataModes.gd:855 scripts/ui/GuildViews.gd:2478
+#: scripts/autoload/game_data/GameDataArt.gd:73 scripts/autoload/game_data/GameDataModes.gd:882 scripts/ui/GuildViews.gd:2478
 msgid "Quests"
 msgstr "Görevler"
 
@@ -1243,7 +1243,7 @@ msgstr "İlk yarığını mühürleyince açılır"
 msgid "Take on quests for Gold, Essence and Renown."
 msgstr "Altın, Öz ve Ün için görevler üstlen."
 
-#: scripts/autoload/game_data/GameDataArt.gd:74 scripts/autoload/game_data/GameDataModes.gd:854 scripts/ui/Main.gd:1188
+#: scripts/autoload/game_data/GameDataArt.gd:74 scripts/autoload/game_data/GameDataModes.gd:881 scripts/ui/Main.gd:1188
 msgid "Training Yard"
 msgstr "Eğitim Alanı"
 
@@ -1307,7 +1307,7 @@ msgstr "Dobbs, Levazımcı"
 msgid "\"Found a smith who'll work for our rates. Bring her any piece a hero wears and she'll temper it: every stat on it a little higher, for Gold. Each temper costs more than the last. She buys spare gear for scrap Essence, too.\" (Inventory > Smithy)"
 msgstr "\"Bizim ücretlere çalışacak bir demirci buldum. Bir kahramanın giydiği herhangi bir parçayı ona götür, tavlasın: üzerindeki her değer biraz yükselir, Altın karşılığında. Her tavlama bir öncekinden pahalı. Yedek teçhizatı da hurda Öz karşılığında alıyor.\" (Envanter > Demirci Ocağı)"
 
-#: scripts/autoload/game_data/GameDataArt.gd:82 scripts/autoload/game_data/GameDataModes.gd:1527 scripts/autoload/game_data/GameDataModes.gd:857
+#: scripts/autoload/game_data/GameDataArt.gd:82 scripts/autoload/game_data/GameDataModes.gd:1554 scripts/autoload/game_data/GameDataModes.gd:884
 msgid "Relics"
 msgstr "Kalıntılar"
 
@@ -1351,7 +1351,7 @@ msgstr "II. Perde'nin iki günü geçince açılır"
 msgid "The Infrastructure and Logistics rooms can be rebuilt now: Essence Amplifiers, Wardstones, the Trade Network and the Scouts' Lodge (Guild > Accord Hall)."
 msgstr "Altyapı ve Lojistik odaları artık yeniden yapılabilir: Öz Güçlendiricileri, Koruma Taşları, Ticaret Ağı ve İzci Köşkü (Lonca > Ahit Salonu)."
 
-#: scripts/autoload/game_data/GameDataArt.gd:87 scripts/autoload/game_data/GameDataModes.gd:759
+#: scripts/autoload/game_data/GameDataArt.gd:87 scripts/autoload/game_data/GameDataModes.gd:786
 msgid "Wardcraft"
 msgstr "Muhafızlık"
 
@@ -2503,7 +2503,7 @@ msgstr "Veba Bulutu"
 msgid "a toxic cloud that eats at every foe for three rounds"
 msgstr "üç tur boyunca her düşmanı kemiren zehirli bir bulut"
 
-#: scripts/autoload/game_data/GameDataChampions.gd:174 scripts/autoload/game_data/GameDataModes.gd:923 scripts/autoload/game_data/GameDataMonsters.gd:118
+#: scripts/autoload/game_data/GameDataChampions.gd:174 scripts/autoload/game_data/GameDataModes.gd:950 scripts/autoload/game_data/GameDataMonsters.gd:118
 msgid "Vaelith"
 msgstr "Vaelith"
 
@@ -3643,7 +3643,7 @@ msgstr "Sıyrılma"
 msgid "avoid hits: dodge and punishing counters"
 msgstr "darbelerden kaçın: kaçınma ve cezalandırıcı karşı saldırılar"
 
-#: scripts/autoload/game_data/GameDataHeroes.gd:310 scripts/autoload/game_data/GameDataHeroes.gd:343 scripts/autoload/game_data/GameDataModes.gd:1522
+#: scripts/autoload/game_data/GameDataHeroes.gd:310 scripts/autoload/game_data/GameDataHeroes.gd:343 scripts/autoload/game_data/GameDataModes.gd:1549
 msgid "Sustain"
 msgstr "Dayanıklılık"
 
@@ -3751,7 +3751,7 @@ msgstr "Son Burç"
 msgid "Oathkeeper"
 msgstr "Yemin Bekçisi"
 
-#: scripts/autoload/game_data/GameDataHeroes.gd:398 scripts/autoload/game_data/GameDataModes.gd:780
+#: scripts/autoload/game_data/GameDataHeroes.gd:398 scripts/autoload/game_data/GameDataModes.gd:807
 msgid "Rally"
 msgstr "Toparlan"
 
@@ -5543,7 +5543,7 @@ msgstr "Sen ne dedin?"
 msgid "That rifts don't. She looked at me like I'd failed a test I didn't know I was taking."
 msgstr "Yarıkların olmadığını. Bana, girdiğimi bilmediğim bir sınavdan kalmışım gibi baktı."
 
-#: scripts/autoload/game_data/GameDataLore.gd:112 scripts/autoload/game_data/GameDataLore.gd:215 scripts/autoload/game_data/GameDataModes.gd:1108
+#: scripts/autoload/game_data/GameDataLore.gd:112 scripts/autoload/game_data/GameDataLore.gd:215 scripts/autoload/game_data/GameDataModes.gd:1135
 msgid "The Iron Chorus"
 msgstr "Demir Koro"
 
@@ -5595,7 +5595,7 @@ msgstr "Yeşil hanımın kapısı"
 msgid "The eldest points at your crest, then up at the Vale. \"The green lady's door,\" she says. \"She let our cousins through. She said you were kinder than you look.\""
 msgstr "En büyükleri armanı, sonra yukarıda Vadi'yi gösteriyor. \"Yeşil hanımın kapısı,\" diyor. \"Kuzenlerimizi o geçirdi. Göründüğünüzden iyi kalpli olduğunuzu söyledi.\""
 
-#: scripts/autoload/game_data/GameDataLore.gd:121 scripts/autoload/game_data/GameDataModes.gd:1317
+#: scripts/autoload/game_data/GameDataLore.gd:121 scripts/autoload/game_data/GameDataModes.gd:1344
 msgid "The clerk"
 msgstr "Kâtip"
 
@@ -5719,7 +5719,7 @@ msgstr "Geçen hafta balık kokuyordu."
 msgid "Long night. He opened three doors with it before I got it off him."
 msgstr "Uzun geceydi. Ben elinden alana kadar onunla üç kapı açtı."
 
-#: scripts/autoload/game_data/GameDataLore.gd:146 scripts/autoload/game_data/GameDataModes.gd:1415 scripts/autoload/game_data/GameDataMonsters.gd:419
+#: scripts/autoload/game_data/GameDataLore.gd:146 scripts/autoload/game_data/GameDataModes.gd:1442 scripts/autoload/game_data/GameDataMonsters.gd:419
 msgid "Company Crossbowman"
 msgstr "Bölük Arbaletçisi"
 
@@ -5731,7 +5731,7 @@ msgstr "Taze oklar"
 msgid "Wen's note for the Bestiary: the crossbowmen's bolts are tipped with fresh Essence, and fresh means a rift opened this week. Their quartermaster keeps a calendar of rifts opening, which is a strange thing to be able to keep."
 msgstr "Wen'in Canavar Kitabı notu: arbaletçilerin oklarının ucunda taze Öz var; taze demek bu hafta bir yarık açıldı demek. Levazımcıları açılacak yarıkların bir takvimini tutuyor; tutulabilmesi bile tuhaf bir şey."
 
-#: scripts/autoload/game_data/GameDataLore.gd:148 scripts/autoload/game_data/GameDataLore.gd:231 scripts/autoload/game_data/GameDataModes.gd:1108
+#: scripts/autoload/game_data/GameDataLore.gd:148 scripts/autoload/game_data/GameDataLore.gd:231 scripts/autoload/game_data/GameDataModes.gd:1135
 msgid "The Gilded Lance"
 msgstr "Yaldızlı Mızrak"
 
@@ -6051,7 +6051,7 @@ msgstr "Tasma yok"
 msgid "Wen's note for the Bestiary: Sythrane's wolves wore no collars, and never once turned on her. Wolves don't do that for a crown. They do it for whoever feeds them."
 msgstr "Wen'in Canavar Kitabı notu: Sythrane'in kurtlarında tasma yoktu ve ona bir kez bile dönmediler. Kurtlar bunu bir taç için yapmaz. Onları kim besliyorsa onun için yapar."
 
-#: scripts/autoload/game_data/GameDataLore.gd:221 scripts/autoload/game_data/GameDataModes.gd:1108
+#: scripts/autoload/game_data/GameDataLore.gd:221 scripts/autoload/game_data/GameDataModes.gd:1135
 msgid "The Ashen Wolves"
 msgstr "Kül Kurtları"
 
@@ -6111,7 +6111,7 @@ msgstr "Geri çağrıldı"
 msgid "P.S. My cousin has been recalled to the capital. Something about a seal, a ring, and questions he would rather not answer. The Lance is, of course, above such things."
 msgstr "Not: Kuzenim başkente geri çağrıldı. Bir mühür, bir yüzük ve cevaplamamayı tercih edeceği sorularla ilgili bir şey. Mızrak elbette böyle şeylerin üstündedir."
 
-#: scripts/autoload/game_data/GameDataLore.gd:238 scripts/autoload/game_data/GameDataModes.gd:1315
+#: scripts/autoload/game_data/GameDataLore.gd:238 scripts/autoload/game_data/GameDataModes.gd:1342
 msgid "The Grandmaster's ledger"
 msgstr "Büyük Üstat'ın defteri"
 
@@ -6295,7 +6295,7 @@ msgstr "O zamanlar Şartları okudun mu?"
 msgid "I copied them. A clerk copies. Reading is for the people who sign."
 msgstr "Kopyaladım. Kâtip kopyalar. Okumak imzalayanların işi."
 
-#: scripts/autoload/game_data/GameDataLore.gd:302 scripts/autoload/game_data/GameDataLore.gd:305 scripts/autoload/game_data/GameDataModes.gd:924
+#: scripts/autoload/game_data/GameDataLore.gd:302 scripts/autoload/game_data/GameDataLore.gd:305 scripts/autoload/game_data/GameDataModes.gd:951
 msgid "Vaelith's Breach"
 msgstr "Vaelith'in Gediği"
 
@@ -6399,7 +6399,7 @@ msgstr "Berat Savaşı"
 msgid "You don't take the page to the herald. You take it to Morrow, with the second column showing, and the coin. He reads it, counts the coin, and laughs for a long time. \"The Treasury's man, bought by a guild. Fine. I was tired of their calendar.\"\n\n(Morrow joins your guild as a Rank S rogue on double wages, and the Company stops hunting. Miss his pay once and he's gone. The Crown will remember at its hearing.)"
 msgstr "Sayfayı münadiye götürmüyorsun. Morrow'a götürüyorsun; ikinci sütun görünür halde, yanında da parayla. Okuyor, parayı sayıyor ve uzun uzun gülüyor. \"Hazine'nin adamı, bir lonca tarafından satın alındı. Peki. Onların takviminden bıkmıştım zaten.\"\n\n(Morrow loncana çift maaşla S Rütbe bir haydut olarak katılır ve Bölük peşini bırakır. Maaşını bir kez ödemezsen gider. Taç bunu duruşmasında hatırlayacak.)"
 
-#: scripts/autoload/game_data/GameDataLore.gd:347 scripts/autoload/game_data/GameDataLore.gd:350 scripts/autoload/game_data/GameDataModes.gd:1204
+#: scripts/autoload/game_data/GameDataLore.gd:347 scripts/autoload/game_data/GameDataLore.gd:350 scripts/autoload/game_data/GameDataModes.gd:1231
 msgid "By Royal Hand"
 msgstr "Kraliyet Eliyle"
 
@@ -6463,7 +6463,7 @@ msgstr "Son salon, Ahit'in yeminin edildiği salon. Kapıları artık hiçbir an
 msgid "\n\nHe holds the lantern out to you, open. You know now what's in it, and that the echoes in your vault would fit."
 msgstr "\n\nFeneri sana uzatıyor, açık. Artık içinde ne olduğunu ve kasandaki yankıların içine sığacağını biliyorsun."
 
-#: scripts/autoload/game_data/GameDataLore.gd:371 scripts/autoload/game_data/GameDataModes.gd:1434 scripts/autoload/game_data/GameDataModes.gd:1436
+#: scripts/autoload/game_data/GameDataLore.gd:371 scripts/autoload/game_data/GameDataModes.gd:1461 scripts/autoload/game_data/GameDataModes.gd:1463
 msgid "What the Rifts Take"
 msgstr "Yarıkların Aldıkları"
 
@@ -6571,7 +6571,7 @@ msgstr "Köyler %s loncasını seçiyor"
 msgid "The moot is long, and loud, and %s takes it. The villages will bring their troubles to another door for a while. The rifts don't care whose name the villages call."
 msgstr "Meclis uzun ve gürültülü geçiyor ve %s kazanıyor. Köyler bir süre dertlerini başka bir kapıya götürecek. Yarıklar köylerin kimin adını seslendiğini umursamaz."
 
-#: scripts/autoload/game_data/GameDataLore.gd:433 scripts/autoload/game_data/GameDataModes.gd:1204
+#: scripts/autoload/game_data/GameDataLore.gd:433 scripts/autoload/game_data/GameDataModes.gd:1231
 msgid "A notice on every guild door in the Vale"
 msgstr "Vadi'deki her lonca kapısına asılmış bir duyuru"
 
@@ -9235,2315 +9235,2395 @@ msgstr "Kristali kazıyıp çıkar"
 msgid "+10-16 Essence · -2 Renown"
 msgstr "+10-16 Öz · -2 Ün"
 
-#: scripts/autoload/game_data/GameDataModes.gd:621
+#: scripts/autoload/game_data/GameDataModes.gd:622
 msgid "Escort the salt carts"
 msgstr "Tuz arabalarına eşlik et"
 
-#: scripts/autoload/game_data/GameDataModes.gd:621
+#: scripts/autoload/game_data/GameDataModes.gd:622
 msgid "The salt carts want guards as far as the river ford. Nobody expects trouble, which is when it comes."
 msgstr "Tuz arabaları nehir geçidine kadar muhafız istiyor. Kimse bela beklemiyor; bela da tam o zaman gelir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:622
+#: scripts/autoload/game_data/GameDataModes.gd:623
 msgid "Clear the mill cellar"
 msgstr "Değirmen mahzenini temizle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:622
+#: scripts/autoload/game_data/GameDataModes.gd:623
 msgid "Something is eating the miller's grain and he would rather not find out what."
 msgstr "Bir şey değirmencinin tahılını yiyor ve o, ne olduğunu öğrenmek istemiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:623
+#: scripts/autoload/game_data/GameDataModes.gd:624
 msgid "Count the border cairns"
 msgstr "Sınır taşlarını say"
 
-#: scripts/autoload/game_data/GameDataModes.gd:623
+#: scripts/autoload/game_data/GameDataModes.gd:624
 msgid "The Crown pays a surveyor's fee to anyone who walks the old border and counts what is still standing."
 msgstr "Taç, eski sınırı yürüyüp hâlâ ayakta olanları sayan herkese bir kadastro ücreti öder."
 
-#: scripts/autoload/game_data/GameDataModes.gd:624
+#: scripts/autoload/game_data/GameDataModes.gd:625
 msgid "Hunt the marsh lights"
 msgstr "Bataklık ışıklarını avla"
 
-#: scripts/autoload/game_data/GameDataModes.gd:624
+#: scripts/autoload/game_data/GameDataModes.gd:625
 msgid "Lights over the marsh have drowned three fishermen this month. The village has a purse for whoever puts them out."
 msgstr "Bataklığın üstündeki ışıklar bu ay üç balıkçıyı boğdu. Köyün, onları söndürene verecek bir kesesi var."
 
-#: scripts/autoload/game_data/GameDataModes.gd:625
+#: scripts/autoload/game_data/GameDataModes.gd:626
 msgid "Recover the toll chest"
 msgstr "Geçiş sandığını geri al"
 
-#: scripts/autoload/game_data/GameDataModes.gd:625
+#: scripts/autoload/game_data/GameDataModes.gd:626
 msgid "Bandits took the bridge toll and went to ground in the quarry. Bring the chest back and keep a share."
 msgstr "Haydutlar köprü geçiş parasını alıp taş ocağına saklandı. Sandığı geri getir, bir payını tut."
 
-#: scripts/autoload/game_data/GameDataModes.gd:626
+#: scripts/autoload/game_data/GameDataModes.gd:627
 msgid "Map the drowned road"
 msgstr "Batık yolun haritasını çıkar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:626
+#: scripts/autoload/game_data/GameDataModes.gd:627
 msgid "The old Accord road runs under the floodwater now. A merchant house wants it mapped before their rivals do."
 msgstr "Eski Ahit yolu artık sel suyunun altından geçiyor. Bir tüccar evi, rakiplerinden önce haritasını istiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:627
+#: scripts/autoload/game_data/GameDataModes.gd:628
 msgid "Take the Hollow's tithe barge"
 msgstr "Oyuk'un vergi mavnasını ele geçir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:627
+#: scripts/autoload/game_data/GameDataModes.gd:628
 msgid "A barge carries rift-glass up the river for the Hollow's buyers. It is guarded, and it is worth it."
 msgstr "Bir mavna, Oyuk'un alıcıları için nehrin yukarısına yarık camı taşıyor. Korunuyor ve buna değer."
 
-#: scripts/autoload/game_data/GameDataModes.gd:628
+#: scripts/autoload/game_data/GameDataModes.gd:629
 msgid "Open an Accord vault"
 msgstr "Bir Ahit mahzenini aç"
 
-#: scripts/autoload/game_data/GameDataModes.gd:628
+#: scripts/autoload/game_data/GameDataModes.gd:629
 msgid "A scholar swears an old guild vault lies under the burned chapel. The last party that went down came back two short."
 msgstr "Bir bilgin, yanmış şapelin altında eski bir lonca mahzeni olduğuna yemin ediyor. Aşağı inen son grup iki kişi eksik döndü."
 
-#: scripts/autoload/game_data/GameDataModes.gd:634
+#: scripts/autoload/game_data/GameDataModes.gd:635
 msgid "Safe"
 msgstr "Güvenli"
 
-#: scripts/autoload/game_data/GameDataModes.gd:634
+#: scripts/autoload/game_data/GameDataModes.gd:635
 msgid "Hard"
 msgstr "Zor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:634
+#: scripts/autoload/game_data/GameDataModes.gd:635
 msgid "Perilous"
 msgstr "Tehlikeli"
 
-#: scripts/autoload/game_data/GameDataModes.gd:686 scripts/autoload/game_data/GameDataModes.gd:955
+#: scripts/autoload/game_data/GameDataModes.gd:644
+msgid "Muscle"
+msgstr "Kas gücü"
+
+#: scripts/autoload/game_data/GameDataModes.gd:645
+msgid "Scout"
+msgstr "İzci"
+
+#: scripts/autoload/game_data/GameDataModes.gd:646
+msgid "Appraiser"
+msgstr "Eksper"
+
+#: scripts/autoload/game_data/GameDataModes.gd:647
+msgid "Field medic"
+msgstr "Sahra hekimi"
+
+#: scripts/autoload/game_data/GameDataModes.gd:648
+msgid "Light fingers"
+msgstr "Uzun parmaklar"
+
+#: scripts/autoload/game_data/GameDataModes.gd:649
+msgid "Takes the blows"
+msgstr "Darbeleri o alır"
+
+#: scripts/autoload/game_data/GameDataModes.gd:650
+msgid "At home in danger"
+msgstr "Tehlikede evinde gibi"
+
+#: scripts/autoload/game_data/GameDataModes.gd:651
+msgid "Drills the others"
+msgstr "Ötekileri çalıştırır"
+
+#: scripts/autoload/game_data/GameDataModes.gd:652
+msgid "Clean shot"
+msgstr "Temiz atış"
+
+#: scripts/autoload/game_data/GameDataModes.gd:653
+msgid "Sets snares"
+msgstr "Tuzak kurar"
+
+#: scripts/autoload/game_data/GameDataModes.gd:654
+msgid "Bounty hunter"
+msgstr "Ödül avcısı"
+
+#: scripts/autoload/game_data/GameDataModes.gd:655
+msgid "Burns the dross"
+msgstr "Cürufu yakar"
+
+#: scripts/autoload/game_data/GameDataModes.gd:656
+msgid "Wards the camp"
+msgstr "Kampı korur"
+
+#: scripts/autoload/game_data/GameDataModes.gd:657
+msgid "Sees it coming"
+msgstr "Geleceği görür"
+
+#: scripts/autoload/game_data/GameDataModes.gd:658
+msgid "Patches everyone"
+msgstr "Herkesi yamar"
+
+#: scripts/autoload/game_data/GameDataModes.gd:659
+msgid "Shields the worst of it"
+msgstr "En kötüsünü karşılar"
+
+#: scripts/autoload/game_data/GameDataModes.gd:660
+msgid "Rallies the party"
+msgstr "Grubu toparlar"
+
+#: scripts/autoload/game_data/GameDataModes.gd:661
+msgid "Quiet work"
+msgstr "Sessiz iş"
+
+#: scripts/autoload/game_data/GameDataModes.gd:662
+msgid "Gets out fast"
+msgstr "Çabuk sıvışır"
+
+#: scripts/autoload/game_data/GameDataModes.gd:663
+msgid "Shrugs it off"
+msgstr "Silkip atar"
+
+#: scripts/autoload/game_data/GameDataModes.gd:713 scripts/autoload/game_data/GameDataModes.gd:982
 msgid "SS"
 msgstr "SS"
 
-#: scripts/autoload/game_data/GameDataModes.gd:687
+#: scripts/autoload/game_data/GameDataModes.gd:714
 msgid "SSS"
 msgstr "SSS"
 
-#: scripts/autoload/game_data/GameDataModes.gd:698
+#: scripts/autoload/game_data/GameDataModes.gd:725
 msgid "more elites"
 msgstr "daha çok seçkin"
 
-#: scripts/autoload/game_data/GameDataModes.gd:698
+#: scripts/autoload/game_data/GameDataModes.gd:725
 msgid "harsher hazards"
 msgstr "daha sert tehlikeler"
 
-#: scripts/autoload/game_data/GameDataModes.gd:698
+#: scripts/autoload/game_data/GameDataModes.gd:725
 msgid "fewer shops"
 msgstr "daha az dükkân"
 
-#: scripts/autoload/game_data/GameDataModes.gd:699
+#: scripts/autoload/game_data/GameDataModes.gd:726
 msgid "no rarity floor on the starting relic"
 msgstr "başlangıç kalıntısında nadirlik alt sınırı yok"
 
-#: scripts/autoload/game_data/GameDataModes.gd:699
+#: scripts/autoload/game_data/GameDataModes.gd:726
 msgid "bosses use two mechanics"
 msgstr "bosslar iki mekanik kullanır"
 
-#: scripts/autoload/game_data/GameDataModes.gd:705
+#: scripts/autoload/game_data/GameDataModes.gd:732
 msgid "Forks offer elite fights more often."
 msgstr "Ayrımlar daha sık seçkin dövüşü sunar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:706
+#: scripts/autoload/game_data/GameDataModes.gd:733
 msgid "The mildest hazards are skipped: every hazard is at least Moderate (at least Severe at SSS)."
 msgstr "En hafif tehlikeler atlanır: her tehlike en az Orta (SSS'de en az Ağır)."
 
-#: scripts/autoload/game_data/GameDataModes.gd:707
+#: scripts/autoload/game_data/GameDataModes.gd:734
 msgid "Forks offer a shop less often."
 msgstr "Ayrımlar daha seyrek dükkân sunar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:708
+#: scripts/autoload/game_data/GameDataModes.gd:735
 msgid "The starting relic can be any rarity, even Common."
 msgstr "Başlangıç kalıntısı her nadirlikte olabilir, Sıradan bile."
 
-#: scripts/autoload/game_data/GameDataModes.gd:709
+#: scripts/autoload/game_data/GameDataModes.gd:736
 msgid "The boss uses two of its mechanics at once."
 msgstr "Boss iki mekaniğini aynı anda kullanır."
 
-#: scripts/autoload/game_data/GameDataModes.gd:737
+#: scripts/autoload/game_data/GameDataModes.gd:764
 msgid "Operations Branch"
 msgstr "Operasyon Dalı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:737
+#: scripts/autoload/game_data/GameDataModes.gd:764
 msgid "Heroes & Combat"
 msgstr "Kahramanlar ve Dövüş"
 
-#: scripts/autoload/game_data/GameDataModes.gd:738 scripts/autoload/game_data/GameDataModes.gd:852
+#: scripts/autoload/game_data/GameDataModes.gd:765 scripts/autoload/game_data/GameDataModes.gd:879
 msgid "Barracks"
 msgstr "Kışla"
 
-#: scripts/autoload/game_data/GameDataModes.gd:738
+#: scripts/autoload/game_data/GameDataModes.gd:765
 msgid "+2 hero slots"
 msgstr "+2 kahraman yeri"
 
-#: scripts/autoload/game_data/GameDataModes.gd:739
+#: scripts/autoload/game_data/GameDataModes.gd:766
 msgid "Mentors: new recruits join 1 level higher"
 msgstr "Akıl hocaları: yeni adaylar 1 seviye yüksek katılır"
 
-#: scripts/autoload/game_data/GameDataModes.gd:739
+#: scripts/autoload/game_data/GameDataModes.gd:766
 msgid "Veteran instructors: heroes earn +20% XP"
 msgstr "Kıdemli eğitmenler: kahramanlar +%20 TP kazanır"
 
-#: scripts/autoload/game_data/GameDataModes.gd:740 scripts/autoload/game_data/GameDataModes.gd:853
+#: scripts/autoload/game_data/GameDataModes.gd:767 scripts/autoload/game_data/GameDataModes.gd:880
 msgid "Infirmary"
 msgstr "Revir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:740
+#: scripts/autoload/game_data/GameDataModes.gd:767
 msgid "-15% recovery time; a bed at Lv1/3/5"
 msgstr "Toparlanma süresi -%15; Sv1/3/5'te bir yatak"
 
-#: scripts/autoload/game_data/GameDataModes.gd:741
+#: scripts/autoload/game_data/GameDataModes.gd:768
 msgid "Order: Supply Drop — heal the party 35% between fights"
 msgstr "Emir: İkmal Atışı — dövüşler arasında ekibi %35 iyileştir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:741
+#: scripts/autoload/game_data/GameDataModes.gd:768
 msgid "Field Triage: once per rift, get a downed hero back up"
 msgstr "Sahada Triyaj: yarık başına bir kez, düşmüş bir kahramanı ayağa kaldır"
 
-#: scripts/autoload/game_data/GameDataModes.gd:741
+#: scripts/autoload/game_data/GameDataModes.gd:768
 msgid "Wounded heroes heal fully after every run"
 msgstr "Yaralı kahramanlar her koşudan sonra tamamen iyileşir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:742 scripts/ui/UiKit.gd:1278
+#: scripts/autoload/game_data/GameDataModes.gd:769 scripts/ui/UiKit.gd:1278
 msgid "Drill Yard"
 msgstr "Talim Alanı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:742
+#: scripts/autoload/game_data/GameDataModes.gd:769
 msgid "a Training Yard slot every 2 levels; +4% party damage and +4% max HP"
 msgstr "her 2 seviyede bir Talim Alanı yeri; ekip hasarı +%4 ve en yüksek can +%4"
 
-#: scripts/autoload/game_data/GameDataModes.gd:743
+#: scripts/autoload/game_data/GameDataModes.gd:770
 msgid "Order: Rally — the party acts first this round and hits 30% harder"
 msgstr "Emir: Toparlan — ekip bu tur önce davranır ve %30 daha sert vurur"
 
-#: scripts/autoload/game_data/GameDataModes.gd:743
+#: scripts/autoload/game_data/GameDataModes.gd:770
 msgid "Vanguard: a fight's first strike deals +25% damage"
 msgstr "Öncü: dövüşün ilk vuruşu +%25 hasar verir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:743
+#: scripts/autoload/game_data/GameDataModes.gd:770
 msgid "Abilities are ready at the start of every fight"
 msgstr "Yetenekler her dövüşün başında hazır"
 
-#: scripts/autoload/game_data/GameDataModes.gd:745
+#: scripts/autoload/game_data/GameDataModes.gd:772
 msgid "Infrastructure Branch"
 msgstr "Altyapı Dalı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:745
+#: scripts/autoload/game_data/GameDataModes.gd:772
 msgid "Rift Yield & Safety"
 msgstr "Yarık Verimi ve Güvenlik"
 
-#: scripts/autoload/game_data/GameDataModes.gd:746
+#: scripts/autoload/game_data/GameDataModes.gd:773
 msgid "Essence Amplifiers"
 msgstr "Öz Güçlendiricileri"
 
-#: scripts/autoload/game_data/GameDataModes.gd:746
+#: scripts/autoload/game_data/GameDataModes.gd:773
 msgid "+8% Essence from fights"
 msgstr "Dövüşlerden +%8 Öz"
 
-#: scripts/autoload/game_data/GameDataModes.gd:747
+#: scripts/autoload/game_data/GameDataModes.gd:774
 msgid "Energy extraction: elites often drop bonus Essence"
 msgstr "Enerji çıkarımı: seçkinler sık sık bonus Öz düşürür"
 
-#: scripts/autoload/game_data/GameDataModes.gd:747
+#: scripts/autoload/game_data/GameDataModes.gd:774
 msgid "Resonance: bosses drop an Essence cache"
 msgstr "Rezonans: bosslar bir Öz zulası düşürür"
 
-#: scripts/autoload/game_data/GameDataModes.gd:748
+#: scripts/autoload/game_data/GameDataModes.gd:775
 msgid "Wardstones"
 msgstr "Koruma Taşları"
 
-#: scripts/autoload/game_data/GameDataModes.gd:748
+#: scripts/autoload/game_data/GameDataModes.gd:775
 msgid "-12% hazard damage, +10% Essence for sealing"
 msgstr "Tehlike hasarı -%12, mühürleme için +%10 Öz"
 
-#: scripts/autoload/game_data/GameDataModes.gd:749
+#: scripts/autoload/game_data/GameDataModes.gd:776
 msgid "Anchor: the first hazard of each rift is negated"
 msgstr "Çapa: her yarığın ilk tehlikesi etkisiz kalır"
 
-#: scripts/autoload/game_data/GameDataModes.gd:749
+#: scripts/autoload/game_data/GameDataModes.gd:776
 msgid "Hazards can't knock a hero out"
 msgstr "Tehlikeler bir kahramanı bayıltamaz"
 
-#: scripts/autoload/game_data/GameDataModes.gd:751
+#: scripts/autoload/game_data/GameDataModes.gd:778
 msgid "Logistics Branch"
 msgstr "Lojistik Dalı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:751
+#: scripts/autoload/game_data/GameDataModes.gd:778
 msgid "Trade & Recruiting"
 msgstr "Ticaret ve Adaylar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:752
+#: scripts/autoload/game_data/GameDataModes.gd:779
 msgid "Trade Network"
 msgstr "Ticaret Ağı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:752
+#: scripts/autoload/game_data/GameDataModes.gd:779
 msgid "+1 feast seat; -6% shop prices, -2% auction fees, +5% Rift Cache chance"
 msgstr "+1 ziyafet yeri; dükkân fiyatları -%6, müzayede ücretleri -%2, Yarık Zulası şansı +%5"
 
-#: scripts/autoload/game_data/GameDataModes.gd:753
+#: scripts/autoload/game_data/GameDataModes.gd:780
 msgid "Order: Requisition — reroll a fight's loot choices"
 msgstr "Emir: Talep — bir dövüşün ganimet seçeneklerini yenile"
 
-#: scripts/autoload/game_data/GameDataModes.gd:753
+#: scripts/autoload/game_data/GameDataModes.gd:780
 msgid "Black Market: Rift Caches hold 30% more Gold"
 msgstr "Kara Pazar: Yarık Zulaları %30 daha fazla Altın içerir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:753
+#: scripts/autoload/game_data/GameDataModes.gd:780
 msgid "Every rift shop offers a unique relic"
 msgstr "Her yarık dükkânı eşsiz bir kalıntı sunar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:754 scripts/autoload/game_data/GameDataModes.gd:849
+#: scripts/autoload/game_data/GameDataModes.gd:781 scripts/autoload/game_data/GameDataModes.gd:876
 msgid "Scouts' Lodge"
 msgstr "İzci Köşkü"
 
-#: scripts/autoload/game_data/GameDataModes.gd:754
+#: scripts/autoload/game_data/GameDataModes.gd:781
 msgid "Recruit board: +1 offer at Lv1 and Lv4"
 msgstr "Aday panosu: Sv1 ve Sv4'te +1 teklif"
 
-#: scripts/autoload/game_data/GameDataModes.gd:755
+#: scripts/autoload/game_data/GameDataModes.gd:782
 msgid "Order: Scout Ahead — reroll the next fork's paths"
 msgstr "Emir: Öncü Keşif — sonraki ayrımın yollarını yenile"
 
-#: scripts/autoload/game_data/GameDataModes.gd:755
+#: scripts/autoload/game_data/GameDataModes.gd:782
 msgid "Headhunter: every recruit refresh has a Rank C+ hero"
 msgstr "Kelle Avcısı: her aday yenilemesinde bir Rütbe C+ kahraman olur"
 
-#: scripts/autoload/game_data/GameDataModes.gd:755
+#: scripts/autoload/game_data/GameDataModes.gd:782
 msgid "Recruit rerolls cost half"
 msgstr "Aday yenilemeleri yarı fiyatına"
 
-#: scripts/autoload/game_data/GameDataModes.gd:759 scripts/ui/GuildViews.gd:2389
+#: scripts/autoload/game_data/GameDataModes.gd:786 scripts/ui/GuildViews.gd:2389
 msgid "Breaches"
 msgstr "Gedikler"
 
-#: scripts/autoload/game_data/GameDataModes.gd:760
+#: scripts/autoload/game_data/GameDataModes.gd:787
 msgid "Armory"
 msgstr "Cephanelik"
 
-#: scripts/autoload/game_data/GameDataModes.gd:760
+#: scripts/autoload/game_data/GameDataModes.gd:787
 msgid "breach foes -5% HP and damage"
 msgstr "gedik düşmanları -%5 can ve hasar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:762
+#: scripts/autoload/game_data/GameDataModes.gd:789
 msgid "Quartermaster"
 msgstr "Levazımcı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:762
+#: scripts/autoload/game_data/GameDataModes.gd:789
 msgid "+10% Gold and Essence for holding a breach"
 msgstr "bir gediği tutmaya +%10 Altın ve Öz"
 
-#: scripts/autoload/game_data/GameDataModes.gd:764
+#: scripts/autoload/game_data/GameDataModes.gd:791
 msgid "Palisade"
 msgstr "Şarampole"
 
-#: scripts/autoload/game_data/GameDataModes.gd:764
+#: scripts/autoload/game_data/GameDataModes.gd:791
 msgid "a lost defense costs 10% less"
 msgstr "kaybedilen bir savunma %10 daha az tutar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:765
+#: scripts/autoload/game_data/GameDataModes.gd:792
 msgid "A lost defense damages one building at most"
 msgstr "Kaybedilen bir savunma en fazla bir binaya zarar verir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:766
+#: scripts/autoload/game_data/GameDataModes.gd:793
 msgid "Watchtower"
 msgstr "Gözcü Kulesi"
 
-#: scripts/autoload/game_data/GameDataModes.gd:766
+#: scripts/autoload/game_data/GameDataModes.gd:793
 msgid "breach foes deal -4% damage"
 msgstr "gedik düşmanları -%4 hasar verir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:767
+#: scripts/autoload/game_data/GameDataModes.gd:794
 msgid "+1 day of warning before a rift breaks"
 msgstr "Bir yarık taşmadan önce +1 gün uyarı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:767
+#: scripts/autoload/game_data/GameDataModes.gd:794
 msgid "+1 more day of warning"
 msgstr "+1 gün daha uyarı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:769
+#: scripts/autoload/game_data/GameDataModes.gd:796
 msgid "Research Branch"
 msgstr "Araştırma Dalı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:769
+#: scripts/autoload/game_data/GameDataModes.gd:796
 msgid "Relics & Theory"
 msgstr "Kalıntılar ve Kuram"
 
-#: scripts/autoload/game_data/GameDataModes.gd:770 scripts/autoload/game_data/GameDataModes.gd:857
+#: scripts/autoload/game_data/GameDataModes.gd:797 scripts/autoload/game_data/GameDataModes.gd:884
 msgid "Relic Vault"
 msgstr "Kalıntı Kasası"
 
-#: scripts/autoload/game_data/GameDataModes.gd:770
+#: scripts/autoload/game_data/GameDataModes.gd:797
 msgid "+1 equipped relic slot at Lv1, Lv3 and Lv5"
 msgstr "Sv1, Sv3 ve Sv5'te +1 kalıntı yuvası"
 
-#: scripts/autoload/game_data/GameDataModes.gd:772 scripts/autoload/game_data/GameDataModes.gd:851 scripts/ui/GuildViews.gd:1271
+#: scripts/autoload/game_data/GameDataModes.gd:799 scripts/autoload/game_data/GameDataModes.gd:878 scripts/ui/GuildViews.gd:1271
 msgid "Arcane Lab"
 msgstr "Gizem Laboratuvarı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:772
+#: scripts/autoload/game_data/GameDataModes.gd:799
 msgid "Treatments and respecs cost 10% less; salvage returns 10% more Essence"
 msgstr "Tedaviler ve yeniden dağıtımlar %10 daha ucuz; hurda %10 daha fazla Öz verir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:773
+#: scripts/autoload/game_data/GameDataModes.gd:800
 msgid "Treat bad quirks and scars"
 msgstr "Kötü huyları ve yara izlerini tedavi et"
 
-#: scripts/autoload/game_data/GameDataModes.gd:779
+#: scripts/autoload/game_data/GameDataModes.gd:806
 msgid "Supply Drop"
 msgstr "İkmal Atışı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:779
+#: scripts/autoload/game_data/GameDataModes.gd:806
 msgid "Heal every standing hero 35% of their max HP."
 msgstr "Ayaktaki her kahramanı en yüksek canının %35'i kadar iyileştir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:780
+#: scripts/autoload/game_data/GameDataModes.gd:807
 msgid "This round the party acts before every foe and hits 30% harder."
 msgstr "Bu tur ekip tüm düşmanlardan önce davranır ve %30 daha sert vurur."
 
-#: scripts/autoload/game_data/GameDataModes.gd:781
+#: scripts/autoload/game_data/GameDataModes.gd:808
 msgid "Requisition"
 msgstr "Talep"
 
-#: scripts/autoload/game_data/GameDataModes.gd:781
+#: scripts/autoload/game_data/GameDataModes.gd:808
 msgid "Reroll this fight's loot choices."
 msgstr "Bu dövüşün ganimet seçeneklerini yenile."
 
-#: scripts/autoload/game_data/GameDataModes.gd:782
+#: scripts/autoload/game_data/GameDataModes.gd:809
 msgid "Scout Ahead"
 msgstr "Öncü Keşif"
 
-#: scripts/autoload/game_data/GameDataModes.gd:782
+#: scripts/autoload/game_data/GameDataModes.gd:809
 msgid "Reroll the paths on the next fork."
 msgstr "Sonraki ayrımdaki yolları yenile."
 
-#: scripts/autoload/game_data/GameDataModes.gd:797
+#: scripts/autoload/game_data/GameDataModes.gd:824
 msgid "Founding Guild"
 msgstr "Kurucu Lonca"
 
-#: scripts/autoload/game_data/GameDataModes.gd:798
+#: scripts/autoload/game_data/GameDataModes.gd:825
 msgid "Established Guild"
 msgstr "Yerleşik Lonca"
 
-#: scripts/autoload/game_data/GameDataModes.gd:799
+#: scripts/autoload/game_data/GameDataModes.gd:826
 msgid "Renowned Guild"
 msgstr "Ünlü Lonca"
 
-#: scripts/autoload/game_data/GameDataModes.gd:800
+#: scripts/autoload/game_data/GameDataModes.gd:827
 msgid "Legendary Guild"
 msgstr "Efsanevi Lonca"
 
-#: scripts/autoload/game_data/GameDataModes.gd:847 scripts/ui/GuildViews.gd:1262
+#: scripts/autoload/game_data/GameDataModes.gd:874 scripts/ui/GuildViews.gd:1262
 msgid "Guild Hall"
 msgstr "Lonca Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:849 scripts/ui/Main.gd:1311
+#: scripts/autoload/game_data/GameDataModes.gd:876 scripts/ui/Main.gd:1311
 msgid "Recruits"
 msgstr "Adaylar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:850 scripts/ui/GuildViews.gd:2038 scripts/ui/Main.gd:1188
+#: scripts/autoload/game_data/GameDataModes.gd:877 scripts/ui/GuildViews.gd:2038 scripts/ui/Main.gd:1188
 msgid "Items"
 msgstr "Eşyalar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:850
+#: scripts/autoload/game_data/GameDataModes.gd:877
 msgid "Market"
 msgstr "Pazar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:852 scripts/ui/Main.gd:1188 scripts/ui/Main.gd:1311
+#: scripts/autoload/game_data/GameDataModes.gd:879 scripts/ui/Main.gd:1188 scripts/ui/Main.gd:1311
 msgid "Heroes"
 msgstr "Kahramanlar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:854
+#: scripts/autoload/game_data/GameDataModes.gd:881
 msgid "Training"
 msgstr "Eğitim"
 
-#: scripts/autoload/game_data/GameDataModes.gd:855
+#: scripts/autoload/game_data/GameDataModes.gd:882
 msgid "Quest Board"
 msgstr "Görev Panosu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:856 scripts/ui/Main.gd:1193 scripts/ui/Main.gd:1313
+#: scripts/autoload/game_data/GameDataModes.gd:883 scripts/ui/Main.gd:1193 scripts/ui/Main.gd:1313
 msgid "Rift Hall"
 msgstr "Yarık Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:856
+#: scripts/autoload/game_data/GameDataModes.gd:883
 msgid "Rift Gate"
 msgstr "Yarık Kapısı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:892
+#: scripts/autoload/game_data/GameDataModes.gd:919
 msgid "A dry year"
 msgstr "Kurak bir yıl"
 
-#: scripts/autoload/game_data/GameDataModes.gd:892
+#: scripts/autoload/game_data/GameDataModes.gd:919
 msgid "Contracts pay 15% less Gold, and heroes ask 15% lower wages."
 msgstr "Sözleşmeler %15 daha az Altın öder ve kahramanlar %15 daha düşük maaş ister."
 
-#: scripts/autoload/game_data/GameDataModes.gd:893
+#: scripts/autoload/game_data/GameDataModes.gd:920
 msgid "A rich year"
 msgstr "Bereketli bir yıl"
 
-#: scripts/autoload/game_data/GameDataModes.gd:893
+#: scripts/autoload/game_data/GameDataModes.gd:920
 msgid "Rift fights pay 20% more Gold, and shop prices are 15% higher."
 msgstr "Yarık dövüşleri %20 daha fazla Altın öder ve dükkân fiyatları %15 daha yüksektir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:894
+#: scripts/autoload/game_data/GameDataModes.gd:921
 msgid "The Hollow stirs in %s"
 msgstr "Oyuk, %s bölgesinde kıpırdanıyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:894
+#: scripts/autoload/game_data/GameDataModes.gd:921
 msgid "Foes there have 20% more health, and its rifts pay 25% more Essence."
 msgstr "Oradaki düşmanların canı %20 daha fazla ve oranın yarıkları %25 daha fazla Öz öder."
 
-#: scripts/autoload/game_data/GameDataModes.gd:895
+#: scripts/autoload/game_data/GameDataModes.gd:922
 msgid "A hard winter"
 msgstr "Sert bir kış"
 
-#: scripts/autoload/game_data/GameDataModes.gd:895
+#: scripts/autoload/game_data/GameDataModes.gd:922
 msgid "One Medical Bay bed fewer (never none), and feasts lift morale twice as much."
 msgstr "Revirde bir yatak eksik (hiçbir zaman sıfır değil) ve ziyafetler morali iki kat yükseltir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:896
+#: scripts/autoload/game_data/GameDataModes.gd:923
 msgid "Restless rifts"
 msgstr "Huzursuz yarıklar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:896
+#: scripts/autoload/game_data/GameDataModes.gd:923
 msgid "Riftbreaks come 2 days sooner, and holding one pays double."
 msgstr "Yarık Taşmaları 2 gün erken gelir ve birine dayanmak iki kat öder."
 
-#: scripts/autoload/game_data/GameDataModes.gd:897
+#: scripts/autoload/game_data/GameDataModes.gd:924
 msgid "Wandering heroes"
 msgstr "Gezgin kahramanlar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:897
+#: scripts/autoload/game_data/GameDataModes.gd:924
 msgid "Two more recruits on the board, and the rival signs your best offer twice as often."
 msgstr "İlan tahtasında iki aday daha var ve rakip en iyi adayını iki kat sık kapar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:898
+#: scripts/autoload/game_data/GameDataModes.gd:925
 msgid "A year of echoes"
 msgstr "Yankılar yılı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:898
+#: scripts/autoload/game_data/GameDataModes.gd:925
 msgid "Echoes turn up twice as often, and a kept echo gives half the Essence."
 msgstr "Yankılar iki kat sık çıkar ve saklanan bir yankı yarı Öz verir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:900
+#: scripts/autoload/game_data/GameDataModes.gd:927
 msgid "A year of witnesses"
 msgstr "Tanıklar yılı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:900
+#: scripts/autoload/game_data/GameDataModes.gd:927
 msgid "The rival writes every week, and every letter tells its version of the Night of Breaking; its Renown comes 10% faster."
 msgstr "Rakip her hafta yazar ve her mektup Kırılma Gecesi'nin kendi versiyonunu anlatır; Ünü %10 daha hızlı gelir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:901
+#: scripts/autoload/game_data/GameDataModes.gd:928
 msgid "A proud rival"
 msgstr "Gururlu bir rakip"
 
-#: scripts/autoload/game_data/GameDataModes.gd:901
+#: scripts/autoload/game_data/GameDataModes.gd:928
 msgid "The rival gains Renown 15% faster and you 10% faster, and the monthly contest pays double."
 msgstr "Rakibin Ün kazanımı %15, seninki %10 hızlanır ve aylık yarışma iki kat öder."
 
-#: scripts/autoload/game_data/GameDataModes.gd:908
+#: scripts/autoload/game_data/GameDataModes.gd:935
 msgid "The rival is hiring"
 msgstr "Rakip adam topluyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:908
+#: scripts/autoload/game_data/GameDataModes.gd:935
 msgid "It goes after your heroes more than anything."
 msgstr "Her şeyden çok kahramanlarının peşine düşer."
 
-#: scripts/autoload/game_data/GameDataModes.gd:909
+#: scripts/autoload/game_data/GameDataModes.gd:936
 msgid "The rival is boasting"
 msgstr "Rakip böbürleniyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:909
+#: scripts/autoload/game_data/GameDataModes.gd:936
 msgid "It dares you more than anything."
 msgstr "Her şeyden çok sana meydan okur."
 
-#: scripts/autoload/game_data/GameDataModes.gd:910
+#: scripts/autoload/game_data/GameDataModes.gd:937
 msgid "The rival is undercutting"
 msgstr "Rakip fiyat kırıyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:910
+#: scripts/autoload/game_data/GameDataModes.gd:937
 msgid "It goes after your contracts more than anything."
 msgstr "Her şeyden çok sözleşmelerinin peşine düşer."
 
-#: scripts/autoload/game_data/GameDataModes.gd:923 scripts/autoload/game_data/GameDataMonsters.gd:124
+#: scripts/autoload/game_data/GameDataModes.gd:950 scripts/autoload/game_data/GameDataMonsters.gd:124
 msgid "The Shattered Vale"
 msgstr "Parçalanmış Vadi"
 
-#: scripts/autoload/game_data/GameDataModes.gd:923
+#: scripts/autoload/game_data/GameDataModes.gd:950
 msgid "Vaelith, the Vale-Render"
 msgstr "Vadi Yırtan Vaelith"
 
-#: scripts/autoload/game_data/GameDataModes.gd:924
+#: scripts/autoload/game_data/GameDataModes.gd:951
 msgid "Greater Rifts"
 msgstr "Büyük Yarıklar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:925
+#: scripts/autoload/game_data/GameDataModes.gd:952
 msgid "The Vale split open on the Night of Breaking, and it has not closed since. Rifts bleed monsters into the farmland. The largest breach belongs to Vaelith, and the villages say she wears the green of an Accord ranger. Seal it, and find out why."
 msgstr "Vadi, Kırılma Gecesi'nde yarıldı ve o günden beri kapanmadı. Yarıklar tarlalara canavar akıtıyor. En büyük gedik Vaelith'in ve köylüler onun bir Ahit korucusunun yeşilini giydiğini söylüyor. Mühürle ve nedenini öğren."
 
-#: scripts/autoload/game_data/GameDataModes.gd:926
+#: scripts/autoload/game_data/GameDataModes.gd:953
 msgid "Vaelith falls back through the Breach, and it seals behind her. Under her cloak was an Accord badge with the oath scratched out: she was one of them, and she left her post. Whatever the old guilds did that night, someone has been undoing it. Greater Rifts are open to your guild."
 msgstr "Vaelith Gedik'ten geri düşer ve gedik arkasından mühürlenir. Pelerininin altında yemini kazınmış bir Ahit nişanı vardı: o da onlardandı ve nöbet yerini terk etti. Eski loncalar o gece her ne yaptıysa, biri onu bozuyor. Büyük Yarıklar loncana açıldı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:927
+#: scripts/autoload/game_data/GameDataModes.gd:954
 msgid "Seal 3 rifts"
 msgstr "3 yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:927
+#: scripts/autoload/game_data/GameDataModes.gd:954
 msgid "Seal a Rank E rift"
 msgstr "Bir Rütbe E yarığı mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:929 scripts/autoload/game_data/GameDataMonsters.gd:126
+#: scripts/autoload/game_data/GameDataModes.gd:956 scripts/autoload/game_data/GameDataMonsters.gd:126
 msgid "The Drowned Marches"
 msgstr "Boğulmuş Bataklıklar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:929 scripts/autoload/game_data/GameDataMonsters.gd:118 scripts/autoload/game_data/GameDataMonsters.gd:127
+#: scripts/autoload/game_data/GameDataModes.gd:956 scripts/autoload/game_data/GameDataMonsters.gd:118 scripts/autoload/game_data/GameDataMonsters.gd:127
 msgid "Nyxara"
 msgstr "Nyxara"
 
-#: scripts/autoload/game_data/GameDataModes.gd:929
+#: scripts/autoload/game_data/GameDataModes.gd:956
 msgid "Nyxara, Queen of the Drowned"
 msgstr "Boğulmuşların Kraliçesi Nyxara"
 
-#: scripts/autoload/game_data/GameDataModes.gd:930
+#: scripts/autoload/game_data/GameDataModes.gd:957
 msgid "the Endless Rift"
 msgstr "Sonsuz Yarık"
 
-#: scripts/autoload/game_data/GameDataModes.gd:931
+#: scripts/autoload/game_data/GameDataModes.gd:958
 msgid "South of the Vale the marshes have risen, and Nyxara's spire rises with them. Before it drowned, the Spire was the Accord's archive: every contract, every name, every oath. Nyxara keeps it now, with a light burning at the bottom. The villages will only trust a guild that has proven itself."
 msgstr "Vadi'nin güneyinde bataklıklar yükseldi ve Nyxara'nın kulesi de onlarla birlikte yükseliyor. Sulara gömülmeden önce Kule, Ahit'in arşiviydi: her sözleşme, her isim, her yemin. Şimdi Nyxara tutuyor onu, dibinde yanan bir ışıkla. Köyler yalnızca kendini kanıtlamış bir loncaya güvenir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:932
+#: scripts/autoload/game_data/GameDataModes.gd:959
 msgid "The Spire crumbles into the black water, and Nyxara with it. One book survived the archive, in the Grandmaster's hand, and it says the guilds did not fall that night. They made a bargain. Beneath the Spire, something vast stirs: a rift with no bottom, lit by pillars of light. The Endless Rift is open to your guild."
 msgstr "Kule kara sulara çöker, Nyxara da onunla. Arşivden Büyük Üstat'ın el yazısıyla tek bir defter kurtuldu ve loncaların o gece düşmediğini söylüyor. Bir pazarlık yaptılar. Kulenin altında devasa bir şey kıpırdıyor: ışık sütunlarıyla aydınlanan, dibi olmayan bir yarık. Sonsuz Yarık loncana açıldı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:933
+#: scripts/autoload/game_data/GameDataModes.gd:960
 msgid "Seal a Rank C rift"
 msgstr "Bir Rütbe C yarığı mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:933
+#: scripts/autoload/game_data/GameDataModes.gd:960
 msgid "Seal 2 rifts of Rank C or higher"
 msgstr "Rütbe C ya da daha yüksek 2 yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:933
+#: scripts/autoload/game_data/GameDataModes.gd:960
 msgid "Complete a quest"
 msgstr "Bir görev tamamla"
 
-#: scripts/autoload/game_data/GameDataModes.gd:935
+#: scripts/autoload/game_data/GameDataModes.gd:962
 msgid "The Ashen Crown"
 msgstr "Küllü Taç"
 
-#: scripts/autoload/game_data/GameDataModes.gd:935 scripts/autoload/game_data/GameDataMonsters.gd:118 scripts/autoload/game_data/GameDataMonsters.gd:129
+#: scripts/autoload/game_data/GameDataModes.gd:962 scripts/autoload/game_data/GameDataMonsters.gd:118 scripts/autoload/game_data/GameDataMonsters.gd:129
 msgid "Sythrane"
 msgstr "Sythrane"
 
-#: scripts/autoload/game_data/GameDataModes.gd:935
+#: scripts/autoload/game_data/GameDataModes.gd:962
 msgid "Sythrane, the Ashen Crown"
 msgstr "Küllü Taç Sythrane"
 
-#: scripts/autoload/game_data/GameDataModes.gd:936
+#: scripts/autoload/game_data/GameDataModes.gd:963
 msgid "The Heart of the Rift"
 msgstr "Yarığın Kalbi"
 
-#: scripts/autoload/game_data/GameDataModes.gd:937
+#: scripts/autoload/game_data/GameDataModes.gd:964
 msgid "Every rift you've sealed led here. At the heart of the rift network sits Sythrane in a crown of ash, guarded by Korrath and Drevok, once her wardens. The Grandmaster's book names her plainly: Sythrane, Grandmaster of the Accord. She made the bargain. Every breach in the world is one of her guilds letting go, and every one feeds her."
 msgstr "Mühürlediğin her yarık buraya çıkıyordu. Yarık ağının kalbinde külden bir taçla Sythrane oturuyor; onu bir zamanlar muhafızları olan Korrath ve Drevok koruyor. Büyük Üstat'ın defteri onu açıkça adlandırıyor: Sythrane, Ahit'in Büyük Üstadı. Pazarlığı o yaptı. Dünyadaki her gedik loncalarından birinin pes etmesi ve her biri onu besliyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:938
+#: scripts/autoload/game_data/GameDataModes.gd:965
 msgid "The Ashen Crown shatters. Sythrane's last words are not a threat but a warning: someone has to hold the Hollow shut, and she was tired. One by one the rifts fall quiet, and for the first time in years the sky is only sky. In the Endless Rift the pillars of light are still holding. Your guild's name will be told for generations. (The rifts never fully close: Endless, the rift ladder and the quests carry on.)"
 msgstr "Küllü Taç parçalanır. Sythrane'in son sözleri bir tehdit değil, bir uyarı: birinin Oyuk'u kapalı tutması gerek ve o yorulmuştu. Yarıklar birer birer susar ve yıllardır ilk kez gökyüzü yalnızca gökyüzüdür. Sonsuz Yarık'ta ışık sütunları hâlâ dayanıyor. Loncanın adı nesiller boyu anlatılacak. (Yarıklar hiçbir zaman tamamen kapanmaz: Sonsuz Yarık, yarık merdiveni ve görevler sürer.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:939
+#: scripts/autoload/game_data/GameDataModes.gd:966
 msgid "Seal a Rank B rift"
 msgstr "Bir Rütbe B yarığı mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:939
+#: scripts/autoload/game_data/GameDataModes.gd:966
 msgid "boss:Korrath"
 msgstr ""
 
-#: scripts/autoload/game_data/GameDataModes.gd:939
+#: scripts/autoload/game_data/GameDataModes.gd:966
 msgid "Defeat Korrath"
 msgstr "Korrath'ı yen"
 
-#: scripts/autoload/game_data/GameDataModes.gd:939
+#: scripts/autoload/game_data/GameDataModes.gd:966
 msgid "boss:Drevok"
 msgstr ""
 
-#: scripts/autoload/game_data/GameDataModes.gd:939
+#: scripts/autoload/game_data/GameDataModes.gd:966
 msgid "Defeat Drevok"
 msgstr "Drevok'u yen"
 
-#: scripts/autoload/game_data/GameDataModes.gd:939
+#: scripts/autoload/game_data/GameDataModes.gd:966
 msgid "Complete 3 quests"
 msgstr "3 görev tamamla"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1295 scripts/autoload/game_data/GameDataModes.gd:941 scripts/autoload/game_data/GameDataModes.gd:942
+#: scripts/autoload/game_data/GameDataModes.gd:1322 scripts/autoload/game_data/GameDataModes.gd:968 scripts/autoload/game_data/GameDataModes.gd:969
 msgid "The Accord Hall"
 msgstr "Ahit Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:941
+#: scripts/autoload/game_data/GameDataModes.gd:968
 msgid "The Terms"
 msgstr "Şartlar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:941
+#: scripts/autoload/game_data/GameDataModes.gd:968
 msgid "The Terms, in the Grandmaster's shape"
 msgstr "Şartlar, Büyük Üstat'ın suretinde"
 
-#: scripts/autoload/game_data/GameDataModes.gd:943
+#: scripts/autoload/game_data/GameDataModes.gd:970
 msgid "With Sythrane gone, the Hollow has no one to bargain with, so it is bargaining with the posts directly. One by one the pillars in the Endless Rift are flickering. The Accord Hall lies below them, and in it the Terms that started all of this, wearing the Grandmaster's face. Every post that has gone dark makes them stronger. Someone will have to read them out loud."
 msgstr "Sythrane gidince Oyuk'un pazarlık edecek kimsesi kalmadı, bu yüzden doğrudan nöbetlerle pazarlık ediyor. Sonsuz Yarık'taki sütunlar birer birer titreşiyor. Ahit Salonu onların altında ve içinde her şeyi başlatan Şartlar, Büyük Üstat'ın yüzünü takınmış duruyor. Kararan her nöbet onları güçlendiriyor. Birinin onları yüksek sesle okuması gerekecek."
 
-#: scripts/autoload/game_data/GameDataModes.gd:944
+#: scripts/autoload/game_data/GameDataModes.gd:971
 msgid "The Terms come apart into forty-one lines of old ink, and the Hall goes quiet. The posts are listening. The bargain needs a last signature, or a fire. Your guild has to choose."
 msgstr "Şartlar kırk bir satır eski mürekkebe dağılır ve Salon susar. Nöbetler dinliyor. Pazarlığın son bir imzaya ya da bir ateşe ihtiyacı var. Loncan seçmek zorunda."
 
-#: scripts/autoload/game_data/GameDataModes.gd:945
+#: scripts/autoload/game_data/GameDataModes.gd:972
 msgid "Seal a Rank A rift"
 msgstr "A Rütbeli bir yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:945
+#: scripts/autoload/game_data/GameDataModes.gd:972
 msgid "Free a lost champion from a pillar"
 msgstr "Bir ışık sütunundan kayıp bir şampiyonu kurtar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:945
+#: scripts/autoload/game_data/GameDataModes.gd:972
 msgid "Find every page of the Grandmaster's ledger"
 msgstr "Büyük Üstat'ın defterinin bütün sayfalarını bul"
 
-#: scripts/autoload/game_data/GameDataModes.gd:948 scripts/autoload/game_data/GameDataMonsters.gd:131
+#: scripts/autoload/game_data/GameDataModes.gd:975 scripts/autoload/game_data/GameDataMonsters.gd:131
 msgid "The Glass Coast"
 msgstr "Cam Kıyısı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:948 scripts/autoload/game_data/GameDataMonsters.gd:132
+#: scripts/autoload/game_data/GameDataModes.gd:975 scripts/autoload/game_data/GameDataMonsters.gd:132
 msgid "The Tidewarden"
 msgstr "Gelgit Bekçisi"
 
-#: scripts/autoload/game_data/GameDataModes.gd:949
+#: scripts/autoload/game_data/GameDataModes.gd:976
 msgid "The Glass Breakwater"
 msgstr "Cam Dalgakıran"
 
-#: scripts/autoload/game_data/GameDataModes.gd:950
+#: scripts/autoload/game_data/GameDataModes.gd:977
 msgid "Under the Accord Hall the Endless Rift has a floor now, and the floor is glass. Below it is a shore the sky comes down to meet: sea-glass sand, tides that fall upward, and the villages of the Hollow's people, who were never only monsters. Their sky is falling. The Tidewarden has kept this shore since the Terms were signed. Find out what the Grandmaster promised them."
 msgstr "Ahit Salonu'nun altında Sonsuz Yarık'ın artık bir tabanı var ve o taban camdan. Altında gökyüzünün inip buluştuğu bir kıyı uzanıyor: deniz camından kum, yukarı doğru akan gelgitler ve hiçbir zaman yalnızca canavar olmamış Oyuk halkının köyleri. Gökyüzleri düşüyor. Gelgit Bekçisi, Şartlar imzalandığından beri bu kıyıyı koruyor. Büyük Üstat'ın onlara ne söz verdiğini öğren."
 
-#: scripts/autoload/game_data/GameDataModes.gd:951
+#: scripts/autoload/game_data/GameDataModes.gd:978
 msgid "The Tidewarden kneels in the glass and lays down a key shaped like a wave. The bargain, it says, was simple: the Vale would hold its doors shut, and the Hollow would not knock. It has kept its side for twenty years while its sky came down. Beyond the shore, the last city of the Hollow hangs upside down from the falling sky."
 msgstr "Gelgit Bekçisi camın içine diz çöküyor ve dalga biçimli bir anahtarı yere bırakıyor. Pazarlık, diyor, basitti: Vadi kapılarını kapalı tutacak, Oyuk da kapıyı çalmayacaktı. Gökyüzü düşerken yirmi yıl boyunca sözünü tuttu. Kıyının ötesinde, Oyuk'un son şehri düşen gökyüzünden baş aşağı sarkıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:952
+#: scripts/autoload/game_data/GameDataModes.gd:979
 msgid "Seal 3 rifts on the Glass Coast"
 msgstr "Cam Kıyısı'nda 3 yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:952
+#: scripts/autoload/game_data/GameDataModes.gd:979
 msgid "Answer 3 crossings"
 msgstr "3 geçişe cevap ver"
 
-#: scripts/autoload/game_data/GameDataModes.gd:952
+#: scripts/autoload/game_data/GameDataModes.gd:979
 msgid "Seal a Rank S rift"
 msgstr "S Rütbe bir yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:954 scripts/autoload/game_data/GameDataMonsters.gd:134
+#: scripts/autoload/game_data/GameDataModes.gd:981 scripts/autoload/game_data/GameDataMonsters.gd:134
 msgid "The Falling Sky"
 msgstr "Düşen Gök"
 
-#: scripts/autoload/game_data/GameDataModes.gd:955
+#: scripts/autoload/game_data/GameDataModes.gd:982
 msgid "The Inverted Throne"
 msgstr "Ters Taht"
 
-#: scripts/autoload/game_data/GameDataModes.gd:956
+#: scripts/autoload/game_data/GameDataModes.gd:983
 msgid "The Inverted City hangs over nothing by cords as thick as towers, and they are fraying one by one. If it falls, both worlds crack along the same line. Its gate is the only door the Hollow's people have left, and something comes up the cords at night to close it. Hold the gate, and climb to the Falling Sky."
 msgstr "Ters Şehir, kuleler kadar kalın halatlarla hiçliğin üzerinde asılı duruyor ve halatlar teker teker yıpranıyor. Düşerse iki dünya da aynı çizgiden çatlar. Kapısı, Oyuk halkına kalan tek kapı ve geceleri bir şey onu kapatmak için halatlardan tırmanıyor. Kapıyı tut ve Düşen Gök'e tırman."
 
-#: scripts/autoload/game_data/GameDataModes.gd:957
+#: scripts/autoload/game_data/GameDataModes.gd:984
 msgid "The Falling Sky is not a creature. It is what the city's sky became when it stopped believing it could stay up, and when it breaks, it breaks into light. The cords hold, for now. Every door between the worlds is in your guild's hands."
 msgstr "Düşen Gök bir yaratık değil. Şehrin gökyüzünün, havada kalabileceğine inanmayı bıraktığında dönüştüğü şey; kırıldığında da ışığa dönüşerek kırılıyor. Halatlar şimdilik dayanıyor. Dünyalar arasındaki her kapı loncanın elinde."
 
-#: scripts/autoload/game_data/GameDataModes.gd:958
+#: scripts/autoload/game_data/GameDataModes.gd:985
 msgid "Seal 3 rifts in the Inverted City"
 msgstr "Ters Şehir'de 3 yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:958
+#: scripts/autoload/game_data/GameDataModes.gd:985
 msgid "Hold the City's gate"
 msgstr "Şehrin kapısını tut"
 
-#: scripts/autoload/game_data/GameDataModes.gd:958
+#: scripts/autoload/game_data/GameDataModes.gd:985
 msgid "Seal a Rank SS rift"
 msgstr "SS Rütbe bir yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:962
+#: scripts/autoload/game_data/GameDataModes.gd:989
 msgid "The Sky Beneath"
 msgstr "Alttaki Gök"
 
-#: scripts/autoload/game_data/GameDataModes.gd:962
+#: scripts/autoload/game_data/GameDataModes.gd:989
 msgid "Book II"
 msgstr "II. Kitap"
 
-#: scripts/autoload/game_data/GameDataModes.gd:963
+#: scripts/autoload/game_data/GameDataModes.gd:990
 msgid "Wen finds the last page of the Grandmaster's ledger stuck to the back cover, in a hand neither of them knows. It is a reply. \"We accept your Terms. Hold your doors, and we will not come through them. Our sky is falling. We will not ask again.\" Hesper reads it twice and puts on her coat."
 msgstr "Wen, Büyük Üstat'ın defterinin son sayfasını arka kapağa yapışmış halde buluyor; ikisinin de tanımadığı bir el yazısıyla. Bu bir cevap. \"Şartlarınızı kabul ediyoruz. Kapılarınızı kapalı tutun, biz de içeri girmeyelim. Gökyüzümüz düşüyor. Bir daha istemeyeceğiz.\" Hesper iki kez okuyor ve paltosunu giyiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:965
+#: scripts/autoload/game_data/GameDataModes.gd:992
 msgid "Far below, the forty-first post hears knocking from underneath. %s asks the guild to answer it."
 msgstr "Çok aşağıda, kırk birinci nöbet altından gelen bir tıkırtı duyuyor. %s, loncadan buna cevap vermesini istiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:966
+#: scripts/autoload/game_data/GameDataModes.gd:993
 msgid "Not everything that came up with the tides was hunting. Some of it was running."
 msgstr "Gelgitlerle yukarı çıkan her şey avlanmıyordu. Bazıları kaçıyordu."
 
-#: scripts/autoload/game_data/GameDataModes.gd:967
+#: scripts/autoload/game_data/GameDataModes.gd:994
 msgid "The posts are held in turns now. Your guild is the first that can go down, and come back."
 msgstr "Nöbetler artık sırayla tutuluyor. Aşağı inip geri dönebilen ilk lonca seninki."
 
-#: scripts/autoload/game_data/GameDataModes.gd:975
+#: scripts/autoload/game_data/GameDataModes.gd:1002
 msgid "A Family at the Door"
 msgstr "Kapıdaki Aile"
 
-#: scripts/autoload/game_data/GameDataModes.gd:975
+#: scripts/autoload/game_data/GameDataModes.gd:1002
 msgid "Five of them, holding hands in a line, the smallest at the back. In this air their edges have already started to go wrong: too many joints, a shine to the skin. The eldest says the only word of ours she knows. It is please."
 msgstr "Beş kişiler, el ele bir sıra halinde, en küçükleri arkada. Bu havada kenarları şimdiden bozulmaya başlamış: fazla eklem, tende bir parlaklık. En yaşlıları dilimizden bildiği tek kelimeyi söylüyor: lütfen."
 
-#: scripts/autoload/game_data/GameDataModes.gd:976
+#: scripts/autoload/game_data/GameDataModes.gd:1003
 msgid "The Glassblower"
 msgstr "Cam Üfleyici"
 
-#: scripts/autoload/game_data/GameDataModes.gd:976
+#: scripts/autoload/game_data/GameDataModes.gd:1003
 msgid "A man with glass where his fingers should be. He was a glassblower, he says, and the air on this side is turning his hands into his work. He would like to come through before it finishes."
 msgstr "Parmaklarının olması gereken yerde cam olan bir adam. Cam üfleyicisiymiş, diyor; bu taraftaki hava ellerini işine dönüştürüyor. Bu iş bitmeden geçmek istiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:977
+#: scripts/autoload/game_data/GameDataModes.gd:1004
 msgid "The Choir"
 msgstr "Koro"
 
-#: scripts/autoload/game_data/GameDataModes.gd:977
+#: scripts/autoload/game_data/GameDataModes.gd:1004
 msgid "Nine voices on the other side of the door, singing in our language, badly. They learned the song from a guild that came down twenty years ago and never went home. They would like to sing it for you in the Vale."
 msgstr "Kapının öbür tarafında, bizim dilimizde, kötü şarkı söyleyen dokuz ses. Şarkıyı yirmi yıl önce aşağı inip bir daha eve dönmeyen bir loncadan öğrenmişler. Onu sana Vadi'de söylemek istiyorlar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:978
+#: scripts/autoload/game_data/GameDataModes.gd:1005
 msgid "A Lost Child, Grown"
 msgstr "Kayıp Çocuk, Büyümüş"
 
-#: scripts/autoload/game_data/GameDataModes.gd:978
+#: scripts/autoload/game_data/GameDataModes.gd:1005
 msgid "You have heard of her: the small one who waited behind a rock for someone to come through the rift for her. Nobody came. She is grown now, and she is done waiting."
 msgstr "Onu duymuştun: yarıktan biri gelsin diye bir kayanın ardında bekleyen o küçük. Kimse gelmedi. Şimdi büyüdü ve beklemekten vazgeçti."
 
-#: scripts/autoload/game_data/GameDataModes.gd:983
+#: scripts/autoload/game_data/GameDataModes.gd:1010
 msgid "The doors"
 msgstr "Kapılar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:984
+#: scripts/autoload/game_data/GameDataModes.gd:1011
 msgid "Every door between the worlds is in your guild's hands. Prop the city and keep the doors open, with keepers on both sides, and the Hollow's people can choose where to live. Or close them all, and let the far side fall quietly, the way it has been falling for twenty years."
 msgstr "Dünyalar arasındaki her kapı loncanın elinde. Şehri destekle ve kapıları iki tarafta da bekçilerle açık tut; Oyuk halkı nerede yaşayacağını seçebilsin. Ya da hepsini kapat ve öbür tarafın, yirmi yıldır düştüğü gibi, sessizce düşmesine izin ver."
 
-#: scripts/autoload/game_data/GameDataModes.gd:987
+#: scripts/autoload/game_data/GameDataModes.gd:1014
 msgid "Both worlds"
 msgstr "İki dünya"
 
-#: scripts/autoload/game_data/GameDataModes.gd:987
+#: scripts/autoload/game_data/GameDataModes.gd:1014
 msgid "The doors stay open"
 msgstr "Kapılar açık kalıyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:988
+#: scripts/autoload/game_data/GameDataModes.gd:1015
 msgid "The city holds, barely, on new cords your guild helped tie. The rifts become doors with keepers on both sides, and the first of the Hollow's people come up through them carrying everything they own. Some of them ask for work.\n\n(Hollow-born heroes now join the recruit board, in this guild and every guild after it.)"
 msgstr "Şehir, loncanın bağlamaya yardım ettiği yeni halatlarda zar zor tutunuyor. Yarıklar iki tarafında bekçileri olan kapılara dönüşüyor ve Oyuk halkının ilkleri, sahip oldukları her şeyi taşıyarak bu kapılardan yukarı çıkıyor. Bazıları iş istiyor.\n\n(Oyuk doğumlu kahramanlar artık bu loncanın ve sonraki her loncanın aday tahtasına geliyor.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:989
+#: scripts/autoload/game_data/GameDataModes.gd:1016
 msgid "Ours"
 msgstr "Bizimki"
 
-#: scripts/autoload/game_data/GameDataModes.gd:989
+#: scripts/autoload/game_data/GameDataModes.gd:1016
 msgid "Every door closed"
 msgstr "Her kapı kapalı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:990
+#: scripts/autoload/game_data/GameDataModes.gd:1017
 msgid "Your guild closes the doors one by one, from the glass shore to the city's gate. The far side falls quietly. The rifts heal over in a season. Some nights the new stars show low on the horizon, for a moment, and then not.\n\n(+10 Laurels for this guild's legacy. The Hollow's foes no longer appear on the ladder.)"
 msgstr "Loncan kapıları cam kıyıdan şehrin kapısına kadar teker teker kapatıyor. Öbür taraf sessizce düşüyor. Yarıklar bir mevsimde kapanıyor. Bazı geceler yeni yıldızlar ufkun alçağında bir an görünüyor, sonra kayboluyor.\n\n(Bu loncanın mirasına +10 Defne. Oyuk'un düşmanları artık sıralamada görünmüyor.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1003
+#: scripts/autoload/game_data/GameDataModes.gd:1030
 msgid "Defeat %d %s"
 msgstr "%d %s yen"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1004
+#: scripts/autoload/game_data/GameDataModes.gd:1031
 msgid "Seal %d Rift%s"
 msgstr "%d Yarık%s mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1005
+#: scripts/autoload/game_data/GameDataModes.gd:1032
 msgid "Win %d Elite fight%s"
 msgstr "%d Seçkin dövüşü%s kazan"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1006
+#: scripts/autoload/game_data/GameDataModes.gd:1033
 msgid "Defeat a Boss"
 msgstr "Bir Boss yen"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1007
+#: scripts/autoload/game_data/GameDataModes.gd:1034
 msgid "Craft %d item%s or relic%s"
 msgstr "%d eşya%s ya da kalıntı%s üret"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1008
+#: scripts/autoload/game_data/GameDataModes.gd:1035
 msgid "Win %d fight%s without a hero going down"
 msgstr "Hiçbir kahraman düşmeden %d dövüş%s kazan"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1031
+#: scripts/autoload/game_data/GameDataModes.gd:1058
 msgid "First Blood — seal your first Rift"
 msgstr "İlk Kan — ilk Yarığını mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1032
+#: scripts/autoload/game_data/GameDataModes.gd:1059
 msgid "Monster Hunter — defeat 25 monsters total"
 msgstr "Canavar Avcısı — toplam 25 canavar yen"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1033
+#: scripts/autoload/game_data/GameDataModes.gd:1060
 msgid "Elite Slayer — win 3 Elite fights"
 msgstr "Seçkin Avcısı — 3 Seçkin dövüşü kazan"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1034
+#: scripts/autoload/game_data/GameDataModes.gd:1061
 msgid "Boss Breaker — defeat 3 Bosses"
 msgstr "Boss Kıran — 3 Boss yen"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1035
+#: scripts/autoload/game_data/GameDataModes.gd:1062
 msgid "Artisan — craft 3 items or relics"
 msgstr "Zanaatkâr — 3 eşya ya da kalıntı üret"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1036
+#: scripts/autoload/game_data/GameDataModes.gd:1063
 msgid "Full Roster — fill every hero slot"
 msgstr "Dolu Kadro — her kahraman yerini doldur"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1037
+#: scripts/autoload/game_data/GameDataModes.gd:1064
 msgid "Guild of the Realm — top the Guild Standings in Renown"
 msgstr "Diyarın Loncası — Lonca Sıralaması'nda Ün'de zirveye çık"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1038
+#: scripts/autoload/game_data/GameDataModes.gd:1065
 msgid "Renowned Guild — reach Renowned Guild tier"
 msgstr "Ünlü Lonca — Ünlü Lonca kademesine ulaş"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1039
+#: scripts/autoload/game_data/GameDataModes.gd:1066
 msgid "Greater Threat — open the Rank C rift"
 msgstr "Büyük Tehdit — Rütbe C yarığını aç"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1040
+#: scripts/autoload/game_data/GameDataModes.gd:1067
 msgid "The Vale Holds — complete Act I"
 msgstr "Vadi Dayanıyor — I. Perde'yi tamamla"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1041
+#: scripts/autoload/game_data/GameDataModes.gd:1068
 msgid "Out of the Marshes — complete Act II"
 msgstr "Bataklıklardan Çıkış — II. Perde'yi tamamla"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1042
+#: scripts/autoload/game_data/GameDataModes.gd:1069
 msgid "Crownbreaker — complete Act III"
 msgstr "Taç Kıran — III. Perde'yi tamamla"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1043
+#: scripts/autoload/game_data/GameDataModes.gd:1070
 msgid "Keeper of the Accord — complete the campaign"
 msgstr "Ahit'in Bekçisi — seferi tamamla"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1044
+#: scripts/autoload/game_data/GameDataModes.gd:1071
 msgid "Rift Warden — seal 25 rifts"
 msgstr "Yarık Bekçisi — 25 yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1045
+#: scripts/autoload/game_data/GameDataModes.gd:1072
 msgid "Centurion — defeat 250 monsters"
 msgstr "Yüzbaşı — 250 canavar yen"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1046
+#: scripts/autoload/game_data/GameDataModes.gd:1073
 msgid "Kingslayer — defeat 20 Bosses"
 msgstr "Kral Katili — 20 Boss yen"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1047
+#: scripts/autoload/game_data/GameDataModes.gd:1074
 msgid "Untouched — seal 5 rifts with no one knocked out"
 msgstr "Dokunulmaz — kimse bayılmadan 5 yarık mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1048
+#: scripts/autoload/game_data/GameDataModes.gd:1075
 msgid "Climber — reach floor 25 of the Tower"
 msgstr "Tırmanıcı — Kule'nin 25. katına ulaş"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1049
+#: scripts/autoload/game_data/GameDataModes.gd:1076
 msgid "Summit — clear floor 100 of the Tower"
 msgstr "Zirve — Kule'nin 100. katını temizle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1050
+#: scripts/autoload/game_data/GameDataModes.gd:1077
 msgid "Beyond the Edge — survive 10 minutes in the Endless Rift"
 msgstr "Sınırın Ötesi — Sonsuz Yarık'ta 10 dakika dayan"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1051
+#: scripts/autoload/game_data/GameDataModes.gd:1078
 msgid "Daily Duty — seal a rift with the daily twist"
 msgstr "Günlük Görev — günün cilvesiyle bir yarığı mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1052
+#: scripts/autoload/game_data/GameDataModes.gd:1079
 msgid "Dedicated — seal the daily twist 7 days in a row"
 msgstr "Kararlı — günün cilvesini 7 gün üst üste mühürle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1053
+#: scripts/autoload/game_data/GameDataModes.gd:1080
 msgid "Build Complete — own a 4-piece boon set"
 msgstr "Yapı Tamam — 4 parçalı bir lütuf setine sahip ol"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1054
+#: scripts/autoload/game_data/GameDataModes.gd:1081
 msgid "Legendary Guild — reach Legendary Guild tier"
 msgstr "Efsanevi Lonca — Efsanevi Lonca kademesine ulaş"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1055
+#: scripts/autoload/game_data/GameDataModes.gd:1082
 msgid "Paragon — raise a hero to Level 10"
 msgstr "Örnek — bir kahramanı 10. seviyeye çıkar"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1056
+#: scripts/autoload/game_data/GameDataModes.gd:1083
 msgid "Great Hall — have 10 heroes on the roster"
 msgstr "Büyük Salon — kadroda 10 kahraman olsun"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1092
+#: scripts/autoload/game_data/GameDataModes.gd:1119
 msgid "Inspired"
 msgstr "İlhamlı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1092
+#: scripts/autoload/game_data/GameDataModes.gd:1119
 msgid "Steady"
 msgstr "Dengeli"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1092
+#: scripts/autoload/game_data/GameDataModes.gd:1119
 msgid "Shaken"
 msgstr "Sarsılmış"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1092
+#: scripts/autoload/game_data/GameDataModes.gd:1119
 msgid "Breaking"
 msgstr "Kırılmak üzere"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1108
+#: scripts/autoload/game_data/GameDataModes.gd:1135
 msgid "The Hollow Crown Company"
 msgstr "Oyuk Taç Bölüğü"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1126
+#: scripts/autoload/game_data/GameDataModes.gd:1153
 msgid "Marshal Orla Venn"
 msgstr "Mareşal Orla Venn"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1127
+#: scripts/autoload/game_data/GameDataModes.gd:1154
 msgid "Kael Ashborn"
 msgstr "Kael Ashborn"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1128
+#: scripts/autoload/game_data/GameDataModes.gd:1155
 msgid "Ser Aldric Vane"
 msgstr "Sör Aldric Vane"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1129
+#: scripts/autoload/game_data/GameDataModes.gd:1156
 msgid "Mother Ilse"
 msgstr "Ana Ilse"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1130 scripts/autoload/game_data/GameDataModes.gd:1477
+#: scripts/autoload/game_data/GameDataModes.gd:1157 scripts/autoload/game_data/GameDataModes.gd:1504
 msgid "Captain Morrow"
 msgstr "Kaptan Morrow"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1142
+#: scripts/autoload/game_data/GameDataModes.gd:1169
 msgid "Seal the small rifts, %s. Leave the real ones to us."
 msgstr "Küçük yarıkları sen mühürle, %s. Gerçeklerini bize bırak."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1143 scripts/autoload/game_data/GameDataModes.gd:1225
+#: scripts/autoload/game_data/GameDataModes.gd:1170 scripts/autoload/game_data/GameDataModes.gd:1252
 msgid "%s pays its heroes in promises, I hear."
 msgstr "Duyduğuma göre %s kahramanlarına vaatle ödüyormuş."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1144
+#: scripts/autoload/game_data/GameDataModes.gd:1171
 msgid "Our recruits ask about %s. Then they sign with us."
 msgstr "Acemilerimiz %s hakkında soru soruyor. Sonra bizimle imzalıyorlar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1145
+#: scripts/autoload/game_data/GameDataModes.gd:1172
 msgid "Tell %s the quest board isn't a charity."
 msgstr "%s loncasına söyleyin, görev panosu bir hayır kurumu değil."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1146
+#: scripts/autoload/game_data/GameDataModes.gd:1173
 msgid "We'll send flowers when %s closes its doors."
 msgstr "%s kapılarını kapattığında çiçek göndereceğiz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1147 scripts/autoload/game_data/GameDataModes.gd:1225
+#: scripts/autoload/game_data/GameDataModes.gd:1174 scripts/autoload/game_data/GameDataModes.gd:1252
 msgid "%s? I thought they'd disbanded."
 msgstr "%s mi? Dağıldıklarını sanıyordum."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1166 scripts/autoload/game_data/GameDataModes.gd:1177 scripts/autoload/game_data/GameDataModes.gd:1474
+#: scripts/autoload/game_data/GameDataModes.gd:1193 scripts/autoload/game_data/GameDataModes.gd:1204 scripts/autoload/game_data/GameDataModes.gd:1501
 msgid "The Night of Breaking"
 msgstr "Kırılma Gecesi"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1166
+#: scripts/autoload/game_data/GameDataModes.gd:1193
 msgid "The end of the Accord"
 msgstr "Ahit'in sonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1167
+#: scripts/autoload/game_data/GameDataModes.gd:1194
 msgid "For three hundred years the guilds of the Accord kept the rifts shut. They swore one oath: close what opens, share what you find, never sell a rift. Then, in a single night, every rift in the Vale opened at once, and every Accord guild went in. None of them came back. By morning their halls stood empty.\n\nThe villages still need a guild. They have yours."
 msgstr "Üç yüz yıl boyunca Ahit'in loncaları yarıkları kapalı tuttu. Tek bir yemin ettiler: açılanı kapat, bulduğunu paylaş, asla bir yarık satma. Sonra tek bir gecede Vadi'deki bütün yarıklar aynı anda açıldı ve Ahit'in bütün loncaları içeri girdi. Hiçbiri geri dönmedi. Sabah olduğunda salonları bomboştu.\n\nKöylerin hâlâ bir loncaya ihtiyacı var. Seninki var."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1172
+#: scripts/autoload/game_data/GameDataModes.gd:1199
 msgid "The Hollow"
 msgstr "Oyuk"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1172
+#: scripts/autoload/game_data/GameDataModes.gd:1199
 msgid "The world sits on a thin crust. Under it is the Hollow, where things that never got to happen pile up: unfinished storms, roads never built, beasts that almost were. A rift is a crack in the crust, and what comes through is the Hollow trying on a shape. It copies what it finds, which is why each region's monsters look like that region."
 msgstr "Dünya ince bir kabuğun üstünde durur. Altında Oyuk vardır; hiç gerçekleşemeyen şeylerin biriktiği yer: yarım kalmış fırtınalar, hiç yapılmamış yollar, neredeyse var olacak canavarlar. Yarık kabuktaki bir çatlaktır ve içinden gelen, bir biçime bürünmeye çalışan Oyuk'tur. Bulduğunu taklit eder; her bölgenin canavarları bu yüzden o bölgeye benzer."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1173 scripts/ui/BattleView.gd:1777 scripts/ui/GuildViews.gd:1948
+#: scripts/autoload/game_data/GameDataModes.gd:1200 scripts/ui/BattleView.gd:1777 scripts/ui/GuildViews.gd:1948
 msgid "Essence"
 msgstr "Öz"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1173
+#: scripts/autoload/game_data/GameDataModes.gd:1200
 msgid "When the Hollow touches air it hardens into crystal. Essence is unfinished possibility: put it into a hero and they grow into what they might have been, into a building and it becomes its better self, into a relic and it wakes. Gold pays people. Essence changes things."
 msgstr "Oyuk havayla buluşunca kristale dönüşür. Öz, yarım kalmış olasılıktır: bir kahramana verirsen olabileceği kişiye dönüşür, bir binaya verirsen daha iyi hâli olur, bir kalıntıya verirsen uyanır. Altın insanlara ödenir. Öz bir şeyleri değiştirir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1174
+#: scripts/autoload/game_data/GameDataModes.gd:1201
 msgid "The Accord"
 msgstr "Ahit"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1174
+#: scripts/autoload/game_data/GameDataModes.gd:1201
 msgid "The oath of the old guilds: close what opens, share what you find, never sell a rift. The villages paid the guilds that swore it, and for three hundred years the crust held. Renown is the villages' trust; the best recruits go where it is."
 msgstr "Eski loncaların yemini: açılanı kapat, bulduğunu paylaş, asla bir yarık satma. Köyler bu yemini eden loncalara ödeme yaptı ve üç yüz yıl boyunca kabuk dayandı. Ün, köylerin güvenidir; en iyi adaylar onun olduğu yere gider."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1175
+#: scripts/autoload/game_data/GameDataModes.gd:1202
 msgid "The Assay"
 msgstr "Mihenk Taşı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1175
+#: scripts/autoload/game_data/GameDataModes.gd:1202
 msgid "Every hero who joins a guild is measured once on the Assay stone, by how much Essence they can hold without breaking: F to S. Rifts are measured on the same scale, so a Rank C rift is one a Rank C hero can stand in. SS and SSS were added after the Night of Breaking, by clerks who had run out of letters."
 msgstr "Bir loncaya katılan her kahraman Mihenk Taşı'nda bir kez ölçülür: kırılmadan ne kadar Öz taşıyabildiğine göre, F'den S'ye. Yarıklar da aynı ölçekle ölçülür; C Rütbeli bir yarık, C Rütbeli bir kahramanın içinde durabileceği yarıktır. SS ve SSS, Kırılma Gecesi'nden sonra harfleri tükenen kâtipler tarafından eklendi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1176
+#: scripts/autoload/game_data/GameDataModes.gd:1203
 msgid "The Five Paths"
 msgstr "Beş Yol"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1176
+#: scripts/autoload/game_data/GameDataModes.gd:1203
 msgid "The Accord trained fighters in five Paths: the Shield (warriors), the Bow (rangers), the Word (mages), the Vow (clerics) and the Knife (rogues). Below Rank B the Path is all a hero is. From Rank B there is enough Essence in them that it settles into a shape of its own, and the Path forks into a calling."
 msgstr "Ahit savaşçılarını beş Yol'da yetiştirdi: Kalkan (savaşçılar), Yay (korucular), Söz (büyücüler), Yemin (rahipler) ve Bıçak (hırsızlar). B Rütbesinin altında bir kahraman Yol'undan ibarettir. B Rütbesinden itibaren içinde kendi biçimini alacak kadar Öz birikir ve Yol bir uzmanlığa ayrılır."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1177
+#: scripts/autoload/game_data/GameDataModes.gd:1204
 msgid "Every rift in the Vale opened at once, deeper than the Assay could measure, and every Accord guild answered. None came back. The new companies that took charters afterward never swore the Accord. Yours can choose to keep it."
 msgstr "Vadi'deki bütün yarıklar aynı anda, Mihenk Taşı'nın ölçemeyeceği kadar derin açıldı ve Ahit'in bütün loncaları çağrıya uydu. Hiçbiri dönmedi. Sonradan berat alan yeni bölükler Ahit'e hiç yemin etmedi. Seninki onu sürdürmeyi seçebilir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1180
+#: scripts/autoload/game_data/GameDataModes.gd:1207
 msgid "Vaelith's badge"
 msgstr "Vaelith'in nişanı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1180
+#: scripts/autoload/game_data/GameDataModes.gd:1207
 msgid "Under Vaelith's cloak was an Accord ranger's badge with the oath scratched out. She held a post on the Night of Breaking and walked away from it. The great Breach in the Vale was the post she left."
 msgstr "Vaelith'in pelerininin altında yemini kazınmış bir Ahit korucusu nişanı vardı. Kırılma Gecesi'nde bir nöbet yeri tutuyordu ve onu bırakıp gitti. Vadi'deki büyük Gedik, onun terk ettiği nöbet yeriydi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1181
+#: scripts/autoload/game_data/GameDataModes.gd:1208
 msgid "The bargain"
 msgstr "Pazarlık"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1181
+#: scripts/autoload/game_data/GameDataModes.gd:1208
 msgid "The guilds did not fall. On the Night of Breaking the Grandmaster of the Accord made a bargain with the Hollow: the strongest of the guilds would stand in the cracks and let the Hollow harden around them, and the Hollow would stay below. The pillars of light in the Endless Rift are those posts, still holding."
 msgstr "Loncalar düşmedi. Kırılma Gecesi'nde Ahit'in Büyük Üstadı Oyuk'la bir pazarlık yaptı: loncaların en güçlüleri çatlaklarda duracak ve Oyuk'un etraflarında katılaşmasına izin verecekti; Oyuk da aşağıda kalacaktı. Sonsuz Yarık'taki ışık sütunları o nöbet yerleri; hâlâ dayanıyorlar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1182 scripts/autoload/game_data/GameDataModes.gd:1324
+#: scripts/autoload/game_data/GameDataModes.gd:1209 scripts/autoload/game_data/GameDataModes.gd:1351
 msgid "The forty-first post"
 msgstr "Kırk birinci nöbet"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1182
+#: scripts/autoload/game_data/GameDataModes.gd:1209
 msgid "Sythrane was the Grandmaster. The bargain asked for forty-one posts, and she would not take the last one herself. The Hollow crowned her instead, and every post that tired and let go fed her. With her gone the rifts are quiet. The posts are still holding, and someone will have to relieve them."
 msgstr "Büyük Üstat Sythrane'di. Pazarlık kırk bir nöbet istiyordu ve sonuncusunu kendisi almadı. Oyuk onun yerine onu taçlandırdı ve yorulup bırakan her nöbet onu besledi. O gidince yarıklar sustu. Nöbetler hâlâ dayanıyor ve birinin onları devralması gerekecek."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1192
+#: scripts/autoload/game_data/GameDataModes.gd:1219
 msgid "Day 1. The Hollow is rising faster than we can close it. The Assay has no mark for what came through at Thornwood. I have called every guild to the Hall."
 msgstr "1. Gün. Oyuk kapatabileceğimizden hızlı yükseliyor. Dikenorman'dan geleni ölçecek bir işaret yok Mihenk Taşı'nda. Bütün loncaları Salon'a çağırdım."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1193
+#: scripts/autoload/game_data/GameDataModes.gd:1220
 msgid "Day 3. A voice answered from the deepest rift. It offered terms. I wrote them down so that I could refuse them properly."
 msgstr "3. Gün. En derin yarıktan bir ses cevap verdi. Şartlar önerdi. Düzgünce reddedebilmek için onları yazdım."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1194
+#: scripts/autoload/game_data/GameDataModes.gd:1221
 msgid "Day 9. Forty posts: forty of our strongest, standing in the cracks, held by the Hollow's own hardening. In return it stays below. I have not refused."
 msgstr "9. Gün. Kırk nöbet: en güçlü kırk kişimiz, çatlaklarda duracak, Oyuk'un kendi katılaşmasıyla tutulacak. Karşılığında o aşağıda kalacak. Reddetmedim."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1195
+#: scripts/autoload/game_data/GameDataModes.gd:1222
 msgid "Day 10. Lots drawn. Brannoch asked for the deepest post and I let him. I told them all I would come back for them myself."
 msgstr "10. Gün. Kuralar çekildi. Brannoch en derin nöbeti istedi, izin verdim. Hepsine, onları almaya bizzat geleceğimi söyledim."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1196
+#: scripts/autoload/game_data/GameDataModes.gd:1223
 msgid "Day 11. Vaelith asked who holds the Grandmaster's post. I said the Grandmaster keeps the ledger. That was not an answer, and she knew it."
 msgstr "11. Gün. Vaelith, Büyük Üstat'ın nöbetini kimin tutacağını sordu. Büyük Üstat defteri tutar dedim. Bu bir cevap değildi ve o bunu biliyordu."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1197
+#: scripts/autoload/game_data/GameDataModes.gd:1224
 msgid "The Night. Every post is taken but mine. The terms say forty-one. The Hollow can count."
 msgstr "Gece. Benimki dışında bütün nöbetler alındı. Şartlar kırk bir diyor. Oyuk saymayı biliyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1198
+#: scripts/autoload/game_data/GameDataModes.gd:1225
 msgid "After. The Hollow came for the forty-first and found me ready to make a different bargain. It gives me a crown. I give it the posts, one at a time, as they tire. It is slower than refusing. That is all I wanted: more time."
 msgstr "Sonra. Oyuk kırk birinciyi almaya geldi ve beni başka bir pazarlığa hazır buldu. O bana bir taç veriyor. Ben ona nöbetleri veriyorum, yoruldukça birer birer. Reddetmekten daha yavaş. Tek istediğim buydu: biraz daha zaman."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1205
+#: scripts/autoload/game_data/GameDataModes.gd:1232
 msgid "The Crown will return to the Vale. A single Royal Charter will go to the company that has done the most to close the rifts: every contract, for a generation. Until then, all chartered companies compete on equal terms.\n\nThe loudest of them, %s, led by %s, has noticed your guild."
 msgstr "Taç, Vadi'ye geri dönecek. Yarıkları kapatmak için en çok çabayı gösteren bölüğe tek bir Kraliyet Beratı verilecek: her sözleşme, bir nesil boyunca. O zamana kadar beratlı bütün bölükler eşit şartlarda yarışır.\n\nAralarında en gürültücüsü olan %s, %s önderliğinde, loncanı fark etti."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1212
+#: scripts/autoload/game_data/GameDataModes.gd:1239
 msgid "%s fights like one of mine. I'd rather ask than steal, so I'm asking: let them come, or pay them what they're worth. No hard feelings either way. — O. Venn"
 msgstr "%s benimkilerden biri gibi dövüşüyor. Çalmaktansa sormayı yeğlerim, o yüzden soruyorum: bırak gelsin ya da hak ettiğini öde. Her iki durumda da kırgınlık yok. — O. Venn"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1213
+#: scripts/autoload/game_data/GameDataModes.gd:1240
 msgid "Seal a Rank %s rift before payday. If you do, I'll say so to the herald. If you don't, I'll say that too. — O. Venn"
 msgstr "Maaş gününden önce %s Rütbeli bir yarık mühürle. Mühürlersen bunu tellala söylerim. Mühürlemezsen onu da söylerim. — O. Venn"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1214
+#: scripts/autoload/game_data/GameDataModes.gd:1241
 msgid "That contract is on the board and we can do it. So can you, maybe. First to sign it keeps it. — O. Venn"
 msgstr "O sözleşme panoda ve biz yapabiliriz. Belki siz de. İlk imzalayan alır. — O. Venn"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1215
+#: scripts/autoload/game_data/GameDataModes.gd:1242
 msgid "Good work this week, %s. Do better next week."
 msgstr "Bu hafta iyi iş, %s. Gelecek hafta daha iyisini yap."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1215
+#: scripts/autoload/game_data/GameDataModes.gd:1242
 msgid "The Chorus sings about the rifts it has closed. %s hums."
 msgstr "Koro kapattığı yarıkların şarkısını söyler. %s mırıldanır."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1215
+#: scripts/autoload/game_data/GameDataModes.gd:1242
 msgid "%s keeps its word. I'll give them that. I'll give them nothing else."
 msgstr "%s sözünü tutar. Bunu kabul ederim. Başka hiçbir şeyi kabul etmem."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1217
+#: scripts/autoload/game_data/GameDataModes.gd:1244
 msgid "We can't train heroes like %s; we haven't the Gold. We can pay them, though, for a few weeks at least. They'll be happy. Probably. — Kael"
 msgstr "%s gibi kahramanları yetiştiremeyiz; Altınımız yok. Ama birkaç hafta da olsa maaşını ödeyebiliriz. Mutlu olur. Muhtemelen. — Kael"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1218
+#: scripts/autoload/game_data/GameDataModes.gd:1245
 msgid "Rank %s by payday. We did one last week. Barely. Your turn. — Kael"
 msgstr "Maaş gününe kadar %s Rütbesi. Biz geçen hafta bir tane yaptık. Zar zor. Sıra sizde. — Kael"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1219
+#: scripts/autoload/game_data/GameDataModes.gd:1246
 msgid "We need that contract more than you do. I'm not proud of saying so. I'm saying it anyway. — Kael"
 msgstr "O sözleşmeye sizden çok ihtiyacımız var. Bunu söylemekle gurur duymuyorum. Yine de söylüyorum. — Kael"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1220
+#: scripts/autoload/game_data/GameDataModes.gd:1247
 msgid "The Wolves are hungry and %s is fat. Draw your own conclusions."
 msgstr "Kurtlar aç, %s ise semiz. Gerisini siz düşünün."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1220
+#: scripts/autoload/game_data/GameDataModes.gd:1247
 msgid "Someday the Wolves will have a hall like %s's. With a roof."
 msgstr "Bir gün Kurtların da %s gibi bir salonu olacak. Çatılı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1220
+#: scripts/autoload/game_data/GameDataModes.gd:1247
 msgid "%s had a good week. We ate."
 msgstr "%s iyi bir hafta geçirdi. Biz yemek yedik."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1222
+#: scripts/autoload/game_data/GameDataModes.gd:1249
 msgid "Your %s has a good eye and a poor wage. I have the opposite problem. I'm sure we can come to an arrangement. — Vane"
 msgstr "%s iyi bir göze ve kötü bir maaşa sahip. Bende tam tersi bir sorun var. Eminim anlaşabiliriz. — Vane"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1223
+#: scripts/autoload/game_data/GameDataModes.gd:1250
 msgid "A Rank %s rift by payday, if your guild can manage it. Mine could, in its sleep. It frequently does. — Vane"
 msgstr "Maaş gününe kadar %s Rütbeli bir yarık, loncanız becerebilirse. Benimki uykusunda yapar. Sık sık da yapar. — Vane"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1224
+#: scripts/autoload/game_data/GameDataModes.gd:1251
 msgid "The Lance will be taking that contract. Do not trouble yourselves. — Ser Aldric Vane"
 msgstr "O sözleşmeyi Mızrak alacak. Zahmet etmeyin. — Ser Aldric Vane"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1225
+#: scripts/autoload/game_data/GameDataModes.gd:1252
 msgid "The Charter will hang in the Lance's hall. I have already chosen the frame."
 msgstr "Berat, Mızrak'ın salonunda asılı duracak. Çerçevesini bile seçtim."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1227
+#: scripts/autoload/game_data/GameDataModes.gd:1254
 msgid "%s has been unhappy, child. I notice these things. Pay them, or I will, and then we'll both know who listens. — Mother Ilse"
 msgstr "%s mutsuz, evladım. Ben bu şeyleri fark ederim. Ya sen öde ya ben öderim; o zaman ikimiz de kimin dinlediğini biliriz. — Ilse Ana"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1228
+#: scripts/autoload/game_data/GameDataModes.gd:1255
 msgid "I've told the taverns you can seal a Rank %s rift by payday. Don't make an old woman a liar. — Ilse"
 msgstr "Meyhanelere maaş gününe kadar %s Rütbeli bir yarığı mühürleyebileceğinizi söyledim. Yaşlı bir kadını yalancı çıkarmayın. — Ilse"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1229
+#: scripts/autoload/game_data/GameDataModes.gd:1256
 msgid "The Wolves will try for this one tomorrow. Take it first and I'll know you can be trusted with better news. Let it go and I'll take it, and I'll know that too. — Ilse"
 msgstr "Kurtlar yarın bunu almaya çalışacak. Önce siz alın, size daha iyi haberler emanet edilebileceğini bileyim. Bırakırsanız ben alırım ve onu da bilirim. — Ilse"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1230
+#: scripts/autoload/game_data/GameDataModes.gd:1257
 msgid "Mother Ilse sends her regards to %s, and a small bill."
 msgstr "Ilse Ana, %s için selamlarını ve küçük bir hesap pusulasını gönderiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1230
+#: scripts/autoload/game_data/GameDataModes.gd:1257
 msgid "Everyone owes the Lantern something. %s just doesn't know what yet."
 msgstr "Herkesin Fener'e bir borcu var. %s henüz neyi borçlu olduğunu bilmiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1230
+#: scripts/autoload/game_data/GameDataModes.gd:1257
 msgid "The Lantern hears %s is short this week. The Lantern lends."
 msgstr "Fener, bu hafta %s loncasının sıkıştığını duydu. Fener borç verir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1232
+#: scripts/autoload/game_data/GameDataModes.gd:1259
 msgid "%s deserves a company that values them. Ours does: twice the wage, half the danger. I can't explain the half. Trade secret. — Capt. Morrow"
 msgstr "%s kendisine değer veren bir bölüğü hak ediyor. Bizimki verir: iki kat maaş, yarı tehlike. Yarısını açıklayamam. Meslek sırrı. — Yzb. Morrow"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1233
+#: scripts/autoload/game_data/GameDataModes.gd:1260
 msgid "Rank %s by payday? A friendly wager. There is always another rift, after all. We make sure of it. — Morrow"
 msgstr "Maaş gününe kadar %s Rütbesi mi? Dostça bir iddia. Sonuçta her zaman bir yarık daha vardır. Biz bundan emin oluruz. — Morrow"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1234
+#: scripts/autoload/game_data/GameDataModes.gd:1261
 msgid "We'll take this one off your hands. Plenty of work for everyone; there always seems to be, near us. — Morrow"
 msgstr "Bunu sizin yerinize biz hallederiz. Herkese yetecek kadar iş var; bizim yakınımızda hep var gibi. — Morrow"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1235
+#: scripts/autoload/game_data/GameDataModes.gd:1262
 msgid "Plenty of work for everyone, %s. There always is."
 msgstr "Herkese yetecek kadar iş var, %s. Hep vardır."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1235
+#: scripts/autoload/game_data/GameDataModes.gd:1262
 msgid "The Company wishes %s a quiet week. Truly."
 msgstr "Bölük, %s için sakin bir hafta diler. Gerçekten."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1235
+#: scripts/autoload/game_data/GameDataModes.gd:1262
 msgid "Captain Morrow sent %s a bottle of good wine. No note."
 msgstr "Yüzbaşı Morrow, %s loncasına bir şişe iyi şarap gönderdi. Notsuz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1243
+#: scripts/autoload/game_data/GameDataModes.gd:1270
 msgid "First payday. I'm Dobbs; I keep the books. The one with the ink is Wen."
 msgstr "İlk maaş günü. Ben Dobbs; defterleri tutarım. Mürekkepli olan da Wen."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1243
+#: scripts/autoload/game_data/GameDataModes.gd:1270
 msgid "I write down what happens. Try to make it worth writing."
 msgstr "Olanları yazarım. Yazmaya değer kılmaya çalışın."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1243
+#: scripts/autoload/game_data/GameDataModes.gd:1270
 msgid "And I'm the old woman who was here before both of them. Pay your heroes and they'll stay."
 msgstr "Ben de ikisinden önce burada olan yaşlı kadınım. Kahramanlarına öde, kalırlar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1244
+#: scripts/autoload/game_data/GameDataModes.gd:1271
 msgid "Someone walked out today."
 msgstr "Bugün biri çekip gitti."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1244
+#: scripts/autoload/game_data/GameDataModes.gd:1271
 msgid "Unpaid twice, or miserable. Usually both."
 msgstr "İki kez maaşsız kalmış ya da mutsuz. Genelde ikisi birden."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1244
+#: scripts/autoload/game_data/GameDataModes.gd:1271
 msgid "I'll write that they left. I won't write why. That's yours to fix."
 msgstr "Gittiğini yazarım. Nedenini yazmam. Onu düzeltmek sana kalmış."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1245
+#: scripts/autoload/game_data/GameDataModes.gd:1272
 msgid "I've added a name to the Memorial."
 msgstr "Anıt'a bir isim ekledim."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1245
+#: scripts/autoload/game_data/GameDataModes.gd:1272
 msgid "Say it out loud once. It helps."
 msgstr "Bir kez yüksek sesle söyle. İyi gelir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1245
+#: scripts/autoload/game_data/GameDataModes.gd:1272
 msgid "I'll take them off the payroll. Quietly."
 msgstr "Onu bordrodan çıkarırım. Sessizce."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1246
+#: scripts/autoload/game_data/GameDataModes.gd:1273
 msgid "We're short. I want that written down, Wen."
 msgstr "Paramız yetmiyor. Bunun yazılmasını istiyorum, Wen."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1246
+#: scripts/autoload/game_data/GameDataModes.gd:1273
 msgid "It's written down. It was written down last week, too."
 msgstr "Yazıldı. Geçen hafta da yazılmıştı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1246
+#: scripts/autoload/game_data/GameDataModes.gd:1273
 msgid "Then underline it."
 msgstr "O zaman altını çiz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1247
+#: scripts/autoload/game_data/GameDataModes.gd:1274
 msgid "Good feast."
 msgstr "Güzel ziyafet."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1247
+#: scripts/autoload/game_data/GameDataModes.gd:1274
 msgid "Expensive feast."
 msgstr "Pahalı ziyafet."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1247
+#: scripts/autoload/game_data/GameDataModes.gd:1274
 msgid "I'm writing 'good'."
 msgstr "'Güzel' yazıyorum."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1248
+#: scripts/autoload/game_data/GameDataModes.gd:1275
 msgid "The herald wrote our name first this week."
 msgstr "Tellal bu hafta ilk bizim adımızı yazdı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1248
+#: scripts/autoload/game_data/GameDataModes.gd:1275
 msgid "Did the herald pay anything?"
 msgstr "Tellal bir şey ödedi mi?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1248
+#: scripts/autoload/game_data/GameDataModes.gd:1275
 msgid "No."
 msgstr "Hayır."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1248
+#: scripts/autoload/game_data/GameDataModes.gd:1275
 msgid "Then it's ink."
 msgstr "O zaman sadece mürekkep."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1249
+#: scripts/autoload/game_data/GameDataModes.gd:1276
 msgid "Our rivals bought new banners."
 msgstr "Rakiplerimiz yeni sancaklar almış."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1249
+#: scripts/autoload/game_data/GameDataModes.gd:1276
 msgid "The Accord never had banners."
 msgstr "Ahit'in hiç sancağı olmadı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1249
+#: scripts/autoload/game_data/GameDataModes.gd:1276
 msgid "The Accord is gone."
 msgstr "Ahit yok artık."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1249
+#: scripts/autoload/game_data/GameDataModes.gd:1276
 msgid "Yes. Well."
 msgstr "Evet. Neyse."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1250
+#: scripts/autoload/game_data/GameDataModes.gd:1277
 msgid "The vault is full. I don't trust it."
 msgstr "Kasa dolu. Buna güvenmiyorum."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1250
+#: scripts/autoload/game_data/GameDataModes.gd:1277
 msgid "Spend it on the heroes, then. Gold never closed a rift."
 msgstr "O zaman kahramanlara harca. Altın hiçbir yarığı kapatmadı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1250
+#: scripts/autoload/game_data/GameDataModes.gd:1277
 msgid "Gold paid the ones who did."
 msgstr "Kapatanlara Altın ödendi ama."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1251
+#: scripts/autoload/game_data/GameDataModes.gd:1278
 msgid "These ledger pages. Hesper, did you know the Grandmaster?"
 msgstr "Bu defter sayfaları... Hesper, Büyük Üstat'ı tanır mıydın?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1251
+#: scripts/autoload/game_data/GameDataModes.gd:1278
 msgid "Everyone knew her. Nobody knew her."
 msgstr "Herkes tanırdı. Kimse tanımazdı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1251
+#: scripts/autoload/game_data/GameDataModes.gd:1278
 msgid "That isn't an answer."
 msgstr "Bu bir cevap değil."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1251
+#: scripts/autoload/game_data/GameDataModes.gd:1278
 msgid "It's the only one she ever gave."
 msgstr "Onun verdiği tek cevap buydu."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1252
+#: scripts/autoload/game_data/GameDataModes.gd:1279
 msgid "Nobody hurt this week."
 msgstr "Bu hafta kimse yaralanmadı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1252
+#: scripts/autoload/game_data/GameDataModes.gd:1279
 msgid "That's not a story."
 msgstr "Bu bir hikâye değil."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1252
+#: scripts/autoload/game_data/GameDataModes.gd:1279
 msgid "It's the best kind. You'll learn."
 msgstr "En iyi türü. Öğrenirsin."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1253
+#: scripts/autoload/game_data/GameDataModes.gd:1280
 msgid "Hesper, what were the old guilds like?"
 msgstr "Hesper, eski loncalar nasıldı?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1253
+#: scripts/autoload/game_data/GameDataModes.gd:1280
 msgid "Louder. Better paid. Gone."
 msgstr "Daha gürültülü. Daha iyi maaşlı. Gitmiş."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1254
+#: scripts/autoload/game_data/GameDataModes.gd:1281
 msgid "Wages, upkeep, and a bill for a broken door."
 msgstr "Maaşlar, bakım ve kırık bir kapının faturası."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1254
+#: scripts/autoload/game_data/GameDataModes.gd:1281
 msgid "Which door?"
 msgstr "Hangi kapı?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1254
+#: scripts/autoload/game_data/GameDataModes.gd:1281
 msgid "The one someone kicked in after the last rift. I'm not saying who."
 msgstr "Son yarıktan sonra birinin tekmeyle kırdığı. Kim olduğunu söylemiyorum."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1255
+#: scripts/autoload/game_data/GameDataModes.gd:1282
 msgid "I sat the Assay at sixteen. The stone barely glowed."
 msgstr "Mihenk Taşı'na on altı yaşında girdim. Taş zar zor parladı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1255
+#: scripts/autoload/game_data/GameDataModes.gd:1282
 msgid "What rank?"
 msgstr "Hangi rütbe?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1255
+#: scripts/autoload/game_data/GameDataModes.gd:1282
 msgid "F. I'm still here. Most of the S's aren't."
 msgstr "F. Ben hâlâ buradayım. S'lerin çoğu değil."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1256
+#: scripts/autoload/game_data/GameDataModes.gd:1283
 msgid "I need another word for 'rift'. I've used it four hundred times."
 msgstr "'Yarık' için başka bir kelimeye ihtiyacım var. Dört yüz kez kullandım."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1256
+#: scripts/autoload/game_data/GameDataModes.gd:1283
 msgid "Use 'expense'."
 msgstr "'Masraf' de."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1257
+#: scripts/autoload/game_data/GameDataModes.gd:1284
 msgid "The recruits ask what the Accord was."
 msgstr "Acemiler Ahit'in ne olduğunu soruyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1257
+#: scripts/autoload/game_data/GameDataModes.gd:1284
 msgid "Tell them it was a promise. Tell them we're keeping it."
 msgstr "Bir söz olduğunu söyle. Onu tuttuğumuzu söyle."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1257
+#: scripts/autoload/game_data/GameDataModes.gd:1284
 msgid "Are we?"
 msgstr "Tutuyor muyuz?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1257
+#: scripts/autoload/game_data/GameDataModes.gd:1284
 msgid "Ask me next payday."
 msgstr "Gelecek maaş günü sor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1259
+#: scripts/autoload/game_data/GameDataModes.gd:1286
 msgid "{guild} paid on the seventh, too. Rain or not."
 msgstr "{guild} loncası da maaşları yedinci gün öderdi. Yağmur yağsa bile."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1259
+#: scripts/autoload/game_data/GameDataModes.gd:1286
 msgid "You never said you knew them."
 msgstr "Onları tanıdığını hiç söylememiştin."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1259
+#: scripts/autoload/game_data/GameDataModes.gd:1286
 msgid "You never asked who taught you the pay table."
 msgstr "Sen de maaş masasını sana kimin öğrettiğini hiç sormadın."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1260
+#: scripts/autoload/game_data/GameDataModes.gd:1287
 msgid "Someone left flowers under the {guild} banner."
 msgstr "Biri {guild} sancağının altına çiçek bırakmış."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1260
+#: scripts/autoload/game_data/GameDataModes.gd:1287
 msgid "Who pays for flowers?"
 msgstr "Çiçeklerin parasını kim ödüyor?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1260
+#: scripts/autoload/game_data/GameDataModes.gd:1287
 msgid "Nobody. That's how you know they mean it."
 msgstr "Kimse. Gönülden olduğunu oradan anlarsın."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1261
+#: scripts/autoload/game_data/GameDataModes.gd:1288
 msgid "{guild} spent less on feasts than we do."
 msgstr "{guild} loncası ziyafetlere bizden az harcardı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1261
+#: scripts/autoload/game_data/GameDataModes.gd:1288
 msgid "And kept fewer heroes."
 msgstr "Ve daha az kahraman tutabildi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1261
+#: scripts/autoload/game_data/GameDataModes.gd:1288
 msgid "I hate it when the books agree with you."
 msgstr "Defterlerin sana hak vermesinden nefret ediyorum."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1262
+#: scripts/autoload/game_data/GameDataModes.gd:1289
 msgid "{hero} is all over the old {guild} ledgers. Rift after rift."
 msgstr "Eski {guild} defterlerinin her sayfasında {hero} var. Yarık üstüne yarık."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1262
+#: scripts/autoload/game_data/GameDataModes.gd:1289
 msgid "{hero} carried me home from the Marches once. Don't write that down."
 msgstr "Bir keresinde {hero} beni Bataklıklar'dan eve kadar taşımıştı. Bunu yazma."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1262
+#: scripts/autoload/game_data/GameDataModes.gd:1289
 msgid "Already have."
 msgstr "Çoktan yazdım."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1263
+#: scripts/autoload/game_data/GameDataModes.gd:1290
 msgid "Who goes down to the forty-first post now that {guild} is gone?"
 msgstr "{guild} loncası artık yok; kırk birinci nöbete şimdi kim inecek?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1263
+#: scripts/autoload/game_data/GameDataModes.gd:1290
 msgid "We do. Once a year, on the Night of Breaking."
 msgstr "Biz. Yılda bir kez, Kırılma Gecesi'nde."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1263
+#: scripts/autoload/game_data/GameDataModes.gd:1290
 msgid "I'll put it in the ledger. No charge."
 msgstr "Deftere yazarım. Ücretsiz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1264
+#: scripts/autoload/game_data/GameDataModes.gd:1291
 msgid "The tides got worse after {guild} burned the Terms."
 msgstr "{guild} loncası Şartları yaktıktan sonra gelgitler kötüleşti."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1264
+#: scripts/autoload/game_data/GameDataModes.gd:1291
 msgid "The tides got honest."
 msgstr "Gelgitler dürüstleşti."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1264
+#: scripts/autoload/game_data/GameDataModes.gd:1291
 msgid "Honest costs more."
 msgstr "Dürüstlük daha pahalı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1265
+#: scripts/autoload/game_data/GameDataModes.gd:1292
 msgid "{guild} wrote the forty-second line."
 msgstr "{guild} kırk ikinci satırı yazdı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1265
+#: scripts/autoload/game_data/GameDataModes.gd:1292
 msgid "In my hand. I'd have liked a better pen."
 msgstr "Benim el yazımla. Daha iyi bir kalem isterdim."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1265
+#: scripts/autoload/game_data/GameDataModes.gd:1292
 msgid "Someone goes down next season. I've budgeted for it."
 msgstr "Gelecek mevsim biri aşağı iniyor. Bütçesini ayırdım."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1267
+#: scripts/autoload/game_data/GameDataModes.gd:1294
 msgid "I found our village in the archive. A contract from ninety years ago: three rifts closed, paid in cheese."
 msgstr "Arşivde köyümüzü buldum. Doksan yıl önceki bir sözleşme: üç yarık kapatılmış, ücreti peynirle ödenmiş."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1267
+#: scripts/autoload/game_data/GameDataModes.gd:1294
 msgid "At what rate?"
 msgstr "Hangi fiyattan?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1267
+#: scripts/autoload/game_data/GameDataModes.gd:1294
 msgid "Better than ours."
 msgstr "Bizimkinden iyi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1268
+#: scripts/autoload/game_data/GameDataModes.gd:1295
 msgid "Hollin sent a sack of flour. And a bill for the doors."
 msgstr "Hollin bir çuval un gönderdi. Bir de kapıların faturasını."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1268
+#: scripts/autoload/game_data/GameDataModes.gd:1295
 msgid "Pay the bill. Keep the flour."
 msgstr "Faturayı öde. Unu sakla."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1268
+#: scripts/autoload/game_data/GameDataModes.gd:1295
 msgid "I'm writing down that they sent both."
 msgstr "İkisini birden gönderdiklerini yazıyorum."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1270
+#: scripts/autoload/game_data/GameDataModes.gd:1297
 msgid "{guild} carried the Accord's archive out of the Spire. I've been reading it for a month."
 msgstr "{guild} loncası Ahit'in arşivini Kule'den taşıyıp çıkarmış. Bir aydır okuyorum."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1270
+#: scripts/autoload/game_data/GameDataModes.gd:1297
 msgid "Find anything?"
 msgstr "Bir şey buldun mu?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1270
+#: scripts/autoload/game_data/GameDataModes.gd:1297
 msgid "Your handwriting. On most of it."
 msgstr "Senin el yazını. Çoğunda."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1271
+#: scripts/autoload/game_data/GameDataModes.gd:1298
 msgid "Hollin sent flour again, for {guild}."
 msgstr "Hollin yine un gönderdi; {guild} loncası için."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1271
+#: scripts/autoload/game_data/GameDataModes.gd:1298
 msgid "{guild} is gone."
 msgstr "{guild} loncası artık yok."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1271
+#: scripts/autoload/game_data/GameDataModes.gd:1298
 msgid "Hollin doesn't seem to mind."
 msgstr "Hollin'in umurunda değil gibi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1272
+#: scripts/autoload/game_data/GameDataModes.gd:1299
 msgid "{guild} took Morrow's money, back in the Charter War."
 msgstr "{guild} loncası, Berat Savaşı'nda Morrow'un parasını almış."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1272
+#: scripts/autoload/game_data/GameDataModes.gd:1299
 msgid "Everyone took somebody's money."
 msgstr "Herkes birinin parasını aldı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1272
+#: scripts/autoload/game_data/GameDataModes.gd:1299
 msgid "They took a lot of it."
 msgstr "Onlar epey almış."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1273
+#: scripts/autoload/game_data/GameDataModes.gd:1300
 msgid "There's a ranger in the {guild} ledgers who never signed for her pay. Just a V."
 msgstr "{guild} defterlerinde maaşı için hiç imza atmamış bir korucu var. Sadece bir V."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1273
+#: scripts/autoload/game_data/GameDataModes.gd:1300
 msgid "She never did like paperwork."
 msgstr "Kâğıt işini hiç sevmezdi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1273
+#: scripts/autoload/game_data/GameDataModes.gd:1300
 msgid "She never did like being paid, by the look of it."
 msgstr "Görünüşe bakılırsa maaş almayı da sevmezmiş."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1274
+#: scripts/autoload/game_data/GameDataModes.gd:1301
 msgid "{guild} just stopped. Do guilds do that?"
 msgstr "{guild} loncası öylece durdu. Loncalar bunu yapar mı?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1274
+#: scripts/autoload/game_data/GameDataModes.gd:1301
 msgid "The good ones stop. The rest get stopped."
 msgstr "İyileri kendiliğinden durur. Gerisini birileri durdurur."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1274
+#: scripts/autoload/game_data/GameDataModes.gd:1301
 msgid "Which were they?"
 msgstr "Onlar hangisiydi?"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1274
+#: scripts/autoload/game_data/GameDataModes.gd:1301
 msgid "Look at their banner. It's still up."
 msgstr "Sancaklarına bak. Hâlâ asılı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1282
+#: scripts/autoload/game_data/GameDataModes.gd:1309
 msgid "An empty post"
 msgstr "Boş bir nöbet"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1282 scripts/ui/Main.gd:2438
+#: scripts/autoload/game_data/GameDataModes.gd:1309 scripts/ui/Main.gd:2438
 msgid "The Endless Rift"
 msgstr "Sonsuz Yarık"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1283
+#: scripts/autoload/game_data/GameDataModes.gd:1310
 msgid "The pillar is dark now. Somewhere in the Vale, a rift that has been quiet for twenty years draws breath. You did the right thing. The Hollow noticed.\n\n(Each champion freed in the Endless Rift brings the next Riftbreak a day sooner.)"
 msgstr "Sütun artık karanlık. Vadi'de bir yerde, yirmi yıldır sessiz olan bir yarık nefes alıyor. Doğru olanı yaptın. Oyuk fark etti.\n\n(Sonsuz Yarık'ta kurtarılan her şampiyon, bir sonraki Yarık Taşmasını bir gün öne çeker.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1295
+#: scripts/autoload/game_data/GameDataModes.gd:1322
 msgid "The last signature"
 msgstr "Son imza"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1296
+#: scripts/autoload/game_data/GameDataModes.gd:1323
 msgid "The Terms lie open on the floor of the Hall: forty-one lines, forty signed. Sign the last, and one of your heroes takes the forty-first post forever; the rifts close for good. Or burn it, and every post is released at once; the champions come home, and the Hollow comes up with them."
 msgstr "Şartlar Salon'un zemininde açık duruyor: kırk bir satır, kırkı imzalı. Sonuncuyu imzala, kahramanlarından biri kırk birinci nöbeti sonsuza dek devralsın; yarıklar ebediyen kapansın. Ya da yak, bütün nöbetler bir anda serbest kalsın; şampiyonlar eve dönsün, Oyuk da onlarla birlikte yükselsin."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1299
+#: scripts/autoload/game_data/GameDataModes.gd:1326
 msgid "The Accord renewed"
 msgstr "Ahit yenilendi"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1299
+#: scripts/autoload/game_data/GameDataModes.gd:1326
 msgid "%s holds the forty-first post"
 msgstr "Kırk birinci nöbeti %s tutuyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1300
+#: scripts/autoload/game_data/GameDataModes.gd:1327
 msgid "The Hall is quiet. Up in the Vale the villagers wake to a morning without a single rift on the horizon, and do not know why. The guild knows. Every year, on the Night of Breaking, someone climbs down to the forty-first post and tells %s how the harvest went.\n\n(Riftbreaks have ended. The Endless Rift, the ladder and the quests carry on.)"
 msgstr "Salon sessiz. Yukarıda, Vadi'de köylüler ufukta tek bir yarık olmayan bir sabaha uyanıyor ve nedenini bilmiyor. Lonca biliyor. Her yıl Kırılma Gecesi'nde biri kırk birinci nöbete iner ve %s adlı kahramana hasadın nasıl geçtiğini anlatır.\n\n(Yarık Taşmaları sona erdi. Sonsuz Yarık, merdiven ve görevler sürüyor.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1301
+#: scripts/autoload/game_data/GameDataModes.gd:1328
 msgid "The Accord broken"
 msgstr "Ahit bozuldu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1301
+#: scripts/autoload/game_data/GameDataModes.gd:1328
 msgid "Every post released"
 msgstr "Bütün nöbetler serbest"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1302
+#: scripts/autoload/game_data/GameDataModes.gd:1329
 msgid "The Terms burn green. Forty pillars go out at once, and forty people step into the dark and start walking home. Behind them, the Hollow rises to meet the sky. It will be a hard century. It will be an honest one.\n\n(Every champion of the old guilds is free. Riftbreaks end; a tide of the Hollow breaks every week, stronger for each one you hold.)"
 msgstr "Şartlar yeşil yanar. Kırk sütun bir anda söner ve kırk kişi karanlığa adım atıp eve yürümeye başlar. Arkalarında Oyuk göğe doğru yükselir. Zor bir yüzyıl olacak. Dürüst bir yüzyıl olacak.\n\n(Eski loncaların bütün şampiyonları özgür. Yarık Taşmaları biter; her hafta Oyuk'un bir gelgiti kırılır ve dayandığın her gelgitle güçlenir.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1303
+#: scripts/autoload/game_data/GameDataModes.gd:1330
 msgid "The Terms rewritten"
 msgstr "Şartlar yeniden yazıldı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1303 scripts/autoload/game_data/GameDataModes.gd:1319 scripts/autoload/game_data/GameDataModes.gd:1326
+#: scripts/autoload/game_data/GameDataModes.gd:1330 scripts/autoload/game_data/GameDataModes.gd:1346 scripts/autoload/game_data/GameDataModes.gd:1353
 msgid "The forty-second line"
 msgstr "Kırk ikinci satır"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1304
+#: scripts/autoload/game_data/GameDataModes.gd:1331
 msgid "Your guild writes one more line under the forty-first, in Hesper's hand, because hers is the only one the Terms accept: the posts are held in turns. Every guild in the Hall of Guilds sends someone down for a season, and they come back. The forty in the pillars walk home, and the Hollow stays shut behind the ones who take their place. Nobody holds it alone any more.\n\n(Riftbreaks have ended, every champion of this guild is free, and the old Accord halls can be restored.)"
 msgstr "Loncan, kırk birincinin altına bir satır daha yazıyor, Hesper'ın el yazısıyla, çünkü Şartlar yalnızca onunkini kabul ediyor: nöbetler sırayla tutulacak. Loncalar Salonu'ndaki her lonca bir mevsim için aşağıya birini gönderir ve o kişi geri döner. Sütunlardaki kırk kişi eve yürür ve onların yerini alanların ardında Oyuk kapalı kalır. Artık kimse onu tek başına tutmuyor.\n\n(Yarık Taşmaları sona erdi, bu loncanın her şampiyonu özgür ve eski Ahit salonları yeniden açılabilir.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1310
+#: scripts/autoload/game_data/GameDataModes.gd:1337
 msgid "There is a third way. Hesper's forty-second line is open: rewrite the Terms, and the posts are held in turns."
 msgstr "Üçüncü bir yol var. Hesper'ın kırk ikinci satırı açık: Şartları yeniden yaz, nöbetler sırayla tutulsun."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1315
+#: scripts/autoload/game_data/GameDataModes.gd:1342
 msgid "A note in the margin"
 msgstr "Kenarda bir not"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1316
+#: scripts/autoload/game_data/GameDataModes.gd:1343
 msgid "Wen finds it while copying the last page: a line in the margin, in a smaller, neater hand than the Grandmaster's. \"If a guild ever has to choose, there is a forty-second line. Ask the clerk.\" Wen asks Hesper who the Grandmaster's clerk was. Hesper says she is tired, and goes to bed before the fire is out."
 msgstr "Wen son sayfayı kopyalarken buluyor: kenarda, Büyük Üstat'ınkinden daha küçük ve düzgün bir el yazısıyla bir satır. \"Bir lonca bir gün seçmek zorunda kalırsa, kırk ikinci bir satır var. Kâtibe sor.\" Wen, Büyük Üstat'ın kâtibinin kim olduğunu Hesper'a soruyor. Hesper yorgun olduğunu söylüyor ve ateş sönmeden yatmaya gidiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1317 scripts/autoload/game_data/GameDataModes.gd:1319
+#: scripts/autoload/game_data/GameDataModes.gd:1344 scripts/autoload/game_data/GameDataModes.gd:1346
 msgid "Hesper, at the pay table"
 msgstr "Hesper, maaş masasında"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1318
+#: scripts/autoload/game_data/GameDataModes.gd:1345
 msgid "\"I was the clerk,\" Hesper says, as if Wen had asked a minute ago and not a guild ago. \"I wrote her letters and her contracts, and I wrote the Terms out fair: forty-one lines. The night they were signed, she sent me home with a note that said I had a fever. I kept the note.\" She puts it on the table. It is in her own hand. \"I never told %s. I'm telling you.\""
 msgstr "\"Kâtip bendim,\" diyor Hesper, sanki Wen bir lonca önce değil de bir dakika önce sormuş gibi. \"Mektuplarını ve sözleşmelerini ben yazdım, Şartların temiz kopyasını da ben yazdım: kırk bir satır. İmzalandıkları gece beni ateşim olduğunu söyleyen bir notla eve gönderdi. Notu sakladım.\" Notu masaya koyuyor. Kendi el yazısıyla. \"Bunu hiç söylemedim; %s bile bilmiyordu. Sana söylüyorum.\""
 
-#: scripts/autoload/game_data/GameDataModes.gd:1320
+#: scripts/autoload/game_data/GameDataModes.gd:1347
 msgid "\"There was a line under the forty-first,\" Hesper says. \"She made me leave it blank. It says the Terms can be changed, once, by a guild that has both kept them and broken them, and a guild is everyone who came before it. %s kept them. %s burned them. When you stand in the Accord Hall, you won't have to choose between the two. Write the forty-second line.\""
 msgstr "\"Kırk birincinin altında bir satır vardı,\" diyor Hesper. \"Boş bırakmamı istedi. Şartların, onlara hem bağlı kalmış hem de onları bozmuş bir lonca tarafından bir kez değiştirilebileceğini söylüyor; bir lonca da kendinden önce gelen herkestir. %s onlara bağlı kaldı. %s onları yaktı. Ahit Salonu'nda durduğunda ikisi arasında seçim yapmak zorunda kalmayacaksın. Kırk ikinci satırı yaz.\""
 
-#: scripts/autoload/game_data/GameDataModes.gd:1321
+#: scripts/autoload/game_data/GameDataModes.gd:1348
 msgid "\"There was a line under the forty-first,\" Hesper says. \"She made me leave it blank. It says the Terms can be changed, once, by a guild that has both kept them and broken them, and a guild is everyone who came before it. None of ours has done both yet. When one has, the line will be waiting.\""
 msgstr "\"Kırk birincinin altında bir satır vardı,\" diyor Hesper. \"Boş bırakmamı istedi. Şartların, onlara hem bağlı kalmış hem de onları bozmuş bir lonca tarafından bir kez değiştirilebileceğini söylüyor; bir lonca da kendinden önce gelen herkestir. Bizimkilerden hiçbiri henüz ikisini birden yapmadı. Biri yaptığında, satır bekliyor olacak.\""
 
-#: scripts/autoload/game_data/GameDataModes.gd:1324
+#: scripts/autoload/game_data/GameDataModes.gd:1351
 msgid "Your guild signed the Terms. %s took the forty-first post, and the Hollow stays below. The rifts that remain are old ones, and quiet."
 msgstr "Loncan Şartları imzaladı. Kırk birinci nöbeti %s devraldı ve Oyuk aşağıda kalıyor. Geriye kalan yarıklar eski ve sessiz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1325
+#: scripts/autoload/game_data/GameDataModes.gd:1352
 msgid "The Terms burned"
 msgstr "Şartlar yandı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1325
+#: scripts/autoload/game_data/GameDataModes.gd:1352
 msgid "Your guild burned the Terms. Every post was released, the old guilds came home, and the Hollow came up with them. The rifts are louder now, and nobody holds them shut but the guilds."
 msgstr "Loncan Şartları yaktı. Bütün nöbetler serbest kaldı, eski loncalar eve döndü ve Oyuk da onlarla birlikte yükseldi. Yarıklar artık daha gürültülü ve onları loncalardan başka kimse kapalı tutmuyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1326
+#: scripts/autoload/game_data/GameDataModes.gd:1353
 msgid "Your guild rewrote the Terms. The posts are held in turns now, a season at a time, by every guild that ever kept the Vale. The champions came home, and the Hollow stayed below."
 msgstr "Loncan Şartları yeniden yazdı. Nöbetler artık, Vadi'yi bir zamanlar korumuş her lonca tarafından, birer mevsim sırayla tutuluyor. Şampiyonlar eve döndü ve Oyuk aşağıda kaldı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1336
+#: scripts/autoload/game_data/GameDataModes.gd:1363
 msgid "A Child's Name"
 msgstr "Bir Çocuğun Adı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1336
+#: scripts/autoload/game_data/GameDataModes.gd:1363
 msgid "This Essence will not settle. It keeps the shape of a word. The miller's wife in Hollin heard about it and walked here in the rain: her son went into the Breach on the Night of Breaking, and she cannot remember what she called him."
 msgstr "Bu Öz bir türlü durulmuyor. Bir kelimenin biçimini koruyor. Hollin'deki değirmencinin karısı bunu duymuş ve yağmurda yürüyerek buraya gelmiş: oğlu Kırılma Gecesi Gedik'e girmiş ve ona ne ad verdiğini hatırlayamıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1337
+#: scripts/autoload/game_data/GameDataModes.gd:1364
 msgid "She holds the crystal to her ear, then says the name out loud, twice, as if checking it still fits. She does not thank you. She does not need to."
 msgstr "Kristali kulağına tutuyor, sonra adı iki kez yüksek sesle söylüyor, hâlâ uyuyor mu diye bakar gibi. Sana teşekkür etmiyor. Gerek de yok."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1338
+#: scripts/autoload/game_data/GameDataModes.gd:1365
 msgid "A Street"
 msgstr "Bir Sokak"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1338
+#: scripts/autoload/game_data/GameDataModes.gd:1365
 msgid "The Essence from the last rift has a street in it: cobbles, a bakery, a blue door. A carter in the village swears it is the street he grew up on, in a town the Vale forgot."
 msgstr "Son yarıktan gelen Özün içinde bir sokak var: arnavut kaldırımı, bir fırın, mavi bir kapı. Köydeki bir arabacı, Vadi'nin unuttuğu bir kasabada büyüdüğü sokak olduğuna yemin ediyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1339
+#: scripts/autoload/game_data/GameDataModes.gd:1366
 msgid "He walks the street in his head all evening, door by door. In the morning he paints his own door blue."
 msgstr "Bütün akşam o sokağı kafasında kapı kapı yürüyor. Sabah kendi kapısını maviye boyuyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1340
+#: scripts/autoload/game_data/GameDataModes.gd:1367
 msgid "A Song"
 msgstr "Bir Şarkı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1340
+#: scripts/autoload/game_data/GameDataModes.gd:1367
 msgid "This Essence hums. The old women in the village know the tune and none of the words. The words were in the rift."
 msgstr "Bu Öz mırıldanıyor. Köyün yaşlı kadınları ezgiyi biliyor ama sözleri bilmiyor. Sözler yarıktaymış."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1341
+#: scripts/autoload/game_data/GameDataModes.gd:1368
 msgid "By nightfall the whole village is singing it, words and all, a little off-key. Wen writes them down."
 msgstr "Akşam olunca bütün köy onu söylüyor, sözleriyle birlikte, biraz falsolu. Wen sözleri yazıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1342
+#: scripts/autoload/game_data/GameDataModes.gd:1369
 msgid "A Face"
 msgstr "Bir Yüz"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1342
+#: scripts/autoload/game_data/GameDataModes.gd:1369
 msgid "There is a face in this crystal, young and stern, in an Accord ranger's green. The village elder asks to see it and goes very quiet."
 msgstr "Bu kristalde genç ve sert bakışlı bir yüz var, bir Ahit korucusunun yeşiliyle. Köyün yaşlısı görmek istiyor ve çok sessizleşiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1343
+#: scripts/autoload/game_data/GameDataModes.gd:1370
 msgid "'My sister,' the elder says. 'I had forgotten I had one.' The crystal goes home with them and sits in the window."
 msgstr "'Kız kardeşim,' diyor yaşlı. 'Bir kız kardeşim olduğunu unutmuşum.' Kristal onunla eve gidiyor ve pencerede duruyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1344
+#: scripts/autoload/game_data/GameDataModes.gd:1371
 msgid "A Recipe"
 msgstr "Bir Tarif"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1344
+#: scripts/autoload/game_data/GameDataModes.gd:1371
 msgid "This Essence smells of bread. The innkeeper says her grandmother's loaf tasted like this, before the Night took the recipe out of everyone's heads."
 msgstr "Bu Öz ekmek kokuyor. Hancı kadın, Gece tarifi herkesin aklından silmeden önce büyükannesinin ekmeğinin tam böyle olduğunu söylüyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1345
+#: scripts/autoload/game_data/GameDataModes.gd:1372
 msgid "The inn smells of it for a week. Your heroes eat there free for the rest of the month, and nobody counts."
 msgstr "Han bir hafta boyunca bu kokuyor. Kahramanların ay sonuna kadar orada bedava yiyor ve kimse saymıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1346
+#: scripts/autoload/game_data/GameDataModes.gd:1373
 msgid "An Oath"
 msgstr "Bir Yemin"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1346
+#: scripts/autoload/game_data/GameDataModes.gd:1373
 msgid "The words in this crystal are the Accord's oath, spoken in a voice nobody living remembers. Old Hesper asks to hold it."
 msgstr "Bu kristaldeki sözler Ahit'in yemini; yaşayan kimsenin hatırlamadığı bir sesle söylenmiş. Yaşlı Hesper onu tutmak istiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1347
+#: scripts/autoload/game_data/GameDataModes.gd:1374
 msgid "Hesper holds it a long time. 'That was the Grandmaster,' she says, 'before.' She gives it to the village shrine and does not speak of it again."
 msgstr "Hesper onu uzun süre tutuyor. 'Bu Büyük Üstat'tı,' diyor, 'eskiden.' Kristali köy tapınağına veriyor ve bir daha ondan söz etmiyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1354
+#: scripts/autoload/game_data/GameDataModes.gd:1381
 msgid "Hesper watches %s split the training post and keep swinging at the stump. 'The Path is choosing for you,' she says. 'You could let it.' They let it. Wen writes a new word under their name: %s."
 msgstr "Hesper, %s adlı kahramanın talim kazığını ikiye bölüp kütüğe vurmaya devam edişini izliyor. 'Yol senin için seçiyor,' diyor. 'Bırakabilirsin.' Bırakıyor. Wen adının altına yeni bir kelime yazıyor: %s."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1355
+#: scripts/autoload/game_data/GameDataModes.gd:1382
 msgid "%s used to be first into every rift and first out. This week they stayed behind to walk the slowest hero home. Hesper calls that the moment a Path forks. Wen writes the new word down: %s."
 msgstr "%s her yarığa ilk giren ve ilk çıkan olurdu. Bu hafta en yavaş kahramanı eve götürmek için geride kaldı. Hesper buna bir Yol'un ayrıldığı an diyor. Wen yeni kelimeyi yazıyor: %s."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1356
+#: scripts/autoload/game_data/GameDataModes.gd:1383
 msgid "%s says nothing about it at all. They turn up at the pay table one morning carrying themselves differently, and Hesper nods as if a debt has been paid. Wen asks what to write. Hesper says: %s."
 msgstr "%s bu konuda hiçbir şey söylemiyor. Bir sabah maaş masasına bambaşka bir duruşla geliyor ve Hesper bir borç ödenmiş gibi başını sallıyor. Wen ne yazacağını soruyor. Hesper diyor ki: %s."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1357
+#: scripts/autoload/game_data/GameDataModes.gd:1384
 msgid "%s didn't want it. The Essence settled anyway, the way rain settles on a roof. Hesper sits with them until dark. 'Nobody's ready,' she says. 'The good ones are scared.' Wen writes: %s."
 msgstr "%s bunu istemedi. Öz yine de yerleşti, yağmurun bir çatıya yerleşmesi gibi. Hesper hava kararana kadar yanında oturuyor. 'Kimse hazır değildir,' diyor. 'İyileri korkar.' Wen yazıyor: %s."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1358
+#: scripts/autoload/game_data/GameDataModes.gd:1385
 msgid "%s prays before every rift, and this time the answer came back as a shape. Hesper says the Vow always answers in its own time. Wen writes it in the chronicle in her best hand: %s."
 msgstr "%s her yarıktan önce dua eder ve bu sefer cevap bir biçim olarak geldi. Hesper, Yemin'in hep kendi zamanında cevap verdiğini söylüyor. Wen tarihçeye en güzel el yazısıyla yazıyor: %s."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1359
+#: scripts/autoload/game_data/GameDataModes.gd:1386
 msgid "%s has been taking notes on their own Essence for weeks. The notes end mid-sentence on the day it settled. Wen copies the last line into the chronicle and adds the new word: %s."
 msgstr "%s haftalardır kendi Özü hakkında not tutuyordu. Notlar, Özün yerleştiği gün bir cümlenin ortasında bitiyor. Wen son satırı tarihçeye geçiriyor ve yeni kelimeyi ekliyor: %s."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1370
+#: scripts/autoload/game_data/GameDataModes.gd:1397
 msgid "Mother Ilse's page"
 msgstr "Ilse Ana'nın sayfası"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1371
+#: scripts/autoload/game_data/GameDataModes.gd:1398
 msgid "Mother Ilse of the Last Lantern finds you after dark with a page torn from the Hollow Crown Company's books: a list of rifts, each with a date, a price, and the word opened. Captain Morrow has been opening rifts and selling the contracts to close them.\n\nShe will give it to the Crown's herald if you ask. Or the Company will pay well for a guild that keeps quiet, and its contracts would come to you."
 msgstr "Son Fener'den Ilse Ana hava karardıktan sonra seni buluyor; elinde Oyuk Taç Bölüğü'nün defterlerinden koparılmış bir sayfa var: her biri bir tarih, bir fiyat ve 'açıldı' kelimesiyle yazılmış bir yarık listesi. Yüzbaşı Morrow yarıklar açıp onları kapatma sözleşmelerini satıyormuş.\n\nİstersen sayfayı Taç'ın tellalına verecek. Ya da Bölük, sessiz kalan bir loncaya iyi para öder ve sözleşmeleri sana gelir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1374
+#: scripts/autoload/game_data/GameDataModes.gd:1401
 msgid "The Company exposed"
 msgstr "Bölük ifşa edildi"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1375
+#: scripts/autoload/game_data/GameDataModes.gd:1402
 msgid "The herald reads Morrow's page aloud in the square. By evening the Hollow Crown Company's banners are down in three villages. By morning a rift has opened on the road to your camp, which is how you know the page was real.\n\n(+10 Renown. A Riftbreak is coming to your door.)"
 msgstr "Tellal, Morrow'un sayfasını meydanda yüksek sesle okuyor. Akşama kadar Oyuk Taç Bölüğü'nün sancakları üç köyde indiriliyor. Sabah kampına giden yolda bir yarık açılmış oluyor; sayfanın gerçek olduğunu böyle anlıyorsun.\n\n(+10 Ün. Kapına bir Yarık Taşması geliyor.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1376
+#: scripts/autoload/game_data/GameDataModes.gd:1403
 msgid "A quiet arrangement"
 msgstr "Sessiz bir anlaşma"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1377
+#: scripts/autoload/game_data/GameDataModes.gd:1404
 msgid "Morrow's contracts start arriving on your board, generous ones. Hesper reads the first, folds it, and doesn't say anything. She doesn't have to.\n\n(Contracts pay 25% more Gold for the rest of the campaign.)"
 msgstr "Morrow'un sözleşmeleri panona gelmeye başlıyor, cömert sözleşmeler. Hesper ilkini okuyor, katlıyor ve hiçbir şey söylemiyor. Söylemesine gerek yok.\n\n(Sözleşmeler seferin geri kalanında %25 daha fazla Altın öder.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1382
+#: scripts/autoload/game_data/GameDataModes.gd:1409
 msgid "The Royal Charter is yours"
 msgstr "Kraliyet Beratı senin"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1383
+#: scripts/autoload/game_data/GameDataModes.gd:1410
 msgid "The herald reads one name, and it is yours. Orla Venn is the first to shake your hand; Kael Ashborn asks for a job; Mother Ilse is already gone, which is how you know she was pleased. The Charter hangs in your hall, and the villages bring their troubles to a door they know.\n\n(Contracts pay 20% more Gold and Essence.)"
 msgstr "Tellal tek bir isim okuyor ve o isim senin. Elini ilk sıkan Orla Venn oluyor; Kael Ashborn iş istiyor; Ilse Ana çoktan gitmiş, memnun kaldığını da buradan anlıyorsun. Berat salonunda asılı duruyor ve köyler dertlerini bildikleri bir kapıya getiriyor.\n\n(Sözleşmeler %20 daha fazla Altın ve Öz öder.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1384
+#: scripts/autoload/game_data/GameDataModes.gd:1411
 msgid "The Charter goes to %s"
 msgstr "Berat %s loncasına gidiyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1385
+#: scripts/autoload/game_data/GameDataModes.gd:1412
 msgid "The herald reads a name, and it isn't yours. %s hangs the Royal Charter in their hall. The rifts don't care whose name is on the wall. Neither, in the end, do the villagers, as long as somebody comes."
 msgstr "Tellal bir isim okuyor ve o isim senin değil. Kraliyet Beratı'nı salonuna %s asıyor. Duvarda kimin adının yazdığı yarıkların umurunda değil. Sonunda köylülerin de değil; yeter ki biri gelsin."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1391
+#: scripts/autoload/game_data/GameDataModes.gd:1418
 msgid "%s and %s have stopped needing to talk in a fight. Wen noticed first. She has started writing their names in the chronicle as one entry, with an ampersand, and neither of them has complained."
 msgstr "%s ve %s artık dövüşte konuşmaya ihtiyaç duymuyor. Önce Wen fark etti. Tarihçede adlarını tek bir kayıt olarak, araya bir 've' işaretiyle yazmaya başladı ve ikisi de şikâyet etmedi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1392
+#: scripts/autoload/game_data/GameDataModes.gd:1419
 msgid "%s and %s sat up past the last candle arguing about a fight they won. Dobbs charged the guild for the candle. Hesper paid it herself and told him to let them be."
 msgstr "%s ve %s, kazandıkları bir dövüşü tartışarak son mum sönene kadar oturdu. Dobbs mumun parasını loncaya yazdı. Hesper parayı kendisi ödedi ve onlara dokunmamasını söyledi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1393
+#: scripts/autoload/game_data/GameDataModes.gd:1420
 msgid "Ten rifts together. %s still can't say %s's full name right, and %s still lets it go. Wen has written down both versions."
 msgstr "Birlikte on yarık. %s, %s adlı arkadaşının tam adını hâlâ doğru söyleyemiyor; %s de hâlâ ses etmiyor. Wen iki söylenişi de yazdı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1394
+#: scripts/autoload/game_data/GameDataModes.gd:1421
 msgid "%s took a hit meant for %s last week and has refused to talk about it since. Wen has written it down anyway. Hesper says that's how the old guilds started."
 msgstr "%s geçen hafta %s için gelen bir darbeyi üstlendi ve o günden beri bunun hakkında konuşmayı reddediyor. Wen yine de yazdı. Hesper eski loncaların da böyle başladığını söylüyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1398
+#: scripts/autoload/game_data/GameDataModes.gd:1425
 msgid "%s went first into every rift. Somebody had to."
 msgstr "%s her yarığa ilk girendi. Birinin girmesi gerekiyordu."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1398
+#: scripts/autoload/game_data/GameDataModes.gd:1425
 msgid "%s never once asked how deep a rift went before stepping in."
 msgstr "%s içeri adım atmadan önce bir yarığın ne kadar derin olduğunu bir kez bile sormadı."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1399
+#: scripts/autoload/game_data/GameDataModes.gd:1426
 msgid "%s was always first out of the rift, and always went back for whoever wasn't."
 msgstr "%s yarıktan hep ilk çıkardı ve çıkamayanlar için hep geri dönerdi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1399
+#: scripts/autoload/game_data/GameDataModes.gd:1426
 msgid "%s never sat still at the pay table. The chair is still pushed back."
 msgstr "%s maaş masasında hiç yerinde duramazdı. Sandalyesi hâlâ geride duruyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1400
+#: scripts/autoload/game_data/GameDataModes.gd:1427
 msgid "%s said very little and meant all of it."
 msgstr "%s çok az konuşurdu ve söylediği her şeyi kastederdi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1400
+#: scripts/autoload/game_data/GameDataModes.gd:1427
 msgid "%s held the line. That is the whole entry, and it is enough."
 msgstr "%s hattı tuttu. Kaydın tamamı bu ve yeterli."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1401
+#: scripts/autoload/game_data/GameDataModes.gd:1428
 msgid "%s was afraid of every rift and walked into all of them."
 msgstr "%s her yarıktan korkardı ve hepsine girdi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1401
+#: scripts/autoload/game_data/GameDataModes.gd:1428
 msgid "%s checked every strap twice. It wasn't the straps."
 msgstr "%s her kayışı iki kez kontrol ederdi. Sorun kayışlar değildi."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1402
+#: scripts/autoload/game_data/GameDataModes.gd:1429
 msgid "%s prayed before every rift. We hope someone answered."
 msgstr "%s her yarıktan önce dua ederdi. Umarız biri cevap vermiştir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1402
+#: scripts/autoload/game_data/GameDataModes.gd:1429
 msgid "%s kept the candles lit in the hall. We have kept them lit since."
 msgstr "%s salondaki mumları yanık tutardı. O günden beri biz yanık tutuyoruz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1403
+#: scripts/autoload/game_data/GameDataModes.gd:1430
 msgid "%s left a notebook full of questions. Wen is working through them."
 msgstr "%s sorularla dolu bir defter bıraktı. Wen onlar üzerinde çalışıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1403
+#: scripts/autoload/game_data/GameDataModes.gd:1430
 msgid "%s understood the Hollow better than any of us, and went to see it anyway."
 msgstr "%s Oyuk'u hepimizden iyi anlıyordu ve yine de görmeye gitti."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1413
+#: scripts/autoload/game_data/GameDataModes.gd:1440
 msgid "Company Ambush"
 msgstr "Bölük Pususu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1414
+#: scripts/autoload/game_data/GameDataModes.gd:1441
 msgid "Morrow's sellswords, sent to settle a debt. The crossbowman snipes from the back; close on him first."
 msgstr "Morrow'un paralı askerleri, bir hesabı kapatmaya gönderilmiş. Arbaletçi arkadan nişan alır; önce ona yaklaş."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1415 scripts/autoload/game_data/GameDataMonsters.gd:419
+#: scripts/autoload/game_data/GameDataModes.gd:1442 scripts/autoload/game_data/GameDataMonsters.gd:419
 msgid "Company Sellsword"
 msgstr "Bölük Paralı Askeri"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1416
+#: scripts/autoload/game_data/GameDataModes.gd:1443
 msgid "Captain Morrow, of the Hollow Crown"
 msgstr "Yüzbaşı Morrow, Oyuk Taç'tan"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1418
+#: scripts/autoload/game_data/GameDataModes.gd:1445
 msgid "Morrow is waiting"
 msgstr "Morrow bekliyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1418
+#: scripts/autoload/game_data/GameDataModes.gd:1445
 msgid "Word comes as you set out: Captain Morrow is at the bottom of this rift, and he has brought friends."
 msgstr "Yola çıkarken haber geliyor: Yüzbaşı Morrow bu yarığın dibinde ve yanında dostlarını da getirmiş."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1419
+#: scripts/autoload/game_data/GameDataModes.gd:1446
 msgid "Morrow's key"
 msgstr "Morrow'un anahtarı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1420
+#: scripts/autoload/game_data/GameDataModes.gd:1447
 msgid "Morrow goes down laughing, which is somehow worse. On his belt hangs an old iron key with the Accord's sigil: the key Pip swears she stole from a rift-lord, and the one he has been opening rifts with. By the end of the week the Company's banners are gone from the Vale.\n\n(+300 Gold, +10 Renown. No more Company ambushes.)"
 msgstr "Morrow gülerek yere düşüyor, ki bu bir şekilde daha kötü. Kemerinde Ahit'in mührünü taşıyan eski bir demir anahtar asılı: Pip'in bir yarık efendisinden çaldığına yemin ettiği anahtar ve Morrow'un yarıkları açtığı anahtar. Hafta bitmeden Bölük'ün sancakları Vadi'den kalkıyor.\n\n(+300 Altın, +10 Ün. Artık Bölük pusuları yok.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1429
+#: scripts/autoload/game_data/GameDataModes.gd:1456
 msgid "a child's name"
 msgstr "bir çocuğun adı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1429
+#: scripts/autoload/game_data/GameDataModes.gd:1456
 msgid "a street with a blue door"
 msgstr "mavi kapılı bir sokak"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1429
+#: scripts/autoload/game_data/GameDataModes.gd:1456
 msgid "a song"
 msgstr "bir şarkı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1430
+#: scripts/autoload/game_data/GameDataModes.gd:1457
 msgid "a young ranger's face"
 msgstr "genç bir korucunun yüzü"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1430
+#: scripts/autoload/game_data/GameDataModes.gd:1457
 msgid "the smell of bread"
 msgstr "ekmek kokusu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1430
+#: scripts/autoload/game_data/GameDataModes.gd:1457
 msgid "the Accord's oath"
 msgstr "Ahit'in yemini"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1431
+#: scripts/autoload/game_data/GameDataModes.gd:1458
 msgid "%s remembers"
 msgstr "%s hatırlıyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1431
+#: scripts/autoload/game_data/GameDataModes.gd:1458
 msgid "An echo, kept"
 msgstr "Saklanan bir yankı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1432
+#: scripts/autoload/game_data/GameDataModes.gd:1459
 msgid "%s has been quiet since you kept the echo. There was %s in it, and %s knew it, from a life they don't remember living.\n\n(%s is Echo-Touched: +6%% ability power.)"
 msgstr "%s, yankıyı sakladığından beri sessiz. İçinde %s vardı ve %s onu tanıdı; yaşadığını hatırlamadığı bir hayattan.\n\n(%s artık Yankı Dokunmuş: +%%6 yetenek gücü.)"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1434 scripts/autoload/game_data/GameDataModes.gd:1436
+#: scripts/autoload/game_data/GameDataModes.gd:1461 scripts/autoload/game_data/GameDataModes.gd:1463
 msgid "Ezra the Pale"
 msgstr "Solgun Ezra"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1435
+#: scripts/autoload/game_data/GameDataModes.gd:1462
 msgid "A pale man with a lantern has been following the echoes. Ezra studies what the rifts take from people, and he keeps a little of it in the lantern, for safekeeping. He asks what you did with yours. When you tell him, he bows, which nobody in the Vale has seen him do."
 msgstr "Elinde bir fenerle solgun bir adam yankıların izini sürüyor. Ezra yarıkların insanlardan aldıklarını inceliyor ve bir kısmını, korumak için fenerinde saklıyor. Seninkileri ne yaptığını soruyor. Anlattığında eğiliyor; Vadi'de kimse onun eğildiğini görmemişti."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1437
+#: scripts/autoload/game_data/GameDataModes.gd:1464
 msgid "A pale man with a lantern has been following the echoes. Ezra studies what the rifts take from people. He asks to see your vault, goes very still, and asks how much of it you have spent, and on what, and whether you kept a list. 'It was yours to spend,' he says at the door. 'I hope it was worth what it cost them.'"
 msgstr "Elinde bir fenerle solgun bir adam yankıların izini sürüyor. Ezra yarıkların insanlardan aldıklarını inceliyor. Kasanı görmek istiyor, kıpırtısız kalıyor ve ne kadarını, neye harcadığını, bir liste tutup tutmadığını soruyor. 'Harcamak senin hakkındı,' diyor kapıda. 'Umarım onlara mal olduğuna değmiştir.'"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1440 scripts/autoload/game_data/GameDataModes.gd:1442
+#: scripts/autoload/game_data/GameDataModes.gd:1467 scripts/autoload/game_data/GameDataModes.gd:1469
 msgid "What the Vale remembers"
 msgstr "Vadi'nin hatırladıkları"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1441
+#: scripts/autoload/game_data/GameDataModes.gd:1468
 msgid "In the weeks after, people stop in the street and say names out loud. A song nobody knew is sung at every harvest. The empty guild halls fill with flowers, and yours gets the most, from people who never met you."
 msgstr "Sonraki haftalarda insanlar sokakta durup isimleri yüksek sesle söylüyor. Kimsenin bilmediği bir şarkı her hasatta söyleniyor. Boş lonca salonları çiçeklerle doluyor ve en çok çiçek, seni hiç tanımamış insanlardan seninkine geliyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1443
+#: scripts/autoload/game_data/GameDataModes.gd:1470
 msgid "Something leaves the Vale with the last of the rifts, quietly, and nobody can say what. Your guild is the strongest the Vale has ever had. Ezra's lantern is found on your doorstep one morning, empty, with no note."
 msgstr "Son yarıklarla birlikte Vadi'den sessizce bir şey ayrılıyor ve kimse ne olduğunu söyleyemiyor. Loncan Vadi'nin gördüğü en güçlü lonca. Bir sabah Ezra'nın feneri kapının önünde bulunuyor; boş ve notsuz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1447
+#: scripts/autoload/game_data/GameDataModes.gd:1474
 msgid "Wen asks %s for a line for the chronicle: something learned in fifty rifts. %s thinks about it for a long time. 'Bring more bandages than you think,' they say. Wen writes it down exactly."
 msgstr "Wen, tarihçe için %s adlı kahramandan bir satır istiyor: elli yarıkta öğrenilmiş bir şey. %s uzun süre düşünüyor. 'Düşündüğünden fazla sargı bezi götür,' diyor. Wen bunu kelimesi kelimesine yazıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1448
+#: scripts/autoload/game_data/GameDataModes.gd:1475
 msgid "Fifty rifts. Dobbs works out what %s has cost the guild in wages and what they have brought home, then quietly tears up the page. Wen asks why. 'Some sums you don't show anyone,' says Dobbs. %s pretends not to hear."
 msgstr "Elli yarık. Dobbs, %s adlı kahramanın loncaya maaş olarak neye mal olduğunu ve eve ne getirdiğini hesaplıyor, sonra sessizce sayfayı yırtıyor. Wen nedenini soruyor. 'Bazı hesapları kimseye göstermezsin,' diyor Dobbs. %s duymamış gibi yapıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1449
+#: scripts/autoload/game_data/GameDataModes.gd:1476
 msgid "Hesper gives %s her old Accord pin for their fiftieth rift. It is bent and tarnished and nobody has ever seen her take it off. %s wears it on the inside of their coat."
 msgstr "Hesper, ellinci yarığı için %s adlı kahramana eski Ahit iğnesini veriyor. İğne eğri ve kararmış, kimse onu çıkardığını görmemişti. %s onu paltosunun içine takıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1457
+#: scripts/autoload/game_data/GameDataModes.gd:1484
 msgid "Free Company"
 msgstr "Özgür Bölük"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1457
+#: scripts/autoload/game_data/GameDataModes.gd:1484
 msgid "As the Vale knows guilds: three heroes and 280 Gold."
 msgstr "Vadi'nin bildiği loncalar gibi: üç kahraman ve 280 Altın."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1458
+#: scripts/autoload/game_data/GameDataModes.gd:1485
 msgid "Mercenary Company"
 msgstr "Paralı Asker Bölüğü"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1459
+#: scripts/autoload/game_data/GameDataModes.gd:1486
 msgid "Hired swords: start with 320 more Gold. Contracts pay 20% more Gold, wages are 15% higher, and Renown comes 20% slower. The Hollow Crown Company will make you an offer."
 msgstr "Kiralık kılıçlar: 320 Altın fazlasıyla başla. Sözleşmeler %20 daha fazla Altın öder, maaşlar %15 daha yüksektir ve Ün %20 daha yavaş gelir. Oyuk Taç Bölüğü sana bir teklif yapacak."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1460
+#: scripts/autoload/game_data/GameDataModes.gd:1487
 msgid "Temple Order"
 msgstr "Tapınak Tarikatı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1461
+#: scripts/autoload/game_data/GameDataModes.gd:1488
 msgid "Sworn to mend: start with 80 less Gold. Wages are 20% lower and downed heroes are back a run sooner. An echo given back earns twice the Renown; one kept, half the Essence."
 msgstr "İyileştirmeye yeminli: 80 Altın eksiğiyle başla. Maaşlar %20 daha düşüktür ve düşen kahramanlar bir sefer erken döner. Geri verilen bir yankı iki kat Ün kazandırır; saklanan bir yankı yarı Öz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1462
+#: scripts/autoload/game_data/GameDataModes.gd:1489
 msgid "The Lantern's Smugglers"
 msgstr "Fener'in Kaçakçıları"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1463
+#: scripts/autoload/game_data/GameDataModes.gd:1490
 msgid "Mother Ilse's people: start with 350 Gold. Shop prices are 25% lower, the Last Lantern is never your rival, and keeping quiet in the Charter War pays 40% more Gold instead of 25%."
 msgstr "Ana Ilse'nin adamları: 350 Altınla başla. Dükkân fiyatları %25 daha düşüktür, Son Fener asla rakibin olmaz ve Berat Savaşı'nda sessiz kalmak %25 yerine %40 daha fazla Altın öder."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1464
+#: scripts/autoload/game_data/GameDataModes.gd:1491
 msgid "Vaelith's Rangers"
 msgstr "Vaelith'in Korucuları"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1465
+#: scripts/autoload/game_data/GameDataModes.gd:1492
 msgid "Deserters' wages: start with 100 less Gold. Every recruit board holds a ranger, rangers deal 10% more damage, and Riftbreaks warn you a day earlier. The Iron Chorus won't compete with deserters."
 msgstr "Kaçakların maaşı: 100 Altın eksiğiyle başla. Her acemi panosunda bir korucu olur, korucular %10 daha fazla hasar verir ve Yarık Taşmaları seni bir gün erken uyarır. Demir Koro kaçaklarla yarışmaz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1466
+#: scripts/autoload/game_data/GameDataModes.gd:1493
 msgid "The Ninth Lamp"
 msgstr "Dokuzuncu Lamba"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1467
+#: scripts/autoload/game_data/GameDataModes.gd:1494
 msgid "Keepers of the sky: Essence gains are 20% lower, but every seal earns 1 more Renown, echoes turn up twice as often and every kept echo touches a hero, and the Arcane Lab starts at level 1."
 msgstr "Gökyüzünün bekçileri: Öz kazancı %20 daha az, ama her mühür 1 Ün fazla kazandırır, yankılar iki kat sık çıkar ve saklanan her yankı bir kahramana dokunur; Gizem Laboratuvarı 1. seviyede başlar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1468
+#: scripts/autoload/game_data/GameDataModes.gd:1495
 msgid "Last of the Accord"
 msgstr "Ahit'in Sonuncusu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1469
+#: scripts/autoload/game_data/GameDataModes.gd:1496
 msgid "Old Hesper's own guild: the Grandmaster's ledger pages turn up twice as often, but the Hollow knows you, and Riftbreaks come a day sooner."
 msgstr "Yaşlı Hesper'in kendi loncası: Büyük Üstat'ın defter sayfaları iki kat sık çıkar, ama Oyuk seni tanır ve Yarık Taşmaları bir gün erken gelir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1472
+#: scripts/autoload/game_data/GameDataModes.gd:1499
 msgid "Kept quiet in a Charter War"
 msgstr "Bir Berat Savaşı'nda sessiz kal"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1472
+#: scripts/autoload/game_data/GameDataModes.gd:1499
 msgid "Finish a campaign"
 msgstr "Bir seferi bitir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1474
+#: scripts/autoload/game_data/GameDataModes.gd:1501
 msgid "Old Hesper remembers"
 msgstr "Yaşlı Hesper hatırlıyor"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1475
+#: scripts/autoload/game_data/GameDataModes.gd:1502
 msgid "Hesper had a fever on the Night of Breaking and missed it. Every other guild of the Accord went into the rifts that night, hers too, and none came back. Twenty years on she has a hall again, three recruits, and the old oath: close what opens, share what you find, never sell a rift. She means to keep it this time."
 msgstr "Hesper Kırılma Gecesi ateşler içindeydi ve geceyi kaçırdı. O gece Ahit'in bütün loncaları yarıklara girdi, onunki de, ve hiçbiri geri dönmedi. Yirmi yıl sonra yine bir salonu, üç acemisi ve eski yemini var: açılanı kapat, bulduğunu paylaş, asla yarık satma. Bu sefer onu tutmaya niyetli."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1477
+#: scripts/autoload/game_data/GameDataModes.gd:1504
 msgid "An offer from the Company"
 msgstr "Bölük'ten bir teklif"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1478
+#: scripts/autoload/game_data/GameDataModes.gd:1505
 msgid "Captain Morrow sends a man with a ledger and a good coat. The Hollow Crown Company would take your contracts off your hands, and your guild with them, at a fair price. He leaves the paper on the table. Nobody signs it. Dobbs reads it twice."
 msgstr "Yüzbaşı Morrow, elinde defter, sırtında iyi bir palto olan bir adam gönderiyor. Oyuk Taç Bölüğü sözleşmelerini, onlarla birlikte de loncanı, adil bir fiyata almak istiyor. Adam kâğıdı masaya bırakıp gidiyor. Kimse imzalamıyor. Dobbs iki kez okuyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1484
+#: scripts/autoload/game_data/GameDataModes.gd:1511
 msgid "Never Sell a Rift"
 msgstr "Asla Yarık Satma"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1484
+#: scripts/autoload/game_data/GameDataModes.gd:1511
 msgid "The Accord's own rule: in the Charter War, keeping quiet is not an option."
 msgstr "Ahit'in kendi kuralı: Berat Savaşı'nda sessiz kalmak bir seçenek değil."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1485
+#: scripts/autoload/game_data/GameDataModes.gd:1512
 msgid "By Hand"
 msgstr "Elle"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1485
+#: scripts/autoload/game_data/GameDataModes.gd:1512
 msgid "No Quick fight: every fight is played, or set to Auto."
 msgstr "Hızlı dövüş yok: her dövüş oynanır ya da Oto'ya bırakılır."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1486
+#: scripts/autoload/game_data/GameDataModes.gd:1513
 msgid "Lean Purse"
 msgstr "Zayıf Kese"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1486
+#: scripts/autoload/game_data/GameDataModes.gd:1513
 msgid "Wages are 50% higher."
 msgstr "Maaşlar %50 daha yüksek."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1487
+#: scripts/autoload/game_data/GameDataModes.gd:1514
 msgid "No Rest"
 msgstr "Dinlenme Yok"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1487
+#: scripts/autoload/game_data/GameDataModes.gd:1514
 msgid "Medical Bay beds don't speed recovery."
 msgstr "Revir yatakları iyileşmeyi hızlandırmaz."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1488
+#: scripts/autoload/game_data/GameDataModes.gd:1515
 msgid "Hollow-Touched"
 msgstr "Oyuk Dokunmuş"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1488
+#: scripts/autoload/game_data/GameDataModes.gd:1515
 msgid "Every foe has 15% more health."
 msgstr "Her düşmanın canı %15 daha fazla."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1489
+#: scripts/autoload/game_data/GameDataModes.gd:1516
 msgid "The Long Watch"
 msgstr "Uzun Nöbet"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1489
+#: scripts/autoload/game_data/GameDataModes.gd:1516
 msgid "Riftbreaks come twice as often."
 msgstr "Yarık Taşmaları iki kat sık gelir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1490
+#: scripts/autoload/game_data/GameDataModes.gd:1517
 msgid "Sworn to the Ledger"
 msgstr "Deftere Yeminli"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1490
+#: scripts/autoload/game_data/GameDataModes.gd:1517
 msgid "Fragments of the Vale's story turn up twice as often, and every story branch costs half again as much."
 msgstr "Vadi'nin hikâyesinin parçaları iki kat sık çıkar ve her hikâye dalı yarısı kadar daha pahalıya gelir."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1499
+#: scripts/autoload/game_data/GameDataModes.gd:1526
 msgid "Hall of the Iron Oath"
 msgstr "Demir Yemin Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1499
+#: scripts/autoload/game_data/GameDataModes.gd:1526
 msgid "+1 hero slot"
 msgstr "+1 kahraman yuvası"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1500
+#: scripts/autoload/game_data/GameDataModes.gd:1527
 msgid "The Iron Oath trained shield-walls. Their drill yard is still marked out in white stones, and Hesper walks it once, end to end, before she lets the recruits in."
 msgstr "Demir Yemin kalkan duvarları yetiştirirdi. Talim alanları hâlâ beyaz taşlarla çizili; Hesper acemileri içeri almadan önce alanı baştan sona bir kez yürüyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1501
+#: scripts/autoload/game_data/GameDataModes.gd:1528
 msgid "Hall of the Green Hand"
 msgstr "Yeşil El Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1501
+#: scripts/autoload/game_data/GameDataModes.gd:1528
 msgid "+1 Medical Bay bed"
 msgstr "+1 Revir yatağı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1502
+#: scripts/autoload/game_data/GameDataModes.gd:1529
 msgid "The Green Hand were healers. Their shelves still smell of feverfew. Wen finds a ledger of everyone they ever patched up, and reads names out loud for an hour."
 msgstr "Yeşil El şifacıydı. Rafları hâlâ papatya kokuyor. Wen, iyileştirdikleri herkesin yazılı olduğu bir defter buluyor ve bir saat boyunca isimleri yüksek sesle okuyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1503
+#: scripts/autoload/game_data/GameDataModes.gd:1530
 msgid "Hall of Quiet Coin"
 msgstr "Sessiz Sikke Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1503
+#: scripts/autoload/game_data/GameDataModes.gd:1530
 msgid "Contracts pay 10% more Gold"
 msgstr "Sözleşmeler %10 daha fazla Altın öder"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1504
+#: scripts/autoload/game_data/GameDataModes.gd:1531
 msgid "Quiet Coin kept the Accord's accounts. Dobbs is in their counting room before the dust settles, and comes out holding a pen like a holy relic."
 msgstr "Sessiz Sikke, Ahit'in hesaplarını tutardı. Dobbs, toz daha yatışmadan sayım odalarına giriyor ve elinde kutsal bir emanet gibi tuttuğu bir kalemle çıkıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1505
+#: scripts/autoload/game_data/GameDataModes.gd:1532
 msgid "Hall of the Ninth Lamp"
 msgstr "Dokuzuncu Lamba Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1505
+#: scripts/autoload/game_data/GameDataModes.gd:1532
 msgid "Contracts pay 10% more Essence"
 msgstr "Sözleşmeler %10 daha fazla Öz öder"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1506
+#: scripts/autoload/game_data/GameDataModes.gd:1533
 msgid "The Ninth Lamp studied Essence. Their lamps still hold a little of it, and light themselves when someone they would have liked walks in."
 msgstr "Dokuzuncu Lamba, Öz'ü incelerdi. Lambalarında hâlâ biraz Öz var ve sevecekleri biri içeri girince kendiliğinden yanıyorlar."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1507
+#: scripts/autoload/game_data/GameDataModes.gd:1534
 msgid "Hall of Long Roads"
 msgstr "Uzun Yollar Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1507
+#: scripts/autoload/game_data/GameDataModes.gd:1534
 msgid "Wages 10% lower"
 msgstr "Maaşlar %10 daha düşük"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1508
+#: scripts/autoload/game_data/GameDataModes.gd:1535
 msgid "Long Roads took in strays and taught them a trade. Word gets around: heroes ask to work for the guild that opened it again, and ask for less."
 msgstr "Uzun Yollar, kimsesizleri alıp onlara bir zanaat öğretirdi. Haber yayılıyor: kahramanlar salonu yeniden açan loncada çalışmak istiyor ve daha azına razı oluyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1509
+#: scripts/autoload/game_data/GameDataModes.gd:1536
 msgid "Hall of the Open Hand"
 msgstr "Açık El Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1509
+#: scripts/autoload/game_data/GameDataModes.gd:1536
 msgid "Shop prices 10% lower"
 msgstr "Dükkân fiyatları %10 daha düşük"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1510
+#: scripts/autoload/game_data/GameDataModes.gd:1537
 msgid "The Open Hand traded with every village in the Vale. The merchants remember the sign over the door, and start giving the guild their old prices."
 msgstr "Açık El, Vadi'deki her köyle ticaret yapardı. Tüccarlar kapının üstündeki tabelayı hatırlıyor ve loncaya eski fiyatlarını vermeye başlıyor."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1511
+#: scripts/autoload/game_data/GameDataModes.gd:1538
 msgid "The Grandmaster's Hall"
 msgstr "Büyük Üstat'ın Salonu"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1511
+#: scripts/autoload/game_data/GameDataModes.gd:1538
 msgid "The title Keepers of the Vale, and 20 Laurels"
 msgstr "Vadi'nin Bekçileri unvanı ve 20 Defne"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1512
+#: scripts/autoload/game_data/GameDataModes.gd:1539
 msgid "The last hall is the one the Accord was sworn in. Its doors open with the key Pip stole from Morrow. Inside is a long table, forty-one chairs, and one that someone has dusted every year. The Vale has its keepers again."
 msgstr "Son salon, Ahit'in yemin edildiği salon. Kapıları Pip'in Morrow'dan çaldığı anahtarla açılıyor. İçeride uzun bir masa, kırk bir sandalye ve birinin her yıl tozunu aldığı bir tanesi var. Vadi'nin yeniden bekçileri var."
 
-#: scripts/autoload/game_data/GameDataModes.gd:1522
+#: scripts/autoload/game_data/GameDataModes.gd:1549
 msgid "Chapel"
 msgstr "Şapel"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1522
+#: scripts/autoload/game_data/GameDataModes.gd:1549
 msgid "Standing heroes mend 6% of their max HP after every won fight; campfires restore 1 more Resolve"
 msgstr "Ayakta kalan kahramanlar kazanılan her dövüşten sonra azami Can'larının %6'sını iyileştirir; kamp ateşleri 1 Azim daha verir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1523 scripts/ui/GuildViews.gd:1273 scripts/ui/Main.gd:1200
+#: scripts/autoload/game_data/GameDataModes.gd:1550 scripts/ui/GuildViews.gd:1273 scripts/ui/Main.gd:1200
 msgid "Smithy"
 msgstr "Demirci Ocağı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1523 scripts/ui/BattleView.gd:1618 scripts/ui/RosterView.gd:967
+#: scripts/autoload/game_data/GameDataModes.gd:1550 scripts/ui/BattleView.gd:1618 scripts/ui/RosterView.gd:967
 msgid "Gear"
 msgstr "Teçhizat"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1523
+#: scripts/autoload/game_data/GameDataModes.gd:1550
 msgid "Tempering costs 25% less; combining three items keeps the best stat line of the three"
 msgstr "Tavlama %25 daha ucuz; üç eşyayı birleştirmek üçünün en iyi değer satırını korur"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1524 scripts/ui/Main.gd:1315
+#: scripts/autoload/game_data/GameDataModes.gd:1551 scripts/ui/Main.gd:1315
 msgid "Library"
 msgstr "Kütüphane"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1524
+#: scripts/autoload/game_data/GameDataModes.gd:1551
 msgid "Learning"
 msgstr "Öğrenme"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1524
+#: scripts/autoload/game_data/GameDataModes.gd:1551
 msgid "Shrines and a trainer's echo teach twice as much"
 msgstr "Tapınaklar ve bir eğitmenin yankısı iki kat öğretir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1525
+#: scripts/autoload/game_data/GameDataModes.gd:1552
 msgid "War Room"
 msgstr "Harp Odası"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1525
+#: scripts/autoload/game_data/GameDataModes.gd:1552
 msgid "Fighting"
 msgstr "Savaş"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1525
+#: scripts/autoload/game_data/GameDataModes.gd:1552
 msgid "Elites pay 50% more; one free Rally order in every rift"
 msgstr "Seçkinler %50 daha fazla öder; her yarıkta bir bedava Toparlan emri"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1526
+#: scripts/autoload/game_data/GameDataModes.gd:1553
 msgid "Healers' Wing"
 msgstr "Şifacılar Kanadı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1526
+#: scripts/autoload/game_data/GameDataModes.gd:1553
 msgid "Care"
 msgstr "Bakım"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1526
+#: scripts/autoload/game_data/GameDataModes.gd:1553
 msgid "Knockouts never leave scars; a downed hero is back after one day"
 msgstr "Bayılmalar asla yara izi bırakmaz; yere düşen bir kahraman bir gün sonra döner"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1527
+#: scripts/autoload/game_data/GameDataModes.gd:1554
 msgid "Reliquary"
 msgstr "Kutsal Emanet Odası"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1527
+#: scripts/autoload/game_data/GameDataModes.gd:1554
 msgid "+1 equipped relic slot; Path relic offers show 4, not 3"
 msgstr "+1 kalıntı yuvası; Yol kalıntısı teklifleri 3 değil 4 gösterir"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1558
+#: scripts/autoload/game_data/GameDataModes.gd:1585
 msgid "Every champion freed"
 msgstr "Her şampiyon kurtarıldı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1559
+#: scripts/autoload/game_data/GameDataModes.gd:1586
 msgid "Every page of the Grandmaster's ledger"
 msgstr "Büyük Üstat'ın defterinin her sayfası"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1560
+#: scripts/autoload/game_data/GameDataModes.gd:1587
 msgid "Every echo answered"
 msgstr "Her yankı cevaplandı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1561
+#: scripts/autoload/game_data/GameDataModes.gd:1588
 msgid "Captain Morrow beaten"
 msgstr "Yüzbaşı Morrow yenildi"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1562
+#: scripts/autoload/game_data/GameDataModes.gd:1589
 msgid "The Royal Charter won"
 msgstr "Kraliyet Beratı kazanıldı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1563
+#: scripts/autoload/game_data/GameDataModes.gd:1590
 msgid "Every Accord hall restored"
 msgstr "Ahit'in bütün salonları yeniden açıldı"
 
-#: scripts/autoload/game_data/GameDataModes.gd:1564
+#: scripts/autoload/game_data/GameDataModes.gd:1591
 msgid "Five tides of the Open Hollow held"
 msgstr "Açık Oyuk'un beş gelgitine dayanıldı"
 
@@ -15387,75 +15467,111 @@ msgstr "Kampta dolaştı: -%d Öz%s."
 msgid ", the %s damaged"
 msgstr ", %s hasar gördü"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:886
+#: scripts/autoload/game_state/GameStateBreach.gd:901
+msgid "+%d%% odds"
+msgstr "+%%%d şans"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:902
+msgid "+%d%% odds on a perilous job"
+msgstr "tehlikeli işte +%%%d şans"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:903
+msgid "+%d%% Gold"
+msgstr "+%%%d Altın"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:904
+msgid "+%d%% Essence"
+msgstr "+%%%d Öz"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:905
+msgid "+%d%% item chance"
+msgstr "+%%%d eşya şansı"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:906
+msgid "+%d%% XP for the party"
+msgstr "grup için +%%%d TP"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:907
+msgid "%d%% less chance of being hurt"
+msgstr "yaralanma şansı %%%d daha az"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:908
+msgid "%d%% less chance of a scar"
+msgstr "yara izi şansı %%%d daha az"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:909
+msgid "a failure turns partial half the time"
+msgstr "başarısızlık yarı yarıya yarım başarıya döner"
+
+#: scripts/autoload/game_state/GameStateBreach.gd:930
 msgid "Expeditions open with the Training Yard"
 msgstr "Seferler Eğitim Alanı ile açılır"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:888
+#: scripts/autoload/game_state/GameStateBreach.gd:932
 msgid "No such posting"
 msgstr "Böyle bir ilan yok"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:890 scripts/ui/GuildViews.gd:3055
+#: scripts/autoload/game_state/GameStateBreach.gd:934 scripts/ui/GuildViews.gd:3059
 msgid "Every expedition party is out"
 msgstr "Bütün sefer grupları dışarıda"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:894
+#: scripts/autoload/game_state/GameStateBreach.gd:938
 msgid "Send 1 to %d heroes"
 msgstr "1 ile %d arası kahraman gönder"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:898
+#: scripts/autoload/game_state/GameStateBreach.gd:942
 msgid "Someone can't go"
 msgstr "Biri gidemiyor"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:942
+#: scripts/autoload/game_state/GameStateBreach.gd:988
 msgid "+%d Gold"
 msgstr "+%d Altın"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:945
+#: scripts/autoload/game_state/GameStateBreach.gd:991
 msgid "+%d Essence"
 msgstr "+%d Öz"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:950
+#: scripts/autoload/game_state/GameStateBreach.gd:996
 msgid "found: %s"
 msgstr "bulunan: %s"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:960
+#: scripts/autoload/game_state/GameStateBreach.gd:1006
 msgid "%s comes back hurt"
 msgstr "%s yaralı döndü"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:965
+#: scripts/autoload/game_state/GameStateBreach.gd:1011
 msgid "%s keeps a scar: %s"
 msgstr "%s bir yara izi taşıyor: %s"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:973
+#: scripts/autoload/game_state/GameStateBreach.gd:1019
 msgid "Dobbs: \"They're back, and it paid.\""
 msgstr "Dobbs: \"Döndüler ve değdi.\""
 
-#: scripts/autoload/game_state/GameStateBreach.gd:973
+#: scripts/autoload/game_state/GameStateBreach.gd:1019
 msgid "Dobbs: \"Back with half of it and a limp.\""
 msgstr "Dobbs: \"Yarısıyla ve topallayarak döndüler.\""
 
-#: scripts/autoload/game_state/GameStateBreach.gd:973
+#: scripts/autoload/game_state/GameStateBreach.gd:1019
 msgid "Dobbs: \"Back with nothing. Get the bandages.\""
 msgstr "Dobbs: \"Eli boş döndüler. Sargıları getirin.\""
 
-#: scripts/autoload/game_state/GameStateBreach.gd:975
+#: scripts/autoload/game_state/GameStateBreach.gd:1021
 msgid "nothing to show for it"
 msgstr "gösterecek bir şey yok"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:977
+#: scripts/autoload/game_state/GameStateBreach.gd:1023
 msgid "Expedition: %s, %s."
 msgstr "Sefer: %s, %s."
 
-#: scripts/autoload/game_state/GameStateBreach.gd:977
+#: scripts/autoload/game_state/GameStateBreach.gd:1023
 msgid "a success"
 msgstr "başarılı"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:977
+#: scripts/autoload/game_state/GameStateBreach.gd:1023
 msgid "half done"
 msgstr "yarım kaldı"
 
-#: scripts/autoload/game_state/GameStateBreach.gd:977
+#: scripts/autoload/game_state/GameStateBreach.gd:1023
 msgid "a failure"
 msgstr "başarısız"
 
@@ -20088,8 +20204,8 @@ msgid "Expeditions"
 msgstr "Seferler"
 
 #: scripts/ui/GuildViews.gd:2396
-msgid "From two seals, the Quest board's Expeditions tab posts three jobs off the map: a safe one, a hard one and (from Act II) a perilous one, each with a Need in power, a length of 1-3 days and a party of up to 3. Heroes you send are away for those days and still draw wages. The odds show before they go: 50% at the Need, better above it. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party, and on a perilous job it can leave a scar. A ranger scouts (+10%), a rogue finds more (+25%), a cleric halves the hurt. Everyone learns on the road, as at the Training Yard. One party out at a time, two with a Scouts' Lodge at level 3."
-msgstr "İki mühürden sonra Görev panosunun Seferler sekmesi haritanın dışında üç iş asar: güvenli bir iş, zor bir iş ve (II. Perde'den itibaren) tehlikeli bir iş; her birinin bir güç gereksinimi, 1-3 günlük süresi ve en fazla 3 kişilik bir grubu vardır. Gönderdiğin kahramanlar o günler boyunca uzaktadır ve maaş almaya devam eder. Gitmeden önce şans gösterilir: gereksinimde %50, üstünde daha iyi. Başarı tam öder; yarım başarı yarısını öder ve biri yaralı döner; başarısızlık hiçbir şey ödemez ve grubu yaralar, tehlikeli bir işte yara izi de bırakabilir. Korucu yolu keşfeder (+%10), haydut daha çok bulur (+%25), rahip yaralanmayı yarıya indirir. Herkes yolda öğrenir, Eğitim Alanı'ndaki gibi. Aynı anda bir grup dışarıda olabilir, 3. seviye İzci Locası ile iki."
+msgid "From two seals, the Quest board's Expeditions tab posts three jobs off the map: a safe one, a hard one and (from Act II) a perilous one, each with a Need in power, a length of 1-3 days and a party of up to 3. Heroes you send are away for those days and still draw wages. The odds show before they go: 50% at the Need, better above it. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party, and on a perilous job it can leave a scar. Every class and every Path brings something on the road, once per party: a warrior's muscle and a ranger's scouting raise the odds, a mage appraises (+50% Essence), a rogue pockets more (+25% Gold), a cleric halves the hurt, and each Path adds its own. Heroes are gone for the whole days while rifts and breaches go on without them. Everyone learns on the road, as at the Training Yard. One party out at a time, two with a Scouts' Lodge at level 3."
+msgstr "İki mühürden sonra Görev panosunun Seferler sekmesi haritanın dışında üç iş asar: güvenli bir iş, zor bir iş ve (II. Perde'den itibaren) tehlikeli bir iş; her birinin bir güç gereksinimi, 1-3 günlük süresi ve en fazla 3 kişilik bir grubu vardır. Gönderdiğin kahramanlar o günler boyunca uzaktadır ve maaş almaya devam eder. Gitmeden önce şans gösterilir: gereksinimde %50, üstünde daha iyi. Başarı tam öder; yarım başarı yarısını öder ve biri yaralı döner; başarısızlık hiçbir şey ödemez ve grubu yaralar, tehlikeli bir işte yara izi de bırakabilir. Her sınıf ve her Yol yolda bir şey katar, grup başına bir kez: savaşçının kas gücü ve korucunun izciliği şansı artırır, büyücü değer biçer (+%50 Öz), haydut daha çok cebe atar (+%25 Altın), rahip yaralanmayı yarıya indirir ve her Yol kendi katkısını ekler. Kahramanlar bütün günler boyunca yoktur; yarıklar ve gedikler onlarsız sürer. Herkes yolda öğrenir, Eğitim Alanı'ndaki gibi. Aynı anda bir grup dışarıda olabilir, 3. seviye İzci Locası ile iki."
 
 #: scripts/ui/GuildViews.gd:2397
 msgid "Camp events"
@@ -20360,8 +20476,8 @@ msgid "\nUnlocks: "
 msgstr "\nAçar: "
 
 #: scripts/ui/GuildViews.gd:2980
-msgid "Send heroes who would sit idle on a job off the map. They are away for its days and still draw wages. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party. A ranger scouts (+10%%), a rogue finds more (+25%%), a cleric halves the hurt. Parties out at once: %d."
-msgstr "Boşta oturacak kahramanları haritanın dışında bir işe gönder. İşin günleri boyunca uzaktadırlar ve maaş almaya devam ederler. Başarı tam öder; yarım başarı yarısını öder ve biri yaralı döner; başarısızlık hiçbir şey ödemez ve grubu yaralar. Korucu yolu keşfeder (+%%10), haydut daha çok bulur (+%%25), rahip yaralanmayı yarıya indirir. Aynı anda dışarıdaki gruplar: %d."
+msgid "Send heroes on a job off the map. They are gone for its whole days and still draw wages, while rifts and breaches go on without them. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party. Every class and Path brings something (hover a hero); each counts once, so a mixed party does best. Parties out at once: %d."
+msgstr "Kahramanları haritanın dışında bir işe gönder. İşin bütün günleri boyunca yoktur ve maaş almaya devam ederler; yarıklar ve gedikler de onlarsız sürer. Başarı tam öder; yarım başarı yarısını öder ve biri yaralı döner; başarısızlık hiçbir şey ödemez ve grubu yaralar. Her sınıf ve Yol bir şey katar (bir kahramanın üstüne gel); her biri bir kez sayılır, karışık bir grup en iyisini yapar. Aynı anda dışarıdaki gruplar: %d."
 
 #: scripts/ui/GuildViews.gd:2990
 msgid "Out: %s"
@@ -20403,11 +20519,11 @@ msgstr "%s · güç %d"
 msgid "Nobody at camp is free."
 msgstr "Kampta boşta kimse yok."
 
-#: scripts/ui/GuildViews.gd:3047
+#: scripts/ui/GuildViews.gd:3051
 msgid "Send them (%d%% odds)"
 msgstr "Gönder (%%%d şans)"
 
-#: scripts/ui/GuildViews.gd:3047
+#: scripts/ui/GuildViews.gd:3051
 msgid "Pick who goes"
 msgstr "Kimin gideceğini seç"
 

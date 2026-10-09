@@ -30,6 +30,18 @@ func run() -> void:
 	var more := GameState.expedition_chance(safe, ["h1", "h2"]) if size >= 2 else one
 	check(one >= 0.1 and one <= 0.95 and more >= one, "odds between 10%% and 95%%, more heroes better (%d%% -> %d%%)" % [int(one * 100), int(more * 100)])
 	check(GameState.send_expedition(0, ["h1", "h2", "h3", "h1"]) != "", "too many heroes is refused")
+	# Every class and Path brings something, once per party.
+	var war := Combat.gen_recruit("F", "warrior")
+	var war2 := Combat.gen_recruit("F", "warrior")
+	var rog := Combat.gen_recruit("F", "rogue")
+	GameState.heroes.append_array([war, war2, rog])
+	var b1 := GameState.expedition_bonuses([war.id])
+	var b2 := GameState.expedition_bonuses([war.id, war2.id])
+	var b3 := GameState.expedition_bonuses([war.id, rog.id])
+	check(float(b1["odds"]) > 0.0 and float(b2["odds"]) == float(b1["odds"]) and float(b3["gold"]) > 0.0 and (b3["lines"] as Array).size() == 2, "a warrior adds odds (once), a rogue adds Gold")
+	check(GameData.CLASSES.all(func(c): return GameData.EXPEDITION_BONUS.has(str(c["id"]))) and GameData.PATHS.keys().all(func(k): return GameData.EXPEDITION_BONUS.has(k)), "every class and every Path has a bonus")
+	for h in [war, war2, rog]:
+		GameState.heroes.erase(h)
 
 	# Send the safe job: the heroes are away until it returns.
 	var days := int(GameState.expedition_def(str(safe["id"]))["days"])

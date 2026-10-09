@@ -615,8 +615,9 @@ var RESOLVE_GAIN := {"rest": 3, "campfire": 1, "shrine": 2}
 ## the Quest board once the Training Yard opens. Tier 0 safe / 1 hard /
 ## 2 perilous; a posting's Need is the ladder's Recommended power for the next
 ## rank x size/4 x EXPEDITION_NEED[tier]. Pay per day x days (camp-scaled),
-## about 60% of a rift day for the same heroes. Failing a perilous job can
-## scar (EXPEDITION_SCAR_TIER and up).
+## about a rift day's pay for the same heroes: they are locked away for whole
+## days while rifts and breaches go on without them. Failing a perilous job
+## can scar (EXPEDITION_SCAR_TIER and up).
 const EXPEDITIONS := [
 	{"id": "salt_carts", "tier": 0, "days": 1, "size": 2, "name": "Escort the salt carts", "text": "The salt carts want guards as far as the river ford. Nobody expects trouble, which is when it comes."},
 	{"id": "mill_cellar", "tier": 0, "days": 1, "size": 1, "name": "Clear the mill cellar", "text": "Something is eating the miller's grain and he would rather not find out what."},
@@ -628,13 +629,39 @@ const EXPEDITIONS := [
 	{"id": "accord_vault", "tier": 2, "days": 3, "size": 3, "name": "Open an Accord vault", "text": "A scholar swears an old guild vault lies under the burned chapel. The last party that went down came back two short."},
 ]
 const EXPEDITION_NEED := [0.7, 1.0, 1.3]
-const EXPEDITION_GOLD := [35, 55, 80]      # per day, before the act's camp scale
-const EXPEDITION_ESSENCE := [0, 8, 16]     # per day, before the act's camp scale
+const EXPEDITION_GOLD := [60, 90, 135]     # per day, before the act's camp scale
+const EXPEDITION_ESSENCE := [0, 13, 27]    # per day, before the act's camp scale
 const EXPEDITION_ITEM := [["", 0.0], ["common", 0.25], ["rare", 0.5]]
 const EXPEDITION_TIER_NAME := ["Safe", "Hard", "Perilous"]
 const EXPEDITION_SCAR_TIER := 2
 const EXPEDITION_SCAR_CHANCE := 0.5
 const EXPEDITION_WOUND_HP := 0.3   # a wounded hero comes back at 30% HP
+## What each class and Path brings on the road; one of each counts per party,
+## so a mixed party gets more. Kinds: odds / odds_perilous (added to the
+## chance), gold / ess / item / xp (added shares), hurt / scar (multipliers on
+## the chance of being hurt or scarred), soften (a failure turns partial).
+const EXPEDITION_BONUS := {
+	"warrior": {"label": "Muscle", "odds": 0.08},
+	"ranger": {"label": "Scout", "odds": 0.10},
+	"mage": {"label": "Appraiser", "ess": 0.5},
+	"cleric": {"label": "Field medic", "hurt": 0.5},
+	"rogue": {"label": "Light fingers", "gold": 0.25},
+	"shieldwall": {"label": "Takes the blows", "hurt": 0.75},
+	"bloodrage": {"label": "At home in danger", "odds_perilous": 0.12},
+	"weaponmaster": {"label": "Drills the others", "xp": 0.25},
+	"marksman": {"label": "Clean shot", "odds": 0.06},
+	"trapper": {"label": "Sets snares", "item": 0.15},
+	"stalker": {"label": "Bounty hunter", "gold": 0.15},
+	"evocation": {"label": "Burns the dross", "ess": 0.25},
+	"warding": {"label": "Wards the camp", "scar": 0.5},
+	"augury": {"label": "Sees it coming", "soften": 0.5},
+	"mercy": {"label": "Patches everyone", "hurt": 0.75},
+	"aegis": {"label": "Shields the worst of it", "scar": 0.5},
+	"zeal": {"label": "Rallies the party", "odds": 0.06},
+	"assassin": {"label": "Quiet work", "gold": 0.15},
+	"skirmisher": {"label": "Gets out fast", "soften": 0.5},
+	"scrapper": {"label": "Shrugs it off", "hurt": 0.75},
+}
 
 
 const KEY_TIPS := ["welcome", "rift_hall", "party", "battle", "reward", "haul", "champions", "overseer"]

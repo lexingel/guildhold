@@ -58,3 +58,9 @@ Three calls: the starting roster (6), expeditions (30), and what Renown pays now
 - **A. Leave it (recommended for now).** Renown already pulls its weight through the rival. Adding nothing keeps the focus plan's "one system per job".
 - **B. Restore it in 0.66 terms:** every 20 Renown puts one unique relic in your next shop. It's cheap to build, since shops already stock relics 20% of the time.
 - **C. Royal contracts:** at 50/100/150 Renown the quest board posts a Crown contract (bigger, harder, pays Laurels). This is the most interesting option and the most work.
+
+## Decided and built (2026-10-09)
+- Expeditions open with the Training Yard; a failed perilous job can scar.
+- Every class and every Path has an expedition bonus (GameData.EXPEDITION_BONUS), counted once per party.
+- Heroes are locked away for the whole days while rifts and breaches go on: splitting the roster between expeditions and training is a risk taken for resources, so a job now pays about a full rift day (Gold 60/90/135 a day, Essence 0/13/27, before the act scale).
+- Still open: founders option, Renown option.
