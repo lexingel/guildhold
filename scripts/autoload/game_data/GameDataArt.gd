@@ -72,7 +72,7 @@ const FEATURE_UNLOCKS := {
 	"bestiary": {"name": "Bestiary", "hint": "Opens after your first fight", "news": "Every foe you meet is recorded here."},
 	"quests": {"name": "Quests", "hint": "Opens after you seal your first rift", "seals": 1, "news": "Take on quests for Gold, Essence and Renown."},
 	"training": {"name": "Training Yard", "hint": "Opens after you seal 2 rifts", "seals": 2, "who": "Wen, the Chronicler",
-		"news": "\"Two rifts sealed, and the yard behind the barracks is finally clear of rubble. Send a hero there for a few days and they come back stronger: an attribute point, a new program. The Drill Yard room adds places.\""},
+		"news": "\"Two rifts sealed, and the yard behind the barracks is finally clear of rubble. Send a hero there for a few days and they come back stronger: an attribute point, a new program. The Drill Yard room adds places. And the quest board has work off the map for anyone left at camp.\""},
 	"management": {"name": "Accord Hall", "hint": "Opens after you seal 2 rifts", "seals": 2, "who": "Wen, the Chronicler",
 		"news": "\"This camp was an Accord hall once. The Barracks, the Infirmary and the Drill Yard can be rebuilt now, room by room, with Gold. Each level costs a little upkeep. More rooms open as the guild grows.\" (Guild > Accord Hall)"},
 	"requests": {"name": "Hero requests", "hint": "Opens after you seal 3 rifts", "seals": 3, "news": "Twice a week a hero may ask for something: time off, a partner, a rift of their own. Say yes for their trust, or no."},

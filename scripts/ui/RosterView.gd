@@ -505,8 +505,8 @@ func _quirk_row(h: Hero) -> Control:
 			origin = tr("child of %s") % str(h.history.get("heir_of", "?"))
 		chip.mouse_filter = Control.MOUSE_FILTER_STOP
 		chip.mouse_default_cursor_shape = Control.CURSOR_HELP
-		_rich_tip(chip, _bb(Palette.TEXT, tr(str(q))) + "  " + _bb(Palette.MUTED, "(" + origin + ")") + "
-" + _bb(Palette.TEXT, tr(str(GameState.quirk_text(q)))))
+		var tip_lines: Array[String] = [_bb(Palette.TEXT, tr(str(q))) + "  " + _bb(Palette.MUTED, "(" + origin + ")"), _bb(Palette.TEXT, tr(str(GameState.quirk_text(q))))]
+		_rich_tip(chip, "\n".join(tip_lines))
 		row.add_child(chip)
 		if bad and GameState.lvl("res.lab") >= 1:
 			row.add_child(_icon_button("res://assets/skills/potion_blue.png", tr("Treat (%d Gold)") % GameState.quirk_treat_cost(), func(id=h.id, qq=q):

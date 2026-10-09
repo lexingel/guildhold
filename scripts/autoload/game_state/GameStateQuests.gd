@@ -125,6 +125,7 @@ func resolve_guild_board() -> void:
 		guild_board.assign(guild_board.filter(func(q): return str(q["status"]) == "active"))
 		while guild_board.filter(func(q): return str(q["status"]) == "posted").size() < GameData.QUEST_POSTED:
 			guild_board.append(roll_quest())
+		roll_expedition_board()
 		board_refresh_day = day + GameData.QUEST_REFRESH_DAYS
 		changed = true
 	# Contracts past their due day fail: Renown and everyone's morale drop.
@@ -1088,4 +1089,6 @@ func guild_standings() -> Array:
 		rows.append({"name": others[k], "renown": int(day * 0.9 * pace), "tower": mini(100, int(day * 0.5 * pace)), "endless": mini(1500, int(day * 10.0 * pace)), "you": false})
 	rows.sort_custom(func(a, b): return int(a["renown"]) > int(b["renown"]) or (int(a["renown"]) == int(b["renown"]) and a["you"]))
 	return rows
+
+
 

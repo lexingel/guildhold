@@ -31,7 +31,7 @@ func run() -> void:
 	GameState.hardship = 3
 	check(is_equal_approx(GameState.year_mult("foe_hp"), 1.1) and GameState.year_add("breach_sooner") == 2.0 and GameState.year_add("resolve_start") == -2.0, "Hardship 3 stacks levels 1-3")
 	var hp3 := int(Combat.gen_monster(d, 2, "combat")["hp"])
-	check(absf(float(hp3) / hp0 - 1.1) < 0.02, "foes have 10% more HP (%d vs %d)" % [hp3, hp0])
+	check(absf(float(hp3) / hp0 - 1.1) < 0.02, "foes have 10%% more HP (%d vs %d)" % [hp3, hp0])
 	GameState.start_ladder_rift("C", ids, null)
 	check(GameState.resolve_now() == GameData.RESOLVE_START - 2, "parties set out with 2 less Resolve")
 	check(Combat.recommended_power("normal", "C") > int(GameData.find_rift_rank("C")["rec"]), "the readout asks for more power")

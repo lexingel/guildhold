@@ -828,3 +828,150 @@ func _camp_threat(id: String, k: int, d: Dictionary) -> String:
 			var dmg := _damage_building()
 			return tr("It roamed the camp: -%d Essence%s.") % [lost_e, tr(", the %s damaged") % dmg if dmg != "" else ""]
 	return ""
+
+
+## ---------------- Expeditions (2026-10-09 playtest) ----------------
+## Idle heroes sent off the map for 1-3 days (GameData.EXPEDITIONS). They are
+## away (busy_runs) the whole time, wages still run; on the last day the
+## outcome is rolled: success pays in full, partial pays half and wounds one,
+## failure pays nothing and wounds everyone (a perilous job can scar).
+func expeditions_open() -> bool:
+	return feature_unlocked("training")
+
+
+func expedition_cap() -> int:
+	return 1 + (1 if lvl("log.scouts") >= 3 else 0)
+
+
+func expedition_def(id: String) -> Dictionary:
+	for e in GameData.EXPEDITIONS:
+		if str(e["id"]) == id:
+			return e
+	return {}
+
+
+## Three postings: a safe, a hard and (from Act II) a perilous job, priced
+## for the next ladder rank. Rolled with the quest board.
+func roll_expedition_board() -> void:
+	expedition_board = []
+	var rank: String = str(GameData.RIFT_RANKS[clampi(best_rift_rank_sealed + 1, 0, GameData.RIFT_RANKS.size() - 1)]["id"])
+	var rec := Combat.recommended_power("", rank)
+	for tier in [0, 1, 2 if campaign_act >= 2 else randi() % 2]:
+		var pool: Array = GameData.EXPEDITIONS.filter(func(e): return int(e["tier"]) == tier and not expedition_board.any(func(p): return str(p["id"]) == str(e["id"])))
+		var e: Dictionary = pool.pick_random()
+		var days := int(e["days"])
+		expedition_board.append({"id": str(e["id"]), "rank": rank,
+			"need": int(round(rec * float(e["size"]) / 4.0 * float(GameData.EXPEDITION_NEED[tier]))),
+			"gold": camp_gold(int(GameData.EXPEDITION_GOLD[tier]) * days),
+			"essence": camp_gold(int(GameData.EXPEDITION_ESSENCE[tier]) * days)})
+
+
+## The odds for `hero_ids` on posting `p`: 50% at the Need, +50% per Need over
+## it, 10-95%; a ranger scouts the way (+10%).
+func expedition_chance(p: Dictionary, hero_ids: Array) -> float:
+	var power := 0
+	var ranger := false
+	for hid in hero_ids:
+		var h := find_hero(str(hid))
+		if h:
+			power += Combat.power_of(h)
+			ranger = ranger or GameData.hero_role(h) == "ranger"
+	var c := 0.5 + 0.5 * (float(power) / maxf(1.0, float(p["need"])) - 1.0) + (0.1 if ranger else 0.0)
+	return clampf(c, 0.1, 0.95)
+
+
+## "" on success, else why not.
+func send_expedition(index: int, hero_ids: Array) -> String:
+	if not expeditions_open():
+		return tr("Expeditions open with the Training Yard")
+	if index < 0 or index >= expedition_board.size():
+		return tr("No such posting")
+	if expeditions.size() >= expedition_cap():
+		return tr("Every expedition party is out")
+	var p: Dictionary = expedition_board[index]
+	var e := expedition_def(str(p["id"]))
+	if hero_ids.is_empty() or hero_ids.size() > int(e["size"]):
+		return tr("Send 1 to %d heroes") % int(e["size"])
+	for hid in hero_ids:
+		var h := find_hero(str(hid))
+		if h == null or h.is_champion or not h.is_available():
+			return tr("Someone can't go")
+	var days := int(e["days"])
+	for hid in hero_ids:
+		find_hero(str(hid)).busy_runs = days
+	var x := p.duplicate()
+	x["hero_ids"] = hero_ids.duplicate()
+	x["left"] = days
+	x["total"] = days
+	x["chance"] = expedition_chance(p, hero_ids)
+	expeditions.append(x)
+	expedition_board.remove_at(index)
+	save()
+	state_changed.emit()
+	return ""
+
+
+func _expedition_day() -> void:
+	for x in expeditions.duplicate():
+		x["left"] = int(x["left"]) - 1
+		if int(x["left"]) <= 0:
+			expeditions.erase(x)
+			_expedition_return(x)
+
+
+func _expedition_return(x: Dictionary) -> void:
+	var e := expedition_def(str(x["id"]))
+	var tier := int(e.get("tier", 0))
+	var party: Array[Hero] = []
+	for hid in x["hero_ids"]:
+		var h := find_hero(str(hid))
+		if h:
+			party.append(h)
+	if party.is_empty():
+		return
+	var roles: Array = party.map(func(h): return GameData.hero_role(h))
+	var r := randf()
+	var chance := float(x.get("chance", 0.5))
+	var outcome := "success" if r < chance else ("partial" if r < chance + (1.0 - chance) * 0.5 else "failure")
+	var share: float = float({"success": 1.0, "partial": 0.5, "failure": 0.0}[outcome]) * (1.25 if roles.has("rogue") else 1.0)
+	var lines: Array[String] = []
+	var g := int(round(int(x["gold"]) * share))
+	var ess := int(round(int(x["essence"]) * share))
+	if g > 0:
+		coins += g
+		lines.append(tr("+%d Gold") % g)
+	if ess > 0:
+		crystals += ess
+		lines.append(tr("+%d Essence") % ess)
+	var item_roll: Array = GameData.EXPEDITION_ITEM[tier]
+	if outcome == "success" and str(item_roll[0]) != "" and randf() < float(item_roll[1]):
+		var it := Combat.gen_item(str(item_roll[0]), "", str(x.get("rank", "")))
+		_grant_loot({"loot_type": "item", "obj": it})
+		lines.append(tr("found: %s") % tr(str(it.name)))
+	# Wounds: one hero on a partial, everyone on a failure; a cleric halves the odds.
+	var guard := 0.5 if roles.has("cleric") else 1.0
+	var hurt: Array[Hero] = []
+	if outcome == "partial":
+		hurt.append(party.pick_random())
+	elif outcome == "failure":
+		hurt.assign(party.filter(func(_h): return randf() < guard))
+	for h in hurt:
+		h.hp = mini(h.hp, maxi(1, int(round(Combat.max_hp(h) * GameData.EXPEDITION_WOUND_HP))))
+		lines.append(tr("%s comes back hurt") % tr(str(h.name.split(" the ")[0])))
+		if outcome == "failure" and tier >= GameData.EXPEDITION_SCAR_TIER and not has_wing("healers") and randf() < GameData.EXPEDITION_SCAR_CHANCE * guard:
+			var scar := Combat.roll_scar(h)
+			if scar != "":
+				h.quirks.append(scar)
+				lines.append(tr("%s keeps a scar: %s") % [tr(str(h.name.split(" the ")[0])), tr(str(scar))])
+	# The road teaches: a third of a level a day, as at the Training Yard.
+	var cap := train_level_cap()
+	for h in party:
+		if h.level < cap:
+			Combat.gain_xp(h, int(ceil(Combat.xp_to_next(h.level, h.rank) * GameData.TRAIN_XP_SHARE * int(x["total"]))))
+		h.history["expeditions"] = int(h.history.get("expeditions", 0)) + 1
+	var title := tr(str(e.get("name", "")))
+	var head: String = {"success": tr("Dobbs: \"They're back, and it paid.\""), "partial": tr("Dobbs: \"Back with half of it and a limp.\""), "failure": tr("Dobbs: \"Back with nothing. Get the bandages.\"")}[outcome]
+	if lines.is_empty():
+		lines.append(tr("nothing to show for it"))
+	push_toast(party[0], title, head + " " + ", ".join(lines) + ".")
+	_news(tr("Expedition: %s, %s.") % [title, {"success": tr("a success"), "partial": tr("half done"), "failure": tr("a failure")}[outcome]])

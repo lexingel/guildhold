@@ -611,6 +611,32 @@ var RESOLVE_GAIN := {"rest": 3, "campfire": 1, "shrine": 2}
 ## The coach tips "Help a little" keeps: the first steps, the first fight and
 ## its reward, and the first time a big system turns up. Feature reveals and
 ## the training fight's guide show in every mode but "No tips".
+## Expeditions (2026-10-09 playtest): jobs off the map for idle heroes, from
+## the Quest board once the Training Yard opens. Tier 0 safe / 1 hard /
+## 2 perilous; a posting's Need is the ladder's Recommended power for the next
+## rank x size/4 x EXPEDITION_NEED[tier]. Pay per day x days (camp-scaled),
+## about 60% of a rift day for the same heroes. Failing a perilous job can
+## scar (EXPEDITION_SCAR_TIER and up).
+const EXPEDITIONS := [
+	{"id": "salt_carts", "tier": 0, "days": 1, "size": 2, "name": "Escort the salt carts", "text": "The salt carts want guards as far as the river ford. Nobody expects trouble, which is when it comes."},
+	{"id": "mill_cellar", "tier": 0, "days": 1, "size": 1, "name": "Clear the mill cellar", "text": "Something is eating the miller's grain and he would rather not find out what."},
+	{"id": "cairns", "tier": 0, "days": 2, "size": 2, "name": "Count the border cairns", "text": "The Crown pays a surveyor's fee to anyone who walks the old border and counts what is still standing."},
+	{"id": "marsh_lights", "tier": 1, "days": 2, "size": 2, "name": "Hunt the marsh lights", "text": "Lights over the marsh have drowned three fishermen this month. The village has a purse for whoever puts them out."},
+	{"id": "toll_chest", "tier": 1, "days": 2, "size": 3, "name": "Recover the toll chest", "text": "Bandits took the bridge toll and went to ground in the quarry. Bring the chest back and keep a share."},
+	{"id": "drowned_road", "tier": 1, "days": 3, "size": 2, "name": "Map the drowned road", "text": "The old Accord road runs under the floodwater now. A merchant house wants it mapped before their rivals do."},
+	{"id": "tithe_barge", "tier": 2, "days": 3, "size": 3, "name": "Take the Hollow's tithe barge", "text": "A barge carries rift-glass up the river for the Hollow's buyers. It is guarded, and it is worth it."},
+	{"id": "accord_vault", "tier": 2, "days": 3, "size": 3, "name": "Open an Accord vault", "text": "A scholar swears an old guild vault lies under the burned chapel. The last party that went down came back two short."},
+]
+const EXPEDITION_NEED := [0.7, 1.0, 1.3]
+const EXPEDITION_GOLD := [35, 55, 80]      # per day, before the act's camp scale
+const EXPEDITION_ESSENCE := [0, 8, 16]     # per day, before the act's camp scale
+const EXPEDITION_ITEM := [["", 0.0], ["common", 0.25], ["rare", 0.5]]
+const EXPEDITION_TIER_NAME := ["Safe", "Hard", "Perilous"]
+const EXPEDITION_SCAR_TIER := 2
+const EXPEDITION_SCAR_CHANCE := 0.5
+const EXPEDITION_WOUND_HP := 0.3   # a wounded hero comes back at 30% HP
+
+
 const KEY_TIPS := ["welcome", "rift_hall", "party", "battle", "reward", "haul", "champions", "overseer"]
 var RESOLVE_WAVER := 3          # at or below: Wavering (foes act first in round 1)
 var RESOLVE_BROKEN_DMG := 0.15  # at 0: Broken, also no starting Momentum and -15% damage

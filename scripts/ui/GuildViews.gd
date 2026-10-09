@@ -2393,6 +2393,7 @@ func _render_compendium_systems(v: VBoxContainer) -> void:
 		["Quests & Milestones", "The quest board posts 6 quests (hunts, boss bounties, rift seals, trials); take up to 3 at a time. Unaccepted postings are replaced every 3 days (a day passes with each rift run or rest). Milestones are a static checklist, auto-granted the moment they're met. A rare escort NPC can also tag along on a fight — surviving pays a small bonus."],
 		["Wages, morale and the rival", "Every 7 days (a day = one rift run or rest) heroes draw wages by rank and level, and every hall room level costs upkeep; see Guild > Ledger. Unpaid upkeep costs Renown. The Training Yard trains only a few attribute points a week (more with the Drill Yard), and a feast seats a limited number of heroes, lowest morale first (more with the Trade Network). The unpaid lose morale, and a hero unpaid twice in a row, or at rock-bottom morale on payday, walks out. Morale (0-100) rises with sealed rifts and feasts and falls with defeats, knockouts, idle weeks and failed contracts: Inspired heroes deal +10% damage, Shaken -10%, Breaking -20%. Taken contracts are due in 6-10 days. A rival guild gains Renown daily, and once a week it may make a move you answer before payday: court one of your heroes (match their offer, or they choose, staying only at morale 50 or above), dare you to seal a rift by payday (Renown rides on it), or go for a posted contract (take it on or lose it). Requests and the rival's moves pop up at camp and wait in the Ledger, whose week board shows each day to payday. At payday, the leader on Renown gets the better recruits. Every 28 days, whichever guild gained more Renown wins a prize."],
 		["Hero requests", "Twice a week a hero may ask for something: time off, a raise, Gold for kit, a Training Yard slot, a partner, a rift of their own, your side in a feud, and more. Saying yes costs something and can leave them a title, a quirk or a bond; saying no costs morale. Answer in the Ledger before payday, or it counts as a no."],
+		["Expeditions", "From two seals, the Quest board's Expeditions tab posts three jobs off the map: a safe one, a hard one and (from Act II) a perilous one, each with a Need in power, a length of 1-3 days and a party of up to 3. Heroes you send are away for those days and still draw wages. The odds show before they go: 50% at the Need, better above it. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party, and on a perilous job it can leave a scar. A ranger scouts (+10%), a rogue finds more (+25%), a cleric halves the hurt. Everyone learns on the road, as at the Training Yard. One party out at a time, two with a Scouts' Lodge at level 3."],
 		["Camp events", "On about a third of days something happens at camp, and each is a choice: a travelling merchant, a renowned hero who drills one of yours, a wandering recruit, a relic peddler, a smith's apprentice, a scholar; a festival, refugees, a debt, the rival's quartermaster. Threats (fire, fever, bandits, a storm, a rift tremor) are foretold the evening before (the status board and the week's calendar): pay, send a hero who stays home that day, or take the loss. An event left unanswered takes its last option the next day. Act I brings only opportunities."],
 		["The rift map", "A ranked rift is a map of lanes: Ranks F-E have 3, D-B 4, A and up 5. Each node leads on to its own lane and one or both neighbours on the next floor, so plan a route: an elite on the way to a treasure, a shop before the boss. Every route ends at a campfire before the boss. Anvils temper a worn piece for free, a Path's shrine teaches the party (its Path's heroes most), and a trainer's echo gives one hero a level. From Rank S, floors more than two ahead are unseen unless a Trapper or a Stalker scouts."],
 	]
@@ -2432,7 +2433,25 @@ const QUEST_CATEGORY := {"hunt": "Hunt", "elite": "Hunt", "bounty": "Wanted", "s
 
 ## The Guild Board: quests pinned as parchment notes on a wooden board —
 ## taken ones first (red pin, TAKEN stamp), then this posting's offers.
+var _quest_view := "contracts"   # the Quest board's tab: contracts | expeditions
+var _exp_pick := {}   # posting index -> hero ids picked for it
+
+
 func _render_quests(v: VBoxContainer) -> void:
+	if GameState.expeditions_open():
+		var tabs := HBoxContainer.new()
+		tabs.add_theme_constant_override("separation", 6)
+		for t in [["contracts", "Contracts"], ["expeditions", tr("Expeditions") + (" (%d out)" % GameState.expeditions.size() if not GameState.expeditions.is_empty() else "")]]:
+			var b := _button(str(t[1]), func(id=str(t[0])):
+				_quest_view = id
+				render())
+			b.toggle_mode = true
+			b.button_pressed = _quest_view == t[0]
+			tabs.add_child(b)
+		v.add_child(tabs)
+		if _quest_view == "expeditions":
+			_render_expeditions(v)
+			return
 	var board_w: float = v.custom_minimum_size.x
 	var taken: Array = GameState.active_quests()
 	var posted: Array = GameState.guild_board.filter(func(q): return str(q["status"]) == "posted")
@@ -2950,3 +2969,91 @@ func _management_node_card(branch: Dictionary, n: Dictionary) -> PanelContainer:
 
 	card.add_child(cv)
 	return card
+
+
+## Expeditions (2026-10-09 playtest): the parties out, then the postings.
+## Pick up to the posting's size from the heroes at camp; the odds update as
+## you pick.
+func _render_expeditions(v: VBoxContainer) -> void:
+	if GameState.expedition_board.is_empty() and GameState.expeditions.is_empty():
+		GameState.roll_expedition_board()
+	v.add_child(_wrap_label(tr("Send heroes who would sit idle on a job off the map. They are away for its days and still draw wages. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party. A ranger scouts (+10%%), a rogue finds more (+25%%), a cleric halves the hurt. Parties out at once: %d.") % GameState.expedition_cap(), 12, true))
+	for x in GameState.expeditions:
+		var e := GameState.expedition_def(str(x["id"]))
+		var names: Array = []
+		for hid in x["hero_ids"]:
+			var xh := GameState.find_hero(str(hid))
+			names.append(tr(str(xh.name.split(" the ")[0])) if xh else "?")
+		var card := PanelContainer.new()
+		card.theme_type_variation = &"CardPanelViolet"
+		var col := _vbox(4)
+		col.add_child(_label(tr("Out: %s") % tr(str(e.get("name", ""))), 15))
+		col.add_child(_label(tr("%s · back in %d day%s · %d%% odds") % [", ".join(names), int(x["left"]), tr(str(_pl(int(x["left"])))), int(round(float(x["chance"]) * 100))], 12, true))
+		card.add_child(col)
+		v.add_child(card)
+	if GameState.expedition_board.is_empty():
+		v.add_child(_label("Nothing posted until the board is renewed.", 13, true))
+		return
+	var full := GameState.expeditions.size() >= GameState.expedition_cap()
+	var idle: Array = GameState.heroes.filter(func(h): return not h.is_champion and h.is_available())
+	var grid := GridContainer.new()
+	grid.columns = 1 if _narrow() else 3
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	for i in GameState.expedition_board.size():
+		var p: Dictionary = GameState.expedition_board[i]
+		var e := GameState.expedition_def(str(p["id"]))
+		var tier := int(e["tier"])
+		var picked: Array = (_exp_pick.get(i, []) as Array).filter(func(hid): return idle.any(func(h): return h.id == hid))
+		var card := PanelContainer.new()
+		card.theme_type_variation = &"CardPanelEmber" if tier == 2 else &"CardPanel"
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var col := _vbox(5)
+		col.add_child(_label(tr(str(e["name"])), 15))
+		var tl := _label(tr("%s · %d day%s · up to %d hero%s · Need %d") % [tr(str(GameData.EXPEDITION_TIER_NAME[tier])), int(e["days"]), tr(str(_pl(int(e["days"])))), int(e["size"]), tr(str(GameData.pl(int(e["size"]), "es"))), int(p["need"])], 12)
+		tl.add_theme_color_override("font_color", Palette.HAZARD if tier == 2 else (Palette.EMBER_BRIGHT if tier == 1 else Palette.good()))
+		col.add_child(tl)
+		col.add_child(_wrap_label(tr(str(e["text"])), 12, true))
+		var pay := tr("Pays %d Gold") % int(p["gold"]) + (tr(", %d Essence") % int(p["essence"]) if int(p["essence"]) > 0 else "")
+		var item_roll: Array = GameData.EXPEDITION_ITEM[tier]
+		if str(item_roll[0]) != "":
+			pay += tr(", %d%% chance of an item") % int(round(float(item_roll[1]) * 100))
+		col.add_child(_wrap_label(pay, 12))
+		if tier >= GameData.EXPEDITION_SCAR_TIER:
+			var risk := _wrap_label("A failure here can leave a lasting scar.", 12)
+			risk.add_theme_color_override("font_color", Palette.HAZARD)
+			col.add_child(risk)
+		var picks := HFlowContainer.new()
+		picks.add_theme_constant_override("h_separation", 4)
+		picks.add_theme_constant_override("v_separation", 4)
+		for h in idle:
+			var on: bool = picked.has(h.id)
+			var hb := _button(tr("%s Lv%d") % [tr(str(h.name.split(" the ")[0])), h.level], func(idx=i, hid=h.id):
+				var cur: Array = (_exp_pick.get(idx, []) as Array).duplicate()
+				if cur.has(hid):
+					cur.erase(hid)
+				elif cur.size() < int(GameState.expedition_def(str(GameState.expedition_board[idx]["id"]))["size"]):
+					cur.append(hid)
+				_exp_pick[idx] = cur
+				render())
+			hb.toggle_mode = true
+			hb.button_pressed = on
+			hb.tooltip_text = tr("%s · power %d") % [tr(str(GameData.hero_role(h).capitalize())), Combat.power_of(h)]
+			picks.add_child(hb)
+		if idle.is_empty():
+			picks.add_child(_label("Nobody at camp is free.", 12, true))
+		col.add_child(picks)
+		var odds := GameState.expedition_chance(p, picked) if not picked.is_empty() else 0.0
+		var send := _icon_domain_button("violet", GameData.BUTTON_ICON_PATH["confirm"], tr("Send them (%d%% odds)") % int(round(odds * 100)) if not picked.is_empty() else tr("Pick who goes"), func(idx=i, ids=picked):
+			var err := GameState.send_expedition(idx, ids)
+			if err != "":
+				_flavor_toast = err
+			_exp_pick = {}
+			render())
+		send.disabled = picked.is_empty() or full
+		if full:
+			send.tooltip_text = tr("Every expedition party is out")
+		col.add_child(send)
+		card.add_child(col)
+		grid.add_child(card)
+	v.add_child(grid)
