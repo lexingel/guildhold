@@ -114,11 +114,14 @@ func start_combat(party: Array[Hero], kind: String, diff: Dictionary, floor_idx:
 
 	var hp_now := 0.0
 	var hp_max := 0.0
+	var hp_base := 0.0
 	for h in party:
 		hp_now += max(0, h.hp)
 		hp_max += max_hp(h)
+		hp_base += base_max_hp(h)
 	var state := {
 		"_start_hp_pct": hp_now / maxf(1.0, hp_max),
+		"_start_hp_base": hp_now / maxf(1.0, hp_base),   # against max HP before wounds (0.68)
 		"party": party, "kind": kind, "diff": diff, "floor_idx": floor_idx,
 		"is_boss": is_boss, "is_elite": is_elite,
 		"monsters": monsters, "background_idx": _biome_background(diff),
@@ -243,7 +246,7 @@ func describe_incoming(state: Dictionary) -> String:
 		avg_max += max_hp(h)
 	avg_max /= living.size()
 	if avg_max > 0.0 and worst_back / avg_max > 0.35:
-		return tr("A heavy blow is coming — consider Defending.")
+		return tr("A heavy blow is coming: Defend or Guard, or it wounds.") if GameState.wounds_on() else tr("A heavy blow is coming — consider Defending.")
 	if float(state["escalate"]) > 0.0 and next_round >= 3:
 		return tr("Damage is stacking — every attack counts more now.")
 	return ""
@@ -280,6 +283,13 @@ func auto_action(state: Dictionary, h: Hero) -> Dictionary:
 			return {"action": "defend", "target": 0}
 	var ok := func(a: String) -> bool: return action_block(state, h, a) == ""
 	var party: Array = state["party"]
+	# From Rank C a heavy blow wounds (0.68): step in front of an ally it's aimed at.
+	if GameState.wounds_on() and ok.call("guard"):
+		for mi in monsters.size():
+			var it := monster_intent(state, mi)
+			var tg = it.get("target")
+			if it.get("heavy_blow", false) and tg is Hero and tg != h and tg.hp > 0 and guard_of(state, tg) == null and not state["_defending"].has(tg.id):
+				return {"action": "guard", "target": 0, "ally": tg.id}
 	var hurt: Array = party.filter(func(x): return x.hp > 0 and x.hp < max_hp(x) * 0.45)
 	if not hurt.is_empty() and ok.call("skill:heal"):
 		return {"action": "skill:heal", "target": 0}
@@ -606,6 +616,16 @@ func _start_round(state: Dictionary) -> void:
 			wtier = "brute"
 		if randf() < float(GameData.WINDUP_CHANCE.get(wtier, 0.0)) + float(state.get("diff", {}).get("windup_bonus", 0.0)) + float(mw.get("windup_bonus", 0.0)):
 			mw["_winding"] = true
+	# Fight stakes (0.68): from Rank C every ordinary fight has a wind-up to answer by round 2.
+	if GameState.wounds_on() and str(state.get("kind", "")) == "combat" and int(state["round_num"]) <= 2 and not state.get("_sure_windup", false):
+		if monsters.any(func(x): return x.get("_winding", false) or x.get("_charged", false)):
+			state["_sure_windup"] = true
+		elif int(state["round_num"]) == 2 or randf() < 0.5:
+			for mw in monsters:
+				if float(mw["hp"]) > 0 and not mw.get("_charged", false) and not (mw.get("affixes", []) as Array).has("hasted"):
+					mw["_winding"] = true
+					state["_sure_windup"] = true
+					break
 	# The guided first fight (training rift) shows one wind-up in round 2.
 	if GameState.run.get("training", false) and int(state["round_num"]) == 2 and not GameState.hints_seen.has("tut_windup"):
 		for mw in monsters:
@@ -1466,7 +1486,14 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 	elif not warded and effective_dodge > 0.0 and randf() < effective_dodge:
 		log.append(tr("%s evades %s's retaliation!") % [tr(str(target.name)), tr(str(m["name"]))])
 		evaded = true
-	var heavy_hit: bool = back >= float(max_hp(target)) * 0.25
+	var heavy_hit: bool = back >= float(base_max_hp(target)) * 0.25
+	if GameState.wounds_on() and (heavy_blow or heavy_hit):   # 0.68: what Guard, Defend or a dodge kept from wounding
+		if evaded:
+			_tally(state, "wound_dodged")
+		elif guard:
+			_tally(state, "wound_guarded")
+		elif state["_defending"].has(target.id):
+			_tally(state, "wound_defended")
 	if evaded:
 		back = 0.0
 	if evaded or heavy_hit:
@@ -1504,6 +1531,13 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 			if heavy_blow and target.hp > 0 and not state["_defending"].has(target.id):
 				state.get_or_add("_stunned", {})[target.id] = true
 				log.append(tr("%s is stunned by the blow!") % tr(str(target.name)))
+			# Fight stakes (0.68): a landed wind-up or a big hit, taken unguarded and undefended, wounds.
+			if GameState.wounds_on() and not guard and not state["_defending"].has(target.id) 					and (heavy_blow or dealt_back >= base_max_hp(target) * GameData.WOUND_HEAVY_PCT):
+				var w := GameState.add_wound(target, dealt_back)
+				if w > 0:
+					_tally(state, "wounds")
+					_tally(state, "wound_hp", w)
+					log.append(tr("%s is wounded: -%d max HP.") % [tr(str(target.name)), w])
 			var status := str(m.get("status", ""))
 			if status != "" and target.hp > 0 and randf() < float(GameData.STATUS_INFO[status]["chance"]):
 				var info: Dictionary = GameData.STATUS_INFO[status]
@@ -1668,6 +1702,10 @@ func defeat_reasons(state: Dictionary) -> Array:
 	if heavy > 0:
 		out.append([2.5 + heavy, tr("%d heavy blow%s landed undefended (%d damage)") % [heavy, GameData.pl(heavy), int(st.get("heavy_dmg", 0.0))],
 			"When a foe is \"Winding up\", its target should Defend (5): half damage and no stun. Guard (6) moves the hit onto a sturdier ally; Shield Bash or Frost Nova break the wind-up."])
+	var wounds := int(st.get("wounds", 0))
+	if wounds > 0:   # fight stakes (0.68)
+		out.append([2.2 + wounds, tr("%d wound%s from heavy blows taken unguarded (-%d max HP)") % [wounds, GameData.pl(wounds), int(st.get("wound_hp", 0.0))],
+			"From Rank C a heavy blow wounds unless its target Defends, is Guarded or dodges. Answer every wind-up: Defend (5), Guard (6), or break it with Shield Bash or Frost Nova."])
 	var taken := float(st.get("taken", 0.0))
 	var dot := float(st.get("dot", 0.0))
 	if taken > 0.0 and dot / taken >= 0.2:
@@ -1922,6 +1960,9 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 	var full_loss := not won and not retreated
 	if full_loss:
 		log.append(tr("Your party is overwhelmed..."))
+	if not GameState.wounds_last_run():   # up to Rank A wounds close when the fight ends (0.68)
+		for h in party:
+			h.wound = 0
 	# Any hero knocked out mid-fight (hp hit 0 while the party kept
 	# fighting and ultimately won, or before a retreat) still needs a
 	# recovery timer — not just the whole-party-wiped case above, or
@@ -1930,14 +1971,12 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 		if h.hp <= 0 and h.down_runs <= 0:
 			GameState.knock_out(h)
 			h.history["knockouts"] = int(h.history.get("knockouts", 0)) + 1
-			# A freshly-knocked-out roster hero may pick up a scar quirk
-			# (up to GameData.SCARS_MAX).
-			if not GameState.run.has("tower") and not GameState.has_wing("healers") and randf() < 0.5:
-				var scar := roll_scar(h)
-				if scar != "":
-					h.quirks.append(scar)
-					log.append(tr("%s is left with a lasting scar: %s.") % [tr(str(h.name)), tr(str(scar))])
-					log.append(GameData.narrative_line("scar_gained"))
+			# The cost of falling (0.68): from Rank C a scar chance, a dropped
+			# gear piece and, at SS+, death for a twice-scarred hero.
+			var scars0 := h.quirks.size()
+			log.append_array(GameState.fall_costs(h))
+			if h.quirks.size() > scars0:
+				log.append(GameData.narrative_line("scar_gained"))
 
 	var result := {
 		"won": won, "retreated": retreated, "log": log, "rounds": int(state["round_num"]), "monster_name": state["monsters"][0]["name"],

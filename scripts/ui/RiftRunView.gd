@@ -427,6 +427,24 @@ func _run_bar(in_combat: bool, at_door := false) -> Control:
 		rl.mouse_filter = Control.MOUSE_FILTER_STOP
 		rl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		top.add_child(rl)
+	# Fight stakes (0.68): wounds carried at S+, and gear left in the rift.
+	if GameState.run.get("sealed") == null:
+		var wounds := 0
+		for h in GameState.current_party():
+			wounds += h.wound
+		var dropped: Dictionary = GameState.run.get("dropped", {})
+		if (GameState.wounds_last_run() and wounds > 0) or not dropped.is_empty():
+			var bits: Array[String] = []
+			if wounds > 0 and GameState.wounds_last_run():
+				bits.append(tr("Wounds -%d max HP") % wounds)
+			for hid in dropped:
+				bits.append(tr("Dropped: %s") % tr(str(dropped[hid].get("name", ""))))
+			var wl := _label(" · ".join(bits), 12)
+			wl.add_theme_color_override("font_color", Palette.HAZARD)
+			wl.tooltip_text = tr("Wounds last the whole run from Rank S: a campfire's Rest halves them, a shrine closes some. A dropped item comes home only if the party seals the rift.")
+			wl.mouse_filter = Control.MOUSE_FILTER_STOP
+			wl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			top.add_child(wl)
 	# Retreat lives up here, out of the way, and asks once before ending the
 	# run (it used to be a big button at the bottom of every node). In combat
 	# the command bar has its own.
@@ -485,7 +503,7 @@ func _run_bar(in_combat: bool, at_door := false) -> Control:
 			nv.add_child(_label("%d/%d%s" % [max(0, h.hp), Combat.max_hp(h), tr(" · down") if h.hp <= 0 or h.is_downed() else ""], 9, true))
 			hrow.add_child(nv)
 			hv.add_child(hrow)
-			hv.add_child(_hp_bar(h.hp, Combat.max_hp(h), 70.0))
+			hv.add_child(_hp_bar(h.hp, Combat.max_hp(h), 70.0, h.wound))
 			hv.mouse_filter = Control.MOUSE_FILTER_STOP
 			hv.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 			hv.tooltip_text = tr("Open %s's page") % h.name.split(" the ")[0]

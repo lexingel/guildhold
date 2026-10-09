@@ -90,6 +90,10 @@ const FEATURE_UNLOCKS := {
 	"hall_research": {"name": "Research rooms", "hint": "Opens when you complete Act II", "act": 3, "news": "The Relic Vault and the Arcane Lab can be rebuilt now (Guild > Accord Hall)."},
 	"daily": {"name": "Daily twist", "hint": "Opens when you complete Act II", "act": 3, "act_days": 1, "news": "Once a day a ladder rift can carry a twist: a special rule and a starting boon, for extra Essence. Tick it in the Rift Hall."},
 	"tower": {"name": "Tower of Trials", "hint": "Opens when you complete Act III", "act": 4, "news": "100 fixed floors in the Rift Hall. Each floor is always the same fight, and pays the first time you clear it."},
+	"wounds": {"name": "Wounds", "hint": "Opens with Rank C rifts", "who": "Wen, the Chronicler",
+		"news": "\"The Greater rifts don't forgive. A heavy blow there leaves a wound: max HP no potion gives back until the fight is over. Defend, Guard or get out of the way. And a hero who falls down there can come back scarred, and without the piece of kit they dropped, unless you seal the rift and fetch it.\" (Library > Systems > Wounds and falls)"},
+	"wounds_run": {"name": "Deep wounds", "hint": "Opens with Rank S rifts", "who": "Wen, the Chronicler",
+		"news": "\"From Rank S a wound doesn't close after the fight. It stays with the hero for the whole rift: a campfire's rest halves it, a shrine closes some. Count what you have left before the boss. And from Rank SS a hero who already carries two scars may not get up again.\""},
 }
 ## Which Accord Hall rooms (GameData.BRANCHES ids) each reveal opens.
 const BRANCH_FEATURE := {"ops": "management", "infra": "hall_rooms", "log": "hall_rooms", "def": "wardcraft", "res": "hall_research"}

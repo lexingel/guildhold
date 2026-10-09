@@ -2625,12 +2625,33 @@ func _ladder_card(best: int, go: Callable) -> Control:
 	cv.add_child(go_row)
 	var foes := tr("Foes: base") if float(rank["hp"]) == 1.0 else tr("Foes: ×%s health, ×%s damage") % [tr(str(rank["hp"])), tr(str(rank["dmg"]))]
 	cv.add_child(_wrap_label(tr("%s%s · Rewards ×%s%s") % [tr(str(base["name"])) + " · ", tr(str(foes)), tr(str(rank["reward"])), tr(str((" · " + ", ".join(rules)) if not rules.is_empty() else ""))], 12, true))
+	var stakes := _stakes_line(_ladder_pick)
+	if stakes != "":
+		var sl := _wrap_label(stakes, 12)
+		sl.add_theme_color_override("font_color", Palette.HAZARD)
+		cv.add_child(sl)
 	if GameState.feature_unlocked("daily"):
 		cv.add_child(_daily_twist_row())
 	if next_locked != "":
 		cv.add_child(_label(next_locked, 12, true))
 	card.add_child(cv)
 	return card
+
+
+## What a Rank `rid` rift puts at stake (0.68, GameData.WOUND_* / FALL_*): "" below Rank C.
+func _stakes_line(rid: String) -> String:
+	var i := GameData.rift_rank_index(rid)
+	if not GameData.STAKES_ON or GameState.hardship < 0 or i < GameData.rift_rank_index(GameData.WOUND_FROM_RANK):
+		return ""
+	var bits: Array[String] = [tr("Heavy blows wound.")]
+	var falls := GameState.rifts_sealed >= GameData.FALL_COST_SEALS
+	if falls:
+		bits.append(tr("A fall can scar and drop gear."))
+	if i >= GameData.rift_rank_index(GameData.WOUND_PERSIST_RANK):
+		bits.append(tr("Wounds last until a campfire."))
+	if falls and i >= GameData.rift_rank_index(GameData.FALL_DEATH_FROM_RANK):
+		bits.append(tr("A twice-scarred hero can die."))
+	return " ".join(bits)
 
 
 # ---------------- Tower of Trials ----------------
@@ -3432,6 +3453,14 @@ func _party_launch_bar() -> Control:
 		var hl := _wrap_label(tr("Wounded: %s — they start the rift hurt.") % tr(str(", ".join(hurt.map(func(h): return "%s (%d/%d)" % [tr(str(h.name.split(" the ")[0])), h.hp, Combat.max_hp(h)])))), 12)
 		hl.add_theme_color_override("font_color", Palette.HAZARD)
 		info.add_child(hl)
+	# Fight stakes (0.68): name every hero a fall could kill here, before the run.
+	var srank := "" if (_pending_tower or _pending_descent or _pending_breach or _pending_daily or _pending_endless or GameState.hardship < 0 or not GameData.STAKES_ON) 		else (GameState.highest_open_rank() if _pending_finale else _pending_rift_rank)
+	if srank != "" and GameState.rifts_sealed >= GameData.FALL_COST_SEALS:
+		for h in going:
+			if GameState.death_risk(h, srank):
+				var dl := _wrap_label(tr("%s has two scars: a fall here can kill them.") % tr(str(h.name.split(" the ")[0])), 12)
+				dl.add_theme_color_override("font_color", Palette.HAZARD)
+				info.add_child(dl)
 	if _pending_endless and _pending_rift_rank == "":
 		info.add_child(_endless_region_picker())
 	if _pending_endless and not pending_party.is_empty():

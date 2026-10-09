@@ -559,6 +559,7 @@ func campfire_choose(choice: String) -> void:
 	match choice:
 		"rest":
 			for h in party:
+				h.wound = int(h.wound * (1.0 - GameData.WOUND_REST_CLOSE))   # a night's rest closes half a wound (0.68)
 				h.hp = min(Combat.max_hp(h), h.hp + int(ceil(Combat.max_hp(h) * campfire_heal_pct())))
 			log.append(tr("The party rests by the fire and recovers %d%% HP.") % int(round(campfire_heal_pct() * 100)))
 		"train":
@@ -803,6 +804,8 @@ func pray_at_shrine() -> void:
 			names.append(h.name.split(" the ")[0])
 	ns["done"] = true
 	change_resolve(int(GameData.RESOLVE_GAIN["shrine"]))
+	for h in current_party():   # a shrine closes some of a wound (0.68)
+		h.wound = maxi(0, h.wound - int(Combat.base_max_hp(h) * GameData.WOUND_SHRINE_CLOSE))
 	ns["note"] = tr("The shrine answers: %s learn the most.") % ", ".join(names) if not names.is_empty() else tr("The shrine answers, faintly: a little XP for everyone.")
 	save()
 	state_changed.emit()
@@ -1322,6 +1325,113 @@ func campfire_heal_pct() -> float:
 	return maxf(0.05, GameData.CAMPFIRE_HEAL_PCT + year_add("campfire_heal"))
 
 
+## The rift rank this run's stakes follow (0.68): a ladder rift's own, a
+## finale's the highest open rank; "" = none (training, the Daily, the Tower,
+## the Descent, breaches, Story).
+func stakes_rank() -> String:
+	if not GameData.STAKES_ON or run.is_empty() or hardship < 0 or run.get("training", false) or run.has("daily") or run.has("tower") or run.has("descent") or run.has("breach"):
+		return ""
+	return highest_open_rank() if int(run.get("finale", 0)) > 0 else str(run.get("rift_rank", ""))
+
+
+func _stakes_at(rank_id: String) -> bool:
+	var r := stakes_rank()
+	return r != "" and GameData.rift_rank_index(r) >= GameData.rift_rank_index(rank_id)
+
+
+func wounds_on() -> bool:
+	return _stakes_at(GameData.WOUND_FROM_RANK)
+
+
+func wounds_last_run() -> bool:
+	return _stakes_at(GameData.WOUND_PERSIST_RANK)
+
+
+func fall_costs_on() -> bool:
+	return wounds_on() and rifts_sealed >= GameData.FALL_COST_SEALS
+
+
+## The scar chance for `h` falling at this run's rank (0.68): FALL_SCAR_CHANCE,
+## halved by a cleric in the party, x0.75 for each Warding or Aegis hero, and
+## halved again by the Healers' Wing.
+func fall_scar_chance(h: Hero) -> float:
+	var c := float(GameData.FALL_SCAR_CHANCE.get(stakes_rank(), 0.0))
+	var party := current_party()
+	if party.any(func(x): return GameData.hero_role(x) == "cleric"):
+		c *= 0.5
+	for x in party:
+		if GameData.hero_path_id(x) in ["warding", "aegis"]:
+			c *= 0.75
+	if has_wing("healers"):
+		c *= 0.5
+	return c
+
+
+## Whether a fall in a Rank `rank_id` rift could kill `h` (0.68): SS and up,
+## two scars already. The Party screen warns before the run.
+func death_risk(h: Hero, rank_id: String) -> bool:
+	return not h.is_champion and rank_id != "" and GameData.rift_rank_index(rank_id) >= GameData.rift_rank_index(GameData.FALL_DEATH_FROM_RANK) 		and h.quirks.filter(func(q): return GameData.quirk(q).get("origin", "") == "scar").size() >= GameData.SCARS_MAX
+
+
+## A hero knocked out in a fight with stakes (0.68): from SS a twice-scarred
+## hero may die (gone at the run's end, like one left behind), else maybe a
+## scar; and once a run they leave one worn gear piece in the rift, back home
+## only if the party seals it. Log lines for the fight's result.
+func fall_costs(h: Hero) -> Array[String]:
+	var out: Array[String] = []
+	if not fall_costs_on() or h.is_champion:
+		return out
+	var who := tr(str(h.name.split(" the ")[0]))
+	if death_risk(h, stakes_rank()) and randf() < GameData.FALL_DEATH_CHANCE:
+		run["slain"] = (run.get("slain", []) as Array) + [h.id]
+		run["hero_ids"] = (run.get("hero_ids", []) as Array).filter(func(x): return str(x) != h.id)
+		out.append(tr("%s does not get up again.") % who)
+		return out
+	if randf() < fall_scar_chance(h):
+		var scar := Combat.roll_scar(h)
+		if scar != "":
+			h.quirks.append(scar)
+			out.append(tr("%s is left with a lasting scar: %s.") % [who, tr(str(scar))])
+	var dropped: Dictionary = run.get("dropped", {})
+	if not dropped.has(h.id):
+		var worn: Array = items.filter(func(it): return it.equipped_to == h.id)
+		if not worn.is_empty():
+			var it: Item = worn.pick_random()
+			items.erase(it)
+			dropped[h.id] = it.to_dict()
+			run["dropped"] = dropped
+			out.append(tr("%s drops their %s in the rift.") % [who, tr(str(it.name))])
+	return out
+
+
+## Items dropped in the rift (0.68): home with a seal, re-worn if the slot is
+## still free; otherwise lost.
+func _settle_dropped(sealed: bool) -> void:
+	var dropped: Dictionary = run.get("dropped", {})
+	for hid in dropped:
+		var it := Item.from_dict(dropped[hid])
+		var h := find_hero(str(hid))
+		if not sealed:
+			_news(tr("Lost in the rift: %s.") % tr(str(it.name)))
+			continue
+		if h == null or (run.get("slain", []) as Array).has(str(hid)) or items.any(func(x): return x.equipped_to == it.equipped_to and x.equipped_idx == it.equipped_idx):
+			it.equipped_to = ""
+			it.equipped_idx = -1
+		items.append(it)
+		_news(tr("Recovered from the rift: %s.") % tr(str(it.name)))
+	run["dropped"] = {}
+
+
+## A wounding blow of `dealt` damage: WOUND_SHARE of it off `h`'s max HP, up
+## to WOUND_CAP of their base max HP; HP follows the lower ceiling. The wound added.
+func add_wound(h: Hero, dealt: int) -> int:
+	var cap := int(Combat.base_max_hp(h) * GameData.WOUND_CAP)
+	var before := h.wound
+	h.wound = mini(cap, h.wound + int(round(dealt * GameData.WOUND_SHARE)))
+	h.hp = mini(h.hp, Combat.max_hp(h))
+	return h.wound - before
+
+
 ## Path relics (0.65): sealing a Rank D+ ladder rift (not a breach, the
 ## Descent, the Tower or a finale) offers 1 of 3 GameData.PATH_RELICS.
 func path_relic_eligible() -> bool:
@@ -1587,7 +1697,7 @@ func _rescue_left_behind() -> void:
 ## The run ended without a seal: anyone left in the rift is lost. Their gear
 ## is recovered and returns to the Inventory.
 func _lose_left_behind() -> void:
-	for hid in run.get("left_behind", []):
+	for hid in run.get("left_behind", []) + run.get("slain", []):
 		var h := find_hero(str(hid))
 		if not h:
 			continue
@@ -1596,11 +1706,16 @@ func _lose_left_behind() -> void:
 				it.equipped_to = ""
 				it.equipped_idx = -1
 		set_down_path_relic(h)
-		push_toast(h, tr("Lost in the rift"), tr("%s was left behind and never came back") % tr(str(h.name.split(" the ")[0])))
-		_memorialize(h, tr("Left behind in a %s") % tr(str(_run_label())))
+		if (run.get("slain", []) as Array).has(h.id):   # fell for good in a Rank SS+ rift (0.68)
+			push_toast(h, tr("Fallen"), tr("%s fell in the rift and did not get up again") % tr(str(h.name.split(" the ")[0])))
+			_memorialize(h, tr("Fell in a Rank %s rift") % tr(str(stakes_rank())))
+		else:
+			push_toast(h, tr("Lost in the rift"), tr("%s was left behind and never came back") % tr(str(h.name.split(" the ")[0])))
+			_memorialize(h, tr("Left behind in a %s") % tr(str(_run_label())))
 		heroes.erase(h)
 		run["heroes_lost"] = int(run.get("heroes_lost", 0)) + 1
 	run["left_behind"] = []
+	run["slain"] = []
 
 
 ## True for any hero worth a bed — actually downed, or merely wounded (hp
@@ -1740,6 +1855,7 @@ func retreat_now() -> void:
 	if ns.has("pre_hp") and not ns.has("result"):   # a fight begun (and reloaded) and then run from: fleeing
 		_drop_haul("fled")
 	_record_run("Retreated")
+	_settle_dropped(false)
 	_lose_left_behind()
 	run = {}
 	_clamp_hp_to_max()
@@ -1764,6 +1880,7 @@ func finish_run() -> void:
 	if run.has("breach"):
 		_breach_outcome(outcome == "Sealed")
 	_record_run(outcome)
+	_settle_dropped(outcome == "Sealed")
 	_lose_left_behind()
 	for h in current_party():   # an evolution's XP boost lasts XP_BOOST_RUNS rift runs
 		h.xp_boost_runs = maxi(0, h.xp_boost_runs - 1)

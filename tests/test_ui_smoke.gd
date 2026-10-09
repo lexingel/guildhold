@@ -162,6 +162,10 @@ func run() -> void:
 	check(GameState.active_slot == slot and GameState.guild_name != "" and main._received.is_empty() and main.screen in ["camp", "rift_run"], "a received guild lands in the chosen slot and opens")
 	GameState.active_slot = 9
 
+	# The Rift Ladder says what a Rank A rift puts at stake (0.68).
+	main._ladder_pick = "A"
+	await _show(main, "rift_hall")
+	check(main.find_children("*", "Label", true, false).any(func(l): return l.text.contains("Heavy blows wound")), "a Rank A rift card names its stakes")
 	# A ranked fight: the command bar, More, the Guard picker, a gamepad button.
 	GameState.start_ladder_rift("A", ids, null)
 	GameState.pending_stories.clear()
@@ -181,6 +185,13 @@ func run() -> void:
 	main.render()
 	await _frames()
 	main._ally_pick = ""
+	# Fight stakes (0.68): a wounded hero's plate says so.
+	var wh := GameState.find_hero(ids[0])
+	wh.wound = 30
+	main.render()
+	await _frames()
+	check(main.find_children("*", "Control", true, false).any(func(c): return c.tooltip_text.contains("Wound: -30")), "a wounded hero's plate shows the wound")
+	wh.wound = 0
 	# Win it and draw the victory screen.
 	var st: Dictionary = GameState.run["node_state"].get("combat_state", {})
 	for m in st.get("monsters", []):

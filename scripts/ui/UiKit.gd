@@ -435,10 +435,12 @@ func _hp_color(ratio: float) -> Color:
 	return Palette.HAZARD
 
 
-func _hp_bar(current: int, max_val: int, width: float) -> ProgressBar:
+## `wound` (0.68): max HP lost to heavy blows, drawn as a dark segment at the
+## bar's end, so the bar keeps the hero's full scale.
+func _hp_bar(current: int, max_val: int, width: float, wound: int = 0) -> ProgressBar:
 	var bar := ProgressBar.new()
 	bar.min_value = 0
-	bar.max_value = max(1, max_val)
+	bar.max_value = max(1, max_val + maxi(0, wound))
 	bar.value = clampi(current, 0, max_val)
 	bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(width, 10)
@@ -457,7 +459,25 @@ func _hp_bar(current: int, max_val: int, width: float) -> ProgressBar:
 	fill_style.corner_radius_bottom_left = 4
 	fill_style.corner_radius_bottom_right = 4
 	bar.add_theme_stylebox_override("fill", fill_style)
+	if wound > 0:
+		bar.add_child(_wound_strip(wound, max_val + wound, width, 10))
+		bar.tooltip_text = wound_tip(wound)
 	return bar
+
+
+## The dark end of an HP bar a wound has closed off (0.68).
+func _wound_strip(wound: int, scale: int, width: float, height: float) -> ColorRect:
+	var r := ColorRect.new()
+	r.color = Color(0.32, 0.06, 0.08, 0.95)
+	var w := width * float(wound) / float(maxi(1, scale))
+	r.size = Vector2(w, height)
+	r.position = Vector2(width - w, 0)
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return r
+
+
+func wound_tip(wound: int) -> String:
+	return tr("Wound: -%d max HP from heavy blows. Healing can't refill it; it closes %s.") % [wound, tr("at a campfire's Rest, a shrine or the run's end") if GameState.wounds_last_run() else tr("when the fight ends")]
 
 
 ## A hero portrait inside GameData.PORTRAIT_FRAME_PATH's ornate frame, sized

@@ -693,6 +693,28 @@ var POST_FIGHT_MEND := 0.0
 ## round, so ordinary fights never hurt and HP never carried (0.56 sim: 98%
 ## before a won fight, 95% after). A var so the sim can sweep it.
 var MEND_CAP := 0.4
+## Fight stakes (0.68, docs/design/fight_stakes_2026_10.md): from Rank C a
+## landed wind-up or a hit of WOUND_HEAVY_PCT of base max HP leaves a wound,
+## WOUND_SHARE of the damage off max HP that mending can't refill (capped at
+## WOUND_CAP). Guard, Defend and a dodge never wound. Up to Rank A wounds close
+## after the fight; from WOUND_PERSIST_RANK they last the run (a campfire's
+## Rest closes WOUND_REST_CLOSE of them, a shrine WOUND_SHRINE_CLOSE of max HP).
+## A fall from Rank C (after FALL_COST_SEALS seals) can scar (FALL_SCAR_CHANCE),
+## drops one worn gear piece in the rift (back if the party seals it), and from
+## FALL_DEATH_FROM_RANK a hero with two scars dies at FALL_DEATH_CHANCE. Never in
+## training, the Daily, the Tower, the Descent, breaches or Story.
+var STAKES_ON := true   # campaign_sim stakes=0: the old rules, for a baseline
+var WOUND_FROM_RANK := "C"
+var WOUND_PERSIST_RANK := "S"
+var WOUND_SHARE := 0.5
+var WOUND_CAP := 0.6
+var WOUND_HEAVY_PCT := 0.25
+var WOUND_REST_CLOSE := 0.5
+var WOUND_SHRINE_CLOSE := 0.25
+var FALL_SCAR_CHANCE := {"C": 0.15, "B": 0.2, "A": 0.25, "S": 0.3, "SS": 0.35, "SSS": 0.35}
+var FALL_DEATH_FROM_RANK := "SS"
+var FALL_DEATH_CHANCE := 0.5
+var FALL_COST_SEALS := 3
 ## Most of a hit a party can dodge, all sources together. A var so the sim can sweep it.
 var DODGE_CAP := 0.6
 ## Where a run's danger sits (0.56): [hp, dmg] multipliers on a kind of fight.

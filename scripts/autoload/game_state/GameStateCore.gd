@@ -668,6 +668,8 @@ func feature_unlocked(id: String) -> bool:
 		"bestiary": return not monsters_seen.is_empty()
 		"champions": return not champions.is_empty()
 		"wardcraft": return not breach.is_empty() or (veteran_reveal() and campaign_act >= GameData.BREACH_UNLOCK_ACT)
+		"wounds": return GameData.STAKES_ON and best_rift_rank_sealed >= GameData.rift_rank_index(GameData.WOUND_FROM_RANK) - 1 and campaign_act >= 2   # Rank C open (0.68)
+		"wounds_run": return GameData.STAKES_ON and best_rift_rank_sealed >= GameData.rift_rank_index(GameData.WOUND_PERSIST_RANK) - 1
 	return true
 
 

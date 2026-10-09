@@ -72,6 +72,9 @@ var short_runs := [0, 0, 0]    # runs with under 4 heroes, of them with an exped
 var resolve_doors := [0, 0, 0, 0, 0]   # boss doors with Resolve on: [doors, wavering, broken, won from wavering/broken, sum of Resolve]
 var lost_high := [0, 0]   # lost fights / of them from above 90% party HP
 var by_kind := {}        # fight kind -> [won, lost, start hp % sum of lost, of won] (all guilds)
+## Fight stakes (0.68), per tier ("C-A" wounds per fight, "S+" per run): [ordinary won, ordinary lost,
+## boss doors, boss-door HP share sum, wounds, wounds avoided, falls, fall scars, drops, deaths, fights]
+var stakes := {}
 var runs := {}           # rank -> [sealed, lost]
 var rounds := {}         # rank -> [fights, total rounds, fights over in round 1]
 var act_day := {}        # act finished -> day
@@ -108,6 +111,8 @@ func _ready() -> void:
 			take_path_relics = false
 		elif a == "exped=1":
 			expeditions_on = true
+		elif a == "stakes=0":   # the rules before fight stakes (0.68), for a baseline
+			GameData.STAKES_ON = false
 		elif a.begins_with("rstart="):
 			GameData.RESOLVE_START = int(a.substr(7))
 		elif a.begins_with("waver="):
@@ -199,6 +204,10 @@ func _ready() -> void:
 		print("   fight length (avg rounds, %% over in round 1): %s" % "  ".join(ranks.filter(func(r): return all_rounds.has(r)).map(func(r): return "%s %.1f/%d%%" % [r, float(all_rounds[r][1]) / maxf(1.0, all_rounds[r][0]), int(100.0 * all_rounds[r][2] / maxf(1.0, all_rounds[r][0]))])))
 		print("   by fight kind (won/all, party HP at the start: lost vs won): %s" % "  ".join(by_kind.keys().map(func(k): return "%s %d/%d (%d%% vs %d%%)" % [k, by_kind[k][0], by_kind[k][0] + by_kind[k][1], int(100.0 * by_kind[k][2] / maxf(1.0, by_kind[k][1])), int(100.0 * by_kind[k][3] / maxf(1.0, by_kind[k][0]))])))
 		by_kind = {}
+		for tier in stakes:
+			var sk: Array = stakes[tier]
+			print("   stakes %s: ordinary fights won %d/%d (%.1f%%) · boss door HP %d%% (%d doors) · %d wounds, %d avoided · %d falls in %d fights: %d scars, %d drops, %d deaths" % [tier, sk[0], sk[0] + sk[1], 100.0 * sk[0] / maxf(1, sk[0] + sk[1]), int(100.0 * sk[3] / maxf(1, sk[2])), sk[2], sk[4], sk[5], sk[6], sk[10], sk[7], sk[8], sk[9]])
+		stakes = {}
 		print("   Resolve at boss doors: %d doors, avg %.1f left, wavering %d, broken %d (won %d of those) · lost fights %d, %d from above 90%% HP" % [resolve_doors[0], float(resolve_doors[4]) / maxf(1, resolve_doors[0]), resolve_doors[1], resolve_doors[2], resolve_doors[3], lost_high[0], lost_high[1]])
 		resolve_doors = [0, 0, 0, 0, 0]
 		print("   Path relics taken: %d" % path_relics_taken)
@@ -829,6 +838,25 @@ func _play_run(rank: String, posts0: int = -1) -> String:
 								resolve_doors[3] += 1
 					bk[3 if won_now else 2] += float(ns.get("combat_state", {}).get("_start_hp_pct", 1.0))
 					by_kind[kind] = bk
+					var tier := "S+" if GameState.wounds_last_run() else ("C-A" if GameState.wounds_on() else "")
+					if tier != "":
+						var sk: Array = stakes.get(tier, [0, 0, 0, 0.0, 0, 0, 0, 0, 0, 0, 0])
+						var cs: Dictionary = ns.get("combat_state", {})
+						var stt: Dictionary = cs.get("_stats", {})
+						sk[10] += 1
+						if kind == "combat":
+							sk[0 if won_now else 1] += 1
+						if kind == "boss":   # HP against base max HP, so wounds count
+							sk[2] += 1
+							sk[3] += float(cs.get("_start_hp_base", cs.get("_start_hp_pct", 1.0)))
+						sk[4] += int(stt.get("wounds", 0.0))
+						sk[5] += int(stt.get("wound_guarded", 0.0) + stt.get("wound_defended", 0.0) + stt.get("wound_dodged", 0.0))
+						sk[6] += (cs.get("party", []) as Array).filter(func(x): return x.hp <= 0).size()
+						var lg: Array = result.get("log", [])
+						sk[7] += lg.filter(func(l): return str(l).contains("lasting scar")).size()
+						sk[8] += lg.filter(func(l): return str(l).contains("in the rift.") and str(l).contains(" drops their ")).size()
+						sk[9] += lg.filter(func(l): return str(l).contains("does not get up again")).size()
+						stakes[tier] = sk
 					if won_now:
 						sustain[0] += float(ns.get("combat_state", {}).get("mend", 0.0))
 						sustain[1] += float(ns.get("combat_state", {}).get("_start_hp_pct", 1.0))

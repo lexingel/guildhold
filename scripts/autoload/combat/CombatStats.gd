@@ -133,7 +133,13 @@ func auto_spend_attrs(h: Hero) -> void:
 		i += 1
 
 
+## Max HP less any wound (0.68): every heal and readout stops at it.
 func max_hp(h: Hero) -> int:
+	return maxi(1, base_max_hp(h) - h.wound)
+
+
+## Max HP before wounds: the wound cap, the heavy-hit test and the bar's scale.
+func base_max_hp(h: Hero) -> int:
 	return round(h.base_hp * (1.0 + hero_skill_total(h, "hp_pct")) * GameState.tactical_bonus())
 
 

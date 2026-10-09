@@ -658,6 +658,7 @@ func evolve_rank_gate(rank_id: String) -> String:
 func _clamp_hp_to_max() -> void:
 	for h in heroes:
 		h.battered = false   # back at camp, the field patch-up no longer holds them back
+		h.wound = 0          # and wounds close (0.68)
 		h.hp = min(h.hp, Combat.max_hp(h))
 
 

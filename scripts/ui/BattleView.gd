@@ -1172,7 +1172,7 @@ func _room_preview() -> Control:
 		var hc := _vbox(2)
 		hc.add_child(_label(tr(str(h.name.split(" the ")[0])), 12))
 		var mx := Combat.max_hp(h)
-		hc.add_child(_hp_bar(maxi(0, h.hp), mx, bar_w))
+		hc.add_child(_hp_bar(maxi(0, h.hp), mx, bar_w, h.wound))
 		hc.add_child(_label("%d/%d" % [maxi(0, h.hp), mx], 11, true))
 		chip.add_child(hc)
 		row.add_child(chip)
@@ -1873,7 +1873,7 @@ func _battle_width() -> float:
 ## A compact unit plate: name and HP on one line, an HP bar with a trailing
 ## "damage taken" chip behind it, a thin shield bar, and a row of status
 ## icons. _plate_set_hp() animates it while a turn plays out.
-func _unit_plate(name_text: String, hp: int, max_val: int, width: float, shield: float = 0.0, statuses: Array = []) -> Control:
+func _unit_plate(name_text: String, hp: int, max_val: int, width: float, shield: float = 0.0, statuses: Array = [], wound: int = 0) -> Control:
 	var wrap := Control.new()
 	wrap.custom_minimum_size = Vector2(width, UNIT_PLATE_H)
 	wrap.size = wrap.custom_minimum_size
@@ -1897,12 +1897,17 @@ func _unit_plate(name_text: String, hp: int, max_val: int, width: float, shield:
 	top.add_child(hp_l)
 	wrap.add_child(top)
 
-	var chip := _flat_bar(max_val, hp, width, 8, Color(1.0, 0.93, 0.8))
+	var scale := max_val + maxi(0, wound)   # a wound keeps the bar at the hero's full scale (0.68)
+	var chip := _flat_bar(scale, hp, width, 8, Color(1.0, 0.93, 0.8))
 	chip.position = Vector2(0, 17)
 	wrap.add_child(chip)
-	var fill := _flat_bar(max_val, hp, width, 8, _hp_color(float(max(0, hp)) / float(max(1, max_val))), true)
+	var fill := _flat_bar(scale, hp, width, 8, _hp_color(float(max(0, hp)) / float(max(1, max_val))), true)
 	fill.position = chip.position
 	wrap.add_child(fill)
+	if wound > 0:
+		var ws := _wound_strip(wound, scale, width, 8)
+		ws.position += chip.position
+		wrap.add_child(ws)
 	if shield > 0.0:
 		var sb := _flat_bar(max_val, int(min(shield, max_val)), width, 3, Palette.CRYSTALS)
 		sb.position = Vector2(0, 26)
@@ -1992,8 +1997,16 @@ func _pulse(node: CanvasItem, lo: float = 0.45, period: float = 0.7) -> void:
 
 
 ## Statuses shown under a hero's HP bar.
+## From Rank C a heavy blow also wounds (0.68): said on the intent's tooltip.
+func _wound_warning() -> String:
+	return ("
+" + tr("It wounds too: half the damage comes off max HP unless the target is guarded or defends.")) if GameState.wounds_on() else ""
+
+
 func _hero_statuses(state: Dictionary, h: Hero) -> Array:
 	var out: Array = []
+	if h.wound > 0:
+		out.append({"icon": "res://assets/skills/heart.png", "tip": wound_tip(h.wound), "color": Palette.HAZARD})
 	if state.get("_defending", {}).has(h.id):
 		out.append({"icon": "res://assets/skills/shield_basic.png", "tip": tr("Defending — takes reduced damage this round"), "color": Palette.VIOLET_BRIGHT})
 	var sh := float(state.get("hero_shields", {}).get(h.id, 0.0))
@@ -2252,7 +2265,7 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 		hero_rects[h.id] = rect
 		var pw: float = minf(h_slot - 16.0, 124.0)
 		var sh := float(state.get("hero_shields", {}).get(h.id, 0.0))
-		var plate := _unit_plate(h.name.split(" the ")[0], h.hp, Combat.max_hp(h), pw, sh, _hero_statuses(state, h))
+		var plate := _unit_plate(h.name.split(" the ")[0], h.hp, Combat.max_hp(h), pw, sh, _hero_statuses(state, h), h.wound)
 		plate.position = Vector2(cx - pw * 0.5, feet - size - UNIT_PLATE_H - 2.0)
 		if h == current_hero:
 			plate.get_child(0).get_child(0).add_theme_color_override("font_color", Palette.EMBER_BRIGHT)
@@ -2335,10 +2348,10 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 				var tip := str(info["desc"]) % int(GameData.SWEEP_MULT * 100) if ikind == "sweep" else str(info["desc"]).replace("%%", "%")
 				chip = _intent_chip(label, ikind in ["sweep", "snipe", "roar", "harvest", "drown", "immolate", "sunder", "brand"], "%s — %s" % [tr(str(info["name"])), tr(str(tip))], str(info["icon"]))
 			elif intent.get("charging", false):
-				chip = _intent_chip("Winding up", true, tr("Gathering strength this round. Next round it lands a heavy blow (×%s damage) that stuns its target unless they Defend. Defend, Guard, or move the likely target to the back row.") % tr(str(GameData.HEAVY_BLOW_MULT)))
+				chip = _intent_chip("Winding up", true, tr("Gathering strength this round. Next round it lands a heavy blow (×%s damage) that stuns its target unless they Defend. Defend, Guard, or move the likely target to the back row.") % tr(str(GameData.HEAVY_BLOW_MULT)) + _wound_warning())
 			elif intent.get("heavy_blow", false):
 				chip = _intent_chip("⚠ %d → %s" % [int(intent["dmg"]), tr(str(t.name.split(" the ")[0]))], true,
-					_keys(tr("HEAVY BLOW on %s for about %d — it stuns unless they Defend. Defend (5) halves it; Guard (6) takes it for them; Shield Bash breaks it.") % [tr(str(t.name)), int(intent["dmg"])]))
+					_keys(tr("HEAVY BLOW on %s for about %d — it stuns unless they Defend. Defend (5) halves it; Guard (6) takes it for them; Shield Bash breaks it.") % [tr(str(t.name)), int(intent["dmg"])]) + _wound_warning())
 			else:
 				chip = _intent_chip("%d → %s" % [int(intent["dmg"]), tr(str(t.name.split(" the ")[0]))], bool(intent["heavy"]),
 					tr("Attacks %s this round for about %d%s") % [tr(str(t.name)), int(intent["dmg"]), tr(str(tr(" — a heavy hit, consider Defending") if intent["heavy"] else ""))])
