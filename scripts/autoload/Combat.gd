@@ -2856,6 +2856,12 @@ func _pp_after_damage(state: Dictionary, h: Hero) -> void:
 			_pp_log(state, tr("The Grim Conjurer pulls %s back from the dark.") % tr(str(h.name)))
 
 
+## True when `h`'s next turn is lost to a stun (resolve_turn skips it), so the
+## screen plays it as a skipped turn instead of offering the action bar.
+func hero_loses_turn(state: Dictionary, h: Hero) -> bool:
+	return state.get("_stunned", {}).has(h.id) and not _pp_stun_immune(state, h)
+
+
 ## A stun on `h` that a Path shrugs off (Red Mist, a Scrapper Legend).
 func _pp_stun_immune(state: Dictionary, h: Hero) -> bool:
 	return int(_pp(state, h).get("mist", 0)) > 0 or (_legend(h) and _pa(h) == "scrapper")

@@ -199,3 +199,14 @@ func run() -> void:
 	st["pending_actions"][war.id] = {"action": "tonic:focus", "target": 0}
 	Combat._resolve_hero_action(st, war)
 	check(int(st["momentum"]) == mini(GameData.MOMENTUM_MAX, mom0 + GameData.TONIC_FOCUS) and GameState.tonic_count() == 0, "a Focus Tonic adds Momentum")
+
+	# Playtest 2026-10-09: a spent round rolls on peek (the screen stops for the
+	# hero who opens it), and a stunned hero's turn is played as lost.
+	st = _state(party)
+	check(not Combat.peek_next_turn(st).is_empty() and int(st["turn_idx"]) < (st["turn_order"] as Array).size(), "peek rolls a fresh round")
+	st["_stunned"] = {war.id: true}
+	check(Combat.hero_loses_turn(st, war) and not Combat.hero_loses_turn(st, cle), "a stunned hero loses the turn")
+	# Rank D recruits arrive at level 1: their first tree nodes are open (the tree used a level gate).
+	var rec := Combat.gen_hero("D", 1)
+	var kind := str(GameData.hero_tree_summaries(rec)[0]["kind"])
+	check(rec.level == 1 and GameData.node_lock(rec, kind, {"id": "t1", "req_level": 2}) == "", "a level-1 Rank D hero can learn a Tier-1 node")

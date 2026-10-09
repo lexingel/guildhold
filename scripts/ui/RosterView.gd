@@ -723,7 +723,10 @@ func _skill_node_tile(h: Hero, kind: String, n: Dictionary) -> Control:
 	var skill_id: String = n["id"]
 	var key := GameData.skill_storage_key(kind, skill_id)
 	var learned: bool = h.skills.get(key, false)
-	var missing_level: bool = h.level < int(n["req_level"])
+	# Trees open by rank and Path stage since 0.62 (GameState.learn_skill checks
+	# the same); the old level gate locked every level-1 recruit out.
+	var lock := GameData.node_lock(h, kind, n)
+	var missing_level: bool = lock != ""
 	var missing_prereq := false
 	for req in n["requires"]:
 		if not h.skills.get(GameData.skill_storage_key(kind, req), false):
@@ -746,7 +749,7 @@ func _skill_node_tile(h: Hero, kind: String, n: Dictionary) -> Control:
 		if locked_out:
 			reason = tr("Locked out: you took %s. A Path is one choice; respec the tree to switch.") % ", ".join((n.get("excludes", []) as Array).filter(func(x): return h.skills.get(GameData.skill_storage_key(kind, x), false)).map(node_name))
 		elif missing_level:
-			reason = tr("Requires Lv%d") % int(n["req_level"])
+			reason = lock
 		elif missing_prereq:
 			var need: Array = (n["requires"] as Array).filter(func(r): return not h.skills.get(GameData.skill_storage_key(kind, r), false)).map(node_name)
 			reason = (tr("Learn %s first") % tr(" and ").join(need)) if not need.is_empty() else (tr("Learn one of %s first") % tr(" or ").join((n.get("requires_any", []) as Array).map(node_name)))

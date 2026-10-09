@@ -234,7 +234,8 @@ func _start_idle_sway(wrapper: Control) -> void:
 	tween.bind_node(wrapper)
 	tween.set_loops()
 	tween.set_trans(Tween.TRANS_SINE)
-	tween.tween_property(wrapper, "position:y", rest.y - 3.0, 1.4)
+	# 1px, not 3: a bigger bob lifted the feet off the shadow and read as floating.
+	tween.tween_property(wrapper, "position:y", rest.y - 1.0, 1.4)
 	tween.tween_property(wrapper, "position:y", rest.y, 1.4)
 
 
@@ -1041,15 +1042,10 @@ func _anim_guard(hw: Control, aw: Control, arena: Control) -> void:
 ## redundant render() firing mid-animation can't start a second overlapping
 ## run.
 ##
-## The stop-check only peeks state["turn_order"][turn_idx] when that index is
-## still in range. When it isn't (this round's order is fully spent), there
-## is nothing valid to inspect yet — Combat.peek_next_turn/_start_round is
-## what rolls the next one, and only _play_turn (inside the loop body) is
-## allowed to trigger that (see its doc comment). Treating an out-of-range
-## index as "stop" here — instead of "fall through and resolve" — used to
-## make render() and this function call each other forever: render() shows no
-## current hero, fires this function, which would immediately break without
-## making progress, call render() again, which fires this function again...
+## The stop-check calls Combat.peek_next_turn, which rolls the next round
+## when this one is spent. Skipping the check at a round boundary used to
+## auto-play the round's first hero with last round's action (playtest
+## 2026-10-09). Stunned heroes don't stop the loop: their turn is lost anyway.
 ##
 ## `pre_action`, if given, runs after the disconnect above but before the
 ## loop — this is how an action-bar click gets its GameState.set_hero_action
@@ -1069,29 +1065,29 @@ func _run_combat_turns(state: Dictionary, hero_wrappers: Dictionary, hero_rects:
 	var force := force_first
 	while is_instance_valid(arena):   # the player may leave the fight's screen during the pause between turns
 		if not force:
-			var turn_order: Array = state.get("turn_order", [])
-			var turn_idx: int = int(state.get("turn_idx", 0))
-			if turn_idx < turn_order.size():
-				var current: Dictionary = turn_order[turn_idx]
-				if str(current.get("type", "")) == "hero":
-					var h := _hero_by_id(state["party"], str(current["id"]))
-					if h and h.hp > 0:
-						if not _auto_battle:
-							break
-						# Auto hands back control (once a round) when a hero is about to fall.
-						var falling := Combat.hero_about_to_fall(state)
-						if falling and _auto_paused_round != int(state.get("round_num", 0)):
-							_auto_paused_round = int(state.get("round_num", 0))
-							_auto_battle = false
-							_auto_pause_note = tr("Auto paused: %s is about to fall. Defend, Guard or heal, then turn Auto back on.") % tr(str(falling.name.split(" the ")[0]))
-							break
-						state["pending_actions"][h.id] = Combat.auto_action(state, h)
+			# Peek rolls the next round when this one is spent, so the hero who
+			# opens it stops here for input instead of replaying last round's action.
+			var current: Dictionary = Combat.peek_next_turn(state)
+			if str(current.get("type", "")) == "hero":
+				var h := _hero_by_id(state["party"], str(current["id"]))
+				if h and h.hp > 0 and not Combat.hero_loses_turn(state, h):
+					if not _auto_battle:
+						break
+					# Auto hands back control (once a round) when a hero is about to fall.
+					var falling := Combat.hero_about_to_fall(state)
+					if falling and _auto_paused_round != int(state.get("round_num", 0)):
+						_auto_paused_round = int(state.get("round_num", 0))
+						_auto_battle = false
+						_auto_pause_note = tr("Auto paused: %s is about to fall. Defend, Guard or heal, then turn Auto back on.") % tr(str(falling.name.split(" the ")[0]))
+						break
+					state["pending_actions"][h.id] = Combat.auto_action(state, h)
 		force = false
 		if GameState.combat_speed >= INSTANT_SPEED:
 			GameState.resolve_turn_now()   # Instant: no playback, the screen updates once at the end
 			if GameState.run.get("node_state", {}).has("result"):
 				break
 			continue
+		_refresh_turn_ui(state, hero_wrappers)
 		await _play_turn_bounded(state, hero_wrappers, hero_rects, monster_wrappers, monster_rects, arena)
 		if GameState.run.get("node_state", {}).has("result") or not is_instance_valid(arena):
 			break   # (the player left the fight's screen: the rest resolves on the next render)
@@ -1106,6 +1102,43 @@ func _run_combat_turns(state: Dictionary, hero_wrappers: Dictionary, hero_rects:
 	# the combat screen this animation belongs to.
 	if screen == "rift_run":
 		render()
+
+
+var _live_strip: Control = null   # this render's turn-order strip and command bar,
+var _live_bar: Control = null     # swapped by _refresh_turn_ui while turns play out
+
+
+## Redraws the turn order and the command bar for the turn about to play, so
+## monster turns highlight the monster and the last hero's skills don't stay
+## offered (playtest 2026-10-09). Stale hotkeys go too: they'd call render()
+## mid-animation.
+func _refresh_turn_ui(state: Dictionary, hero_wrappers: Dictionary) -> void:
+	if not is_instance_valid(_live_strip) or not is_instance_valid(_live_bar):
+		return
+	_combat_hotkeys.clear()
+	var turn: Dictionary = Combat.peek_next_turn(state)
+	var living: Array[Hero] = []
+	for h in state["party"]:
+		if h.hp > 0:
+			living.append(h)
+	var waiting := ""
+	if str(turn.get("type", "")) == "hero":
+		var h := _hero_by_id(state["party"], str(turn["id"]))
+		if h:
+			waiting = tr("%s acts…") % tr(str(h.name.split(" the ")[0]))
+	var strip := _turn_order_strip(state)
+	strip.size_flags_horizontal = _live_strip.size_flags_horizontal
+	_live_strip = _swap_control(_live_strip, strip)
+	_live_bar = _swap_control(_live_bar, _command_bar(state, null, living, hero_wrappers, Callable(), Callable(), waiting))
+
+
+func _swap_control(old: Control, fresh: Control) -> Control:
+	var parent := old.get_parent()
+	var idx := old.get_index()
+	parent.add_child(fresh)
+	parent.move_child(fresh, idx)
+	old.queue_free()
+	return fresh
 
 
 ## A quick step-back-and-fade on every living hero before the screen swaps to
@@ -2104,7 +2137,7 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 	var current_hero: Hero = null
 	if str(current_turn.get("type", "")) == "hero":
 		var candidate := _hero_by_id(party, str(current_turn["id"]))
-		if candidate and candidate.hp > 0:
+		if candidate and candidate.hp > 0 and not Combat.hero_loses_turn(state, candidate):
 			current_hero = candidate
 	var acting_monster: int = int(current_turn["id"]) if str(current_turn.get("type", "")) == "monster" else -1
 	if current_hero == null or current_hero.id != _guard_picker_for:
@@ -2179,7 +2212,7 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 		var size: float = rect.custom_minimum_size.y
 		rect.custom_minimum_size.x = size * 0.48   # every frame is 96 wide; an 84-wide still fits by height
 		rect.size = rect.custom_minimum_size
-		var feet: float = ground - (H * 0.06 if is_back else 0.0)
+		var feet: float = ground   # the back row sits left of the front row (see the party screen), on the same floor
 		var cx: float = h_start + h_slot * (k + 0.5) + (10.0 if h == current_hero else 0.0)
 		var ring_w: float = size * 0.8
 		var hover_ring := _ground_ring(cx, feet, ring_w, Palette.HAZARD, true)
@@ -2229,7 +2262,9 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 				big_i = i
 	var mz_x := W * 0.56
 	var mz_w := W * 0.41
-	var m_slot: float = mz_w / max(1, monsters.size())
+	# Slots by the living foes, and no width cap on the sprite: a summon used to
+	# shrink every foe while the heroes kept their size (playtest 2026-10-09).
+	var m_slot: float = mz_w / max(1, living_idx.size())
 	var next_round: int = int(state.get("round_num", 0))
 	for i in monsters.size():
 		var m: Dictionary = monsters[i]
@@ -2238,12 +2273,12 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 		# Monster art is drawn on the same 200px canvas as the heroes, so one
 		# scale for all keeps every sprite at the heroes' pixel size (and a
 		# small creature small); the boss/elite is drawn a size class up.
-		var m_rect := _sprite_fit(GameData.sprite_for_monster(str(m["name"])), minf(1.0, px + 0.25) if i == big_i else px, m_slot * 1.1, true)
+		var m_rect := _sprite_fit(GameData.sprite_for_monster(str(m["name"])), minf(1.0, px + 0.25) if i == big_i else px, INF, true)
 		m_rect.flip_h = GameData.faces_away(GameData.sprite_for_monster(str(m["name"])))
 		var msz: Vector2 = m_rect.custom_minimum_size
 		var ring_w: float = minf(msz.x, msz.y * 1.2) * 0.8
-		var cx: float = mz_x + m_slot * (i + 0.5)
-		var feet: float = ground - (H * 0.06 if i % 2 == 1 else 0.0)
+		var cx: float = mz_x + m_slot * (living_idx.find(i) + 0.5)
+		var feet: float = ground   # everyone stands on the floor line (lifts read as floating)
 		if i == _combat_target and current_hero:
 			var tring := _ground_ring(cx, feet, ring_w, Palette.HAZARD)
 			arena.add_child(tring)
@@ -2366,12 +2401,41 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 				_combat_target = ti
 				run_turns.call(func(): GameState.set_hero_action(hid, sk_act, ti))
 				return
+			if _ally_pick != "":   # asking for an ally (Guard, a tonic): a foe click never attacks
+				return
 			if ti == _combat_target:
 				attack_cb.call(ti)
 			else:
 				_combat_target = ti
 				render()
-		for i in monster_wrappers:
+		# Guard or a tonic waiting for its ally: the heroes take the clicks, not the foes.
+		if _ally_pick == "guard" or _ally_pick == "tonic":
+			var mode := _ally_pick
+			for h in state["party"]:
+				if h.hp <= 0 or not hero_wrappers.has(h.id) or (mode == "guard" and h == current_hero):
+					continue
+				if mode == "tonic" and _tonic_kind == "healing" and h.hp >= Combat.max_hp(h):
+					continue
+				var hw: Control = hero_wrappers[h.id]
+				var ahit := Button.new()
+				ahit.flat = true
+				for sn in ["normal", "hover", "pressed", "focus", "disabled"]:
+					ahit.add_theme_stylebox_override(sn, StyleBoxEmpty.new())
+				ahit.position = hw.position
+				ahit.size = hw.size
+				ahit.mouse_default_cursor_shape = Control.CURSOR_CROSS
+				ahit.tooltip_text = (tr("Guard %s") if mode == "guard" else tr("Give %s the tonic")) % tr(str(h.name.split(" the ")[0]))
+				hw.modulate = Color(1.15, 1.08, 1.0)
+				ahit.mouse_entered.connect(func(): if is_instance_valid(hw): hw.modulate = Color(1.35, 1.25, 1.1))
+				ahit.mouse_exited.connect(func(): if is_instance_valid(hw): hw.modulate = Color(1.15, 1.08, 1.0))
+				var aid: String = h.id
+				ahit.pressed.connect(func():
+					if _combat_animating:
+						return
+					_ally_pick = ""
+					run_turns.call(func(): GameState.set_hero_action(hid, mode if mode == "guard" else "tonic:" + _tonic_kind, 0, aid)))
+				arena.add_child(ahit)
+		for i in (monster_wrappers if _ally_pick == "" or _ally_pick.begins_with("foe:") else {}):
 			var w: Control = monster_wrappers[i]
 			var hit := Button.new()
 			hit.flat = true
@@ -2415,15 +2479,18 @@ func _render_battle(v: VBoxContainer, state: Dictionary) -> void:
 		var strip := _turn_order_strip(state)
 		strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		strip_row.add_child(strip)
+		_live_strip = strip
 		strip_row.add_child(_battle_tools(living_heroes, hero_wrappers))
 		col.add_child(strip_row)
 	else:
-		col.add_child(_turn_order_strip(state))
+		_live_strip = _turn_order_strip(state)
+		col.add_child(_live_strip)
 	var tut := _tutorial_step(state, current_hero)
 	_tut_key = str(tut.get("key", ""))
 	if not tut.is_empty():
 		col.add_child(_tutorial_panel(tut))
-	col.add_child(_command_bar(state, current_hero, living_heroes, hero_wrappers, attack_cb, run_turns))
+	_live_bar = _command_bar(state, current_hero, living_heroes, hero_wrappers, attack_cb, run_turns)
+	col.add_child(_live_bar)
 	if _combat_log_open:
 		var full_log: Array = state["log"]
 		col.add_child(_log_richtext(full_log.slice(max(0, full_log.size() - 14)), party, monsters, 140.0))
@@ -2847,7 +2914,7 @@ func _tool_button(icon_path: String, text: String, tip: String, cb: Callable) ->
 	return b
 
 
-func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[Hero], hero_wrappers: Dictionary, attack_cb: Callable, run_turns: Callable) -> Control:
+func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[Hero], hero_wrappers: Dictionary, attack_cb: Callable, run_turns: Callable, waiting := "") -> Control:
 	var monsters: Array = state["monsters"]
 	var panel := PanelContainer.new()
 	var st := StyleBoxFlat.new()
@@ -3025,7 +3092,7 @@ func _command_bar(state: Dictionary, current_hero: Hero, living_heroes: Array[He
 		if _ally_pick != "":
 			_guard_picker(row, state, current_hero, living_heroes, run_turns)
 	else:
-		var l := _label(tr("The party is down.") if living_heroes.is_empty() else tr("Enemy turn…"), 14, true)
+		var l := _label(tr("The party is down.") if living_heroes.is_empty() else (waiting if waiting != "" else tr("Enemy turn…")), 14, true)
 		l.custom_minimum_size = Vector2(160, 54) if compact else Vector2(200, 72)
 		l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		row.add_child(l)

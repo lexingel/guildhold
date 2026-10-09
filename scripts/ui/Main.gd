@@ -2032,8 +2032,10 @@ func _render_onboard(v: VBoxContainer) -> void:
 		pending_crest = 1
 		_flavor_toast = GameData.narrative_line("guild_founded")
 		screen = "camp"
-		render()
+		# The cinematic first: rendering the camp before it played the prologue
+		# card's voice, marked it heard and stopped it, so a skip lost it.
 		_play_cinematic(true)   # the Night of Breaking, ending on this guild's name
+		render()
 	)
 	v.add_child(found)
 	edit.text_submitted.connect(func(_t): found.pressed.emit())   # Enter founds it too
