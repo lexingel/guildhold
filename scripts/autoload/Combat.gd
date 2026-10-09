@@ -95,6 +95,12 @@ func start_combat(party: Array[Hero], kind: String, diff: Dictionary, floor_idx:
 		log.append(tr("The party's Resolve is broken: foes strike first, and the heroes fight without Momentum."))
 	elif waver == 1:
 		log.append(tr("The party is wavering: foes strike first."))
+	# From Rank S, Momentum decides who strikes first on the road (0.69).
+	var road_first := false
+	if waver == 0 and kind == "combat" and GameState.wounds_last_run():
+		road_first = momentum < GameData.ROAD_INITIATIVE
+		log.append(tr("The foes strike first: the party has %d Momentum, %d keeps the initiative.") % [momentum, GameData.ROAD_INITIATIVE] if road_first
+			else tr("The party has the initiative (%d Momentum).") % momentum)
 
 	# An escort NPC quest, folded onto an ordinary "combat" node rather than a
 	# whole new node kind — a chance for a fragile ally to tag along who
@@ -131,7 +137,7 @@ func start_combat(party: Array[Hero], kind: String, diff: Dictionary, floor_idx:
 		"momentum_proc": momentum_proc, "momentum": mini(momentum, GameData.MOMENTUM_MAX), "kill_shield": kill_shield, "hero_shields": {},
 		"monster_shields": monster_shields, "hero_poison": {}, "escort": escort,
 		"round_num": 0, "log": log,
-		"pending_actions": pending_actions, "_waver": waver,
+		"pending_actions": pending_actions, "_waver": waver, "_foes_first": road_first,
 	}
 	_pp_start(state)   # Paths (0.62): per-hero counters, Resonance
 	# Seed round 1's turn order immediately so the combat screen's very first
@@ -502,8 +508,8 @@ func _compute_turn_order(state: Dictionary) -> Array:
 			if (monsters[i].get("affixes", []) as Array).has("hasted"):
 				entries.append({"type": "monster", "id": i, "_spd": float(monsters[i].get("spd", 10)) * 0.4 + randf() * 0.01})
 	entries.sort_custom(func(a, b): return float(a["_spd"]) > float(b["_spd"]))
-	if int(state.get("_waver", 0)) > 0 and int(state.get("round_num", 0)) == 1:
-		# Low Resolve (0.64): every foe acts before every hero in round 1.
+	if (int(state.get("_waver", 0)) > 0 or state.get("_foes_first", false)) and int(state.get("round_num", 0)) == 1:
+		# Low Resolve (0.64), or too little Momentum on the road from Rank S (0.69): every foe acts before every hero in round 1.
 		var foes_first := entries.filter(func(e): return e["type"] == "monster")
 		foes_first.append_array(entries.filter(func(e): return e["type"] == "hero"))
 		return foes_first
@@ -1535,7 +1541,8 @@ func _monster_strike(state: Dictionary, i: int, target: Hero, mult: float, aimed
 			# undefended, wounds; any other such hit leaves a trace.
 			if GameState.wounds_on() and not guard and not state["_defending"].has(target.id):
 				var big: bool = heavy_blow or dealt_back >= base_max_hp(target) * GameData.WOUND_HEAVY_PCT
-				var w := GameState.add_wound(target, dealt_back, GameData.WOUND_SHARE if big else GameData.WOUND_TRACE)
+				var trace: float = GameData.WOUND_TRACE if GameState.wounds_last_run() and str(state.get("kind", "")) == "combat" else 0.0   # traces wear the road down from Rank S (0.69)
+				var w := GameState.add_wound(target, dealt_back, GameData.WOUND_SHARE if big else trace)
 				if w > 0:
 					_tally(state, "wound_hp", w)
 					if big:
@@ -1966,6 +1973,10 @@ func _finish_combat(state: Dictionary, won: bool, retreated: bool) -> Dictionary
 	if not GameState.wounds_last_run():   # up to Rank A wounds close when the fight ends (0.68)
 		for h in party:
 			h.wound = 0
+	elif won and not bool(state.get("is_boss", false)):   # from Rank S Momentum left over carries to the next fight (0.69)
+		var left := int(state.get("momentum", 0))
+		if left > 0:
+			GameState.run["momentum_bonus"] = mini(GameData.MOMENTUM_MAX - GameData.MOMENTUM_START, int(GameState.run.get("momentum_bonus", 0)) + left)
 	# Any hero knocked out mid-fight (hp hit 0 while the party kept
 	# fighting and ultimately won, or before a retreat) still needs a
 	# recovery timer — not just the whole-party-wiped case above, or

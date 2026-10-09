@@ -708,7 +708,13 @@ var STAKES_ON := true   # campaign_sim stakes=0: the old rules, for a baseline
 var WOUND_FROM_RANK := "C"
 var WOUND_PERSIST_RANK := "S"
 var WOUND_SHARE := 0.5
-var WOUND_TRACE := 0.0        # of any other unguarded hit; off: 0.15-0.3 slowed bosses without wearing the run (sim 2026-10-09)
+var WOUND_TRACE := 0.3        # of any other unguarded hit in an ordinary fight from Rank S (sim 2026-10-10: 0.3-0.5 cost a few % a fight at normal pace; judge in playtest)
+var WOUND_ROAD_DMG := 1.5     # from Rank S ordinary fights hit this much harder (0.69): they landed almost no damage, so nothing could carry
+var WOUND_ROAD_HP := 1.5      # and their foes are this much tougher, so they live to act (0.69)
+## From Rank S an ordinary fight's foes strike first unless the party starts it
+## with ROAD_INITIATIVE Momentum or more; Momentum left after a won fight on the
+## road carries to the next (the user, 2026-10-09: Momentum decides who acts first).
+var ROAD_INITIATIVE := 5
 var WOUND_CAP := 0.6
 var WOUND_HEAVY_PCT := 0.25
 var WOUND_REST_CLOSE := 0.5

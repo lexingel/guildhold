@@ -78,17 +78,6 @@ func run() -> void:
 		defended_clean = defended_clean and t.wound == 0
 	check(wounded, "a landed wind-up wounds at Rank B")
 	check(defended_clean, "a defended blow never wounds")
-	t.wound = 0
-	t.hp = Combat.max_hp(t)
-	GameData.WOUND_TRACE = 0.15   # off in 0.68; the rule still works when switched on
-	var st_t := Combat.start_combat(party, "combat", GameState._diff(), 0)
-	st_t["dodge"] = 0.0
-	var hp0 := t.hp
-	for k in 10:
-		if t.wound == 0:
-			Combat._monster_strike(st_t, 0, t, 1.0, false)
-	check(t.wound > 0 and t.wound <= int(ceil((hp0 - t.hp) * GameData.WOUND_SHARE)) + 1, "an ordinary hit leaves a trace (%d)" % t.wound)
-	GameData.WOUND_TRACE = 0.0
 	t.wound = 40
 	Combat._finish_combat(Combat.start_combat(party, "combat", GameState._diff(), 0), true, false)
 	check(t.wound == 0, "up to Rank A a wound closes when the fight ends")
@@ -127,6 +116,39 @@ func run() -> void:
 
 	# From Rank S a wound lasts the run; a campfire halves it, a shrine closes some.
 	GameState.start_ladder_rift("S", _ids(), null)
+	# On the road from Rank S ordinary fights hit harder and every hit leaves a trace (0.69).
+	seed(21)
+	var plain := Combat.gen_monster(GameState._diff(), 0, "combat")
+	seed(21)
+	GameData.WOUND_ROAD_DMG = 1.0
+	var mild := Combat.gen_monster(GameState._diff(), 0, "combat")
+	GameData.WOUND_ROAD_DMG = 1.5
+	check(int(plain["dmg"]) > int(mild["dmg"]), "from Rank S ordinary foes hit harder (%d vs %d)" % [int(plain["dmg"]), int(mild["dmg"])])
+	t.wound = 0
+	t.hp = Combat.max_hp(t)
+	var st_t := Combat.start_combat(party, "combat", GameState._diff(), 0)
+	st_t["dodge"] = 0.0
+	var hp0 := t.hp
+	for k in 10:
+		if t.wound == 0:
+			Combat._monster_strike(st_t, 0, t, 1.0, false)
+	check(t.wound > 0 and t.wound <= int(ceil((hp0 - t.hp) * GameData.WOUND_SHARE)) + 1, "an ordinary hit leaves a trace from Rank S (%d)" % t.wound)
+	# Momentum decides who strikes first on the road, and carries between fights (0.69).
+	GameState.run.erase("momentum_bonus")
+	var cold := Combat.start_combat(party, "combat", GameState._diff(), 0)
+	check(cold.get("_foes_first", false), "from Rank S the foes strike first at %d Momentum" % GameData.MOMENTUM_START)
+	cold["round_num"] = 1
+	var order: Array = Combat._compute_turn_order(cold)
+	check(str(order[0]["type"]) == "monster", "and act before every hero in round 1")
+	GameState.run["momentum_bonus"] = GameData.ROAD_INITIATIVE - GameData.MOMENTUM_START
+	var warm := Combat.start_combat(party, "combat", GameState._diff(), 0)
+	check(not warm.get("_foes_first", false), "with %d Momentum the party keeps the initiative" % GameData.ROAD_INITIATIVE)
+	warm["momentum"] = 4
+	Combat._finish_combat(warm, true, false)
+	check(int(GameState.run.get("momentum_bonus", 0)) == 4, "Momentum left after a won fight carries to the next")
+	GameState.run.erase("momentum_bonus")
+	var boss_st := Combat.start_combat(party, "boss", GameState._diff(), 0)
+	check(not boss_st.get("_foes_first", false), "the boss isn't affected")
 	t.wound = 100
 	Combat._finish_combat(Combat.start_combat(party, "combat", GameState._diff(), 0), true, false)
 	check(t.wound == 100, "from Rank S a wound outlasts the fight")

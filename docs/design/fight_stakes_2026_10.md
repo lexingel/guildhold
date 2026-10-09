@@ -18,6 +18,18 @@ Status: shipped in 0.68.0 (2026-10-09), except the run wear-down layer, which th
   - traces built but switched off (`WOUND_TRACE` 0.0).
 - **What works:** a wind-up to answer in every C+ fight, and fall costs at normal pace. Per 16 guilds that's about 90 scars, about 570 drops (nearly all recovered) and 5 deaths at SS/SSS.
 - **Follow-up for run wear-down:** ordinary fights at S+ must hit harder or last longer, a change to fights themselves. Then traces (`WOUND_TRACE`) can carry it.
+
+## 0.69: the deep road (2026-10-10)
+
+- **The user asked** for ordinary fights at S+ to hit harder.
+- **Why that alone did nothing:** a probe showed that at Recommended power ordinary foes die in round 1 before acting (0 damage taken in 2 of 3 fights).
+- **The user's design: both tougher foes and Momentum for initiative.** From Rank S, ordinary foes get ×1.5 HP (`WOUND_ROAD_HP`) and ×1.5 damage (`WOUND_ROAD_DMG`).
+  - **Who strikes first:** foes strike first unless the party starts the fight with `ROAD_INITIATIVE` (5) Momentum.
+  - **Banking:** Momentum left after a won non-boss fight carries to the next (`run["momentum_bonus"]`, capped).
+  - **Traces:** `WOUND_TRACE` 0.3 in ordinary fights only.
+- **Sim (8 guilds, traces 0.3 / 0.5):** boss-door HP 93-97%, ordinary fights won 100%, act pace about normal. The road now costs a few percent a fight; shrines and the campfire before the boss close much of it.
+- **Shipped at 0.3** to be judged in the playtest (the user's call): sim auto-play defends far better than people do.
+- **If testers feel no wear:** raise `WOUND_TRACE` towards 0.75-1.0 and cut campfire/shrine closing.
 - **Found while building:** every knock-out used to scar at 50%, at every rank. Now a fall below C doesn't scar, and C+ uses 15-35%.
 
 ## Why

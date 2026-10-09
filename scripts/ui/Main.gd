@@ -2660,6 +2660,7 @@ func _stakes_line(rid: String) -> String:
 		bits.append(tr("A fall can scar and drop gear."))
 	if i >= GameData.rift_rank_index(GameData.WOUND_PERSIST_RANK):
 		bits.append(tr("Wounds last until a campfire."))
+		bits.append(tr("Road foes are tougher and strike first unless the party starts a fight with %d Momentum.") % GameData.ROAD_INITIATIVE)
 	if falls and i >= GameData.rift_rank_index(GameData.FALL_DEATH_FROM_RANK):
 		bits.append(tr("A twice-scarred hero can die."))
 	return " ".join(bits)
