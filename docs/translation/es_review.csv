@@ -311,7 +311,7 @@ Opens after you seal your first rift,Se abre al sellar tu primera grieta,scripts
 Training Yard,Patio de Entrenamiento,scripts/autoload/game_data/GameDataArt.gd:74
 Opens after you seal 2 rifts,Se abre al sellar 2 grietas,scripts/autoload/game_data/GameDataArt.gd:74
 "Wen, the Chronicler","Wen, la Cronista",scripts/autoload/game_data/GameDataArt.gd:74
-"""Two rifts sealed, and the yard behind the barracks is finally clear of rubble. Send a hero there for a few days and they come back stronger: an attribute point, a new program. The Drill Yard room adds places. And the quest board has work off the map for anyone left at camp.""",,scripts/autoload/game_data/GameDataArt.gd:75
+"""Two rifts sealed, and the yard behind the barracks is finally clear of rubble. Send a hero there for a few days and they come back stronger: an attribute point, a new program. The Drill Yard room adds places. And the quest board has work off the map for anyone left at camp.""","""Dos grietas selladas, y el patio tras los barracones por fin está libre de escombros. Envía allí a un héroe unos días y volverá más fuerte: un punto de atributo, un programa nuevo. La sala del Campo de Instrucción añade puestos. Y el tablón de misiones tiene trabajo fuera del mapa para quien se quede en el campamento.""",scripts/autoload/game_data/GameDataArt.gd:75
 Accord Hall,Salón del Acuerdo,scripts/autoload/game_data/GameDataArt.gd:76
 """This camp was an Accord hall once. The Barracks, the Infirmary and the Drill Yard can be rebuilt now, room by room, with Gold. Each level costs a little upkeep. More rooms open as the guild grows."" (Guild > Accord Hall)","""Este campamento fue un salón del Acuerdo. El Cuartel, el Dispensario y el Campo de Instrucción ya se pueden reconstruir, sala a sala, con Oro. Cada nivel cuesta un poco de mantenimiento. Se abren más salas a medida que crece el gremio."" (Gremio > Salón del Acuerdo)",scripts/autoload/game_data/GameDataArt.gd:77
 Hero requests,Peticiones de los héroes,scripts/autoload/game_data/GameDataArt.gd:78
@@ -354,8 +354,8 @@ Español (beta),,scripts/autoload/game_data/GameDataArt.gd:176
 zh_CN,,scripts/autoload/game_data/GameDataArt.gd:176
 简体中文 (beta),,scripts/autoload/game_data/GameDataArt.gd:176
 "Expedition pay was checked in a full simulation and set by the heroes you send: a job asks for what your spare heroes can do and pays what a rift at their own rank would, so a bench that can't keep up with your best four still has work, and a strong one is no longer paid more on the road than in the rifts.","La paga de las expediciones se revisó en una simulación completa y ahora depende de los héroes que envías: un trabajo pide lo que tus héroes de reserva pueden hacer y paga lo que daría una grieta de su propio rango, así que una reserva que no está a la altura de tus cuatro mejores sigue teniendo trabajo, y una fuerte ya no gana más en el camino que en las grietas.",scripts/autoload/game_data/GameDataArt.gd:179
-"Your own founders and expeditions. A new guild signs its first three heroes from a board of six, one of every class among them, with free rerolls. From two seals the Quest board posts expeditions: jobs off the map for heroes you can spare, gone for whole days while the rifts go on without them. The odds show before they leave, every class and Path brings something on the road, and a perilous job gone wrong can leave a scar. After Act I's card you choose how many tips you want, and the Training Yard now costs Essence.",,scripts/autoload/game_data/GameDataArt.gd:180
-"Fixes from a full playthrough: the hero who opens a round waits for you instead of replaying last round's move, the turn order and the action bar follow every turn, Guard picks an ally, a stunned hero loses the turn openly, foes keep their size when one is summoned, and new recruits can spend their skill points. Also: Settings and a master volume on the title screen, a crest picker, the shrine's second choice, Take buttons in treasure rooms, a bigger rift map with fewer crossings, the main portal leads to the ranked rifts, front-row heroes stand nearest the foes, a Worn filter in the inventory, banked Momentum on the map, and a cleaner Guild, Records and Library.",,scripts/autoload/game_data/GameDataArt.gd:181
+"Your own founders and expeditions. A new guild signs its first three heroes from a board of six, one of every class among them, with free rerolls. From two seals the Quest board posts expeditions: jobs off the map for heroes you can spare, gone for whole days while the rifts go on without them. The odds show before they leave, every class and Path brings something on the road, and a perilous job gone wrong can leave a scar. After Act I's card you choose how many tips you want, and the Training Yard now costs Essence.","Tus propios fundadores y expediciones. Un gremio nuevo contrata a sus tres primeros héroes de un tablón de seis, con una de cada clase entre ellos y renovaciones gratis. Desde dos sellados, el tablón de Misiones publica expediciones: trabajos fuera del mapa para los héroes de los que puedas prescindir, que se ausentan días enteros mientras las grietas siguen sin ellos. La probabilidad se ve antes de partir, cada clase y cada Senda aporta algo en el camino, y un trabajo peligroso que sale mal puede dejar una cicatriz. Tras la tarjeta del Acto I eliges cuántos consejos quieres, y el Patio de Entrenamiento ahora cuesta Esencia.",scripts/autoload/game_data/GameDataArt.gd:180
+"Fixes from a full playthrough: the hero who opens a round waits for you instead of replaying last round's move, the turn order and the action bar follow every turn, Guard picks an ally, a stunned hero loses the turn openly, foes keep their size when one is summoned, and new recruits can spend their skill points. Also: Settings and a master volume on the title screen, a crest picker, the shrine's second choice, Take buttons in treasure rooms, a bigger rift map with fewer crossings, the main portal leads to the ranked rifts, front-row heroes stand nearest the foes, a Worn filter in the inventory, banked Momentum on the map, and a cleaner Guild, Records and Library.","Correcciones tras una partida completa: el héroe que abre una ronda te espera en vez de repetir el movimiento de la ronda anterior, el orden de turnos y la barra de acciones siguen cada turno, Proteger elige a un aliado, un héroe aturdido pierde el turno a la vista, los enemigos mantienen su tamaño cuando se invoca a uno, y los reclutas nuevos pueden gastar sus puntos de habilidad. Además: Ajustes y volumen general en la pantalla de título, un selector de blasón, la segunda opción del santuario, botones Tomar en las salas de tesoro, un mapa de grieta más grande con menos cruces, el portal principal lleva a las grietas por rango, los héroes de la fila delantera se colocan más cerca de los enemigos, un filtro En uso en el inventario, el Ímpetu acumulado en el mapa, y un Gremio, Registros y Biblioteca más limpios.",scripts/autoload/game_data/GameDataArt.gd:181
 "Gear, simpler. The Smithy is one screen for gear's four jobs: temper what your heroes wear, combine three spare items into a better one, reforge a stat line, salvage for Essence. Relics bend rules now and nothing else: every relic is one of a kind (from finales, an elite's loot, a rift shop, events and the Tower), and stats live on gear. Rolled relics, relic levels, rerolls and the starting relic choice are gone; an old save's rolled relics and every relic level became Essence. Path relics are carried by heroes: one each, of their own Path, working while they fight, passed between them on the hero's Path tab. Offers come only for Paths your heroes walk, and declining one pays the seal's full Essence. The Relic Vault adds a relic slot at Lv1, 3 and 5; the Arcane Lab cheapens treatments and respecs and raises salvage.","Equipo, más sencillo. La Herrería es una sola pantalla para las cuatro tareas del equipo: templar lo que llevan tus héroes, combinar tres objetos sobrantes en uno mejor, reforjar una línea de valor y desguazar por Esencia. Las reliquias ahora solo tuercen reglas: cada una es única (de finales, el botín de una élite, una tienda de grieta, eventos y la Torre), y los valores viven en el equipo. Se acabaron las reliquias aleatorias, sus niveles, las retiradas y la reliquia inicial; en una partida antigua, las reliquias aleatorias y cada nivel de reliquia se convirtieron en Esencia. Las reliquias de Senda las llevan los héroes: una cada uno, de su propia Senda, funcionan mientras combaten y se pasan entre ellos en la pestaña Senda del héroe. Solo se ofrecen para las Sendas de tus héroes, y rechazar una paga toda la Esencia del sello. La Cámara de Reliquias añade una ranura en Nv1, 3 y 5; el Laboratorio Arcano abarata tratamientos y reasignaciones y aumenta el desguace.",scripts/autoload/game_data/GameDataArt.gd:182
 "One new thing at a time. A new guild starts with heroes, rifts, fights and payday; the rest comes in turn, brought in by Wen, Dobbs or Hesper: the Training Yard and the hall's first rooms after two seals, the Smithy and relics with Act I's finale, the rival, Resolve and the haul a day into Act II, reforging and the Daily twist in Act III, the Tower in Act IV. A player whose past guild got past Act I has all of Act II's from day 1. The Accord Hall is one tree now: its 13 rooms are built with Gold, and at the end of Acts I, III and V you choose one of two wings (3 of 6 per guild), each with a new effect. Heroes on a Path can train Path Mastery for Essence: each rank makes their Path rule 4% stronger.","Una novedad cada vez. Un gremio nuevo empieza con héroes, grietas, combates y día de paga; lo demás llega por turnos, de la mano de Wen, Dobbs o Hesper: el Patio de Entrenamiento y las primeras salas del salón tras dos sellos, la Herrería y las reliquias con el final del Acto I, el rival, el Temple y el botín un día después de empezar el Acto II, la reforja y el Giro diario en el Acto III, la Torre en el Acto IV. Quien tuvo un gremio que pasó del Acto I tiene todo lo del Acto II desde el primer día. El Salón del Acuerdo es ahora un solo árbol: sus 13 salas se construyen con Oro, y al final de los Actos I, III y V eliges una de dos alas (3 de 6 por gremio), cada una con un efecto nuevo. Los héroes en una Senda pueden entrenar la Maestría de Senda con Esencia: cada rango hace la regla de su Senda un 4% más fuerte.",scripts/autoload/game_data/GameDataArt.gd:183
 "Fixes from the review: a reload in the middle of a fight puts the party back as it stood before it, so the fight starts over fairly (and running from it afterwards costs the haul, as fleeing does). The hazard card now shows exactly what lands, Pathfinder and Scavenger included. A key left waiting in Settings no longer catches a later press; moved keys stay in fights and the hints name them. Resolve isn't sold while it doesn't count. The daily score counts Resolve only where it drains and scales with the difficulty. Phones: the map's legend wraps, Resolve shows in a fight, and the attack shows its damage on the foe. Story cards waiting to be read survive a reload. The sound effects are loudness-matched. Settings > Send feedback can share play milestones with the developer, if you tick it.","Arreglos de la revisión: recargar en mitad de un combate devuelve al grupo a como estaba antes, así que el combate empieza de nuevo de forma justa (y huir después cuesta el botín, como huir). La carta de peligro muestra ahora exactamente lo que golpea, Rastreador y Carroñero incluidos. Una tecla que esperaba en Ajustes ya no atrapa una pulsación posterior; las teclas movidas se quedan en los combates y las pistas las nombran. El Temple no se vende mientras no cuenta. La puntuación diaria cuenta el Temple solo donde se desgasta y escala con la dificultad. Móviles: la leyenda del mapa se parte en dos líneas, el Temple se ve en el combate y el ataque muestra su daño sobre el enemigo. Las cartas de historia por leer sobreviven a una recarga. Los efectos de sonido están igualados en volumen. Ajustes > Enviar comentarios puede compartir los hitos de juego con el desarrollador, si lo marcas.",scripts/autoload/game_data/GameDataArt.gd:184
@@ -2397,45 +2397,45 @@ Read the oath aloud,Leer el juramento en voz alta,scripts/autoload/game_data/Gam
 Every hero heals 10% HP · +2 Renown,Cada héroe recupera un 10% de PV · +2 de Renombre,scripts/autoload/game_data/GameDataModes.gd:590
 Chip out the crystal,Arrancar el cristal,scripts/autoload/game_data/GameDataModes.gd:591
 +10-16 Essence · -2 Renown,+10-16 de Esencia · -2 de Renombre,scripts/autoload/game_data/GameDataModes.gd:591
-Escort the salt carts,,scripts/autoload/game_data/GameDataModes.gd:625
-"The salt carts want guards as far as the river ford. Nobody expects trouble, which is when it comes.",,scripts/autoload/game_data/GameDataModes.gd:625
-Clear the mill cellar,,scripts/autoload/game_data/GameDataModes.gd:626
-Something is eating the miller's grain and he would rather not find out what.,,scripts/autoload/game_data/GameDataModes.gd:626
-Count the border cairns,,scripts/autoload/game_data/GameDataModes.gd:627
-The Crown pays a surveyor's fee to anyone who walks the old border and counts what is still standing.,,scripts/autoload/game_data/GameDataModes.gd:627
-Hunt the marsh lights,,scripts/autoload/game_data/GameDataModes.gd:628
-Lights over the marsh have drowned three fishermen this month. The village has a purse for whoever puts them out.,,scripts/autoload/game_data/GameDataModes.gd:628
-Recover the toll chest,,scripts/autoload/game_data/GameDataModes.gd:629
-Bandits took the bridge toll and went to ground in the quarry. Bring the chest back and keep a share.,,scripts/autoload/game_data/GameDataModes.gd:629
-Map the drowned road,,scripts/autoload/game_data/GameDataModes.gd:630
-The old Accord road runs under the floodwater now. A merchant house wants it mapped before their rivals do.,,scripts/autoload/game_data/GameDataModes.gd:630
-Take the Hollow's tithe barge,,scripts/autoload/game_data/GameDataModes.gd:631
-"A barge carries rift-glass up the river for the Hollow's buyers. It is guarded, and it is worth it.",,scripts/autoload/game_data/GameDataModes.gd:631
-Open an Accord vault,,scripts/autoload/game_data/GameDataModes.gd:632
-A scholar swears an old guild vault lies under the burned chapel. The last party that went down came back two short.,,scripts/autoload/game_data/GameDataModes.gd:632
-Safe,,scripts/autoload/game_data/GameDataModes.gd:638
-Hard,,scripts/autoload/game_data/GameDataModes.gd:638
-Perilous,,scripts/autoload/game_data/GameDataModes.gd:638
-Muscle,,scripts/autoload/game_data/GameDataModes.gd:647
-Scout,,scripts/autoload/game_data/GameDataModes.gd:648
-Appraiser,,scripts/autoload/game_data/GameDataModes.gd:649
-Field medic,,scripts/autoload/game_data/GameDataModes.gd:650
-Light fingers,,scripts/autoload/game_data/GameDataModes.gd:651
-Takes the blows,,scripts/autoload/game_data/GameDataModes.gd:652
-At home in danger,,scripts/autoload/game_data/GameDataModes.gd:653
-Drills the others,,scripts/autoload/game_data/GameDataModes.gd:654
-Clean shot,,scripts/autoload/game_data/GameDataModes.gd:655
-Sets snares,,scripts/autoload/game_data/GameDataModes.gd:656
-Bounty hunter,,scripts/autoload/game_data/GameDataModes.gd:657
-Burns the dross,,scripts/autoload/game_data/GameDataModes.gd:658
-Wards the camp,,scripts/autoload/game_data/GameDataModes.gd:659
-Sees it coming,,scripts/autoload/game_data/GameDataModes.gd:660
-Patches everyone,,scripts/autoload/game_data/GameDataModes.gd:661
-Shields the worst of it,,scripts/autoload/game_data/GameDataModes.gd:662
-Rallies the party,,scripts/autoload/game_data/GameDataModes.gd:663
-Quiet work,,scripts/autoload/game_data/GameDataModes.gd:664
-Gets out fast,,scripts/autoload/game_data/GameDataModes.gd:665
-Shrugs it off,,scripts/autoload/game_data/GameDataModes.gd:666
+Escort the salt carts,Escoltar los carros de sal,scripts/autoload/game_data/GameDataModes.gd:625
+"The salt carts want guards as far as the river ford. Nobody expects trouble, which is when it comes.","Los carros de sal necesitan guardias hasta el vado del río. Nadie espera problemas, y es justo entonces cuando llegan.",scripts/autoload/game_data/GameDataModes.gd:625
+Clear the mill cellar,Limpiar el sótano del molino,scripts/autoload/game_data/GameDataModes.gd:626
+Something is eating the miller's grain and he would rather not find out what.,Algo se está comiendo el grano del molinero y él prefiere no averiguar qué.,scripts/autoload/game_data/GameDataModes.gd:626
+Count the border cairns,Contar los mojones fronterizos,scripts/autoload/game_data/GameDataModes.gd:627
+The Crown pays a surveyor's fee to anyone who walks the old border and counts what is still standing.,La Corona paga honorarios de agrimensor a quien recorra la vieja frontera y cuente lo que sigue en pie.,scripts/autoload/game_data/GameDataModes.gd:627
+Hunt the marsh lights,Cazar las luces del pantano,scripts/autoload/game_data/GameDataModes.gd:628
+Lights over the marsh have drowned three fishermen this month. The village has a purse for whoever puts them out.,Las luces sobre el pantano han ahogado a tres pescadores este mes. La aldea tiene una bolsa para quien las apague.,scripts/autoload/game_data/GameDataModes.gd:628
+Recover the toll chest,Recuperar el cofre del peaje,scripts/autoload/game_data/GameDataModes.gd:629
+Bandits took the bridge toll and went to ground in the quarry. Bring the chest back and keep a share.,Unos bandidos se llevaron el peaje del puente y se escondieron en la cantera. Trae el cofre y quédate una parte.,scripts/autoload/game_data/GameDataModes.gd:629
+Map the drowned road,Cartografiar el camino ahogado,scripts/autoload/game_data/GameDataModes.gd:630
+The old Accord road runs under the floodwater now. A merchant house wants it mapped before their rivals do.,El viejo camino del Acuerdo corre ahora bajo la inundación. Una casa mercante lo quiere cartografiado antes que sus rivales.,scripts/autoload/game_data/GameDataModes.gd:630
+Take the Hollow's tithe barge,Asaltar la barcaza del diezmo del Hueco,scripts/autoload/game_data/GameDataModes.gd:631
+"A barge carries rift-glass up the river for the Hollow's buyers. It is guarded, and it is worth it.","Una barcaza lleva cristal de grieta río arriba para los compradores del Hueco. Está vigilada, y merece la pena.",scripts/autoload/game_data/GameDataModes.gd:631
+Open an Accord vault,Abrir una cámara del Acuerdo,scripts/autoload/game_data/GameDataModes.gd:632
+A scholar swears an old guild vault lies under the burned chapel. The last party that went down came back two short.,Un erudito jura que bajo la capilla quemada hay una vieja cámara de gremio. El último grupo que bajó volvió con dos menos.,scripts/autoload/game_data/GameDataModes.gd:632
+Safe,Seguro,scripts/autoload/game_data/GameDataModes.gd:638
+Hard,Difícil,scripts/autoload/game_data/GameDataModes.gd:638
+Perilous,Peligroso,scripts/autoload/game_data/GameDataModes.gd:638
+Muscle,Músculo,scripts/autoload/game_data/GameDataModes.gd:647
+Scout,Batidor,scripts/autoload/game_data/GameDataModes.gd:648
+Appraiser,Tasador,scripts/autoload/game_data/GameDataModes.gd:649
+Field medic,Médico de campo,scripts/autoload/game_data/GameDataModes.gd:650
+Light fingers,Dedos ligeros,scripts/autoload/game_data/GameDataModes.gd:651
+Takes the blows,Aguanta los golpes,scripts/autoload/game_data/GameDataModes.gd:652
+At home in danger,Cómodo en el peligro,scripts/autoload/game_data/GameDataModes.gd:653
+Drills the others,Instruye a los demás,scripts/autoload/game_data/GameDataModes.gd:654
+Clean shot,Tiro limpio,scripts/autoload/game_data/GameDataModes.gd:655
+Sets snares,Pone lazos,scripts/autoload/game_data/GameDataModes.gd:656
+Bounty hunter,Cazarrecompensas,scripts/autoload/game_data/GameDataModes.gd:657
+Burns the dross,Quema la escoria,scripts/autoload/game_data/GameDataModes.gd:658
+Wards the camp,Protege el campamento,scripts/autoload/game_data/GameDataModes.gd:659
+Sees it coming,Lo ve venir,scripts/autoload/game_data/GameDataModes.gd:660
+Patches everyone,Remienda a todos,scripts/autoload/game_data/GameDataModes.gd:661
+Shields the worst of it,Para lo peor,scripts/autoload/game_data/GameDataModes.gd:662
+Rallies the party,Anima al grupo,scripts/autoload/game_data/GameDataModes.gd:663
+Quiet work,Trabajo discreto,scripts/autoload/game_data/GameDataModes.gd:664
+Gets out fast,Sale rápido,scripts/autoload/game_data/GameDataModes.gd:665
+Shrugs it off,Ni se inmuta,scripts/autoload/game_data/GameDataModes.gd:666
 SS,SS,scripts/autoload/game_data/GameDataModes.gd:716
 SSS,SSS,scripts/autoload/game_data/GameDataModes.gd:717
 more elites,más élites,scripts/autoload/game_data/GameDataModes.gd:728
@@ -4011,33 +4011,33 @@ Laid up with fever for 2 days: %s.,En cama con fiebre durante 2 días: %s.,scrip
 The bandits took %d Gold.,Los bandidos se llevaron %d de Oro.,scripts/autoload/game_state/GameStateBreach.gd:824
 It roamed the camp: -%d Essence%s.,Merodeó por el campamento: -%d de Esencia%s.,scripts/autoload/game_state/GameStateBreach.gd:829
 ", the %s damaged",", daños en %s",scripts/autoload/game_state/GameStateBreach.gd:829
-+%d%% odds,,scripts/autoload/game_state/GameStateBreach.gd:917
-+%d%% odds on a perilous job,,scripts/autoload/game_state/GameStateBreach.gd:918
-+%d%% Gold,,scripts/autoload/game_state/GameStateBreach.gd:919
-+%d%% Essence,,scripts/autoload/game_state/GameStateBreach.gd:920
-+%d%% item chance,,scripts/autoload/game_state/GameStateBreach.gd:921
-+%d%% XP for the party,,scripts/autoload/game_state/GameStateBreach.gd:922
-%d%% less chance of being hurt,,scripts/autoload/game_state/GameStateBreach.gd:923
-%d%% less chance of a scar,,scripts/autoload/game_state/GameStateBreach.gd:924
-a failure turns partial half the time,,scripts/autoload/game_state/GameStateBreach.gd:925
-Expeditions open with the Training Yard,,scripts/autoload/game_state/GameStateBreach.gd:946
-No such posting,,scripts/autoload/game_state/GameStateBreach.gd:948
-Every expedition party is out,,scripts/autoload/game_state/GameStateBreach.gd:950
-Send 1 to %d heroes,,scripts/autoload/game_state/GameStateBreach.gd:954
-Someone can't go,,scripts/autoload/game_state/GameStateBreach.gd:958
-+%d Gold,,scripts/autoload/game_state/GameStateBreach.gd:1004
-+%d Essence,,scripts/autoload/game_state/GameStateBreach.gd:1007
-found: %s,,scripts/autoload/game_state/GameStateBreach.gd:1012
-%s comes back hurt,,scripts/autoload/game_state/GameStateBreach.gd:1022
-%s keeps a scar: %s,,scripts/autoload/game_state/GameStateBreach.gd:1027
-"Dobbs: ""They're back, and it paid.""",,scripts/autoload/game_state/GameStateBreach.gd:1035
-"Dobbs: ""Back with half of it and a limp.""",,scripts/autoload/game_state/GameStateBreach.gd:1035
-"Dobbs: ""Back with nothing. Get the bandages.""",,scripts/autoload/game_state/GameStateBreach.gd:1035
-nothing to show for it,,scripts/autoload/game_state/GameStateBreach.gd:1037
-"Expedition: %s, %s.",,scripts/autoload/game_state/GameStateBreach.gd:1039
-a success,,scripts/autoload/game_state/GameStateBreach.gd:1039
-half done,,scripts/autoload/game_state/GameStateBreach.gd:1039
-a failure,,scripts/autoload/game_state/GameStateBreach.gd:1039
++%d%% odds,+%d%% prob.,scripts/autoload/game_state/GameStateBreach.gd:917
++%d%% odds on a perilous job,+%d%% prob. en un trabajo peligroso,scripts/autoload/game_state/GameStateBreach.gd:918
++%d%% Gold,+%d%% de Oro,scripts/autoload/game_state/GameStateBreach.gd:919
++%d%% Essence,+%d%% de Esencia,scripts/autoload/game_state/GameStateBreach.gd:920
++%d%% item chance,+%d%% prob. de objeto,scripts/autoload/game_state/GameStateBreach.gd:921
++%d%% XP for the party,+%d%% EXP para el grupo,scripts/autoload/game_state/GameStateBreach.gd:922
+%d%% less chance of being hurt,%d%% menos prob. de salir herido,scripts/autoload/game_state/GameStateBreach.gd:923
+%d%% less chance of a scar,%d%% menos prob. de cicatriz,scripts/autoload/game_state/GameStateBreach.gd:924
+a failure turns partial half the time,un fracaso se vuelve parcial la mitad de las veces,scripts/autoload/game_state/GameStateBreach.gd:925
+Expeditions open with the Training Yard,Las expediciones se abren con el Patio de Entrenamiento,scripts/autoload/game_state/GameStateBreach.gd:946
+No such posting,No existe ese encargo,scripts/autoload/game_state/GameStateBreach.gd:948
+Every expedition party is out,Todos los grupos de expedición están fuera,scripts/autoload/game_state/GameStateBreach.gd:950
+Send 1 to %d heroes,Envía de 1 a %d héroes,scripts/autoload/game_state/GameStateBreach.gd:954
+Someone can't go,Alguien no puede ir,scripts/autoload/game_state/GameStateBreach.gd:958
++%d Gold,+%d de Oro,scripts/autoload/game_state/GameStateBreach.gd:1004
++%d Essence,+%d de Esencia,scripts/autoload/game_state/GameStateBreach.gd:1007
+found: %s,hallado: %s,scripts/autoload/game_state/GameStateBreach.gd:1012
+%s comes back hurt,%s vuelve herido,scripts/autoload/game_state/GameStateBreach.gd:1022
+%s keeps a scar: %s,%s se queda con una cicatriz: %s,scripts/autoload/game_state/GameStateBreach.gd:1027
+"Dobbs: ""They're back, and it paid.""","Dobbs: ""Han vuelto, y ha salido rentable.""",scripts/autoload/game_state/GameStateBreach.gd:1035
+"Dobbs: ""Back with half of it and a limp.""","Dobbs: ""Vuelven con la mitad y cojeando.""",scripts/autoload/game_state/GameStateBreach.gd:1035
+"Dobbs: ""Back with nothing. Get the bandages.""","Dobbs: ""Vuelven sin nada. Trae las vendas.""",scripts/autoload/game_state/GameStateBreach.gd:1035
+nothing to show for it,sin nada que mostrar,scripts/autoload/game_state/GameStateBreach.gd:1037
+"Expedition: %s, %s.","Expedición: %s, %s.",scripts/autoload/game_state/GameStateBreach.gd:1039
+a success,un éxito,scripts/autoload/game_state/GameStateBreach.gd:1039
+half done,a medias,scripts/autoload/game_state/GameStateBreach.gd:1039
+a failure,un fracaso,scripts/autoload/game_state/GameStateBreach.gd:1039
 Not enough Gold,No hay suficiente Oro,scripts/autoload/game_state/GameStateCore.gd:287
 Not enough Essence,No hay suficiente Esencia,scripts/autoload/game_state/GameStateCore.gd:287
 A wing of the hall,Un ala del salón,scripts/autoload/game_state/GameStateCore.gd:470
@@ -4323,7 +4323,7 @@ You receive: %s (%s).,Recibes: %s (%s).,scripts/autoload/game_state/GameStateRun
 %s is tempered on the old anvil.,%s se templa en el viejo yunque.,scripts/autoload/game_state/GameStateRuns.gd:783
 The shrine answers: %s learn the most.,"El santuario responde: %s, los que más aprenden.",scripts/autoload/game_state/GameStateRuns.gd:806
 "The shrine answers, faintly: a little XP for everyone.","El santuario responde, débilmente: un poco de EXP para todos.",scripts/autoload/game_state/GameStateRuns.gd:806
-You pocket the offerings: +%d Gold. The candles gutter out behind you (%d Resolve).,,scripts/autoload/game_state/GameStateRuns.gd:825
+You pocket the offerings: +%d Gold. The candles gutter out behind you (%d Resolve).,Te guardas las ofrendas: +%d de Oro. Las velas se apagan a tu espalda (%d de Temple).,scripts/autoload/game_state/GameStateRuns.gd:825
 %s trains with the echo: level %d.,%s entrena con el eco: nivel %d.,scripts/autoload/game_state/GameStateRuns.gd:840
 %s trains with the echo: +%d attribute points.,%s entrena con el eco: +%d puntos de atributo.,scripts/autoload/game_state/GameStateRuns.gd:843
 The Anchor Artifact snuffs the hazard before it strikes.,El Artefacto Ancla sofoca el peligro antes de que golpee.,scripts/autoload/game_state/GameStateRuns.gd:931
@@ -4546,7 +4546,7 @@ Escape,Escape,scripts/ui/BattleView.gd:381
 Acting now: ,Actúa ahora: ,scripts/ui/BattleView.gd:559
 [Heavy blow on %s],[Golpe pesado sobre %s],scripts/ui/BattleView.gd:770
 "Auto paused: %s is about to fall. Defend, Guard or heal, then turn Auto back on.","Auto en pausa: %s está a punto de caer. Defiende, Protege o cura, y luego vuelve a activar Auto.",scripts/ui/BattleView.gd:1081
-%s acts…,,scripts/ui/BattleView.gd:1128
+%s acts…,%s actúa…,scripts/ui/BattleView.gd:1128
 %s · %d HP,%s · %d PV,scripts/ui/BattleView.gd:1189
 Resolve %d: foes strike first this fight.,Temple %d: los enemigos golpean primero en este combate.,scripts/ui/BattleView.gd:1195
 "Resolve broken: foes strike first, no starting Momentum, %d%% less damage.","Temple quebrado: los enemigos golpean primero, sin Ímpetu inicial, un %d%% menos de daño.",scripts/ui/BattleView.gd:1195
@@ -4576,7 +4576,7 @@ Victory!,¡Victoria!,scripts/ui/BattleView.gd:1351
  (%d from Amplifiers), (%d de Amplificadores),scripts/ui/BattleView.gd:1362
   +%d Essence cache (Resonance),  +%d de Esencia en reserva (Resonancia),scripts/ui/BattleView.gd:1364
   +%d extracted,  +%d extraído,scripts/ui/BattleView.gd:1367
-Hero pages: spend the new points,,scripts/ui/BattleView.gd:1374
+Hero pages: spend the new points,Páginas de héroe: gasta los puntos nuevos,scripts/ui/BattleView.gd:1374
 "Feat done: +%d Gold, +%d Essence.","Hazaña cumplida: +%d de Oro, +%d de Esencia.",scripts/ui/BattleView.gd:1380
 "Flawless, by hand: +%d Gold, +%d Essence (no one went down and you played every turn).","Impecable, a mano: +%d de Oro, +%d de Esencia (nadie cayó y jugaste cada turno).",scripts/ui/BattleView.gd:1384
 The pillar gives way: %s is free.,El pilar cede: %s es libre.,scripts/ui/BattleView.gd:1388
@@ -4668,8 +4668,8 @@ Feat: %s,Hazaña: %s,scripts/ui/BattleView.gd:2367
  (by hand only), (solo a mano),scripts/ui/BattleView.gd:2367
 "%s Won by hand (no Auto), it pays +%d%% Gold and Essence, and an elite offers one more boon.","%s Ganado a mano (sin Auto), paga +%d%% de Oro y Esencia, y una élite ofrece un don más.",scripts/ui/BattleView.gd:2369
 This rift is Rank %s on the rift ladder.,Esta grieta es de Rango %s en la escalera de grietas.,scripts/ui/BattleView.gd:2379
-Guard %s,,scripts/ui/BattleView.gd:2437
-Give %s the tonic,,scripts/ui/BattleView.gd:2437
+Guard %s,Proteger a %s,scripts/ui/BattleView.gd:2437
+Give %s the tonic,Darle el tónico a %s,scripts/ui/BattleView.gd:2437
 Attack %s,Atacar a %s,scripts/ui/BattleView.gd:2457
 Target %s (click again to attack),Apuntar a %s (pulsa otra vez para atacar),scripts/ui/BattleView.gd:2457
 %s on %s,%s sobre %s,scripts/ui/BattleView.gd:2464
@@ -4780,7 +4780,7 @@ Skip,Omitir,scripts/ui/Cinematic.gd:119
 Esc skips the opening.,Esc omite la introducción.,scripts/ui/Cinematic.gd:120
 Guild tier reached,Nivel de gremio alcanzado,scripts/ui/GuildViews.gd:14
 Welcome to your guild,Bienvenido a tu gremio,scripts/ui/GuildViews.gd:19
-"Rifts are tearing open across the land. First, sign three founders from the recruit board (Roster > Recruits); then head to the Rift Hall (key 3) to seal a rift.",,scripts/ui/GuildViews.gd:19
+"Rifts are tearing open across the land. First, sign three founders from the recruit board (Roster > Recruits); then head to the Rift Hall (key 3) to seal a rift.","Las grietas se abren por toda la tierra. Primero, contrata a tres fundadores del tablón de reclutas (Plantilla > Reclutas); luego ve a la Sala de Grietas (tecla 3) para sellar una grieta.",scripts/ui/GuildViews.gd:19
 Back at camp,De vuelta en el campamento,scripts/ui/GuildViews.gd:21
 "Equip what you found on the Roster's Hero tab (key 1), spend skill points under Skills, and hire more heroes when you can afford them. Every rift run or rest is one day.","Equipa lo que encontraste en la pestaña Héroe de la Plantilla (tecla 1), gasta puntos de habilidad en Habilidades y contrata más héroes cuando puedas pagarlos. Cada incursión o descanso es un día.",scripts/ui/GuildViews.gd:21
  — the %s, — %s,scripts/ui/GuildViews.gd:130
@@ -4833,8 +4833,8 @@ Oaths sworn: %s,Juramentos hechos: %s,scripts/ui/GuildViews.gd:539
 Retire the guild,Retirar el gremio,scripts/ui/GuildViews.gd:548
 "A guild can retire once Act II is done: it joins the Hall of Guilds, leaves Laurels for your next guild, and up to two of its heroes come back as champions. Its save slot is freed.","Un gremio puede retirarse una vez terminado el Acto II: entra en la Sala de los Gremios, deja Laureles para tu próximo gremio, y hasta dos de sus héroes vuelven como campeones. Su ranura de guardado queda libre.",scripts/ui/GuildViews.gd:549
 Retire this guild…,Retirar este gremio…,scripts/ui/GuildViews.gd:550
-Hide the %d done,,scripts/ui/GuildViews.gd:572
-Show the %d done,,scripts/ui/GuildViews.gd:572
+Hide the %d done,Ocultar los %d completados,scripts/ui/GuildViews.gd:572
+Show the %d done,Mostrar los %d completados,scripts/ui/GuildViews.gd:572
 Renown,Renombre,scripts/ui/GuildViews.gd:1166
 %s (power %d),%s (poder %d),scripts/ui/GuildViews.gd:639
 Days passed,Días transcurridos,scripts/ui/GuildViews.gd:641
@@ -4937,7 +4937,7 @@ Renown — you %d · them %d (%s),Renombre — tú %d · ellos %d (%s),scripts/u
 you lead by %d,vas %d por delante,scripts/ui/GuildViews.gd:1148
 they lead by %d,van %d por delante,scripts/ui/GuildViews.gd:1148
 level,empate,scripts/ui/GuildViews.gd:1148
-"Renown is the one race with the rival. They gain it every day and sometimes take a posted contract before you do. At payday the leader gets the pick of next week's recruits (one more offer for you, or one fewer). Seal rifts and finish contracts to gain it; failed contracts and unpaid upkeep cost it.",,scripts/ui/GuildViews.gd:1150
+"Renown is the one race with the rival. They gain it every day and sometimes take a posted contract before you do. At payday the leader gets the pick of next week's recruits (one more offer for you, or one fewer). Seal rifts and finish contracts to gain it; failed contracts and unpaid upkeep cost it.","El Renombre es la única carrera con el rival. Lo gana cada día y a veces se queda un contrato publicado antes que tú. En el día de paga, quien va en cabeza elige primero entre los reclutas de la semana siguiente (una oferta más para ti, o una menos). Sella grietas y completa contratos para ganarlo; los contratos fallidos y el mantenimiento impagado lo cuestan.",scripts/ui/GuildViews.gd:1150
 "This month: Renown gained — you %d · them %d · %d day%s left. Prize: %d Gold, %d Renown.","Este mes: Renombre ganado — tú %d · ellos %d · quedan %d día%s. Premio: %d de Oro, %d de Renombre.",scripts/ui/GuildViews.gd:1154
 "The Crown's herald counts Renown toward the Royal Charter: one guild, every contract, for a generation.","El heraldo de la Corona cuenta el Renombre para la Carta Real: un gremio, todos los contratos, durante una generación.",scripts/ui/GuildViews.gd:1158
 Guild Standings,Clasificación de gremios,scripts/ui/GuildViews.gd:1161
@@ -4947,7 +4947,7 @@ Endless best,Mejor Infinita,scripts/ui/GuildViews.gd:1166
  (you), (tú),scripts/ui/GuildViews.gd:1172
  — rival, — rival,scripts/ui/GuildViews.gd:1172
 The other guilds' records grow every day. Top the Renown column for an achievement.,Los registros de los otros gremios crecen cada día. Encabeza la columna de Renombre para obtener un logro.,scripts/ui/GuildViews.gd:1178
-Sign your founders (Roster > Recruits): %d to go,,scripts/ui/GuildViews.gd:1194
+Sign your founders (Roster > Recruits): %d to go,Contrata a tus fundadores (Plantilla > Reclutas): faltan %d,scripts/ui/GuildViews.gd:1194
 Assemble a party in the Rift Hall and enter a rift,Forma un grupo en la Sala de Grietas y entra en una grieta,scripts/ui/GuildViews.gd:1195
 Equip an item on a hero (Roster > Heroes),Equipa un objeto a un héroe (Plantilla > Héroes),scripts/ui/GuildViews.gd:1196
 Spend a skill point (Roster > Heroes > Skills),Gasta un punto de habilidad (Plantilla > Héroes > Habilidades),scripts/ui/GuildViews.gd:1197
@@ -4983,8 +4983,8 @@ Each level: Boon and Call +%d%%. At level %d the Call works twice a rift.,Cada n
 Essence: %d,Esencia: %d,scripts/ui/GuildViews.gd:1366
 Spend it to level up champions. The Endless Rift pays the most.,Gástala para subir de nivel a los campeones. La Grieta Infinita es la que más paga.,scripts/ui/GuildViews.gd:1368
 %d of %d champions found. Every new guild meets a different twelve.,%d de %d campeones encontrados. Cada gremio nuevo conoce a doce distintos.,scripts/ui/GuildViews.gd:1373
-Sign your founders: %d to go,,scripts/ui/GuildViews.gd:1391
-Every founder signs free and brings their first week's wages. A party of four needs someone in front and someone who heals. Free rerolls left: %d.,,scripts/ui/GuildViews.gd:1392
+Sign your founders: %d to go,Contrata a tus fundadores: faltan %d,scripts/ui/GuildViews.gd:1391
+Every founder signs free and brings their first week's wages. A party of four needs someone in front and someone who heals. Free rerolls left: %d.,Cada fundador se une gratis y trae el sueldo de su primera semana. Un grupo de cuatro necesita a alguien delante y a alguien que cure. Renovaciones gratis restantes: %d.,scripts/ui/GuildViews.gd:1392
 Hiring heroes,Contratar héroes,scripts/ui/GuildViews.gd:1395
 Recruit heroes below; higher ranks are stronger.,Recluta héroes abajo; los rangos más altos son más fuertes.,scripts/ui/GuildViews.gd:1395
 New faces arrive every day and wait a few days; payday fills the board. Each reroll or commission doubles the next until payday (back to %d Gold).%s,Llegan caras nuevas cada día y esperan unos días; el día de paga llena el tablón. Cada renovación o encargo duplica el siguiente hasta el día de paga (vuelve a %d de Oro).%s,scripts/ui/GuildViews.gd:1396
@@ -4996,8 +4996,8 @@ Your roster is full. The Barracks (Guild > Manage > Operations) adds 2 slots a l
 No one is looking for work right now. New faces arrive every day.,Nadie busca trabajo ahora mismo. Llegan caras nuevas cada día.,scripts/ui/GuildViews.gd:1406
 Commission a recruit (%d Gold):,Encargar un recluta (%d de Oro):,scripts/ui/GuildViews.gd:1411
 A %s joins the offers at the usual rank odds (the last offer leaves).,Un %s se suma a las ofertas con las probabilidades de rango habituales (la última oferta se va).,scripts/ui/GuildViews.gd:1422
-free,,scripts/ui/GuildViews.gd:1445
-Rank %s %s · %s · Power %d · %d HP · wage %d/week,,scripts/ui/GuildViews.gd:1446
+free,gratis,scripts/ui/GuildViews.gd:1445
+Rank %s %s · %s · Power %d · %d HP · wage %d/week,Rango %s %s · %s · Poder %d · %d PV · sueldo %d/semana,scripts/ui/GuildViews.gd:1446
 Brings %d skill and %d attribute points,Trae %d puntos de habilidad y %d de atributo,scripts/ui/GuildViews.gd:1449
 A fresh recruit,Un recluta novato,scripts/ui/GuildViews.gd:1449
 trains a Path at Rank D,entrena una Senda en Rango D,scripts/ui/GuildViews.gd:1455
@@ -5006,7 +5006,7 @@ Last day,Último día,scripts/ui/GuildViews.gd:1459
 Leaves tomorrow,Se va mañana,scripts/ui/GuildViews.gd:1459
 Leaves in %d days,Se va en %d días,scripts/ui/GuildViews.gd:1459
 "Waits on the board until day %d, then takes work elsewhere.",Espera en el tablón hasta el día %d; luego busca trabajo en otra parte.,scripts/ui/GuildViews.gd:1462
-"Reroll (free, %d left)",,scripts/ui/GuildViews.gd:1468
+"Reroll (free, %d left)","Renovar (gratis, quedan %d)",scripts/ui/GuildViews.gd:1468
 Reroll (%d Gold),Renovar (%d de Oro),scripts/ui/GuildViews.gd:1468
 "Swap this offer for a new face. The next reroll costs double, until payday.","Cambia esta oferta por una cara nueva. La siguiente renovación cuesta el doble, hasta el día de paga.",scripts/ui/GuildViews.gd:1475
 Recruit,Reclutar,scripts/ui/GuildViews.gd:1477
@@ -5031,7 +5031,7 @@ Training Yard — %d/%d stations in use,Patio de Entrenamiento — %d/%d puestos
 Mastery %d,Maestría %d,scripts/ui/GuildViews.gd:1618
 %s · day %d of %d,%s · día %d de %d,scripts/ui/GuildViews.gd:1619
 Recall,Retirar,scripts/ui/GuildViews.gd:1621
-Recalled: %d Essence back for the days not started.,,scripts/ui/GuildViews.gd:1623
+Recalled: %d Essence back for the days not started.,Retirado: se devuelven %d de Esencia por los días no empezados.,scripts/ui/GuildViews.gd:1623
 "Days done are kept; today's training and its fee are lost, the days not started are refunded.","Los días hechos se conservan; el entrenamiento de hoy y su tarifa se pierden, y los días no empezados se reembolsan.",scripts/ui/GuildViews.gd:1626
 Free station,Puesto libre,scripts/ui/GuildViews.gd:1630
 Send a hero to train,Enviar a un héroe a entrenar,scripts/ui/GuildViews.gd:1642
@@ -5169,7 +5169,7 @@ Nothing yet: no three spare pieces of one kind and rarity.,Nada aún: no hay tre
 "%s: %d spare, %d craft%s","%s: %d de sobra, %d lote%s",scripts/ui/GuildViews.gd:2364
 Open the Smithy,Abrir la Herrería,scripts/ui/GuildViews.gd:2366
 "Your camp was an Accord hall once. Its 13 rooms are rebuilt with Gold, a few at a time as the guild grows: Operations after two seals, Infrastructure, Logistics and Wardcraft in Act II, Research in Act III. Every level adds its effect and a little upkeep; some levels unlock a perk (a first-strike bonus, a boss Essence cache, extra relic slots…). Guild Tier, and the hall's art, track total levels. At the end of Acts I, III and V you are offered two of the six wings and build one, 3 of 6 per guild. A room damaged by a breach works a level lower until you repair it with Gold.","Tu campamento fue un salón del Acuerdo. Sus 13 salas se reconstruyen con Oro, unas pocas cada vez a medida que crece el gremio: Operaciones tras dos sellos, Infraestructura, Logística y Arte de la Guardia en el Acto II, Investigación en el Acto III. Cada nivel suma su efecto y un poco de mantenimiento; algunos niveles desbloquean una ventaja (un bono al primer golpe, un alijo de Esencia del jefe, más ranuras de reliquia…). El rango del gremio y el aspecto del salón siguen el total de niveles. Al final de los Actos I, III y V se te ofrecen dos de las seis alas y construyes una, 3 de 6 por gremio. Una sala dañada por una brecha funciona un nivel por debajo hasta que la reparas con Oro.",scripts/ui/GuildViews.gd:2376
-"From Act III, the Rift Ladder offers a twist each day: a rule and a starting boon that come from the date, so every guild faces the same one. Tick it and your next ladder rift (any rank) carries it; one try a day. Sealing it pays bonus Essence and grows your streak. Records (Guild > Records) track achievements, lifetime statistics and your last 30 runs; the Memorial remembers heroes lost for good.",,scripts/ui/GuildViews.gd:2377
+"From Act III, the Rift Ladder offers a twist each day: a rule and a starting boon that come from the date, so every guild faces the same one. Tick it and your next ladder rift (any rank) carries it; one try a day. Sealing it pays bonus Essence and grows your streak. Records (Guild > Records) track achievements, lifetime statistics and your last 30 runs; the Memorial remembers heroes lost for good.","Desde el Acto III, la Escalera de Grietas ofrece un giro cada día: una regla y una bendición inicial que salen de la fecha, así que todos los gremios se enfrentan al mismo. Márcalo y tu siguiente grieta de la escalera (de cualquier rango) lo llevará; un intento al día. Sellarla paga Esencia extra y alarga tu racha. Registros (Gremio > Registros) guarda logros, estadísticas totales y tus últimas 30 incursiones; el Memorial recuerda a los héroes perdidos para siempre.",scripts/ui/GuildViews.gd:2377
 Endless Rift,Grieta Infinita,scripts/ui/GuildViews.gd:2378
 "A real-time survival run in the region you pick, and only champions go in (up to 4). You steer the first (WASD, arrows, drag or stick); the rest follow and fight on their own, and each fires their signature move on a timer (the ring over their head fills as it recharges). Your equipped relics come along. Every five minutes the rift runs the same cycle: the horde, a swarm, an elite pack (its leader carries a chest), archers and casters, then a lull with a chest nearby, and a warden at the end of it. At 20:00 the Rift Warden comes: beat it to seal the rift. The rift's strength (shown before you enter) starts gentle and grows with every champion you free and every act you pass. A run pays Essence and a little Gold, and costs the guild a day.","Una incursión de supervivencia en tiempo real en la región que elijas, y solo entran campeones (hasta 4). Tú controlas al primero (WASD, flechas, arrastrar o palanca); los demás lo siguen y luchan solos, y cada uno lanza su movimiento característico de forma periódica (el anillo sobre su cabeza se llena al recargarse). Tus reliquias equipadas te acompañan. Cada cinco minutos la grieta repite el mismo ciclo: la horda, un enjambre, una manada de élite (su líder lleva un cofre), arqueros y lanzadores, luego una tregua con un cofre cerca, y un guardián al final. A las 20:00 llega el Guardián de la grieta: derrótalo para sellar la grieta. La fuerza de la grieta (mostrada antes de entrar) empieza suave y crece con cada campeón que liberas y cada acto que superas. Una incursión paga Esencia y algo de Oro, y le cuesta un día al gremio.",scripts/ui/GuildViews.gd:2378
 Endless picks,Elecciones en la Infinita,scripts/ui/GuildViews.gd:2379
@@ -5194,7 +5194,7 @@ Ability Awakening,Despertar de Habilidad,scripts/ui/GuildViews.gd:2388
 "Spend Skill Points once to give a hero's Ability a secondary effect (by ability: +2 Momentum back, a lingering debuff, a party dodge boost, a self-shield, or a small damage stack).","Gasta Puntos de Habilidad una vez para dar a la Habilidad de un héroe un efecto secundario (según la habilidad: +2 de Ímpetu de vuelta, un perjuicio persistente, un aumento de esquiva del grupo, un autoescudo o una pequeña acumulación de daño).",scripts/ui/GuildViews.gd:2388
 "Heroes stand in the front or back row. Foes aim most attacks at the front row; Snipes hunt the back. Warriors and rogues hit at half strength with a basic attack from the back row, and some skills need a row. Move (7) switches rows for a turn. Back-row foes take less damage from attacks.","Los héroes se colocan en la fila delantera o trasera. Los enemigos dirigen la mayoría de los ataques a la fila delantera; los Disparos letales cazan la trasera. Guerreros y pícaros golpean a la mitad de fuerza con un ataque básico desde la fila trasera, y algunas habilidades necesitan una fila. Mover (7) cambia de fila por un turno. Los enemigos de la fila trasera reciben menos daño de los ataques.",scripts/ui/GuildViews.gd:2389
 Controls,Controles,scripts/ui/GuildViews.gd:2390
-"Keyboard: 1-5 switch camp tabs; in a fight 1 Attack, 2-4 skills, 5 Defend, M opens More (6 Guard, 7 Move, 8 Tonics, 9 Call; their keys work either way), Space repeats the last action, Tab cycles targets, A toggles Auto, Esc goes back. Gamepad: D-pad and A work every menu, B goes back, LB/RB switch camp tabs. In a fight A repeats the last action, X Defends, Y uses the Ability, LB/RB the two skills, Start opens More (Guard, Move, Tonics, Call), the D-pad cycles targets, Select toggles Auto.",,scripts/ui/GuildViews.gd:2390
+"Keyboard: 1-5 switch camp tabs; in a fight 1 Attack, 2-4 skills, 5 Defend, M opens More (6 Guard, 7 Move, 8 Tonics, 9 Call; their keys work either way), Space repeats the last action, Tab cycles targets, A toggles Auto, Esc goes back. Gamepad: D-pad and A work every menu, B goes back, LB/RB switch camp tabs. In a fight A repeats the last action, X Defends, Y uses the Ability, LB/RB the two skills, Start opens More (Guard, Move, Tonics, Call), the D-pad cycles targets, Select toggles Auto.","Teclado: 1-5 cambian de pestaña en el campamento; en combate 1 Atacar, 2-4 habilidades, 5 Defender, M abre Más (6 Proteger, 7 Mover, 8 Tónicos, 9 Llamada; sus teclas funcionan igualmente), Espacio repite la última acción, Tab cambia de objetivo, A activa Auto, Esc vuelve atrás. Mando: la cruceta y A manejan todos los menús, B vuelve atrás, LB/RB cambian de pestaña en el campamento. En combate A repite la última acción, X Defiende, Y usa la Habilidad, LB/RB las dos habilidades, Start abre Más (Proteger, Mover, Tónicos, Llamada), la cruceta cambia de objetivo, Select activa Auto.",scripts/ui/GuildViews.gd:2390
 Momentum and skills,Ímpetu y habilidades,scripts/ui/GuildViews.gd:2391
 "Momentum is the party's shared pool (up to 10, starting at 3). Each basic attack adds 1, each kill 1, and each hit taken while Defending or Guarding 1 (2 for a heavy blow). Every hero has two role skills (Lv1 and Lv6) and their subclass Ability (Lv3). Skills cost 2-4 Momentum, Abilities 4.","El Ímpetu es la reserva compartida del grupo (hasta 10, empezando en 3). Cada ataque básico añade 1, cada muerte 1, y cada golpe recibido al Defender o Proteger 1 (2 si es un golpe pesado). Cada héroe tiene dos habilidades de rol (Nv1 y Nv6) y la Habilidad de su subclase (Nv3). Las habilidades cuestan 2-4 de Ímpetu, las Habilidades 4.",scripts/ui/GuildViews.gd:2391
 Enemy moves,Movimientos enemigos,scripts/ui/GuildViews.gd:2392
@@ -5207,24 +5207,24 @@ Rift bosses,Jefes de grieta,scripts/ui/GuildViews.gd:2394
 "Opens with Act IV, in the Rift Hall. 100 fixed floors, one fight each: a floor is always the same fight, so a loss is something to plan around. Heroes fight at full HP and leave as they came (no downing, scars or days passing). Most floors carry a rule (armored or burning foes, a swarm, a party cap). Every 10th floor is a guardian that gives a unique relic, and floors 10/25/50/75/100 earn guild titles. Only a first clear pays; floors 91-100 reshuffle their rules every week and pay half for a re-clear.","Se abre con el Acto IV, en el Salón de Grietas. 100 pisos fijos, un combate cada uno: un piso es siempre el mismo combate, así que una derrota es algo que planear. Los héroes luchan con todos sus PV y salen como entraron (sin caídas, cicatrices ni días que pasen). La mayoría de los pisos tienen una regla (enemigos acorazados o en llamas, un enjambre, un límite de grupo). Cada décimo piso es un guardián que da una reliquia única, y los pisos 10/25/50/75/100 otorgan títulos de gremio. Solo paga la primera vez; los pisos 91-100 cambian sus reglas cada semana y pagan la mitad al repetirlos.",scripts/ui/GuildViews.gd:2396
 Foes & regions,Enemigos y regiones,scripts/ui/GuildViews.gd:2397
 "Each rift is in a region (the Vale, the Marshes, the Ashen Wastes) with its own foes. Some foes wind up a heavy blow a turn ahead (x2.5, stuns unless the target Defends); armored foes shrug off part of every basic attack (each hit chips the armor; abilities ignore it); fire foes can burn and frost foes can chill (act late). A Field Tonic cleanses burn, chill, poison and stun.","Cada grieta está en una región (el Valle, las Marismas, los Páramos de Ceniza) con sus propios enemigos. Algunos enemigos cargan un golpe pesado un turno antes (x2,5, aturde salvo que el objetivo Defienda); los enemigos acorazados ignoran parte de cada ataque básico (cada golpe desgasta la armadura; las habilidades la ignoran); los enemigos de fuego pueden quemar y los de escarcha congelar (actuar tarde). Un Tónico de campaña purifica quemaduras, congelación, veneno y aturdimiento.",scripts/ui/GuildViews.gd:2397
-"Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Endless Rift.",,scripts/ui/GuildViews.gd:2398
-"Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Descent.",,scripts/ui/GuildViews.gd:2398
-"Relics bend rules: each is one of a kind, found from Act I's finale on (finales, elites, shops, events and the Tower's guardians), and sits on the Relic Altar for the whole guild. Stats live on gear. A sealed Rank D+ rift offers a Path relic instead, carried by a hero of that Path (one each) and passed between them at camp; it works while they fight. Declining one pays the seal's Essence.",,scripts/ui/GuildViews.gd:2399
+"Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Endless Rift.","Seis actos, cada uno termina en una grieta final contra un enemigo con nombre. Cumple los objetivos de un acto (en la Sala de Grietas) para abrir su final; sellarlo paga una recompensa y una reliquia única. El Acto I abre las Grietas Mayores, el Acto II la Grieta Infinita.",scripts/ui/GuildViews.gd:2398
+"Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Descent.","Seis actos, cada uno termina en una grieta final contra un enemigo con nombre. Cumple los objetivos de un acto (en la Sala de Grietas) para abrir su final; sellarlo paga una recompensa y una reliquia única. El Acto I abre las Grietas Mayores, el Acto II el Descenso.",scripts/ui/GuildViews.gd:2398
+"Relics bend rules: each is one of a kind, found from Act I's finale on (finales, elites, shops, events and the Tower's guardians), and sits on the Relic Altar for the whole guild. Stats live on gear. A sealed Rank D+ rift offers a Path relic instead, carried by a hero of that Path (one each) and passed between them at camp; it works while they fight. Declining one pays the seal's Essence.","Las reliquias tuercen reglas: cada una es única, se encuentra desde el final del Acto I (finales, élites, tiendas, eventos y los guardianes de la Torre) y se coloca en el Altar de Reliquias para todo el gremio. Los valores viven en el equipo. Una grieta sellada de Rango D+ ofrece en su lugar una reliquia de Senda, que lleva un héroe de esa Senda (una cada uno) y se pasa entre ellos en el campamento; funciona mientras combate. Rechazarla paga la Esencia del sellado.",scripts/ui/GuildViews.gd:2399
 Quirks,Rasgos,scripts/ui/GuildViews.gd:2400
 "Everything personal about a hero beyond class, skills and gear: at most one born quirk (it sets their voice), up to 2 scars from being knocked out (a wound with a small upside), and quirks earned by what they've done. Bad born quirks and scars can be treated for Gold at the Arcane Lab.","Todo lo personal de un héroe más allá de clase, habilidades y equipo: como mucho un rasgo innato (define su voz), hasta 2 cicatrices por quedar noqueado (una herida con una pequeña ventaja) y rasgos ganados por lo que ha hecho. Los rasgos innatos malos y las cicatrices se pueden tratar con Oro en el Laboratorio Arcano.",scripts/ui/GuildViews.gd:2400
-"From Act II a rift swells every so often: a rank, a place and a countdown in days (Rift Hall and the camp's status board). Seal a rift of that rank or higher before it runs out to close it, for a little Essence. Otherwise it breaks, and every rift run waits until your guild holds it: a breach rift of back-to-back fights (a fight, an elite and the breach's warden; the Inverted City's gate adds an elite) with no camp, shop or campfire between them. Ranks below S break out in a region; from S up they break at your camp. Holding pays Gold and Essence. Falling or turning back costs a share of your Essence and of the Gold beyond the coming payday's wages, and damages a building (two at the camp). The Accord Hall's Wardcraft rooms soften all of it.",,scripts/ui/GuildViews.gd:2401
+"From Act II a rift swells every so often: a rank, a place and a countdown in days (Rift Hall and the camp's status board). Seal a rift of that rank or higher before it runs out to close it, for a little Essence. Otherwise it breaks, and every rift run waits until your guild holds it: a breach rift of back-to-back fights (a fight, an elite and the breach's warden; the Inverted City's gate adds an elite) with no camp, shop or campfire between them. Ranks below S break out in a region; from S up they break at your camp. Holding pays Gold and Essence. Falling or turning back costs a share of your Essence and of the Gold beyond the coming payday's wages, and damages a building (two at the camp). The Accord Hall's Wardcraft rooms soften all of it.","Desde el Acto II, de vez en cuando una grieta se hincha: un rango, un lugar y una cuenta atrás en días (Sala de Grietas y tablero de estado del campamento). Sella una grieta de ese rango o superior antes de que se agote para cerrarla, a cambio de un poco de Esencia. Si no, se rompe, y toda incursión espera hasta que tu gremio la contenga: una grieta de brecha de combates seguidos (un combate, una élite y el guardián de la brecha; la puerta de la Ciudad Invertida añade una élite) sin campamento, tienda ni hoguera entre ellos. Los rangos por debajo de S se rompen en una región; desde S hacia arriba se rompen en tu campamento. Contenerla paga Oro y Esencia. Caer o retirarse cuesta una parte de tu Esencia y del Oro que supere los sueldos del próximo día de paga, y daña un edificio (dos en el campamento). Las salas de Arte de la Guardia del Salón del Acuerdo lo suavizan todo.",scripts/ui/GuildViews.gd:2401
 Defending,Defensa,scripts/ui/GuildViews.gd:2402
 "Foes walk the roads toward the goal. Build towers on the round pads with supplies (you start with some and earn more for every kill); click a tower to upgrade or sell it. Ballistas shoot far, Fire Braziers splash and burn, Frost Totems slow, Ward Stones shield nearby heroes, Chapels mend them; research in the Defenses branch opens the last three and tier 3. Idle heroes stand at posts: warriors and rogues hold foes in place, rangers and mages shoot. Steer one champion by clicking where to go. Every foe that gets through costs integrity (an elite 3, a warden 10); at 0 the defense is lost. Call a wave early for bonus supplies.","Los enemigos recorren los caminos hacia la meta. Construye torres en las plataformas redondas con suministros (empiezas con algunos y ganas más con cada muerte); haz clic en una torre para mejorarla o venderla. Las Balistas disparan lejos, los Braseros de fuego salpican y queman, los Tótems de escarcha ralentizan, las Piedras de guarda escudan a los héroes cercanos y las Capillas los curan; la investigación de la rama Defensas abre las tres últimas y el nivel 3. Los héroes libres ocupan puestos: guerreros y pícaros retienen a los enemigos, exploradores y magos disparan. Dirige a un campeón haciendo clic adonde ir. Cada enemigo que pasa cuesta integridad (una élite 3, un guardián 10); en 0 la defensa se pierde. Llama a una oleada antes de tiempo para obtener suministros extra.",scripts/ui/GuildViews.gd:2402
-"Each new guild meets twelve champions, drawn from a pool of twenty-four: three are freed at the end of Acts I, II and III, and nine are lost, each held in a pillar of light (in the Descent, and in ladder rifts from Rank B; reach one to free them). A champion never joins the roster. In rift runs one oversees the party: their Boon lifts everyone, and any hero can spend a turn on their Call (once a rift, twice from level 3). Essence levels them up (to 5).",,scripts/ui/GuildViews.gd:2403
+"Each new guild meets twelve champions, drawn from a pool of twenty-four: three are freed at the end of Acts I, II and III, and nine are lost, each held in a pillar of light (in the Descent, and in ladder rifts from Rank B; reach one to free them). A champion never joins the roster. In rift runs one oversees the party: their Boon lifts everyone, and any hero can spend a turn on their Call (once a rift, twice from level 3). Essence levels them up (to 5).","Cada gremio nuevo conoce a doce campeones, sacados de un grupo de veinticuatro: tres se liberan al final de los Actos I, II y III, y nueve están perdidos, cada uno preso en un pilar de luz (en el Descenso, y en grietas de la escalera desde el Rango B; alcanza uno para liberarlo). Un campeón nunca entra en la plantilla. En las incursiones, uno supervisa al grupo: su Bendición mejora a todos, y cualquier héroe puede gastar un turno en su Llamada (una vez por grieta, dos desde el nivel 3). La Esencia los sube de nivel (hasta 5).",scripts/ui/GuildViews.gd:2403
 Attributes,Atributos,scripts/ui/GuildViews.gd:2404
-"Might (damage, HP), Agility (speed, dodge, first strike) and Focus (ability power, mend). Heroes gain 3 points per level to spend on the Roster's Hero tab; gear adds more, and better gear needs a minimum in its attribute to equip. Train up to 8 extra points at the Training Yard, or reset a hero's points for 5 Essence per level (gear they no longer qualify for comes off).",,scripts/ui/GuildViews.gd:2404
+"Might (damage, HP), Agility (speed, dodge, first strike) and Focus (ability power, mend). Heroes gain 3 points per level to spend on the Roster's Hero tab; gear adds more, and better gear needs a minimum in its attribute to equip. Train up to 8 extra points at the Training Yard, or reset a hero's points for 5 Essence per level (gear they no longer qualify for comes off).","Fuerza (daño, PV), Agilidad (velocidad, esquiva, primer golpe) y Enfoque (poder de habilidad, curación). Los héroes ganan 3 puntos por nivel para gastar en la pestaña Héroe de la Plantilla; el equipo añade más, y el mejor equipo exige un mínimo en su atributo para equiparlo. Entrena hasta 8 puntos extra en el Patio de Entrenamiento, o reinicia los puntos de un héroe por 5 de Esencia por nivel (el equipo para el que ya no cumple se le quita).",scripts/ui/GuildViews.gd:2404
 Quests & Milestones,Misiones e hitos,scripts/ui/GuildViews.gd:2405
-"The quest board posts 6 quests (hunts, boss bounties, rift seals, trials); take up to 3 at a time. Unaccepted postings are replaced every 3 days (a day passes with each rift run or rest). Milestones are a static checklist, auto-granted the moment they're met. A rare escort NPC can also tag along on a fight — surviving pays a small bonus.",,scripts/ui/GuildViews.gd:2405
+"The quest board posts 6 quests (hunts, boss bounties, rift seals, trials); take up to 3 at a time. Unaccepted postings are replaced every 3 days (a day passes with each rift run or rest). Milestones are a static checklist, auto-granted the moment they're met. A rare escort NPC can also tag along on a fight — surviving pays a small bonus.","El tablón de misiones publica 6 misiones (cacerías, recompensas por jefes, sellados de grietas, pruebas); acepta hasta 3 a la vez. Los encargos no aceptados se renuevan cada 3 días (pasa un día con cada incursión o descanso). Los Hitos son una lista fija que se concede sola en cuanto se cumple. A veces un PNJ de escolta se une a un combate — sobrevivir paga una pequeña bonificación.",scripts/ui/GuildViews.gd:2405
 "Wages, morale and the rival","Sueldos, moral y el rival",scripts/ui/GuildViews.gd:2406
 "Every 7 days (a day = one rift run or rest) heroes draw wages by rank and level, and every hall room level costs upkeep; see Guild > Ledger. Unpaid upkeep costs Renown. The Training Yard trains only a few attribute points a week (more with the Drill Yard), and a feast seats a limited number of heroes, lowest morale first (more with the Trade Network). The unpaid lose morale, and a hero unpaid twice in a row, or at rock-bottom morale on payday, walks out. Morale (0-100) rises with sealed rifts and feasts and falls with defeats, knockouts, idle weeks and failed contracts: Inspired heroes deal +10% damage, Shaken -10%, Breaking -20%. Taken contracts are due in 6-10 days. A rival guild gains Renown daily, and once a week it may make a move you answer before payday: court one of your heroes (match their offer, or they choose, staying only at morale 50 or above), dare you to seal a rift by payday (Renown rides on it), or go for a posted contract (take it on or lose it). Requests and the rival's moves pop up at camp and wait in the Ledger, whose week board shows each day to payday. At payday, the leader on Renown gets the better recruits. Every 28 days, whichever guild gained more Renown wins a prize.","Cada 7 días (un día = una incursión o un descanso) los héroes cobran salarios según rango y nivel, y cada nivel de sala cuesta mantenimiento; ver Gremio > Libro de cuentas. El mantenimiento impagado cuesta Renombre. El Patio de Entrenamiento solo entrena unos pocos puntos de atributo por semana (más con el Campo de Instrucción), y un banquete sienta a un número limitado de héroes, los de moral más baja primero (más con la Red Comercial). Los impagados pierden moral, y un héroe sin cobrar dos veces seguidas, o con la moral por los suelos el día de paga, se marcha. La moral (0-100) sube con grietas selladas y banquetes y baja con derrotas, derribos, semanas ociosas y contratos fallidos: los héroes Inspirados hacen +10% de daño, los Vacilantes -10%, los Rotos -20%. Los contratos aceptados vencen en 6-10 días. Un gremio rival gana Renombre cada día, y una vez por semana puede hacer una jugada que respondes antes del día de paga: cortejar a uno de tus héroes (iguala su oferta o elige él, que solo se queda con moral 50 o más), retarte a sellar una grieta antes del día de paga (el Renombre está en juego) o ir a por un contrato publicado (acéptalo o piérdelo). Las peticiones y las jugadas del rival aparecen en el campamento y esperan en el Libro de cuentas, cuyo tablero semanal muestra cada día hasta la paga. El día de paga, quien va primero en Renombre recibe mejores reclutas. Cada 28 días, el gremio que más Renombre ganó se lleva un premio.",scripts/ui/GuildViews.gd:2406
-"Twice a week a hero may ask for something: time off, a raise, Gold for kit, a Training Yard slot, a partner, a rift of their own, your side in a feud, and more. Saying yes costs something and can leave them a title, a quirk or a bond; saying no costs morale. Answer in the Ledger before payday, or it counts as a no.",,scripts/ui/GuildViews.gd:2407
-Expeditions,,scripts/ui/GuildViews.gd:2408
-"From two seals, the Quest board's Expeditions tab posts three jobs off the map: a safe one, a hard one and (from Act II) a perilous one, each with a Need in power, a length of 1-3 days and a party of up to 3. Heroes you send are away for those days and still draw wages. The odds show before they go: 50% at the Need, better above it. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party, and on a perilous job it can leave a scar. Every class and every Path brings something on the road, once per party: a warrior's muscle and a ranger's scouting raise the odds, a mage appraises (+50% Essence), a rogue pockets more (+25% Gold), a cleric halves the hurt, and each Path adds its own. Heroes are gone for the whole days while rifts and breaches go on without them. Everyone learns on the road, as at the Training Yard. One party out at a time, two with a Scouts' Lodge at level 3.",,scripts/ui/GuildViews.gd:2408
+"Twice a week a hero may ask for something: time off, a raise, Gold for kit, a Training Yard slot, a partner, a rift of their own, your side in a feud, and more. Saying yes costs something and can leave them a title, a quirk or a bond; saying no costs morale. Answer in the Ledger before payday, or it counts as a no.","Dos veces por semana un héroe puede pedir algo: tiempo libre, un aumento, Oro para equipo, un puesto en el Patio de Entrenamiento, un compañero, una grieta propia, tu apoyo en una disputa, y más. Decir que sí cuesta algo y puede dejarle un título, un rasgo o un vínculo; decir que no cuesta moral. Responde en el Libro de cuentas antes del día de paga, o contará como un no.",scripts/ui/GuildViews.gd:2407
+Expeditions,Expediciones,scripts/ui/GuildViews.gd:2408
+"From two seals, the Quest board's Expeditions tab posts three jobs off the map: a safe one, a hard one and (from Act II) a perilous one, each with a Need in power, a length of 1-3 days and a party of up to 3. Heroes you send are away for those days and still draw wages. The odds show before they go: 50% at the Need, better above it. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party, and on a perilous job it can leave a scar. Every class and every Path brings something on the road, once per party: a warrior's muscle and a ranger's scouting raise the odds, a mage appraises (+50% Essence), a rogue pockets more (+25% Gold), a cleric halves the hurt, and each Path adds its own. Heroes are gone for the whole days while rifts and breaches go on without them. Everyone learns on the road, as at the Training Yard. One party out at a time, two with a Scouts' Lodge at level 3.","Desde dos sellados, la pestaña Expediciones del tablón de Misiones publica tres trabajos fuera del mapa: uno seguro, uno difícil y (desde el Acto II) uno peligroso, cada uno con un Requisito de poder, una duración de 1-3 días y un grupo de hasta 3. Los héroes que envías están fuera esos días y siguen cobrando sueldo. La probabilidad se ve antes de partir: 50% con el Requisito justo, más por encima. El éxito paga entero; un resultado parcial paga la mitad y alguien vuelve herido; un fracaso no paga nada y hiere al grupo, y en un trabajo peligroso puede dejar una cicatriz. Cada clase y cada Senda aporta algo en el camino, una vez por grupo: el músculo del guerrero y el rastreo del explorador suben la probabilidad, el mago tasa (+50% de Esencia), el pícaro se embolsa más (+25% de Oro), el clérigo reduce las heridas a la mitad, y cada Senda añade lo suyo. Los héroes se ausentan días enteros mientras las grietas y las brechas siguen sin ellos. Todos aprenden en el camino, como en el Patio de Entrenamiento. Un grupo fuera a la vez, dos con el Refugio de Batidores a nivel 3.",scripts/ui/GuildViews.gd:2408
 Camp events,Sucesos del campamento,scripts/ui/GuildViews.gd:2409
 "On about a third of days something happens at camp, and each is a choice: a travelling merchant, a renowned hero who drills one of yours, a wandering recruit, a relic peddler, a smith's apprentice, a scholar; a festival, refugees, a debt, the rival's quartermaster. Threats (fire, fever, bandits, a storm, a rift tremor) are foretold the evening before (the status board and the week's calendar): pay, send a hero who stays home that day, or take the loss. An event left unanswered takes its last option the next day. Act I brings only opportunities.","Aproximadamente un día de cada tres pasa algo en el campamento, y cada suceso es una elección: un mercader ambulante, un héroe renombrado que entrena a uno de los tuyos, un recluta errante, un buhonero de reliquias, el aprendiz de un herrero, un erudito; una fiesta, refugiados, una deuda, el intendente del rival. Las amenazas (incendio, fiebre, bandidos, una tormenta, un temblor de grieta) se presagian la tarde anterior (el tablero de estado y el calendario semanal): paga, envía a un héroe que se queda en casa ese día, o asume la pérdida. Un suceso sin respuesta toma su última opción al día siguiente. El Acto I solo trae oportunidades.",scripts/ui/GuildViews.gd:2409
 The rift map,El mapa de la grieta,scripts/ui/GuildViews.gd:2410
@@ -5233,8 +5233,8 @@ Wanted,Se busca,scripts/ui/GuildViews.gd:2442
 Seal the Rift,Sella la grieta,scripts/ui/GuildViews.gd:2442
 Trial,Prueba,scripts/ui/GuildViews.gd:2443
 Supply,Suministro,scripts/ui/GuildViews.gd:2443
-Contracts,,scripts/ui/GuildViews.gd:2456
- (%d out),,scripts/ui/GuildViews.gd:2456
+Contracts,Contratos,scripts/ui/GuildViews.gd:2456
+ (%d out), (%d fuera),scripts/ui/GuildViews.gd:2456
 Day %d  ·  Taken %d/%d  ·  new postings in %d day%s,Día %d  ·  Aceptadas %d/%d  ·  nuevos anuncios en %d día%s,scripts/ui/GuildViews.gd:2497
 A day passes with every rift run or rest. Unaccepted postings are replaced when the board refreshes; quests you've taken stay.,Pasa un día con cada incursión o descanso. Los anuncios no aceptados se reemplazan cuando se renueva el tablón; las misiones que has aceptado se quedan.,scripts/ui/GuildViews.gd:2502
 Nothing posted — new postings in %d day%s.,Nada publicado: nuevos anuncios en %d día%s.,scripts/ui/GuildViews.gd:2514
@@ -5294,19 +5294,19 @@ Next: %s%s,Siguiente: %s%s,scripts/ui/GuildViews.gd:2975
 "
 Unlocks: ","
 Desbloquea: ",scripts/ui/GuildViews.gd:2975
-"Send heroes on a job off the map. They are gone for its whole days and still draw wages, while rifts and breaches go on without them. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party. Every class and Path brings something (hover a hero); each counts once, so a mixed party does best. Parties out at once: %d.",,scripts/ui/GuildViews.gd:2992
-Out: %s,,scripts/ui/GuildViews.gd:3002
-%s · back in %d day%s · %d%% odds,,scripts/ui/GuildViews.gd:3003
-Nothing posted until the board is renewed.,,scripts/ui/GuildViews.gd:3007
-%s · %d day%s · up to %d hero%s · Need %d,,scripts/ui/GuildViews.gd:3025
-Pays %d Gold,,scripts/ui/GuildViews.gd:3029
-", %d Essence",,scripts/ui/GuildViews.gd:3029
-", %d%% chance of an item",,scripts/ui/GuildViews.gd:3032
-A failure here can leave a lasting scar.,,scripts/ui/GuildViews.gd:3035
-%s · power %d,,scripts/ui/GuildViews.gd:3053
-Nobody at camp is free.,,scripts/ui/GuildViews.gd:3056
-Send them (%d%% odds),,scripts/ui/GuildViews.gd:3063
-Pick who goes,,scripts/ui/GuildViews.gd:3063
+"Send heroes on a job off the map. They are gone for its whole days and still draw wages, while rifts and breaches go on without them. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party. Every class and Path brings something (hover a hero); each counts once, so a mixed party does best. Parties out at once: %d.","Envía héroes a un trabajo fuera del mapa. Se ausentan todos sus días y siguen cobrando sueldo, mientras las grietas y las brechas siguen sin ellos. El éxito paga entero; un resultado parcial paga la mitad y alguien vuelve herido; un fracaso no paga nada y hiere al grupo. Cada clase y Senda aporta algo (pasa el cursor sobre un héroe); cada una cuenta una vez, así que un grupo variado rinde mejor. Grupos fuera a la vez: %d.",scripts/ui/GuildViews.gd:2992
+Out: %s,Fuera: %s,scripts/ui/GuildViews.gd:3002
+%s · back in %d day%s · %d%% odds,%s · vuelve en %d día%s · %d%% prob.,scripts/ui/GuildViews.gd:3003
+Nothing posted until the board is renewed.,No hay nada publicado hasta que se renueve el tablón.,scripts/ui/GuildViews.gd:3007
+%s · %d day%s · up to %d hero%s · Need %d,%s · %d día%s · hasta %d héroe%s · Requiere %d,scripts/ui/GuildViews.gd:3025
+Pays %d Gold,Paga %d de Oro,scripts/ui/GuildViews.gd:3029
+", %d Essence",", %d de Esencia",scripts/ui/GuildViews.gd:3029
+", %d%% chance of an item",", %d%% de prob. de objeto",scripts/ui/GuildViews.gd:3032
+A failure here can leave a lasting scar.,Un fracaso aquí puede dejar una cicatriz duradera.,scripts/ui/GuildViews.gd:3035
+%s · power %d,%s · poder %d,scripts/ui/GuildViews.gd:3053
+Nobody at camp is free.,No hay nadie libre en el campamento.,scripts/ui/GuildViews.gd:3056
+Send them (%d%% odds),Enviarlos (%d%% prob.),scripts/ui/GuildViews.gd:3063
+Pick who goes,Elige quién va,scripts/ui/GuildViews.gd:3063
 navigator.storage && navigator.storage.persist && navigator.storage.persist();,navigator.storage && navigator.storage.persist && navigator.storage.persist();,scripts/ui/Main.gd:37
 (new URLSearchParams(location.search)).get('receive')||'',(new URLSearchParams(location.search)).get('receive')||'',scripts/ui/Main.gd:40
 "history.replaceState(null,'',location.pathname)","history.replaceState(null,'',location.pathname)",scripts/ui/Main.gd:42
@@ -5360,14 +5360,14 @@ Keep the doors open,Mantener las puertas abiertas,scripts/ui/Main.gd:625
 "Both worlds: Hollow-born heroes join your recruit board, in later guilds too","Ambos mundos: héroes nacidos del Hueco se suman a tu tablón de reclutas, también en gremios posteriores",scripts/ui/Main.gd:625
 Close every door,Cerrar todas las puertas,scripts/ui/Main.gd:626
 "Ours: +%d Laurels, and the Hollow's foes leave the ladder","El nuestro: +%d Laureles, y los enemigos del Hueco dejan la escalera",scripts/ui/Main.gd:626
-How much should the guild's old hands tell you?,,scripts/ui/Main.gd:655
-Guide me through everything,,scripts/ui/Main.gd:662
-A tip on every screen the first time you open it (as now).,,scripts/ui/Main.gd:662
-Help a little,,scripts/ui/Main.gd:663
-Tips only for the first fight and when a big new system turns up.,,scripts/ui/Main.gd:663
+How much should the guild's old hands tell you?,¿Cuánto deberían contarte los veteranos del gremio?,scripts/ui/Main.gd:655
+Guide me through everything,Guíame en todo,scripts/ui/Main.gd:662
+A tip on every screen the first time you open it (as now).,Un consejo en cada pantalla la primera vez que la abras (como ahora).,scripts/ui/Main.gd:662
+Help a little,Ayúdame un poco,scripts/ui/Main.gd:663
+Tips only for the first fight and when a big new system turns up.,Consejos solo en el primer combate y cuando aparezca un sistema nuevo importante.,scripts/ui/Main.gd:663
 No tips,Sin consejos,scripts/ui/Main.gd:664
-Nothing explained. Settings can turn tips back on.,,scripts/ui/Main.gd:664
- (key %d),,scripts/ui/Main.gd:672
+Nothing explained. Settings can turn tips back on.,Sin explicaciones. Puedes reactivar los consejos en Ajustes.,scripts/ui/Main.gd:664
+ (key %d), (tecla %d),scripts/ui/Main.gd:672
 Expose the Company,Exponer a la Compañía,scripts/ui/Main.gd:706
 +%d Renown. The Company will strike back: a Riftbreak at your door.,+%d de Renombre. La Compañía contraatacará: un Desborde a tu puerta.,scripts/ui/Main.gd:709
 Keep quiet,Guardar silencio,scripts/ui/Main.gd:711
@@ -5437,7 +5437,7 @@ is available to recruit!,¡está disponible para reclutar!,scripts/ui/Main.gd:12
 Roster,Plantilla,scripts/ui/Main.gd:1311
 %s  (key %s),%s  (tecla %s),scripts/ui/Main.gd:1399
 Tower,Torre,scripts/ui/Main.gd:1486
-Title,,scripts/ui/Main.gd:1496
+Title,Título,scripts/ui/Main.gd:1496
 Back to %s,Volver a %s,scripts/ui/Main.gd:1533
 %d hall room levels,%d niveles de salas,scripts/ui/Main.gd:1566
  · %d more to %s, · %d más para %s,scripts/ui/Main.gd:1568
@@ -5529,8 +5529,8 @@ Guild name,Nombre del gremio,scripts/ui/Main.gd:2007
 Your crest,Tu emblema,scripts/ui/Main.gd:2014
 Random name,Nombre al azar,scripts/ui/Main.gd:2020
 The %s %s,%s y %s,scripts/ui/Main.gd:2021
-Crest,,scripts/ui/Main.gd:2030
-Crest %d,,scripts/ui/Main.gd:2038
+Crest,Blasón,scripts/ui/Main.gd:2030
+Crest %d,Blasón %d,scripts/ui/Main.gd:2038
 Found the Guild,Fundar el gremio,scripts/ui/Main.gd:2045
 Name your guild first,Primero ponle nombre a tu gremio,scripts/ui/Main.gd:2051
 %d oath%s,%d juramento%s,scripts/ui/Main.gd:2095
@@ -5558,7 +5558,7 @@ short %d.,faltan %d.,scripts/ui/Main.gd:2238
 Choosing a rift,Elegir una grieta,scripts/ui/Main.gd:2252
 "Rifts come in ranks, F to SSS. Seal a rank to open the next. The readout compares your best party's power with what the rift expects — Deadly, Risky, Even or Favored. Your very first rift is a shorter training run.","Las grietas tienen rangos, de F a SSS. Sella un rango para abrir el siguiente. El indicador compara el poder de tu mejor grupo con lo que espera la grieta: Mortal, Arriesgada, Pareja o Favorable. Tu primerísima grieta es una incursión de entrenamiento más corta.",scripts/ui/Main.gd:2252
 The Descent,El Descenso,scripts/ui/Main.gd:2287
- — locked,,scripts/ui/Main.gd:2287
+ — locked, — bloqueado,scripts/ui/Main.gd:2287
 Rank %s Rift,Grieta de Rango %s,scripts/ui/Main.gd:2289
 Ranks C-SSS — locked,Rangos C-SSS — bloqueados,scripts/ui/Main.gd:2290
 Rank C — %s,Rango C — %s,scripts/ui/Main.gd:2290
@@ -5712,7 +5712,7 @@ Reset keys,Restablecer teclas,scripts/ui/Main.gd:3786
 The Night of Breaking: how the old guilds vanished. About a minute; Esc skips.,La Noche de la Ruptura: cómo desaparecieron los viejos gremios. Alrededor de un minuto; Esc la omite.,scripts/ui/Main.gd:3818
 Hide feedback,Ocultar comentarios,scripts/ui/Main.gd:3820
 Audio,Audio,scripts/ui/Main.gd:3828
-Master,,scripts/ui/Main.gd:3829
+Master,General,scripts/ui/Main.gd:3829
 Spoken lines: on,Diálogos hablados: sí,scripts/ui/Main.gd:3849
 Spoken lines: off,Diálogos hablados: no,scripts/ui/Main.gd:3849
 "The narrator reads the story cards, and the guild's people speak at the pay table and in rival letters. English only for now.","El narrador lee las tarjetas de la historia, y la gente del gremio habla en la mesa de pagos y en las cartas de los rivales. Por ahora solo en inglés.",scripts/ui/Main.gd:3857
@@ -5738,7 +5738,7 @@ Hearing aid: %s,Ayuda auditiva: %s,scripts/ui/Main.gd:3937
 Tips,Consejos,scripts/ui/Main.gd:3949
 Tips: %s,Consejos: %s,scripts/ui/Main.gd:3953
 all,todos,locale/extra_msgids.txt
-key moments,,scripts/ui/Main.gd:3953
+key moments,momentos clave,scripts/ui/Main.gd:3953
 Show all tips again,Mostrar de nuevo todos los consejos,scripts/ui/Main.gd:3957
 Save Slots,Ranuras de guardado,scripts/ui/Main.gd:3965
 Backup,Copia de seguridad,scripts/ui/Main.gd:3988
@@ -5817,7 +5817,7 @@ Shrine,Santuario,scripts/ui/RiftRunView.gd:335
 " — the Descent, depth %d"," — el Descenso, profundidad %d",scripts/ui/RiftRunView.gd:375
 This rift's region sets which foes you'll meet.,La región de esta grieta determina qué enemigos encontrarás.,scripts/ui/RiftRunView.gd:378
 Relic ward %d,Barrera de reliquia %d,scripts/ui/RiftRunView.gd:399
-Next fight +%d Momentum,,scripts/ui/RiftRunView.gd:401
+Next fight +%d Momentum,Próximo combate +%d de Ímpetu,scripts/ui/RiftRunView.gd:401
 Haul %d Gold · %d Essence,Botín %d de Oro · %d de Esencia,scripts/ui/RiftRunView.gd:406
 "Yours once the party is home. If the party falls, %d%% of it is lost; fleeing a fight drops %d%%. Leaving between floors keeps it all.","Es tuyo cuando el grupo vuelva a casa. Si el grupo cae, se pierde el %d%%; huir de un combate hace perder el %d%%. Salir entre pisos lo conserva todo.",scripts/ui/RiftRunView.gd:408
 Resolve %d,Temple %d,scripts/ui/RiftRunView.gd:418
@@ -5914,7 +5914,7 @@ A trainer's echo,El eco de un instructor,scripts/ui/RiftRunView.gd:1022
 Nothing the party wears can take more tempering.,Nada de lo que lleva el grupo admite más templado.,scripts/ui/RiftRunView.gd:1040
 "A shrine to the %s Path, its candles still lit. Kneel, and the party learns: %d%% of a level for heroes on this Path, %d%% for the rest.","Un santuario de la Senda de %s, con sus velas aún encendidas. Arrodíllate y el grupo aprende: un %d%% de nivel para los héroes de esta Senda, un %d%% para el resto.",scripts/ui/RiftRunView.gd:1042
 Kneel,Arrodillarse,scripts/ui/RiftRunView.gd:1043
-"%d-%d Gold, but %d Resolve.",,scripts/ui/RiftRunView.gd:1050
+"%d-%d Gold, but %d Resolve.","%d-%d de Oro, pero %d de Temple.",scripts/ui/RiftRunView.gd:1050
 The echo of an old guild's trainer still drills in this hall. One hero can train with it and gain a level (at level 10: attribute points).,El eco del instructor de un viejo gremio aún entrena en esta sala. Un héroe puede entrenar con él y ganar un nivel (en el nivel 10: puntos de atributo).,scripts/ui/RiftRunView.gd:1053
 %s (Lv%d),%s (Nv%d),scripts/ui/RiftRunView.gd:1055
 Your Anchor Artifact blocks it — no damage,Tu Artefacto Ancla lo bloquea: sin daño,scripts/ui/RiftRunView.gd:1089
@@ -6054,16 +6054,16 @@ Relics  %d,Reliquias  %d,scripts/ui/RosterView.gd:1163
 Supplies  %d,Suministros  %d,scripts/ui/RosterView.gd:1163
 All,Todo,scripts/ui/RosterView.gd:1188
 Weapons,Armas,scripts/ui/RosterView.gd:1188
-Worn,,scripts/ui/RosterView.gd:1188
+Worn,En uso,scripts/ui/RosterView.gd:1188
 Rarity,Rareza,scripts/ui/RosterView.gd:1201
 Value,Valor,scripts/ui/RosterView.gd:1202
 Name,Nombre,scripts/ui/RosterView.gd:1203
-Nobody wears anything yet.,,scripts/ui/RosterView.gd:1214
+Nobody wears anything yet.,Nadie lleva nada todavía.,scripts/ui/RosterView.gd:1214
 No unequipped items here — loot drops in rifts.,No hay objetos sin equipar: el botín cae en las grietas.,scripts/ui/RosterView.gd:1214
-What your heroes wear. Click one to open its wearer's page.,,scripts/ui/RosterView.gd:1216
+What your heroes wear. Click one to open its wearer's page.,Lo que llevan tus héroes. Haz clic en uno para abrir la página de quien lo lleva.,scripts/ui/RosterView.gd:1216
 Click an item to see it and equip it.  + fills someone's empty slot.,Haz clic en un objeto para verlo y equiparlo.  + llena la ranura vacía de alguien.,scripts/ui/RosterView.gd:1216
 %s — click for details,%s — haz clic para ver detalles,scripts/ui/RosterView.gd:1277
-Worn by %s,,scripts/ui/RosterView.gd:1280
+Worn by %s,Lo lleva %s,scripts/ui/RosterView.gd:1280
 Equip → %s,Equipar → %s,scripts/ui/RosterView.gd:1356
 Swap → %s,Cambiar → %s,scripts/ui/RosterView.gd:1356
 Equip on,Equipar a,scripts/ui/RosterView.gd:1363

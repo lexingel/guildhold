@@ -1257,7 +1257,7 @@ msgstr "Wen，编年史官"
 
 #: scripts/autoload/game_data/GameDataArt.gd:75
 msgid "\"Two rifts sealed, and the yard behind the barracks is finally clear of rubble. Send a hero there for a few days and they come back stronger: an attribute point, a new program. The Drill Yard room adds places. And the quest board has work off the map for anyone left at camp.\""
-msgstr ""
+msgstr "\"两座裂隙已封印，兵营后面的院子也终于清走了碎石。派英雄去那里待几天，回来就会更强：一个属性点，一个新项目。操练场这个房间能增加位置。任务板上还有地图之外的活儿，留守营地的人都能接。\""
 
 #: scripts/autoload/game_data/GameDataArt.gd:76 scripts/ui/GuildViews.gd:1265 scripts/ui/Main.gd:1314
 msgid "Accord Hall"
@@ -1429,11 +1429,11 @@ msgstr "远征报酬已在完整模拟中核对，并按你派出的英雄来定
 
 #: scripts/autoload/game_data/GameDataArt.gd:180
 msgid "Your own founders and expeditions. A new guild signs its first three heroes from a board of six, one of every class among them, with free rerolls. From two seals the Quest board posts expeditions: jobs off the map for heroes you can spare, gone for whole days while the rifts go on without them. The odds show before they leave, every class and Path brings something on the road, and a perilous job gone wrong can leave a scar. After Act I's card you choose how many tips you want, and the Training Yard now costs Essence."
-msgstr ""
+msgstr "自选创始英雄与远征。新公会从一块六人招募板（每个职业都有）上签下最初三名英雄，可免费重抽。封印两座裂隙后，任务板会发布远征：给你腾得出手的英雄在地图之外接活，一去就是整天，裂隙那边照常进行。出发前会显示成功率，每个职业和道途在路上都有所助益，凶险任务一旦失手可能留下伤疤。看过第一幕的卡片后，你可以选择想要多少提示；训练场现在需要花费精华。"
 
 #: scripts/autoload/game_data/GameDataArt.gd:181
 msgid "Fixes from a full playthrough: the hero who opens a round waits for you instead of replaying last round's move, the turn order and the action bar follow every turn, Guard picks an ally, a stunned hero loses the turn openly, foes keep their size when one is summoned, and new recruits can spend their skill points. Also: Settings and a master volume on the title screen, a crest picker, the shrine's second choice, Take buttons in treasure rooms, a bigger rift map with fewer crossings, the main portal leads to the ranked rifts, front-row heroes stand nearest the foes, a Worn filter in the inventory, banked Momentum on the map, and a cleaner Guild, Records and Library."
-msgstr ""
+msgstr "完整通关后的修复：开启回合的英雄会等待你的指令，而不是重复上一回合的行动；行动顺序和行动栏每回合都会更新；守护可以选择一名队友；被击晕的英雄会明确地失去回合；召唤出新敌人时，其余敌人保持原有大小；新招募的英雄可以花费技能点。另外：标题画面加入设置和主音量、纹章选择器、圣坛的第二个选项、宝藏房间的拿取按钮、更大且交叉更少的裂隙地图、主传送门通往阶级裂隙、前排英雄站得离敌人最近、物品栏的“已穿戴”筛选、地图上显示储存的气势，以及更清爽的公会、记录和图书馆页面。"
 
 #: scripts/autoload/game_data/GameDataArt.gd:182
 msgid "Gear, simpler. The Smithy is one screen for gear's four jobs: temper what your heroes wear, combine three spare items into a better one, reforge a stat line, salvage for Essence. Relics bend rules now and nothing else: every relic is one of a kind (from finales, an elite's loot, a rift shop, events and the Tower), and stats live on gear. Rolled relics, relic levels, rerolls and the starting relic choice are gone; an old save's rolled relics and every relic level became Essence. Path relics are carried by heroes: one each, of their own Path, working while they fight, passed between them on the hero's Path tab. Offers come only for Paths your heroes walk, and declining one pays the seal's full Essence. The Relic Vault adds a relic slot at Lv1, 3 and 5; the Arcane Lab cheapens treatments and respecs and raises salvage."
@@ -9249,159 +9249,159 @@ msgstr "+10-16精华 · -2声望"
 
 #: scripts/autoload/game_data/GameDataModes.gd:625
 msgid "Escort the salt carts"
-msgstr ""
+msgstr "护送盐车"
 
 #: scripts/autoload/game_data/GameDataModes.gd:625
 msgid "The salt carts want guards as far as the river ford. Nobody expects trouble, which is when it comes."
-msgstr ""
+msgstr "盐车要人护送到河边浅滩。没人预料会出事，而麻烦往往就在这时找上门。"
 
 #: scripts/autoload/game_data/GameDataModes.gd:626
 msgid "Clear the mill cellar"
-msgstr ""
+msgstr "清理磨坊地窖"
 
 #: scripts/autoload/game_data/GameDataModes.gd:626
 msgid "Something is eating the miller's grain and he would rather not find out what."
-msgstr ""
+msgstr "有东西在偷吃磨坊主的粮食，他宁可不知道那是什么。"
 
 #: scripts/autoload/game_data/GameDataModes.gd:627
 msgid "Count the border cairns"
-msgstr ""
+msgstr "清点边界石堆"
 
 #: scripts/autoload/game_data/GameDataModes.gd:627
 msgid "The Crown pays a surveyor's fee to anyone who walks the old border and counts what is still standing."
-msgstr ""
+msgstr "王冠会付一笔测量费，给任何走完旧边界、清点出仍然矗立之物的人。"
 
 #: scripts/autoload/game_data/GameDataModes.gd:628
 msgid "Hunt the marsh lights"
-msgstr ""
+msgstr "猎杀沼泽鬼火"
 
 #: scripts/autoload/game_data/GameDataModes.gd:628
 msgid "Lights over the marsh have drowned three fishermen this month. The village has a purse for whoever puts them out."
-msgstr ""
+msgstr "沼泽上的鬼火这个月已经淹死了三个渔夫。村里凑了一笔赏钱，给能把它们熄灭的人。"
 
 #: scripts/autoload/game_data/GameDataModes.gd:629
 msgid "Recover the toll chest"
-msgstr ""
+msgstr "夺回过路费箱"
 
 #: scripts/autoload/game_data/GameDataModes.gd:629
 msgid "Bandits took the bridge toll and went to ground in the quarry. Bring the chest back and keep a share."
-msgstr ""
+msgstr "强盗抢走了桥上的过路费，躲进了采石场。把箱子带回来，你可以留一份。"
 
 #: scripts/autoload/game_data/GameDataModes.gd:630
 msgid "Map the drowned road"
-msgstr ""
+msgstr "测绘被淹的道路"
 
 #: scripts/autoload/game_data/GameDataModes.gd:630
 msgid "The old Accord road runs under the floodwater now. A merchant house wants it mapped before their rivals do."
-msgstr ""
+msgstr "古老的盟约大道如今沉在洪水之下。一家商行想抢在对手之前把它绘成地图。"
 
 #: scripts/autoload/game_data/GameDataModes.gd:631
 msgid "Take the Hollow's tithe barge"
-msgstr ""
+msgstr "劫下空洞的什一税驳船"
 
 #: scripts/autoload/game_data/GameDataModes.gd:631
 msgid "A barge carries rift-glass up the river for the Hollow's buyers. It is guarded, and it is worth it."
-msgstr ""
+msgstr "一艘驳船沿河运送裂隙玻璃，交给空洞的买家。船上有守卫，但值得一抢。"
 
 #: scripts/autoload/game_data/GameDataModes.gd:632
 msgid "Open an Accord vault"
-msgstr ""
+msgstr "打开盟约宝库"
 
 #: scripts/autoload/game_data/GameDataModes.gd:632
 msgid "A scholar swears an old guild vault lies under the burned chapel. The last party that went down came back two short."
-msgstr ""
+msgstr "一位学者发誓，烧毁的礼拜堂下面有一座旧公会宝库。上一支下去的小队，回来时少了两个人。"
 
 #: scripts/autoload/game_data/GameDataModes.gd:638
 msgid "Safe"
-msgstr ""
+msgstr "安全"
 
 #: scripts/autoload/game_data/GameDataModes.gd:638
 msgid "Hard"
-msgstr ""
+msgstr "困难"
 
 #: scripts/autoload/game_data/GameDataModes.gd:638
 msgid "Perilous"
-msgstr ""
+msgstr "凶险"
 
 #: scripts/autoload/game_data/GameDataModes.gd:647
 msgid "Muscle"
-msgstr ""
+msgstr "蛮力"
 
 #: scripts/autoload/game_data/GameDataModes.gd:648
 msgid "Scout"
-msgstr ""
+msgstr "侦察"
 
 #: scripts/autoload/game_data/GameDataModes.gd:649
 msgid "Appraiser"
-msgstr ""
+msgstr "鉴定师"
 
 #: scripts/autoload/game_data/GameDataModes.gd:650
 msgid "Field medic"
-msgstr ""
+msgstr "战地医护"
 
 #: scripts/autoload/game_data/GameDataModes.gd:651
 msgid "Light fingers"
-msgstr ""
+msgstr "妙手"
 
 #: scripts/autoload/game_data/GameDataModes.gd:652
 msgid "Takes the blows"
-msgstr ""
+msgstr "硬扛打击"
 
 #: scripts/autoload/game_data/GameDataModes.gd:653
 msgid "At home in danger"
-msgstr ""
+msgstr "临危自若"
 
 #: scripts/autoload/game_data/GameDataModes.gd:654
 msgid "Drills the others"
-msgstr ""
+msgstr "督促操练"
 
 #: scripts/autoload/game_data/GameDataModes.gd:655
 msgid "Clean shot"
-msgstr ""
+msgstr "精准一击"
 
 #: scripts/autoload/game_data/GameDataModes.gd:656
 msgid "Sets snares"
-msgstr ""
+msgstr "布设陷阱"
 
 #: scripts/autoload/game_data/GameDataModes.gd:657
 msgid "Bounty hunter"
-msgstr ""
+msgstr "赏金猎人"
 
 #: scripts/autoload/game_data/GameDataModes.gd:658
 msgid "Burns the dross"
-msgstr ""
+msgstr "焚去杂质"
 
 #: scripts/autoload/game_data/GameDataModes.gd:659
 msgid "Wards the camp"
-msgstr ""
+msgstr "护佑营地"
 
 #: scripts/autoload/game_data/GameDataModes.gd:660
 msgid "Sees it coming"
-msgstr ""
+msgstr "未卜先知"
 
 #: scripts/autoload/game_data/GameDataModes.gd:661
 msgid "Patches everyone"
-msgstr ""
+msgstr "人人包扎"
 
 #: scripts/autoload/game_data/GameDataModes.gd:662
 msgid "Shields the worst of it"
-msgstr ""
+msgstr "挡下最狠的"
 
 #: scripts/autoload/game_data/GameDataModes.gd:663
 msgid "Rallies the party"
-msgstr ""
+msgstr "鼓舞小队"
 
 #: scripts/autoload/game_data/GameDataModes.gd:664
 msgid "Quiet work"
-msgstr ""
+msgstr "悄然行事"
 
 #: scripts/autoload/game_data/GameDataModes.gd:665
 msgid "Gets out fast"
-msgstr ""
+msgstr "迅速脱身"
 
 #: scripts/autoload/game_data/GameDataModes.gd:666
 msgid "Shrugs it off"
-msgstr ""
+msgstr "不当回事"
 
 #: scripts/autoload/game_data/GameDataModes.gd:716 scripts/autoload/game_data/GameDataModes.gd:985
 msgid "SS"
@@ -15481,111 +15481,111 @@ msgstr "，%s受损"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:917
 msgid "+%d%% odds"
-msgstr ""
+msgstr "成功率+%d%%"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:918
 msgid "+%d%% odds on a perilous job"
-msgstr ""
+msgstr "凶险任务成功率+%d%%"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:919
 msgid "+%d%% Gold"
-msgstr ""
+msgstr "金币+%d%%"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:920
 msgid "+%d%% Essence"
-msgstr ""
+msgstr "精华+%d%%"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:921
 msgid "+%d%% item chance"
-msgstr ""
+msgstr "物品几率+%d%%"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:922
 msgid "+%d%% XP for the party"
-msgstr ""
+msgstr "小队经验+%d%%"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:923
 msgid "%d%% less chance of being hurt"
-msgstr ""
+msgstr "受伤几率降低%d%%"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:924
 msgid "%d%% less chance of a scar"
-msgstr ""
+msgstr "留下伤疤几率降低%d%%"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:925
 msgid "a failure turns partial half the time"
-msgstr ""
+msgstr "失败时有一半几率转为部分成功"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:946
 msgid "Expeditions open with the Training Yard"
-msgstr ""
+msgstr "远征随训练场一同开放"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:948
 msgid "No such posting"
-msgstr ""
+msgstr "没有这项委托"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:950 scripts/ui/GuildViews.gd:3071
 msgid "Every expedition party is out"
-msgstr ""
+msgstr "所有远征小队都已出发"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:954
 msgid "Send 1 to %d heroes"
-msgstr ""
+msgstr "派出1至%d名英雄"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:958
 msgid "Someone can't go"
-msgstr ""
+msgstr "有人无法出发"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1004
 msgid "+%d Gold"
-msgstr ""
+msgstr "+%d金币"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1007
 msgid "+%d Essence"
-msgstr ""
+msgstr "+%d精华"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1012
 msgid "found: %s"
-msgstr ""
+msgstr "发现：%s"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1022
 msgid "%s comes back hurt"
-msgstr ""
+msgstr "%s负伤归来"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1027
 msgid "%s keeps a scar: %s"
-msgstr ""
+msgstr "%s留下了伤疤：%s"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1035
 msgid "Dobbs: \"They're back, and it paid.\""
-msgstr ""
+msgstr "Dobbs：\"他们回来了，这趟赚到了。\""
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1035
 msgid "Dobbs: \"Back with half of it and a limp.\""
-msgstr ""
+msgstr "Dobbs：\"只带回一半，还瘸着腿。\""
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1035
 msgid "Dobbs: \"Back with nothing. Get the bandages.\""
-msgstr ""
+msgstr "Dobbs：\"空手而归。快拿绷带来。\""
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1037
 msgid "nothing to show for it"
-msgstr ""
+msgstr "一无所获"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1039
 msgid "Expedition: %s, %s."
-msgstr ""
+msgstr "远征：%s，%s。"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1039
 msgid "a success"
-msgstr ""
+msgstr "成功"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1039
 msgid "half done"
-msgstr ""
+msgstr "完成一半"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1039
 msgid "a failure"
-msgstr ""
+msgstr "失败"
 
 #: scripts/autoload/game_state/GameStateCore.gd:287 scripts/autoload/game_state/GameStateItems.gd:12 scripts/autoload/game_state/GameStateQuests.gd:800
 msgid "Not enough Gold"
@@ -16697,7 +16697,7 @@ msgstr "圣坛微弱地回应：每人获得少许经验。"
 
 #: scripts/autoload/game_state/GameStateRuns.gd:825
 msgid "You pocket the offerings: +%d Gold. The candles gutter out behind you (%d Resolve)."
-msgstr ""
+msgstr "你把供品揣进兜里：+%d金币。身后的蜡烛摇曳着熄灭了（决心%d）。"
 
 #: scripts/autoload/game_state/GameStateRuns.gd:840
 msgid "%s trains with the echo: level %d."
@@ -17573,7 +17573,7 @@ msgstr "自动已暂停：%s即将倒下。防御、守护或治疗，然后重�
 
 #: scripts/ui/BattleView.gd:1128
 msgid "%s acts…"
-msgstr ""
+msgstr "%s行动中…"
 
 #: scripts/ui/BattleView.gd:1189
 msgid "%s · %d HP"
@@ -17693,7 +17693,7 @@ msgstr "  +%d已提取"
 
 #: scripts/ui/BattleView.gd:1374
 msgid "Hero pages: spend the new points"
-msgstr ""
+msgstr "英雄页面：分配新获得的点数"
 
 #: scripts/ui/BattleView.gd:1380
 msgid "Feat done: +%d Gold, +%d Essence."
@@ -18061,11 +18061,11 @@ msgstr "这座裂隙在裂隙天梯上为%s阶。"
 
 #: scripts/ui/BattleView.gd:2437
 msgid "Guard %s"
-msgstr ""
+msgstr "守护%s"
 
 #: scripts/ui/BattleView.gd:2437
 msgid "Give %s the tonic"
-msgstr ""
+msgstr "把药剂给%s"
 
 #: scripts/ui/BattleView.gd:2457
 msgid "Attack %s"
@@ -18469,7 +18469,7 @@ msgstr "欢迎来到你的公会"
 
 #: scripts/ui/GuildViews.gd:19
 msgid "Rifts are tearing open across the land. First, sign three founders from the recruit board (Roster > Recruits); then head to the Rift Hall (key 3) to seal a rift."
-msgstr ""
+msgstr "大地上的裂隙正纷纷撕开。首先，从招募板签下三名创始英雄（名册 > 招募）；然后前往裂隙大厅（按键3）封印一座裂隙。"
 
 #: scripts/ui/GuildViews.gd:21
 msgid "Back at camp"
@@ -18681,11 +18681,11 @@ msgstr "让这个公会退隐……"
 
 #: scripts/ui/GuildViews.gd:572
 msgid "Hide the %d done"
-msgstr ""
+msgstr "隐藏%d项已完成"
 
 #: scripts/ui/GuildViews.gd:572
 msgid "Show the %d done"
-msgstr ""
+msgstr "显示%d项已完成"
 
 #: scripts/ui/GuildViews.gd:1166 scripts/ui/GuildViews.gd:606 scripts/ui/GuildViews.gd:652
 msgid "Renown"
@@ -19089,7 +19089,7 @@ msgstr "持平"
 
 #: scripts/ui/GuildViews.gd:1150
 msgid "Renown is the one race with the rival. They gain it every day and sometimes take a posted contract before you do. At payday the leader gets the pick of next week's recruits (one more offer for you, or one fewer). Seal rifts and finish contracts to gain it; failed contracts and unpaid upkeep cost it."
-msgstr ""
+msgstr "声望是与对手唯一的竞赛。对手每天都会获得声望，有时还会抢先接下已发布的契约。发薪日时，领先者可优先挑选下周的新兵（你多一个人选，或少一个）。封印裂隙、完成契约可获得声望；契约失败和拖欠维护费会使其下降。"
 
 #: scripts/ui/GuildViews.gd:1154
 msgid "This month: Renown gained — you %d · them %d · %d day%s left. Prize: %d Gold, %d Renown."
@@ -19129,7 +19129,7 @@ msgstr "其他公会的记录每天都在增长。登上声望榜首可获得成
 
 #: scripts/ui/GuildViews.gd:1194
 msgid "Sign your founders (Roster > Recruits): %d to go"
-msgstr ""
+msgstr "签下创始英雄（名册 > 招募）：还差%d名"
 
 #: scripts/ui/GuildViews.gd:1195
 msgid "Assemble a party in the Rift Hall and enter a rift"
@@ -19273,11 +19273,11 @@ msgstr "已找到%d/%d位勇者。每个新公会会遇到不同的十二位。"
 
 #: scripts/ui/GuildViews.gd:1391
 msgid "Sign your founders: %d to go"
-msgstr ""
+msgstr "签下创始英雄：还差%d名"
 
 #: scripts/ui/GuildViews.gd:1392
 msgid "Every founder signs free and brings their first week's wages. A party of four needs someone in front and someone who heals. Free rerolls left: %d."
-msgstr ""
+msgstr "每名创始英雄都免费签约，并自带第一周的薪水。四人小队需要有人顶在前面，也需要有人治疗。剩余免费重抽：%d次。"
 
 #: scripts/ui/GuildViews.gd:1395
 msgid "Hiring heroes"
@@ -19325,11 +19325,11 @@ msgstr "一名%s按常规阶级概率加入邀约（最后一份邀约离开）�
 
 #: scripts/ui/GuildViews.gd:1445
 msgid "free"
-msgstr ""
+msgstr "免费"
 
 #: scripts/ui/GuildViews.gd:1446
 msgid "Rank %s %s · %s · Power %d · %d HP · wage %d/week"
-msgstr ""
+msgstr "%s阶%s · %s · 战力%d · %d生命 · 薪水%d/周"
 
 #: scripts/ui/GuildViews.gd:1449
 msgid "Brings %d skill and %d attribute points"
@@ -19365,7 +19365,7 @@ msgstr "在告示板上等到第%d天，然后去别处找活。"
 
 #: scripts/ui/GuildViews.gd:1468
 msgid "Reroll (free, %d left)"
-msgstr ""
+msgstr "重抽（免费，剩%d次）"
 
 #: scripts/ui/GuildViews.gd:1468
 msgid "Reroll (%d Gold)"
@@ -19465,7 +19465,7 @@ msgstr "召回"
 
 #: scripts/ui/GuildViews.gd:1623
 msgid "Recalled: %d Essence back for the days not started."
-msgstr ""
+msgstr "已召回：未开始的天数退还%d精华。"
 
 #: scripts/ui/GuildViews.gd:1626
 msgid "Days done are kept; today's training and its fee are lost, the days not started are refunded."
@@ -20017,7 +20017,7 @@ msgstr "你的营地曾是盟约的一座大厅。它的13个房间用金币重�
 
 #: scripts/ui/GuildViews.gd:2377
 msgid "From Act III, the Rift Ladder offers a twist each day: a rule and a starting boon that come from the date, so every guild faces the same one. Tick it and your next ladder rift (any rank) carries it; one try a day. Sealing it pays bonus Essence and grows your streak. Records (Guild > Records) track achievements, lifetime statistics and your last 30 runs; the Memorial remembers heroes lost for good."
-msgstr ""
+msgstr "从第三幕起，裂隙天梯每天提供一个变奏：一条规则和一个初始恩赐，由日期决定，因此每个公会面对的都相同。勾选后，你的下一个天梯裂隙（任意阶级）将带上它；每天一次机会。封印后可获得额外精华并延续连胜。记录（公会 > 记录）会追踪成就、生涯统计和你最近30次裂隙行动；纪念碑铭记永远逝去的英雄。"
 
 #: scripts/ui/GuildViews.gd:2378 scripts/ui/Main.gd:2287 scripts/ui/Main.gd:2475
 msgid "Endless Rift"
@@ -20117,7 +20117,7 @@ msgstr "操作"
 
 #: scripts/ui/GuildViews.gd:2390
 msgid "Keyboard: 1-5 switch camp tabs; in a fight 1 Attack, 2-4 skills, 5 Defend, M opens More (6 Guard, 7 Move, 8 Tonics, 9 Call; their keys work either way), Space repeats the last action, Tab cycles targets, A toggles Auto, Esc goes back. Gamepad: D-pad and A work every menu, B goes back, LB/RB switch camp tabs. In a fight A repeats the last action, X Defends, Y uses the Ability, LB/RB the two skills, Start opens More (Guard, Move, Tonics, Call), the D-pad cycles targets, Select toggles Auto."
-msgstr ""
+msgstr "键盘：1-5切换营地标签页；战斗中1为攻击，2-4为技能，5为防御，M打开更多（6守护、7移动、8药剂、9召唤；这些按键两种方式都可用），空格键重复上一个行动，Tab切换目标，A切换自动，Esc返回。手柄：十字键和A键可操作所有菜单，B返回，LB/RB切换营地标签页。战斗中A重复上一个行动，X防御，Y使用主动技能，LB/RB使用两个技能，Start打开更多（守护、移动、药剂、召唤），十字键切换目标，Select切换自动。"
 
 #: scripts/ui/GuildViews.gd:2391
 msgid "Momentum and skills"
@@ -20169,15 +20169,15 @@ msgstr "每座裂隙位于一个区域（山谷、沼泽、灰烬荒原），各
 
 #: scripts/ui/GuildViews.gd:2398
 msgid "Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Endless Rift."
-msgstr ""
+msgstr "共六幕，每一幕都以对抗一名有名有姓之敌的终章裂隙收尾。达成一幕的目标（显示在裂隙大厅）即可开启其终章；封印终章可获得奖励和一件独特遗物。第一幕开启大型裂隙，第二幕开启无尽裂隙。"
 
 #: scripts/ui/GuildViews.gd:2398
 msgid "Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Descent."
-msgstr ""
+msgstr "共六幕，每一幕都以对抗一名有名有姓之敌的终章裂隙收尾。达成一幕的目标（显示在裂隙大厅）即可开启其终章；封印终章可获得奖励和一件独特遗物。第一幕开启大型裂隙，第二幕开启深渊下行。"
 
 #: scripts/ui/GuildViews.gd:2399
 msgid "Relics bend rules: each is one of a kind, found from Act I's finale on (finales, elites, shops, events and the Tower's guardians), and sits on the Relic Altar for the whole guild. Stats live on gear. A sealed Rank D+ rift offers a Path relic instead, carried by a hero of that Path (one each) and passed between them at camp; it works while they fight. Declining one pays the seal's Essence."
-msgstr ""
+msgstr "遗物改写规则：每件都独一无二，从第一幕终章起可获得（终章、精英、商店、事件和试炼之塔的守护者），放在遗物祭坛上，为整个公会生效。数值在装备上。封印D阶及以上的裂隙会改为提供一件道途遗物，由该道途的英雄携带（每人一件），可在营地相互传递；在其战斗时生效。放弃道途遗物则改为获得封印的精华。"
 
 #: scripts/ui/GuildViews.gd:2400
 msgid "Quirks"
@@ -20189,7 +20189,7 @@ msgstr "英雄在职业、技能和装备之外的一切个人特征：最多一
 
 #: scripts/ui/GuildViews.gd:2401
 msgid "From Act II a rift swells every so often: a rank, a place and a countdown in days (Rift Hall and the camp's status board). Seal a rift of that rank or higher before it runs out to close it, for a little Essence. Otherwise it breaks, and every rift run waits until your guild holds it: a breach rift of back-to-back fights (a fight, an elite and the breach's warden; the Inverted City's gate adds an elite) with no camp, shop or campfire between them. Ranks below S break out in a region; from S up they break at your camp. Holding pays Gold and Essence. Falling or turning back costs a share of your Essence and of the Gold beyond the coming payday's wages, and damages a building (two at the camp). The Accord Hall's Wardcraft rooms soften all of it."
-msgstr ""
+msgstr "从第二幕起，时不时会有一座裂隙膨胀：显示阶级、地点和以天计的倒计时（裂隙大厅和营地状态板）。在倒计时结束前封印一座同阶或更高阶的裂隙即可将其关闭，获得少量精华。否则它会破开，所有裂隙行动都要等你的公会守住它：一座连续作战的裂口裂隙（一场战斗、一个精英和裂口的守卫；倒悬之城的城门多一个精英），中间没有营地、商店或营火。S阶以下在某个地区破开；S阶及以上在你的营地破开。守住可获得金币和精华。倒下或撤退会损失一部分精华，以及超出下个发薪日薪水之外的一部分金币，并损毁一座建筑（在营地则为两座）。盟约大厅的守御术房间可减轻这一切。"
 
 #: scripts/ui/GuildViews.gd:2402 scripts/ui/Main.gd:3614
 msgid "Defending"
@@ -20201,7 +20201,7 @@ msgstr "敌人沿着道路走向目标。用补给在圆形平台上建塔（初
 
 #: scripts/ui/GuildViews.gd:2403
 msgid "Each new guild meets twelve champions, drawn from a pool of twenty-four: three are freed at the end of Acts I, II and III, and nine are lost, each held in a pillar of light (in the Descent, and in ladder rifts from Rank B; reach one to free them). A champion never joins the roster. In rift runs one oversees the party: their Boon lifts everyone, and any hero can spend a turn on their Call (once a rift, twice from level 3). Essence levels them up (to 5)."
-msgstr ""
+msgstr "每个新公会会遇到十二位勇者，从二十四位中抽取：三位在第一、二、三幕结束时获释，九位失落，各自困在一道光柱中（在深渊下行中，以及B阶起的天梯裂隙中；抵达光柱即可解放）。勇者从不加入名册。在裂隙行动中，由一位勇者担任小队的督军：其恩赐提升全员，任何英雄都可花一个回合发动其召唤（每座裂隙一次，3级起两次）。精华可提升其等级（最高5级）。"
 
 #: scripts/ui/GuildViews.gd:2404 scripts/ui/RosterView.gd:539
 msgid "Attributes"
@@ -20209,7 +20209,7 @@ msgstr "属性"
 
 #: scripts/ui/GuildViews.gd:2404
 msgid "Might (damage, HP), Agility (speed, dodge, first strike) and Focus (ability power, mend). Heroes gain 3 points per level to spend on the Roster's Hero tab; gear adds more, and better gear needs a minimum in its attribute to equip. Train up to 8 extra points at the Training Yard, or reset a hero's points for 5 Essence per level (gear they no longer qualify for comes off)."
-msgstr ""
+msgstr "力量（伤害、生命）、敏捷（速度、闪避、先手）和专注（技能强度、回复）。英雄每升一级获得3点，在名册的英雄页分配；装备会额外增加，更好的装备需要对应属性达到最低值才能装备。可在训练场额外训练最多8点，或以每级5精华重置英雄的点数（不再满足要求的装备会被卸下）。"
 
 #: scripts/ui/GuildViews.gd:2405
 msgid "Quests & Milestones"
@@ -20217,7 +20217,7 @@ msgstr "任务与里程碑"
 
 #: scripts/ui/GuildViews.gd:2405
 msgid "The quest board posts 6 quests (hunts, boss bounties, rift seals, trials); take up to 3 at a time. Unaccepted postings are replaced every 3 days (a day passes with each rift run or rest). Milestones are a static checklist, auto-granted the moment they're met. A rare escort NPC can also tag along on a fight — surviving pays a small bonus."
-msgstr ""
+msgstr "任务板发布6个任务（狩猎、首领悬赏、裂隙封印、试炼）；最多同时接3个。未接的委托每3天更换一次（每次裂隙行动或休息过去一天）。里程碑是固定清单，达成即自动发放。偶尔还会有稀有的护送NPC随队参战——活下来可获得一小笔奖励。"
 
 #: scripts/ui/GuildViews.gd:2406
 msgid "Wages, morale and the rival"
@@ -20229,15 +20229,15 @@ msgstr "每7天（一天 = 一次裂隙出征或休息）英雄按等级和级�
 
 #: scripts/ui/GuildViews.gd:2407
 msgid "Twice a week a hero may ask for something: time off, a raise, Gold for kit, a Training Yard slot, a partner, a rift of their own, your side in a feud, and more. Saying yes costs something and can leave them a title, a quirk or a bond; saying no costs morale. Answer in the Ledger before payday, or it counts as a no."
-msgstr ""
+msgstr "每周两次，英雄可能会提出请求：休假、加薪、买装备的金币、训练场名额、一个搭档、一座属于自己的裂隙、在争执中站在其一边，等等。答应要付出代价，可能让其获得称号、特质或羁绊；拒绝则损失士气。须在发薪日前于账簿中回应，否则视为拒绝。"
 
 #: scripts/ui/GuildViews.gd:2408 scripts/ui/GuildViews.gd:2456
 msgid "Expeditions"
-msgstr ""
+msgstr "远征"
 
 #: scripts/ui/GuildViews.gd:2408
 msgid "From two seals, the Quest board's Expeditions tab posts three jobs off the map: a safe one, a hard one and (from Act II) a perilous one, each with a Need in power, a length of 1-3 days and a party of up to 3. Heroes you send are away for those days and still draw wages. The odds show before they go: 50% at the Need, better above it. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party, and on a perilous job it can leave a scar. Every class and every Path brings something on the road, once per party: a warrior's muscle and a ranger's scouting raise the odds, a mage appraises (+50% Essence), a rogue pockets more (+25% Gold), a cleric halves the hurt, and each Path adds its own. Heroes are gone for the whole days while rifts and breaches go on without them. Everyone learns on the road, as at the Training Yard. One party out at a time, two with a Scouts' Lodge at level 3."
-msgstr ""
+msgstr "封印两座裂隙后，任务板的远征页会发布三份地图之外的任务：一份安全、一份困难，以及（第二幕起）一份凶险，每份都有战力需求、1-3天的时长，小队最多3人。派出的英雄在这几天里不在，但仍领薪水。出发前会显示成功率：刚好达到需求时为50%，超出越多越高。成功则全额支付；部分成功付一半，且有人负伤归来；失败则分文不得，全队受伤，凶险任务还可能留下伤疤。每个职业和每条道途在路上都有所助益，每支小队各计一次：战士的蛮力和游侠的侦察提高成功率，法师负责鉴定（精华+50%），盗贼多揣一些（金币+25%），牧师让伤势减半，每条道途另有加成。英雄整天不在，裂隙和裂口照常推进。每个人都能在路上有所长进，与训练场相同。同一时间只能派出一支小队，斥候小屋达到3级后可派两支。"
 
 #: scripts/ui/GuildViews.gd:2409
 msgid "Camp events"
@@ -20273,11 +20273,11 @@ msgstr "补给"
 
 #: scripts/ui/GuildViews.gd:2456
 msgid "Contracts"
-msgstr ""
+msgstr "契约"
 
 #: scripts/ui/GuildViews.gd:2456
 msgid " (%d out)"
-msgstr ""
+msgstr " (外出%d)"
 
 #: scripts/ui/GuildViews.gd:2497
 msgid "Day %d  ·  Taken %d/%d  ·  new postings in %d day%s"
@@ -20509,55 +20509,55 @@ msgstr "\n解锁： "
 
 #: scripts/ui/GuildViews.gd:2992
 msgid "Send heroes on a job off the map. They are gone for its whole days and still draw wages, while rifts and breaches go on without them. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party. Every class and Path brings something (hover a hero); each counts once, so a mixed party does best. Parties out at once: %d."
-msgstr ""
+msgstr "派英雄去地图之外接活。任务期间他们整天不在，仍领薪水，裂隙和裂口照常推进。成功则全额支付；部分成功付一半，且有人负伤归来；失败则分文不得，全队受伤。每个职业和道途都有所助益（悬停英雄查看）；每种只计一次，所以混搭的小队效果最好。可同时外出的小队：%d。"
 
 #: scripts/ui/GuildViews.gd:3002
 msgid "Out: %s"
-msgstr ""
+msgstr "外出：%s"
 
 #: scripts/ui/GuildViews.gd:3003
 msgid "%s · back in %d day%s · %d%% odds"
-msgstr ""
+msgstr "%s · %d天%s后返回 · 成功率%d%%"
 
 #: scripts/ui/GuildViews.gd:3007
 msgid "Nothing posted until the board is renewed."
-msgstr ""
+msgstr "任务板更新前没有新委托。"
 
 #: scripts/ui/GuildViews.gd:3025
 msgid "%s · %d day%s · up to %d hero%s · Need %d"
-msgstr ""
+msgstr "%s · %d天%s · 最多%d名英雄%s · 需求%d"
 
 #: scripts/ui/GuildViews.gd:3029
 msgid "Pays %d Gold"
-msgstr ""
+msgstr "报酬%d金币"
 
 #: scripts/ui/GuildViews.gd:3029
 msgid ", %d Essence"
-msgstr ""
+msgstr "，%d精华"
 
 #: scripts/ui/GuildViews.gd:3032
 msgid ", %d%% chance of an item"
-msgstr ""
+msgstr "，%d%%几率获得物品"
 
 #: scripts/ui/GuildViews.gd:3035
 msgid "A failure here can leave a lasting scar."
-msgstr ""
+msgstr "在此失败可能留下永久伤疤。"
 
 #: scripts/ui/GuildViews.gd:3053
 msgid "%s · power %d"
-msgstr ""
+msgstr "%s · 战力%d"
 
 #: scripts/ui/GuildViews.gd:3056
 msgid "Nobody at camp is free."
-msgstr ""
+msgstr "营地里没人有空。"
 
 #: scripts/ui/GuildViews.gd:3063
 msgid "Send them (%d%% odds)"
-msgstr ""
+msgstr "派他们出发（成功率%d%%）"
 
 #: scripts/ui/GuildViews.gd:3063
 msgid "Pick who goes"
-msgstr ""
+msgstr "选择出发人选"
 
 #: scripts/ui/Main.gd:37
 msgid "navigator.storage && navigator.storage.persist && navigator.storage.persist();"
@@ -20773,23 +20773,23 @@ msgstr "我们的：+%d桂冠，空洞的敌人离开天梯"
 
 #: scripts/ui/Main.gd:655
 msgid "How much should the guild's old hands tell you?"
-msgstr ""
+msgstr "公会的老手们该给你讲多少？"
 
 #: scripts/ui/Main.gd:662
 msgid "Guide me through everything"
-msgstr ""
+msgstr "全程指导我"
 
 #: scripts/ui/Main.gd:662
 msgid "A tip on every screen the first time you open it (as now)."
-msgstr ""
+msgstr "首次打开每个界面时都有提示（与现在相同）。"
 
 #: scripts/ui/Main.gd:663
 msgid "Help a little"
-msgstr ""
+msgstr "稍加提点"
 
 #: scripts/ui/Main.gd:663
 msgid "Tips only for the first fight and when a big new system turns up."
-msgstr ""
+msgstr "只在第一场战斗和出现重要新系统时提示。"
 
 #: scripts/ui/Main.gd:664 scripts/ui/UiKit.gd:1674
 msgid "No tips"
@@ -20797,11 +20797,11 @@ msgstr "关闭提示"
 
 #: scripts/ui/Main.gd:664
 msgid "Nothing explained. Settings can turn tips back on."
-msgstr ""
+msgstr "不作任何解释。可在设置中重新开启提示。"
 
 #: scripts/ui/Main.gd:672
 msgid " (key %d)"
-msgstr ""
+msgstr " (按键%d)"
 
 #: scripts/ui/Main.gd:706
 msgid "Expose the Company"
@@ -21081,7 +21081,7 @@ msgstr "塔"
 
 #: scripts/ui/Main.gd:1496
 msgid "Title"
-msgstr ""
+msgstr "标题画面"
 
 #: scripts/ui/Main.gd:1533
 msgid "Back to %s"
@@ -21393,11 +21393,11 @@ msgstr "%s%s"
 
 #: scripts/ui/Main.gd:2030
 msgid "Crest"
-msgstr ""
+msgstr "纹章"
 
 #: scripts/ui/Main.gd:2038
 msgid "Crest %d"
-msgstr ""
+msgstr "纹章%d"
 
 #: scripts/ui/Main.gd:2045
 msgid "Found the Guild"
@@ -21509,7 +21509,7 @@ msgstr "深渊下行"
 
 #: scripts/ui/Main.gd:2287
 msgid " — locked"
-msgstr ""
+msgstr " — 未解锁"
 
 #: scripts/ui/Main.gd:2289 scripts/ui/Main.gd:2290
 msgid "Rank %s Rift"
@@ -22109,7 +22109,7 @@ msgstr "音频"
 
 #: scripts/ui/Main.gd:3829
 msgid "Master"
-msgstr ""
+msgstr "主音量"
 
 #: scripts/ui/Main.gd:3849
 msgid "Spoken lines: on"
@@ -22213,7 +22213,7 @@ msgstr "全体"
 
 #: scripts/ui/Main.gd:3953
 msgid "key moments"
-msgstr ""
+msgstr "关键时刻"
 
 #: scripts/ui/Main.gd:3957
 msgid "Show all tips again"
@@ -22521,7 +22521,7 @@ msgstr "遗物护盾%d"
 
 #: scripts/ui/RiftRunView.gd:401
 msgid "Next fight +%d Momentum"
-msgstr ""
+msgstr "下一场战斗气势+%d"
 
 #: scripts/ui/RiftRunView.gd:406
 msgid "Haul %d Gold · %d Essence"
@@ -22893,7 +22893,7 @@ msgstr "跪拜"
 
 #: scripts/ui/RiftRunView.gd:1050
 msgid "%d-%d Gold, but %d Resolve."
-msgstr ""
+msgstr "%d-%d金币，但决心%d。"
 
 #: scripts/ui/RiftRunView.gd:1053
 msgid "The echo of an old guild's trainer still drills in this hall. One hero can train with it and gain a level (at level 10: attribute points)."
@@ -23421,7 +23421,7 @@ msgstr "武器"
 
 #: scripts/ui/RosterView.gd:1188
 msgid "Worn"
-msgstr ""
+msgstr "已穿戴"
 
 #: scripts/ui/RosterView.gd:1201
 msgid "Rarity"
@@ -23437,7 +23437,7 @@ msgstr "名称"
 
 #: scripts/ui/RosterView.gd:1214
 msgid "Nobody wears anything yet."
-msgstr ""
+msgstr "还没有人穿戴任何东西。"
 
 #: scripts/ui/RosterView.gd:1214
 msgid "No unequipped items here — loot drops in rifts."
@@ -23445,7 +23445,7 @@ msgstr "这里没有未装备的物品——战利品在裂隙中掉落。"
 
 #: scripts/ui/RosterView.gd:1216
 msgid "What your heroes wear. Click one to open its wearer's page."
-msgstr ""
+msgstr "英雄们穿戴的物品。点击一件即可打开穿戴者的页面。"
 
 #: scripts/ui/RosterView.gd:1216
 msgid "Click an item to see it and equip it.  + fills someone's empty slot."
@@ -23457,7 +23457,7 @@ msgstr "%s — 点击查看详情"
 
 #: scripts/ui/RosterView.gd:1280
 msgid "Worn by %s"
-msgstr ""
+msgstr "%s穿戴中"
 
 #: scripts/ui/RosterView.gd:1356
 msgid "Equip → %s"

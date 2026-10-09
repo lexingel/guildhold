@@ -1257,7 +1257,7 @@ msgstr "Wen, la Cronista"
 
 #: scripts/autoload/game_data/GameDataArt.gd:75
 msgid "\"Two rifts sealed, and the yard behind the barracks is finally clear of rubble. Send a hero there for a few days and they come back stronger: an attribute point, a new program. The Drill Yard room adds places. And the quest board has work off the map for anyone left at camp.\""
-msgstr ""
+msgstr "\"Dos grietas selladas, y el patio tras los barracones por fin está libre de escombros. Envía allí a un héroe unos días y volverá más fuerte: un punto de atributo, un programa nuevo. La sala del Campo de Instrucción añade puestos. Y el tablón de misiones tiene trabajo fuera del mapa para quien se quede en el campamento.\""
 
 #: scripts/autoload/game_data/GameDataArt.gd:76 scripts/ui/GuildViews.gd:1265 scripts/ui/Main.gd:1314
 msgid "Accord Hall"
@@ -1429,11 +1429,11 @@ msgstr "La paga de las expediciones se revisó en una simulación completa y aho
 
 #: scripts/autoload/game_data/GameDataArt.gd:180
 msgid "Your own founders and expeditions. A new guild signs its first three heroes from a board of six, one of every class among them, with free rerolls. From two seals the Quest board posts expeditions: jobs off the map for heroes you can spare, gone for whole days while the rifts go on without them. The odds show before they leave, every class and Path brings something on the road, and a perilous job gone wrong can leave a scar. After Act I's card you choose how many tips you want, and the Training Yard now costs Essence."
-msgstr ""
+msgstr "Tus propios fundadores y expediciones. Un gremio nuevo contrata a sus tres primeros héroes de un tablón de seis, con una de cada clase entre ellos y renovaciones gratis. Desde dos sellados, el tablón de Misiones publica expediciones: trabajos fuera del mapa para los héroes de los que puedas prescindir, que se ausentan días enteros mientras las grietas siguen sin ellos. La probabilidad se ve antes de partir, cada clase y cada Senda aporta algo en el camino, y un trabajo peligroso que sale mal puede dejar una cicatriz. Tras la tarjeta del Acto I eliges cuántos consejos quieres, y el Patio de Entrenamiento ahora cuesta Esencia."
 
 #: scripts/autoload/game_data/GameDataArt.gd:181
 msgid "Fixes from a full playthrough: the hero who opens a round waits for you instead of replaying last round's move, the turn order and the action bar follow every turn, Guard picks an ally, a stunned hero loses the turn openly, foes keep their size when one is summoned, and new recruits can spend their skill points. Also: Settings and a master volume on the title screen, a crest picker, the shrine's second choice, Take buttons in treasure rooms, a bigger rift map with fewer crossings, the main portal leads to the ranked rifts, front-row heroes stand nearest the foes, a Worn filter in the inventory, banked Momentum on the map, and a cleaner Guild, Records and Library."
-msgstr ""
+msgstr "Correcciones tras una partida completa: el héroe que abre una ronda te espera en vez de repetir el movimiento de la ronda anterior, el orden de turnos y la barra de acciones siguen cada turno, Proteger elige a un aliado, un héroe aturdido pierde el turno a la vista, los enemigos mantienen su tamaño cuando se invoca a uno, y los reclutas nuevos pueden gastar sus puntos de habilidad. Además: Ajustes y volumen general en la pantalla de título, un selector de blasón, la segunda opción del santuario, botones Tomar en las salas de tesoro, un mapa de grieta más grande con menos cruces, el portal principal lleva a las grietas por rango, los héroes de la fila delantera se colocan más cerca de los enemigos, un filtro En uso en el inventario, el Ímpetu acumulado en el mapa, y un Gremio, Registros y Biblioteca más limpios."
 
 #: scripts/autoload/game_data/GameDataArt.gd:182
 msgid "Gear, simpler. The Smithy is one screen for gear's four jobs: temper what your heroes wear, combine three spare items into a better one, reforge a stat line, salvage for Essence. Relics bend rules now and nothing else: every relic is one of a kind (from finales, an elite's loot, a rift shop, events and the Tower), and stats live on gear. Rolled relics, relic levels, rerolls and the starting relic choice are gone; an old save's rolled relics and every relic level became Essence. Path relics are carried by heroes: one each, of their own Path, working while they fight, passed between them on the hero's Path tab. Offers come only for Paths your heroes walk, and declining one pays the seal's full Essence. The Relic Vault adds a relic slot at Lv1, 3 and 5; the Arcane Lab cheapens treatments and respecs and raises salvage."
@@ -9249,159 +9249,159 @@ msgstr "+10-16 de Esencia · -2 de Renombre"
 
 #: scripts/autoload/game_data/GameDataModes.gd:625
 msgid "Escort the salt carts"
-msgstr ""
+msgstr "Escoltar los carros de sal"
 
 #: scripts/autoload/game_data/GameDataModes.gd:625
 msgid "The salt carts want guards as far as the river ford. Nobody expects trouble, which is when it comes."
-msgstr ""
+msgstr "Los carros de sal necesitan guardias hasta el vado del río. Nadie espera problemas, y es justo entonces cuando llegan."
 
 #: scripts/autoload/game_data/GameDataModes.gd:626
 msgid "Clear the mill cellar"
-msgstr ""
+msgstr "Limpiar el sótano del molino"
 
 #: scripts/autoload/game_data/GameDataModes.gd:626
 msgid "Something is eating the miller's grain and he would rather not find out what."
-msgstr ""
+msgstr "Algo se está comiendo el grano del molinero y él prefiere no averiguar qué."
 
 #: scripts/autoload/game_data/GameDataModes.gd:627
 msgid "Count the border cairns"
-msgstr ""
+msgstr "Contar los mojones fronterizos"
 
 #: scripts/autoload/game_data/GameDataModes.gd:627
 msgid "The Crown pays a surveyor's fee to anyone who walks the old border and counts what is still standing."
-msgstr ""
+msgstr "La Corona paga honorarios de agrimensor a quien recorra la vieja frontera y cuente lo que sigue en pie."
 
 #: scripts/autoload/game_data/GameDataModes.gd:628
 msgid "Hunt the marsh lights"
-msgstr ""
+msgstr "Cazar las luces del pantano"
 
 #: scripts/autoload/game_data/GameDataModes.gd:628
 msgid "Lights over the marsh have drowned three fishermen this month. The village has a purse for whoever puts them out."
-msgstr ""
+msgstr "Las luces sobre el pantano han ahogado a tres pescadores este mes. La aldea tiene una bolsa para quien las apague."
 
 #: scripts/autoload/game_data/GameDataModes.gd:629
 msgid "Recover the toll chest"
-msgstr ""
+msgstr "Recuperar el cofre del peaje"
 
 #: scripts/autoload/game_data/GameDataModes.gd:629
 msgid "Bandits took the bridge toll and went to ground in the quarry. Bring the chest back and keep a share."
-msgstr ""
+msgstr "Unos bandidos se llevaron el peaje del puente y se escondieron en la cantera. Trae el cofre y quédate una parte."
 
 #: scripts/autoload/game_data/GameDataModes.gd:630
 msgid "Map the drowned road"
-msgstr ""
+msgstr "Cartografiar el camino ahogado"
 
 #: scripts/autoload/game_data/GameDataModes.gd:630
 msgid "The old Accord road runs under the floodwater now. A merchant house wants it mapped before their rivals do."
-msgstr ""
+msgstr "El viejo camino del Acuerdo corre ahora bajo la inundación. Una casa mercante lo quiere cartografiado antes que sus rivales."
 
 #: scripts/autoload/game_data/GameDataModes.gd:631
 msgid "Take the Hollow's tithe barge"
-msgstr ""
+msgstr "Asaltar la barcaza del diezmo del Hueco"
 
 #: scripts/autoload/game_data/GameDataModes.gd:631
 msgid "A barge carries rift-glass up the river for the Hollow's buyers. It is guarded, and it is worth it."
-msgstr ""
+msgstr "Una barcaza lleva cristal de grieta río arriba para los compradores del Hueco. Está vigilada, y merece la pena."
 
 #: scripts/autoload/game_data/GameDataModes.gd:632
 msgid "Open an Accord vault"
-msgstr ""
+msgstr "Abrir una cámara del Acuerdo"
 
 #: scripts/autoload/game_data/GameDataModes.gd:632
 msgid "A scholar swears an old guild vault lies under the burned chapel. The last party that went down came back two short."
-msgstr ""
+msgstr "Un erudito jura que bajo la capilla quemada hay una vieja cámara de gremio. El último grupo que bajó volvió con dos menos."
 
 #: scripts/autoload/game_data/GameDataModes.gd:638
 msgid "Safe"
-msgstr ""
+msgstr "Seguro"
 
 #: scripts/autoload/game_data/GameDataModes.gd:638
 msgid "Hard"
-msgstr ""
+msgstr "Difícil"
 
 #: scripts/autoload/game_data/GameDataModes.gd:638
 msgid "Perilous"
-msgstr ""
+msgstr "Peligroso"
 
 #: scripts/autoload/game_data/GameDataModes.gd:647
 msgid "Muscle"
-msgstr ""
+msgstr "Músculo"
 
 #: scripts/autoload/game_data/GameDataModes.gd:648
 msgid "Scout"
-msgstr ""
+msgstr "Batidor"
 
 #: scripts/autoload/game_data/GameDataModes.gd:649
 msgid "Appraiser"
-msgstr ""
+msgstr "Tasador"
 
 #: scripts/autoload/game_data/GameDataModes.gd:650
 msgid "Field medic"
-msgstr ""
+msgstr "Médico de campo"
 
 #: scripts/autoload/game_data/GameDataModes.gd:651
 msgid "Light fingers"
-msgstr ""
+msgstr "Dedos ligeros"
 
 #: scripts/autoload/game_data/GameDataModes.gd:652
 msgid "Takes the blows"
-msgstr ""
+msgstr "Aguanta los golpes"
 
 #: scripts/autoload/game_data/GameDataModes.gd:653
 msgid "At home in danger"
-msgstr ""
+msgstr "Cómodo en el peligro"
 
 #: scripts/autoload/game_data/GameDataModes.gd:654
 msgid "Drills the others"
-msgstr ""
+msgstr "Instruye a los demás"
 
 #: scripts/autoload/game_data/GameDataModes.gd:655
 msgid "Clean shot"
-msgstr ""
+msgstr "Tiro limpio"
 
 #: scripts/autoload/game_data/GameDataModes.gd:656
 msgid "Sets snares"
-msgstr ""
+msgstr "Pone lazos"
 
 #: scripts/autoload/game_data/GameDataModes.gd:657
 msgid "Bounty hunter"
-msgstr ""
+msgstr "Cazarrecompensas"
 
 #: scripts/autoload/game_data/GameDataModes.gd:658
 msgid "Burns the dross"
-msgstr ""
+msgstr "Quema la escoria"
 
 #: scripts/autoload/game_data/GameDataModes.gd:659
 msgid "Wards the camp"
-msgstr ""
+msgstr "Protege el campamento"
 
 #: scripts/autoload/game_data/GameDataModes.gd:660
 msgid "Sees it coming"
-msgstr ""
+msgstr "Lo ve venir"
 
 #: scripts/autoload/game_data/GameDataModes.gd:661
 msgid "Patches everyone"
-msgstr ""
+msgstr "Remienda a todos"
 
 #: scripts/autoload/game_data/GameDataModes.gd:662
 msgid "Shields the worst of it"
-msgstr ""
+msgstr "Para lo peor"
 
 #: scripts/autoload/game_data/GameDataModes.gd:663
 msgid "Rallies the party"
-msgstr ""
+msgstr "Anima al grupo"
 
 #: scripts/autoload/game_data/GameDataModes.gd:664
 msgid "Quiet work"
-msgstr ""
+msgstr "Trabajo discreto"
 
 #: scripts/autoload/game_data/GameDataModes.gd:665
 msgid "Gets out fast"
-msgstr ""
+msgstr "Sale rápido"
 
 #: scripts/autoload/game_data/GameDataModes.gd:666
 msgid "Shrugs it off"
-msgstr ""
+msgstr "Ni se inmuta"
 
 #: scripts/autoload/game_data/GameDataModes.gd:716 scripts/autoload/game_data/GameDataModes.gd:985
 msgid "SS"
@@ -15481,111 +15481,111 @@ msgstr ", daños en %s"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:917
 msgid "+%d%% odds"
-msgstr ""
+msgstr "+%d%% prob."
 
 #: scripts/autoload/game_state/GameStateBreach.gd:918
 msgid "+%d%% odds on a perilous job"
-msgstr ""
+msgstr "+%d%% prob. en un trabajo peligroso"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:919
 msgid "+%d%% Gold"
-msgstr ""
+msgstr "+%d%% de Oro"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:920
 msgid "+%d%% Essence"
-msgstr ""
+msgstr "+%d%% de Esencia"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:921
 msgid "+%d%% item chance"
-msgstr ""
+msgstr "+%d%% prob. de objeto"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:922
 msgid "+%d%% XP for the party"
-msgstr ""
+msgstr "+%d%% EXP para el grupo"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:923
 msgid "%d%% less chance of being hurt"
-msgstr ""
+msgstr "%d%% menos prob. de salir herido"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:924
 msgid "%d%% less chance of a scar"
-msgstr ""
+msgstr "%d%% menos prob. de cicatriz"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:925
 msgid "a failure turns partial half the time"
-msgstr ""
+msgstr "un fracaso se vuelve parcial la mitad de las veces"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:946
 msgid "Expeditions open with the Training Yard"
-msgstr ""
+msgstr "Las expediciones se abren con el Patio de Entrenamiento"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:948
 msgid "No such posting"
-msgstr ""
+msgstr "No existe ese encargo"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:950 scripts/ui/GuildViews.gd:3071
 msgid "Every expedition party is out"
-msgstr ""
+msgstr "Todos los grupos de expedición están fuera"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:954
 msgid "Send 1 to %d heroes"
-msgstr ""
+msgstr "Envía de 1 a %d héroes"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:958
 msgid "Someone can't go"
-msgstr ""
+msgstr "Alguien no puede ir"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1004
 msgid "+%d Gold"
-msgstr ""
+msgstr "+%d de Oro"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1007
 msgid "+%d Essence"
-msgstr ""
+msgstr "+%d de Esencia"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1012
 msgid "found: %s"
-msgstr ""
+msgstr "hallado: %s"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1022
 msgid "%s comes back hurt"
-msgstr ""
+msgstr "%s vuelve herido"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1027
 msgid "%s keeps a scar: %s"
-msgstr ""
+msgstr "%s se queda con una cicatriz: %s"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1035
 msgid "Dobbs: \"They're back, and it paid.\""
-msgstr ""
+msgstr "Dobbs: \"Han vuelto, y ha salido rentable.\""
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1035
 msgid "Dobbs: \"Back with half of it and a limp.\""
-msgstr ""
+msgstr "Dobbs: \"Vuelven con la mitad y cojeando.\""
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1035
 msgid "Dobbs: \"Back with nothing. Get the bandages.\""
-msgstr ""
+msgstr "Dobbs: \"Vuelven sin nada. Trae las vendas.\""
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1037
 msgid "nothing to show for it"
-msgstr ""
+msgstr "sin nada que mostrar"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1039
 msgid "Expedition: %s, %s."
-msgstr ""
+msgstr "Expedición: %s, %s."
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1039
 msgid "a success"
-msgstr ""
+msgstr "un éxito"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1039
 msgid "half done"
-msgstr ""
+msgstr "a medias"
 
 #: scripts/autoload/game_state/GameStateBreach.gd:1039
 msgid "a failure"
-msgstr ""
+msgstr "un fracaso"
 
 #: scripts/autoload/game_state/GameStateCore.gd:287 scripts/autoload/game_state/GameStateItems.gd:12 scripts/autoload/game_state/GameStateQuests.gd:800
 msgid "Not enough Gold"
@@ -16697,7 +16697,7 @@ msgstr "El santuario responde, débilmente: un poco de EXP para todos."
 
 #: scripts/autoload/game_state/GameStateRuns.gd:825
 msgid "You pocket the offerings: +%d Gold. The candles gutter out behind you (%d Resolve)."
-msgstr ""
+msgstr "Te guardas las ofrendas: +%d de Oro. Las velas se apagan a tu espalda (%d de Temple)."
 
 #: scripts/autoload/game_state/GameStateRuns.gd:840
 msgid "%s trains with the echo: level %d."
@@ -17573,7 +17573,7 @@ msgstr "Auto en pausa: %s está a punto de caer. Defiende, Protege o cura, y lue
 
 #: scripts/ui/BattleView.gd:1128
 msgid "%s acts…"
-msgstr ""
+msgstr "%s actúa…"
 
 #: scripts/ui/BattleView.gd:1189
 msgid "%s · %d HP"
@@ -17693,7 +17693,7 @@ msgstr "  +%d extraído"
 
 #: scripts/ui/BattleView.gd:1374
 msgid "Hero pages: spend the new points"
-msgstr ""
+msgstr "Páginas de héroe: gasta los puntos nuevos"
 
 #: scripts/ui/BattleView.gd:1380
 msgid "Feat done: +%d Gold, +%d Essence."
@@ -18061,11 +18061,11 @@ msgstr "Esta grieta es de Rango %s en la escalera de grietas."
 
 #: scripts/ui/BattleView.gd:2437
 msgid "Guard %s"
-msgstr ""
+msgstr "Proteger a %s"
 
 #: scripts/ui/BattleView.gd:2437
 msgid "Give %s the tonic"
-msgstr ""
+msgstr "Darle el tónico a %s"
 
 #: scripts/ui/BattleView.gd:2457
 msgid "Attack %s"
@@ -18469,7 +18469,7 @@ msgstr "Bienvenido a tu gremio"
 
 #: scripts/ui/GuildViews.gd:19
 msgid "Rifts are tearing open across the land. First, sign three founders from the recruit board (Roster > Recruits); then head to the Rift Hall (key 3) to seal a rift."
-msgstr ""
+msgstr "Las grietas se abren por toda la tierra. Primero, contrata a tres fundadores del tablón de reclutas (Plantilla > Reclutas); luego ve a la Sala de Grietas (tecla 3) para sellar una grieta."
 
 #: scripts/ui/GuildViews.gd:21
 msgid "Back at camp"
@@ -18681,11 +18681,11 @@ msgstr "Retirar este gremio…"
 
 #: scripts/ui/GuildViews.gd:572
 msgid "Hide the %d done"
-msgstr ""
+msgstr "Ocultar los %d completados"
 
 #: scripts/ui/GuildViews.gd:572
 msgid "Show the %d done"
-msgstr ""
+msgstr "Mostrar los %d completados"
 
 #: scripts/ui/GuildViews.gd:1166 scripts/ui/GuildViews.gd:606 scripts/ui/GuildViews.gd:652
 msgid "Renown"
@@ -19089,7 +19089,7 @@ msgstr "empate"
 
 #: scripts/ui/GuildViews.gd:1150
 msgid "Renown is the one race with the rival. They gain it every day and sometimes take a posted contract before you do. At payday the leader gets the pick of next week's recruits (one more offer for you, or one fewer). Seal rifts and finish contracts to gain it; failed contracts and unpaid upkeep cost it."
-msgstr ""
+msgstr "El Renombre es la única carrera con el rival. Lo gana cada día y a veces se queda un contrato publicado antes que tú. En el día de paga, quien va en cabeza elige primero entre los reclutas de la semana siguiente (una oferta más para ti, o una menos). Sella grietas y completa contratos para ganarlo; los contratos fallidos y el mantenimiento impagado lo cuestan."
 
 #: scripts/ui/GuildViews.gd:1154
 msgid "This month: Renown gained — you %d · them %d · %d day%s left. Prize: %d Gold, %d Renown."
@@ -19129,7 +19129,7 @@ msgstr "Los registros de los otros gremios crecen cada día. Encabeza la columna
 
 #: scripts/ui/GuildViews.gd:1194
 msgid "Sign your founders (Roster > Recruits): %d to go"
-msgstr ""
+msgstr "Contrata a tus fundadores (Plantilla > Reclutas): faltan %d"
 
 #: scripts/ui/GuildViews.gd:1195
 msgid "Assemble a party in the Rift Hall and enter a rift"
@@ -19273,11 +19273,11 @@ msgstr "%d de %d campeones encontrados. Cada gremio nuevo conoce a doce distinto
 
 #: scripts/ui/GuildViews.gd:1391
 msgid "Sign your founders: %d to go"
-msgstr ""
+msgstr "Contrata a tus fundadores: faltan %d"
 
 #: scripts/ui/GuildViews.gd:1392
 msgid "Every founder signs free and brings their first week's wages. A party of four needs someone in front and someone who heals. Free rerolls left: %d."
-msgstr ""
+msgstr "Cada fundador se une gratis y trae el sueldo de su primera semana. Un grupo de cuatro necesita a alguien delante y a alguien que cure. Renovaciones gratis restantes: %d."
 
 #: scripts/ui/GuildViews.gd:1395
 msgid "Hiring heroes"
@@ -19325,11 +19325,11 @@ msgstr "Un %s se suma a las ofertas con las probabilidades de rango habituales (
 
 #: scripts/ui/GuildViews.gd:1445
 msgid "free"
-msgstr ""
+msgstr "gratis"
 
 #: scripts/ui/GuildViews.gd:1446
 msgid "Rank %s %s · %s · Power %d · %d HP · wage %d/week"
-msgstr ""
+msgstr "Rango %s %s · %s · Poder %d · %d PV · sueldo %d/semana"
 
 #: scripts/ui/GuildViews.gd:1449
 msgid "Brings %d skill and %d attribute points"
@@ -19365,7 +19365,7 @@ msgstr "Espera en el tablón hasta el día %d; luego busca trabajo en otra parte
 
 #: scripts/ui/GuildViews.gd:1468
 msgid "Reroll (free, %d left)"
-msgstr ""
+msgstr "Renovar (gratis, quedan %d)"
 
 #: scripts/ui/GuildViews.gd:1468
 msgid "Reroll (%d Gold)"
@@ -19465,7 +19465,7 @@ msgstr "Retirar"
 
 #: scripts/ui/GuildViews.gd:1623
 msgid "Recalled: %d Essence back for the days not started."
-msgstr ""
+msgstr "Retirado: se devuelven %d de Esencia por los días no empezados."
 
 #: scripts/ui/GuildViews.gd:1626
 msgid "Days done are kept; today's training and its fee are lost, the days not started are refunded."
@@ -20017,7 +20017,7 @@ msgstr "Tu campamento fue un salón del Acuerdo. Sus 13 salas se reconstruyen co
 
 #: scripts/ui/GuildViews.gd:2377
 msgid "From Act III, the Rift Ladder offers a twist each day: a rule and a starting boon that come from the date, so every guild faces the same one. Tick it and your next ladder rift (any rank) carries it; one try a day. Sealing it pays bonus Essence and grows your streak. Records (Guild > Records) track achievements, lifetime statistics and your last 30 runs; the Memorial remembers heroes lost for good."
-msgstr ""
+msgstr "Desde el Acto III, la Escalera de Grietas ofrece un giro cada día: una regla y una bendición inicial que salen de la fecha, así que todos los gremios se enfrentan al mismo. Márcalo y tu siguiente grieta de la escalera (de cualquier rango) lo llevará; un intento al día. Sellarla paga Esencia extra y alarga tu racha. Registros (Gremio > Registros) guarda logros, estadísticas totales y tus últimas 30 incursiones; el Memorial recuerda a los héroes perdidos para siempre."
 
 #: scripts/ui/GuildViews.gd:2378 scripts/ui/Main.gd:2287 scripts/ui/Main.gd:2475
 msgid "Endless Rift"
@@ -20117,7 +20117,7 @@ msgstr "Controles"
 
 #: scripts/ui/GuildViews.gd:2390
 msgid "Keyboard: 1-5 switch camp tabs; in a fight 1 Attack, 2-4 skills, 5 Defend, M opens More (6 Guard, 7 Move, 8 Tonics, 9 Call; their keys work either way), Space repeats the last action, Tab cycles targets, A toggles Auto, Esc goes back. Gamepad: D-pad and A work every menu, B goes back, LB/RB switch camp tabs. In a fight A repeats the last action, X Defends, Y uses the Ability, LB/RB the two skills, Start opens More (Guard, Move, Tonics, Call), the D-pad cycles targets, Select toggles Auto."
-msgstr ""
+msgstr "Teclado: 1-5 cambian de pestaña en el campamento; en combate 1 Atacar, 2-4 habilidades, 5 Defender, M abre Más (6 Proteger, 7 Mover, 8 Tónicos, 9 Llamada; sus teclas funcionan igualmente), Espacio repite la última acción, Tab cambia de objetivo, A activa Auto, Esc vuelve atrás. Mando: la cruceta y A manejan todos los menús, B vuelve atrás, LB/RB cambian de pestaña en el campamento. En combate A repite la última acción, X Defiende, Y usa la Habilidad, LB/RB las dos habilidades, Start abre Más (Proteger, Mover, Tónicos, Llamada), la cruceta cambia de objetivo, Select activa Auto."
 
 #: scripts/ui/GuildViews.gd:2391
 msgid "Momentum and skills"
@@ -20169,15 +20169,15 @@ msgstr "Cada grieta está en una región (el Valle, las Marismas, los Páramos d
 
 #: scripts/ui/GuildViews.gd:2398
 msgid "Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Endless Rift."
-msgstr ""
+msgstr "Seis actos, cada uno termina en una grieta final contra un enemigo con nombre. Cumple los objetivos de un acto (en la Sala de Grietas) para abrir su final; sellarlo paga una recompensa y una reliquia única. El Acto I abre las Grietas Mayores, el Acto II la Grieta Infinita."
 
 #: scripts/ui/GuildViews.gd:2398
 msgid "Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Descent."
-msgstr ""
+msgstr "Seis actos, cada uno termina en una grieta final contra un enemigo con nombre. Cumple los objetivos de un acto (en la Sala de Grietas) para abrir su final; sellarlo paga una recompensa y una reliquia única. El Acto I abre las Grietas Mayores, el Acto II el Descenso."
 
 #: scripts/ui/GuildViews.gd:2399
 msgid "Relics bend rules: each is one of a kind, found from Act I's finale on (finales, elites, shops, events and the Tower's guardians), and sits on the Relic Altar for the whole guild. Stats live on gear. A sealed Rank D+ rift offers a Path relic instead, carried by a hero of that Path (one each) and passed between them at camp; it works while they fight. Declining one pays the seal's Essence."
-msgstr ""
+msgstr "Las reliquias tuercen reglas: cada una es única, se encuentra desde el final del Acto I (finales, élites, tiendas, eventos y los guardianes de la Torre) y se coloca en el Altar de Reliquias para todo el gremio. Los valores viven en el equipo. Una grieta sellada de Rango D+ ofrece en su lugar una reliquia de Senda, que lleva un héroe de esa Senda (una cada uno) y se pasa entre ellos en el campamento; funciona mientras combate. Rechazarla paga la Esencia del sellado."
 
 #: scripts/ui/GuildViews.gd:2400
 msgid "Quirks"
@@ -20189,7 +20189,7 @@ msgstr "Todo lo personal de un héroe más allá de clase, habilidades y equipo:
 
 #: scripts/ui/GuildViews.gd:2401
 msgid "From Act II a rift swells every so often: a rank, a place and a countdown in days (Rift Hall and the camp's status board). Seal a rift of that rank or higher before it runs out to close it, for a little Essence. Otherwise it breaks, and every rift run waits until your guild holds it: a breach rift of back-to-back fights (a fight, an elite and the breach's warden; the Inverted City's gate adds an elite) with no camp, shop or campfire between them. Ranks below S break out in a region; from S up they break at your camp. Holding pays Gold and Essence. Falling or turning back costs a share of your Essence and of the Gold beyond the coming payday's wages, and damages a building (two at the camp). The Accord Hall's Wardcraft rooms soften all of it."
-msgstr ""
+msgstr "Desde el Acto II, de vez en cuando una grieta se hincha: un rango, un lugar y una cuenta atrás en días (Sala de Grietas y tablero de estado del campamento). Sella una grieta de ese rango o superior antes de que se agote para cerrarla, a cambio de un poco de Esencia. Si no, se rompe, y toda incursión espera hasta que tu gremio la contenga: una grieta de brecha de combates seguidos (un combate, una élite y el guardián de la brecha; la puerta de la Ciudad Invertida añade una élite) sin campamento, tienda ni hoguera entre ellos. Los rangos por debajo de S se rompen en una región; desde S hacia arriba se rompen en tu campamento. Contenerla paga Oro y Esencia. Caer o retirarse cuesta una parte de tu Esencia y del Oro que supere los sueldos del próximo día de paga, y daña un edificio (dos en el campamento). Las salas de Arte de la Guardia del Salón del Acuerdo lo suavizan todo."
 
 #: scripts/ui/GuildViews.gd:2402 scripts/ui/Main.gd:3614
 msgid "Defending"
@@ -20201,7 +20201,7 @@ msgstr "Los enemigos recorren los caminos hacia la meta. Construye torres en las
 
 #: scripts/ui/GuildViews.gd:2403
 msgid "Each new guild meets twelve champions, drawn from a pool of twenty-four: three are freed at the end of Acts I, II and III, and nine are lost, each held in a pillar of light (in the Descent, and in ladder rifts from Rank B; reach one to free them). A champion never joins the roster. In rift runs one oversees the party: their Boon lifts everyone, and any hero can spend a turn on their Call (once a rift, twice from level 3). Essence levels them up (to 5)."
-msgstr ""
+msgstr "Cada gremio nuevo conoce a doce campeones, sacados de un grupo de veinticuatro: tres se liberan al final de los Actos I, II y III, y nueve están perdidos, cada uno preso en un pilar de luz (en el Descenso, y en grietas de la escalera desde el Rango B; alcanza uno para liberarlo). Un campeón nunca entra en la plantilla. En las incursiones, uno supervisa al grupo: su Bendición mejora a todos, y cualquier héroe puede gastar un turno en su Llamada (una vez por grieta, dos desde el nivel 3). La Esencia los sube de nivel (hasta 5)."
 
 #: scripts/ui/GuildViews.gd:2404 scripts/ui/RosterView.gd:539
 msgid "Attributes"
@@ -20209,7 +20209,7 @@ msgstr "Atributos"
 
 #: scripts/ui/GuildViews.gd:2404
 msgid "Might (damage, HP), Agility (speed, dodge, first strike) and Focus (ability power, mend). Heroes gain 3 points per level to spend on the Roster's Hero tab; gear adds more, and better gear needs a minimum in its attribute to equip. Train up to 8 extra points at the Training Yard, or reset a hero's points for 5 Essence per level (gear they no longer qualify for comes off)."
-msgstr ""
+msgstr "Fuerza (daño, PV), Agilidad (velocidad, esquiva, primer golpe) y Enfoque (poder de habilidad, curación). Los héroes ganan 3 puntos por nivel para gastar en la pestaña Héroe de la Plantilla; el equipo añade más, y el mejor equipo exige un mínimo en su atributo para equiparlo. Entrena hasta 8 puntos extra en el Patio de Entrenamiento, o reinicia los puntos de un héroe por 5 de Esencia por nivel (el equipo para el que ya no cumple se le quita)."
 
 #: scripts/ui/GuildViews.gd:2405
 msgid "Quests & Milestones"
@@ -20217,7 +20217,7 @@ msgstr "Misiones e hitos"
 
 #: scripts/ui/GuildViews.gd:2405
 msgid "The quest board posts 6 quests (hunts, boss bounties, rift seals, trials); take up to 3 at a time. Unaccepted postings are replaced every 3 days (a day passes with each rift run or rest). Milestones are a static checklist, auto-granted the moment they're met. A rare escort NPC can also tag along on a fight — surviving pays a small bonus."
-msgstr ""
+msgstr "El tablón de misiones publica 6 misiones (cacerías, recompensas por jefes, sellados de grietas, pruebas); acepta hasta 3 a la vez. Los encargos no aceptados se renuevan cada 3 días (pasa un día con cada incursión o descanso). Los Hitos son una lista fija que se concede sola en cuanto se cumple. A veces un PNJ de escolta se une a un combate — sobrevivir paga una pequeña bonificación."
 
 #: scripts/ui/GuildViews.gd:2406
 msgid "Wages, morale and the rival"
@@ -20229,15 +20229,15 @@ msgstr "Cada 7 días (un día = una incursión o un descanso) los héroes cobran
 
 #: scripts/ui/GuildViews.gd:2407
 msgid "Twice a week a hero may ask for something: time off, a raise, Gold for kit, a Training Yard slot, a partner, a rift of their own, your side in a feud, and more. Saying yes costs something and can leave them a title, a quirk or a bond; saying no costs morale. Answer in the Ledger before payday, or it counts as a no."
-msgstr ""
+msgstr "Dos veces por semana un héroe puede pedir algo: tiempo libre, un aumento, Oro para equipo, un puesto en el Patio de Entrenamiento, un compañero, una grieta propia, tu apoyo en una disputa, y más. Decir que sí cuesta algo y puede dejarle un título, un rasgo o un vínculo; decir que no cuesta moral. Responde en el Libro de cuentas antes del día de paga, o contará como un no."
 
 #: scripts/ui/GuildViews.gd:2408 scripts/ui/GuildViews.gd:2456
 msgid "Expeditions"
-msgstr ""
+msgstr "Expediciones"
 
 #: scripts/ui/GuildViews.gd:2408
 msgid "From two seals, the Quest board's Expeditions tab posts three jobs off the map: a safe one, a hard one and (from Act II) a perilous one, each with a Need in power, a length of 1-3 days and a party of up to 3. Heroes you send are away for those days and still draw wages. The odds show before they go: 50% at the Need, better above it. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party, and on a perilous job it can leave a scar. Every class and every Path brings something on the road, once per party: a warrior's muscle and a ranger's scouting raise the odds, a mage appraises (+50% Essence), a rogue pockets more (+25% Gold), a cleric halves the hurt, and each Path adds its own. Heroes are gone for the whole days while rifts and breaches go on without them. Everyone learns on the road, as at the Training Yard. One party out at a time, two with a Scouts' Lodge at level 3."
-msgstr ""
+msgstr "Desde dos sellados, la pestaña Expediciones del tablón de Misiones publica tres trabajos fuera del mapa: uno seguro, uno difícil y (desde el Acto II) uno peligroso, cada uno con un Requisito de poder, una duración de 1-3 días y un grupo de hasta 3. Los héroes que envías están fuera esos días y siguen cobrando sueldo. La probabilidad se ve antes de partir: 50% con el Requisito justo, más por encima. El éxito paga entero; un resultado parcial paga la mitad y alguien vuelve herido; un fracaso no paga nada y hiere al grupo, y en un trabajo peligroso puede dejar una cicatriz. Cada clase y cada Senda aporta algo en el camino, una vez por grupo: el músculo del guerrero y el rastreo del explorador suben la probabilidad, el mago tasa (+50% de Esencia), el pícaro se embolsa más (+25% de Oro), el clérigo reduce las heridas a la mitad, y cada Senda añade lo suyo. Los héroes se ausentan días enteros mientras las grietas y las brechas siguen sin ellos. Todos aprenden en el camino, como en el Patio de Entrenamiento. Un grupo fuera a la vez, dos con el Refugio de Batidores a nivel 3."
 
 #: scripts/ui/GuildViews.gd:2409
 msgid "Camp events"
@@ -20273,11 +20273,11 @@ msgstr "Suministro"
 
 #: scripts/ui/GuildViews.gd:2456
 msgid "Contracts"
-msgstr ""
+msgstr "Contratos"
 
 #: scripts/ui/GuildViews.gd:2456
 msgid " (%d out)"
-msgstr ""
+msgstr " (%d fuera)"
 
 #: scripts/ui/GuildViews.gd:2497
 msgid "Day %d  ·  Taken %d/%d  ·  new postings in %d day%s"
@@ -20509,55 +20509,55 @@ msgstr "\nDesbloquea: "
 
 #: scripts/ui/GuildViews.gd:2992
 msgid "Send heroes on a job off the map. They are gone for its whole days and still draw wages, while rifts and breaches go on without them. Success pays in full; a partial pays half and someone comes back hurt; a failure pays nothing and hurts the party. Every class and Path brings something (hover a hero); each counts once, so a mixed party does best. Parties out at once: %d."
-msgstr ""
+msgstr "Envía héroes a un trabajo fuera del mapa. Se ausentan todos sus días y siguen cobrando sueldo, mientras las grietas y las brechas siguen sin ellos. El éxito paga entero; un resultado parcial paga la mitad y alguien vuelve herido; un fracaso no paga nada y hiere al grupo. Cada clase y Senda aporta algo (pasa el cursor sobre un héroe); cada una cuenta una vez, así que un grupo variado rinde mejor. Grupos fuera a la vez: %d."
 
 #: scripts/ui/GuildViews.gd:3002
 msgid "Out: %s"
-msgstr ""
+msgstr "Fuera: %s"
 
 #: scripts/ui/GuildViews.gd:3003
 msgid "%s · back in %d day%s · %d%% odds"
-msgstr ""
+msgstr "%s · vuelve en %d día%s · %d%% prob."
 
 #: scripts/ui/GuildViews.gd:3007
 msgid "Nothing posted until the board is renewed."
-msgstr ""
+msgstr "No hay nada publicado hasta que se renueve el tablón."
 
 #: scripts/ui/GuildViews.gd:3025
 msgid "%s · %d day%s · up to %d hero%s · Need %d"
-msgstr ""
+msgstr "%s · %d día%s · hasta %d héroe%s · Requiere %d"
 
 #: scripts/ui/GuildViews.gd:3029
 msgid "Pays %d Gold"
-msgstr ""
+msgstr "Paga %d de Oro"
 
 #: scripts/ui/GuildViews.gd:3029
 msgid ", %d Essence"
-msgstr ""
+msgstr ", %d de Esencia"
 
 #: scripts/ui/GuildViews.gd:3032
 msgid ", %d%% chance of an item"
-msgstr ""
+msgstr ", %d%% de prob. de objeto"
 
 #: scripts/ui/GuildViews.gd:3035
 msgid "A failure here can leave a lasting scar."
-msgstr ""
+msgstr "Un fracaso aquí puede dejar una cicatriz duradera."
 
 #: scripts/ui/GuildViews.gd:3053
 msgid "%s · power %d"
-msgstr ""
+msgstr "%s · poder %d"
 
 #: scripts/ui/GuildViews.gd:3056
 msgid "Nobody at camp is free."
-msgstr ""
+msgstr "No hay nadie libre en el campamento."
 
 #: scripts/ui/GuildViews.gd:3063
 msgid "Send them (%d%% odds)"
-msgstr ""
+msgstr "Enviarlos (%d%% prob.)"
 
 #: scripts/ui/GuildViews.gd:3063
 msgid "Pick who goes"
-msgstr ""
+msgstr "Elige quién va"
 
 #: scripts/ui/Main.gd:37
 msgid "navigator.storage && navigator.storage.persist && navigator.storage.persist();"
@@ -20773,23 +20773,23 @@ msgstr "El nuestro: +%d Laureles, y los enemigos del Hueco dejan la escalera"
 
 #: scripts/ui/Main.gd:655
 msgid "How much should the guild's old hands tell you?"
-msgstr ""
+msgstr "¿Cuánto deberían contarte los veteranos del gremio?"
 
 #: scripts/ui/Main.gd:662
 msgid "Guide me through everything"
-msgstr ""
+msgstr "Guíame en todo"
 
 #: scripts/ui/Main.gd:662
 msgid "A tip on every screen the first time you open it (as now)."
-msgstr ""
+msgstr "Un consejo en cada pantalla la primera vez que la abras (como ahora)."
 
 #: scripts/ui/Main.gd:663
 msgid "Help a little"
-msgstr ""
+msgstr "Ayúdame un poco"
 
 #: scripts/ui/Main.gd:663
 msgid "Tips only for the first fight and when a big new system turns up."
-msgstr ""
+msgstr "Consejos solo en el primer combate y cuando aparezca un sistema nuevo importante."
 
 #: scripts/ui/Main.gd:664 scripts/ui/UiKit.gd:1674
 msgid "No tips"
@@ -20797,11 +20797,11 @@ msgstr "Sin consejos"
 
 #: scripts/ui/Main.gd:664
 msgid "Nothing explained. Settings can turn tips back on."
-msgstr ""
+msgstr "Sin explicaciones. Puedes reactivar los consejos en Ajustes."
 
 #: scripts/ui/Main.gd:672
 msgid " (key %d)"
-msgstr ""
+msgstr " (tecla %d)"
 
 #: scripts/ui/Main.gd:706
 msgid "Expose the Company"
@@ -21081,7 +21081,7 @@ msgstr "Torre"
 
 #: scripts/ui/Main.gd:1496
 msgid "Title"
-msgstr ""
+msgstr "Título"
 
 #: scripts/ui/Main.gd:1533
 msgid "Back to %s"
@@ -21393,11 +21393,11 @@ msgstr "%s y %s"
 
 #: scripts/ui/Main.gd:2030
 msgid "Crest"
-msgstr ""
+msgstr "Blasón"
 
 #: scripts/ui/Main.gd:2038
 msgid "Crest %d"
-msgstr ""
+msgstr "Blasón %d"
 
 #: scripts/ui/Main.gd:2045
 msgid "Found the Guild"
@@ -21509,7 +21509,7 @@ msgstr "El Descenso"
 
 #: scripts/ui/Main.gd:2287
 msgid " — locked"
-msgstr ""
+msgstr " — bloqueado"
 
 #: scripts/ui/Main.gd:2289 scripts/ui/Main.gd:2290
 msgid "Rank %s Rift"
@@ -22109,7 +22109,7 @@ msgstr "Audio"
 
 #: scripts/ui/Main.gd:3829
 msgid "Master"
-msgstr ""
+msgstr "General"
 
 #: scripts/ui/Main.gd:3849
 msgid "Spoken lines: on"
@@ -22213,7 +22213,7 @@ msgstr "todos"
 
 #: scripts/ui/Main.gd:3953
 msgid "key moments"
-msgstr ""
+msgstr "momentos clave"
 
 #: scripts/ui/Main.gd:3957
 msgid "Show all tips again"
@@ -22521,7 +22521,7 @@ msgstr "Barrera de reliquia %d"
 
 #: scripts/ui/RiftRunView.gd:401
 msgid "Next fight +%d Momentum"
-msgstr ""
+msgstr "Próximo combate +%d de Ímpetu"
 
 #: scripts/ui/RiftRunView.gd:406
 msgid "Haul %d Gold · %d Essence"
@@ -22893,7 +22893,7 @@ msgstr "Arrodillarse"
 
 #: scripts/ui/RiftRunView.gd:1050
 msgid "%d-%d Gold, but %d Resolve."
-msgstr ""
+msgstr "%d-%d de Oro, pero %d de Temple."
 
 #: scripts/ui/RiftRunView.gd:1053
 msgid "The echo of an old guild's trainer still drills in this hall. One hero can train with it and gain a level (at level 10: attribute points)."
@@ -23421,7 +23421,7 @@ msgstr "Armas"
 
 #: scripts/ui/RosterView.gd:1188
 msgid "Worn"
-msgstr ""
+msgstr "En uso"
 
 #: scripts/ui/RosterView.gd:1201
 msgid "Rarity"
@@ -23437,7 +23437,7 @@ msgstr "Nombre"
 
 #: scripts/ui/RosterView.gd:1214
 msgid "Nobody wears anything yet."
-msgstr ""
+msgstr "Nadie lleva nada todavía."
 
 #: scripts/ui/RosterView.gd:1214
 msgid "No unequipped items here — loot drops in rifts."
@@ -23445,7 +23445,7 @@ msgstr "No hay objetos sin equipar: el botín cae en las grietas."
 
 #: scripts/ui/RosterView.gd:1216
 msgid "What your heroes wear. Click one to open its wearer's page."
-msgstr ""
+msgstr "Lo que llevan tus héroes. Haz clic en uno para abrir la página de quien lo lleva."
 
 #: scripts/ui/RosterView.gd:1216
 msgid "Click an item to see it and equip it.  + fills someone's empty slot."
@@ -23457,7 +23457,7 @@ msgstr "%s — haz clic para ver detalles"
 
 #: scripts/ui/RosterView.gd:1280
 msgid "Worn by %s"
-msgstr ""
+msgstr "Lo lleva %s"
 
 #: scripts/ui/RosterView.gd:1356
 msgid "Equip → %s"
