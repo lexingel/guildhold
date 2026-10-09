@@ -851,19 +851,35 @@ func expedition_def(id: String) -> Dictionary:
 
 
 ## Three postings: a safe, a hard and (from Act II) a perilous job, priced
-## for the next ladder rank. Rolled with the quest board.
+## from the guild's own heroes: the lower third's hero power x the party size
+## x EXPEDITION_NEED[tier] (the sim, 2026-10-09: priced for the next ladder
+## rank, the heroes left at camp had 10-30% odds all game). Pay is a fight's
+## coin and Essence per hero-day (EXPEDITION_GOLD / ESSENCE) at the rank those
+## same heroes could run: the highest sealed rank whose Recommended power four
+## of them reach (paid at the best rank sealed, a big bench farmed SSS pay with
+## Rank F heroes: 100k Gold in 45 days). Rolled with the quest board.
 func roll_expedition_board() -> void:
 	expedition_board = []
-	var rank: String = str(GameData.RIFT_RANKS[clampi(best_rift_rank_sealed + 1, 0, GameData.RIFT_RANKS.size() - 1)]["id"])
-	var rec := Combat.recommended_power("", rank)
+	var powers: Array = heroes.filter(func(h): return not h.is_champion).map(func(h): return Combat.power_of(h))
+	powers.sort()
+	var ref: float = float(powers[powers.size() / 3]) if not powers.is_empty() else 50.0
+	var rank := "F"
+	for i in clampi(best_rift_rank_sealed + 1, 1, GameData.RIFT_RANKS.size()):
+		var rid := str(GameData.RIFT_RANKS[i]["id"])
+		if Combat.recommended_power("", rid) <= ref * 4.0:
+			rank = rid
+	var rr := GameData.find_rift_rank(rank)
+	var base: Dictionary = GameData.DIFFICULTIES.filter(func(d): return str(d["id"]) == str(rr["base"]))[0]
+	var coin := (float(base["coin"][0]) + float(base["coin"][1])) * 0.5 * float(rr["reward"])
+	var ess := (float(base["crystal"][0]) + float(base["crystal"][1])) * 0.5 * float(rr["reward"])
 	for tier in [0, 1, 2 if campaign_act >= 2 else randi() % 2]:
 		var pool: Array = GameData.EXPEDITIONS.filter(func(e): return int(e["tier"]) == tier and not expedition_board.any(func(p): return str(p["id"]) == str(e["id"])))
 		var e: Dictionary = pool.pick_random()
 		var days := int(e["days"])
 		expedition_board.append({"id": str(e["id"]), "rank": rank,
-			"need": int(round(rec * float(e["size"]) / 4.0 * float(GameData.EXPEDITION_NEED[tier]))),
-			"gold": camp_gold(int(GameData.EXPEDITION_GOLD[tier]) * days),
-			"essence": camp_gold(int(GameData.EXPEDITION_ESSENCE[tier]) * days)})
+			"need": maxi(1, int(round(ref * float(e["size"]) * float(GameData.EXPEDITION_NEED[tier])))),
+			"gold": int(round(coin * float(GameData.EXPEDITION_GOLD[tier]) * float(e["size"]) * days)),
+			"essence": int(round(ess * float(GameData.EXPEDITION_ESSENCE[tier]) * float(e["size"]) * days))})
 
 
 ## What a party brings (GameData.EXPEDITION_BONUS): each class and Path once.

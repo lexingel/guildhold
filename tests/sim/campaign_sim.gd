@@ -60,6 +60,14 @@ var sustain := [0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0]   # mend/round sum, start hp su
 var hard_level := 0   # hard=N: found at Hardship N (-1 Story), 0.64
 var take_path_relics := true   # relics=0: always take the Essence
 var path_relics_taken := 0
+var expeditions_on := false   # exped=1: bench heroes go on expeditions (2026-10-09)
+var _exp_sent := {}           # str(hero ids) -> {gold, ess, bon, days, n, tier}
+## Expedition and rift pay, per profile: [sent, success, partial, failure, gold, essence, hero-days,
+## wounds, scars, rift run days, rift hero-days, rift gold, rift essence]
+var exp_stats := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+var _run_party := 0           # heroes in today's rift run (0: no run today)
+var _run_ess := 0             # Essence the run brought in
+var _exp_paid_today := [0, 0] # expedition Gold, Essence that came home today
 var resolve_doors := [0, 0, 0, 0, 0]   # boss doors with Resolve on: [doors, wavering, broken, won from wavering/broken, sum of Resolve]
 var lost_high := [0, 0]   # lost fights / of them from above 90% party HP
 var by_kind := {}        # fight kind -> [won, lost, start hp % sum of lost, of won] (all guilds)
@@ -97,6 +105,8 @@ func _ready() -> void:
 			hard_level = int(a.substr(5))
 		elif a == "relics=0":
 			take_path_relics = false
+		elif a == "exped=1":
+			expeditions_on = true
 		elif a.begins_with("rstart="):
 			GameData.RESOLVE_START = int(a.substr(7))
 		elif a.begins_with("waver="):
@@ -192,6 +202,10 @@ func _ready() -> void:
 		resolve_doors = [0, 0, 0, 0, 0]
 		print("   Path relics taken: %d" % path_relics_taken)
 		path_relics_taken = 0
+		var es := exp_stats
+		print("   expeditions: %d sent (%d success, %d partial, %d failed), %d Gold %d Essence over %d hero-days = %.0f Gold %.1f Essence a hero-day · about %d heroes hurt, %d parties came back with a scar" % [es[0], es[1], es[2], es[3], es[4], es[5], es[6], es[4] / maxf(1, es[6]), es[5] / maxf(1, es[6]), es[7], es[8]])
+		print("   rifts: %d run days, %d hero-days = %.0f Gold %.1f Essence a hero-day (gross, before wages)" % [es[9], es[10], es[11] / maxf(1, es[10]), es[12] / maxf(1, es[10])])
+		exp_stats = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 		lost_high = [0, 0]
 		print("   left a run early to keep the haul: %d times" % left_with_haul)
 		print("   won fights: party mend %.1f%%/round, dodge %d%%, wipe guard %d%%, %.1f rounds, party HP %d%% before, %d%% after" % [100.0 * sustain[0] / maxf(1, sustain[3]), int(100.0 * sustain[4] / maxf(1, sustain[3])), int(100.0 * sustain[5] / maxf(1, sustain[3])), sustain[6] / maxf(1, sustain[3]), int(100.0 * sustain[1] / maxf(1, sustain[3])), int(100.0 * sustain[2] / maxf(1, sustain[3]))])
@@ -265,10 +279,16 @@ func _guild(p: String, s: int) -> void:
 		GameState.apply_legacy_gifts(gifts)
 		GameState.legacy["laurels"] = 0
 	var act := GameState.campaign_act
+	_exp_sent = {}
 	while GameState.day < days:
 		var pay0 := int(GameState.payday_report.get("day", -1))
 		var c0 := GameState.coins
+		var out0: Array = GameState.expeditions.map(func(x): return str(x["hero_ids"]))
+		var news0: Array = GameState.guild_news.duplicate()
+		_run_party = 0
+		_run_ess = 0
 		_day(p)
+		_exp_returns(out0, news0)
 		var spent := _spent
 		_spent = 0
 		var paid := 0
@@ -278,6 +298,11 @@ func _guild(p: String, s: int) -> void:
 			bill_paid[pw] = int(bill_paid.get(pw, 0)) + paid
 		var w := (GameState.day - 1) / GameData.PAYDAY_DAYS   # days 1-7 are week 0, paid on day 7
 		gross_gold[w] = int(gross_gold.get(w, 0)) + maxi(0, GameState.coins - c0 + spent + paid)
+		if _run_party > 0:   # a rift day: its gross Gold and Essence, less any expedition that came home today
+			exp_stats[9] += 1
+			exp_stats[10] += _run_party
+			exp_stats[11] += maxi(0, GameState.coins - c0 + spent + paid - _exp_paid_today[0])
+			exp_stats[12] += maxi(0, _run_ess - _exp_paid_today[1])
 		if GameState.campaign_act != act:
 			act = GameState.campaign_act
 			act_day[act] = GameState.day
@@ -354,6 +379,8 @@ func _day(p: String) -> void:
 		ending_day = GameState.day
 		ending_laurels = GameState.write_legacy([])
 	_quests()
+	if expeditions_on:
+		_send_expeditions()
 	var g0 := GameState.coins
 	if p == "investor":
 		_invest()
@@ -394,7 +421,10 @@ func _day(p: String) -> void:
 			GameState.start_daily(rank, party, null)
 		else:
 			GameState.start_ladder_rift(rank, party, null)
+	var e_run := GameState.crystals
 	var res := _play_run(rank)
+	_run_party = party.size()
+	_run_ess = GameState.crystals - e_run
 	if rank != "finale":
 		var b := clampi(int(round(float(_party_power) / Combat.recommended_power("", rank) * 10.0)), 4, 16)
 		var ct: Array = curve.get(b, [0, 0])
@@ -623,6 +653,75 @@ func _learn_all(h: Hero) -> void:
 			for id in ["edge", "hide"] + (GameData.KIND_SKILL_PACKAGE[kind] as Array).map(func(n): return str(n["id"])):
 				if h.skill_points > 0:
 					GameState.learn_skill(h.id, str(kind), str(id))
+
+
+## Bench heroes (outside the top four) take the best-paying posting they
+## have at least a 50% chance on: the sim's expedition player.
+func _send_expeditions() -> void:
+	if not GameState.expeditions_open():
+		return
+	var lineup := _pick_party()
+	for round_i in 2:
+		if GameState.expeditions.size() >= GameState.expedition_cap() or GameState.expedition_board.is_empty():
+			return
+		var bench: Array = GameState.heroes.filter(func(h): return not h.is_champion and h.is_available() and not lineup.has(h.id) and h.training.is_empty())
+		bench.sort_custom(func(a, b): return Combat.power_of(a) > Combat.power_of(b))
+		var best := -1
+		var best_ids: Array = []
+		var best_ev := 0.0
+		for i in GameState.expedition_board.size():
+			var post: Dictionary = GameState.expedition_board[i]
+			var e := GameState.expedition_def(str(post["id"]))
+			var ids: Array = bench.slice(0, int(e["size"])).map(func(h): return h.id)
+			if ids.is_empty():
+				continue
+			var c := GameState.expedition_chance(post, ids)
+			var ev := (c + (1.0 - c) * 0.25) * (float(post["gold"]) + 3.0 * float(post["essence"])) / (float(ids.size()) * float(e["days"]))
+			if c >= 0.5 and ev > best_ev:
+				best = i
+				best_ids = ids
+				best_ev = ev
+		if log_days:
+			var bp := 0.0
+			for i2 in GameState.expedition_board.size():
+				var pp: Dictionary = GameState.expedition_board[i2]
+				var ids2: Array = bench.slice(0, int(GameState.expedition_def(str(pp["id"]))["size"])).map(func(h): return h.id)
+				if not ids2.is_empty():
+					bp = maxf(bp, GameState.expedition_chance(pp, ids2))
+			print("     exp day %d act %d sealed %s bench %d best chance %.2f" % [GameState.day, GameState.campaign_act, GameData.RIFT_RANKS[maxi(0, GameState.best_rift_rank_sealed)]["id"], bench.size(), bp])
+		if best < 0:
+			return
+		var post2: Dictionary = GameState.expedition_board[best]
+		var e2 := GameState.expedition_def(str(post2["id"]))
+		var rec := {"gold": int(post2["gold"]), "ess": int(post2["essence"]), "bon": GameState.expedition_bonuses(best_ids), "days": int(e2["days"]), "n": best_ids.size(), "tier": int(e2["tier"])}
+		if GameState.send_expedition(best, best_ids) == "":
+			_exp_sent[str(best_ids)] = rec
+			exp_stats[0] += 1
+
+
+## Parties back today: their outcome (from the news line) and what they paid.
+func _exp_returns(out0: Array, news0: Array) -> void:
+	_exp_paid_today = [0, 0]
+	var still: Array = GameState.expeditions.map(func(x): return str(x["hero_ids"]))
+	var fresh: Array = GameState.guild_news.filter(func(l): return not news0.has(l) and str(l).contains("Expedition:"))
+	for key in _exp_sent.keys():   # every party sent and no longer out (a 1-day job comes back the day it left)
+		if still.has(key):
+			continue
+		var rec: Dictionary = _exp_sent[key]
+		_exp_sent.erase(key)
+		var line := str(fresh.pop_front()) if not fresh.is_empty() else ""
+		var outcome := "success" if line.contains("a success") else ("partial" if line.contains("half done") else "failure")
+		var share := {"success": 1.0, "partial": 0.5, "failure": 0.0}[outcome] as float
+		var g := int(round(int(rec["gold"]) * share * (1.0 + float(rec["bon"]["gold"]))))
+		var ess := int(round(int(rec["ess"]) * share * (1.0 + float(rec["bon"]["ess"]))))
+		exp_stats[{"success": 1, "partial": 2, "failure": 3}[outcome]] += 1
+		exp_stats[4] += g
+		exp_stats[5] += ess
+		exp_stats[6] += int(rec["n"]) * int(rec["days"])
+		exp_stats[7] += 1 if outcome == "partial" else (int(rec["n"]) if outcome == "failure" else 0)
+		_exp_paid_today[0] += g
+		_exp_paid_today[1] += ess
+	exp_stats[8] += GameState.pending_toasts.filter(func(t): return str(t.get("text", "")).contains("keeps a scar")).size()
 
 
 func _pick_party() -> Array[String]:

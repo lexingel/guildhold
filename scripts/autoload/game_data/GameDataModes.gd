@@ -613,11 +613,14 @@ var RESOLVE_GAIN := {"rest": 3, "campfire": 1, "shrine": 2}
 ## the training fight's guide show in every mode but "No tips".
 ## Expeditions (2026-10-09 playtest): jobs off the map for idle heroes, from
 ## the Quest board once the Training Yard opens. Tier 0 safe / 1 hard /
-## 2 perilous; a posting's Need is the ladder's Recommended power for the next
-## rank x size/4 x EXPEDITION_NEED[tier]. Pay per day x days (camp-scaled),
-## about a rift day's pay for the same heroes: they are locked away for whole
-## days while rifts and breaches go on without them. Failing a perilous job
-## can scar (EXPEDITION_SCAR_TIER and up).
+## 2 perilous; a posting's Need is the guild's lower-third hero power x size x
+## EXPEDITION_NEED[tier]. Pay per hero-day is EXPEDITION_GOLD / ESSENCE x a
+## fight's coin and Essence at the rank those heroes could run (see
+## roll_expedition_board), x days. The 4-guild sim (advice, exped=1) has the
+## bench take jobs at 60%+ odds and earn about 80-90 Gold and 25 Essence a
+## hero-day after the odds, against 145 and 60 for the top four in the rifts;
+## wages stay 39% of income. Failing a perilous job can scar
+## (EXPEDITION_SCAR_TIER and up).
 const EXPEDITIONS := [
 	{"id": "salt_carts", "tier": 0, "days": 1, "size": 2, "name": "Escort the salt carts", "text": "The salt carts want guards as far as the river ford. Nobody expects trouble, which is when it comes."},
 	{"id": "mill_cellar", "tier": 0, "days": 1, "size": 1, "name": "Clear the mill cellar", "text": "Something is eating the miller's grain and he would rather not find out what."},
@@ -628,9 +631,9 @@ const EXPEDITIONS := [
 	{"id": "tithe_barge", "tier": 2, "days": 3, "size": 3, "name": "Take the Hollow's tithe barge", "text": "A barge carries rift-glass up the river for the Hollow's buyers. It is guarded, and it is worth it."},
 	{"id": "accord_vault", "tier": 2, "days": 3, "size": 3, "name": "Open an Accord vault", "text": "A scholar swears an old guild vault lies under the burned chapel. The last party that went down came back two short."},
 ]
-const EXPEDITION_NEED := [0.7, 1.0, 1.3]
-const EXPEDITION_GOLD := [60, 90, 135]     # per day, before the act's camp scale
-const EXPEDITION_ESSENCE := [0, 13, 27]    # per day, before the act's camp scale
+const EXPEDITION_NEED := [0.8, 1.0, 1.25]
+const EXPEDITION_GOLD := [1.8, 2.2, 2.8]      # x a fight's coin at the heroes' rank, per hero-day
+const EXPEDITION_ESSENCE := [0.0, 1.8, 3.2]   # x a fight's Essence there, per hero-day
 const EXPEDITION_ITEM := [["", 0.0], ["common", 0.25], ["rare", 0.5]]
 const EXPEDITION_TIER_NAME := ["Safe", "Hard", "Perilous"]
 const EXPEDITION_SCAR_TIER := 2
