@@ -3059,7 +3059,14 @@ func _render_expeditions(v: VBoxContainer) -> void:
 			var bl := _wrap_label("\n".join(GameState.expedition_bonuses(picked)["lines"]), 12)
 			bl.add_theme_color_override("font_color", Palette.good())
 			col.add_child(bl)
-		var odds := GameState.expedition_chance(p, picked) if not picked.is_empty() else 0.0
+			# A hero ready for a Path course needs others to cover the party while they train (the sim, 0.67.3).
+			var left := idle.size() - picked.size() - 1
+			var ready: Array = idle.filter(func(h): return not picked.has(h.id) and GameState.subclass_training_options(h).any(func(o): return str(o["lock"]) == "" and not bool(o["change"])))
+			if not ready.is_empty() and left < 4:
+				var wl := _wrap_label(tr("%s is ready for a Path course. With these away, only %d hero%s would be left for the rifts while they train.") % [tr(str(ready[0].name.split(" the ")[0])), left, tr(str(GameData.pl(left, "es")))], 12)
+				wl.add_theme_color_override("font_color", Palette.HAZARD)
+				col.add_child(wl)
+		var odds :=GameState.expedition_chance(p, picked) if not picked.is_empty() else 0.0
 		var send := _icon_domain_button("violet", GameData.BUTTON_ICON_PATH["confirm"], tr("Send them (%d%% odds)") % int(round(odds * 100)) if not picked.is_empty() else tr("Pick who goes"), func(idx=i, ids=picked):
 			var err := GameState.send_expedition(idx, ids)
 			if err != "":

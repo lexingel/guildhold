@@ -95,4 +95,35 @@ func run() -> void:
 			hurt_scarred = true
 			break
 	check(hurt_scarred, "a perilous failure hurts the party and can leave a scar")
+
+	# The card warns when sending would leave fewer than four to cover a hero
+	# ready for a Path course (0.67.3: the sim's casual guilds stalled on it).
+	var main: Control = load("res://scenes/Main.tscn").instantiate()
+	add_child(main)
+	await get_tree().physics_frame
+	GameState.active_slot = 9
+	GameState.reset()
+	GameState.rifts_sealed = 2
+	GameState.campaign_act = 2
+	GameState.coins = 50000
+	GameState.crystals = 50000
+	for i in 5:
+		var r := Combat.gen_recruit("D")
+		r.id = "r%d" % i
+		r.hp = Combat.max_hp(r)
+		GameState.heroes.append(r)
+	var ready: Array = GameState.heroes.filter(func(h): return GameState.subclass_training_options(h).any(func(o): return str(o["lock"]) == ""))
+	check(not ready.is_empty(), "a Rank D recruit is ready for a Path course")
+	GameState.roll_expedition_board()
+	var warned := func(pick: Array) -> bool:
+		main._exp_pick = {0: pick}
+		var v := VBoxContainer.new()
+		main._render_expeditions(v)
+		var hit := v.find_children("*", "Label", true, false).any(func(l): return str(l.text).contains("ready for a Path course"))
+		v.free()
+		return hit
+	var spare: Array = GameState.heroes.filter(func(h): return h != ready[0]).map(func(h): return h.id)
+	check(not warned.call([]), "no warning before anyone is picked")
+	check(warned.call([spare[0]]), "picking one of five warns: three left while the fifth trains")
+	main.queue_free()
 	GameState.delete_slot(9)

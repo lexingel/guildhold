@@ -38,7 +38,9 @@ static func hero_portrait(h) -> String:
 ## with real plural forms (German, Russian...) is added.
 static func pl(n: int, suffix: String = "s") -> String:
 	var loc := TranslationServer.get_locale()
-	return "" if n == 1 or not (loc.begins_with("en") or loc.begins_with("es")) else suffix   # Spanish nouns take the -s too (0.70)
+	if n == 1 or not (loc.begins_with("en") or loc.begins_with("es")):
+		return ""
+	return "s" if loc.begins_with("es") else suffix   # Spanish nouns take the -s too (0.70): hero%s is héroe%s there, never héroees
 
 
 static func find_role(role_id: String) -> Dictionary:
