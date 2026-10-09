@@ -336,9 +336,11 @@ func recruit_hero(offer_id: String) -> String:
 		return tr("Roster is full.")
 	var offer := recruit_pool[idx]
 	var rank := GameData.find_rank(offer.rank)
-	if coins < int(rank["cost"]):
+	var founder := signing_founders()
+	var cost := 0 if founder else int(rank["cost"])
+	if coins < cost:
 		return tr("Not enough Gold.")
-	coins -= int(rank["cost"])
+	coins -= cost
 	var is_dupe := heroes.any(func(h): return h.pool_id == offer.pool_id)
 	if guild_mentor():   # Barracks Lv3: recruits join a level higher
 		offer.level = 2
@@ -346,6 +348,15 @@ func recruit_hero(offer_id: String) -> String:
 		offer.hp = Combat.max_hp(offer)
 	heroes.append(offer)
 	_drop_offer(offer)   # the next face arrives tomorrow (it used to be replaced on the spot)
+	if founder:   # a founder pays their own first week, and the last one opens the usual board
+		coins += wage_of(offer)
+		founding_picks -= 1
+		if founding_picks <= 0:
+			founding_rerolls = 0
+			refresh_recruit_pool()
+		save()
+		state_changed.emit()
+		return ""
 	if is_dupe:
 		var refund := int(round(float(rank["cost"]) * 0.5))
 		coins += refund
@@ -362,6 +373,13 @@ func reroll_recruit_offer(offer_id: String) -> String:
 			idx = i
 			break
 	if idx < 0:
+		return ""
+	if signing_founders() and founding_rerolls > 0:   # the founding board's free rerolls: another Rank F
+		founding_rerolls -= 1
+		_drop_offer(recruit_pool[idx])
+		_post_offer(Combat.gen_recruit("F"), 60, idx)
+		save()
+		state_changed.emit()
 		return ""
 	if coins < recruit_reroll_cost():
 		return tr("Not enough Gold.")

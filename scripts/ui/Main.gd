@@ -2065,8 +2065,7 @@ func _render_onboard(v: VBoxContainer) -> void:
 		_pending_hardship = 0
 		GameState.vale_year = _pending_year.duplicate(true) if not (GameState.legacy.get("guilds", []) as Array).is_empty() else {}
 		_pending_year = {}
-		GameState.hire_starters()
-		GameState.refresh_recruit_pool()
+		GameState.open_founding_board()
 		GameState.apply_legacy_gifts(_pending_gifts)
 		_pending_gifts.clear()
 		GameState.carry_subclasses(_pending_carry)

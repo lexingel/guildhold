@@ -1776,6 +1776,24 @@ func finish_run() -> void:
 
 ## A new guild's first three: a warrior, a cleric and a ranger or mage
 ## (Rank F), so a player's first step is a rift, not the recruit board.
+## A new guild signs its own founders (2026-10-09 playtest): the first
+## recruit board holds FOUNDING_OFFERS Rank F offers, every role among them;
+## FOUNDING_PICKS sign free (each brings their first week's wages), and
+## FOUNDING_REROLLS rerolls are free. Then the usual board.
+func open_founding_board() -> void:
+	founding_picks = GameData.FOUNDING_PICKS
+	founding_rerolls = GameData.FOUNDING_REROLLS
+	recruit_pool = []
+	recruit_until = {}
+	var roles: Array = GameData.CLASSES.map(func(c): return str(c["id"]))
+	roles.shuffle()
+	while roles.size() < GameData.FOUNDING_OFFERS:
+		roles.append(roles.pick_random())
+	for r in roles:
+		_post_offer(Combat.gen_recruit("F", str(r)), 60)
+
+
+## The tests and the sims found a guild the old way: the balanced trio.
 func hire_starters() -> void:
 	for roles in [["warrior"], ["cleric"], ["ranger", "mage"]]:
 		heroes.append(Combat.gen_recruit("F", str(roles[randi() % roles.size()])))

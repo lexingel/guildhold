@@ -63,4 +63,5 @@ Three calls: the starting roster (6), expeditions (30), and what Renown pays now
 - Expeditions open with the Training Yard; a failed perilous job can scar.
 - Every class and every Path has an expedition bonus (GameData.EXPEDITION_BONUS), counted once per party.
 - Heroes are locked away for the whole days while rifts and breaches go on: splitting the roster between expeditions and training is a risk taken for resources, so a job now pays about a full rift day (Gold 60/90/135 a day, Essence 0/13/27, before the act scale).
-- Still open: founders option, Renown option.
+- Founders: option A, the founding board (6 Rank F offers with every role, 3 sign free and pay their first week, 3 free rerolls). Tests and sims still found with `hire_starters`.
+- Renown: option A, it stays the rival race; nothing added.

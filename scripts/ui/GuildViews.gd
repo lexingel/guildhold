@@ -16,7 +16,7 @@ func _render_camp_screen(v: VBoxContainer) -> void:
 
 	if term_tab == "camp":
 		if GameState.runs_started == 0:
-			_coach(v, "welcome", "Welcome to your guild", "Rifts are tearing open across the land. Your first three heroes have signed on (Roster, key 1). Head to the Rift Hall (key 3) to seal a rift.")
+			_coach(v, "welcome", "Welcome to your guild", "Rifts are tearing open across the land. First, sign three founders from the recruit board (Roster > Recruits); then head to the Rift Hall (key 3) to seal a rift.")
 		elif GameState.runs_started >= 1 and GameState.run.is_empty():
 			_coach(v, "after_first_run", "Back at camp", "Equip what you found on the Roster's Hero tab (key 1), spend skill points under Skills, and hire more heroes when you can afford them. Every rift run or rest is one day.")
 		_render_camp(v)
@@ -1191,6 +1191,7 @@ func _getting_started_steps() -> Dictionary:
 	var go := func(tab: String, sub: String): return func(): term_tab = tab; roster_tab = sub; render()
 	var hall := func(): screen = "rift_hall"; render()
 	var steps := [
+		[tr("Sign your founders (Roster > Recruits): %d to go") % GameState.founding_picks, not GameState.signing_founders(), go.call("recruits", "")],
 		["Assemble a party in the Rift Hall and enter a rift", not GameState.monsters_seen.is_empty(), hall],
 		["Equip an item on a hero (Roster > Heroes)", GameState.items.any(func(it): return it.equipped_to != ""), go.call("roster", "hero")],
 		["Spend a skill point (Roster > Heroes > Skills)", GameState.heroes.any(func(h): return h.skills.values().has(true)), go.call("roster", "skills")],
@@ -1383,6 +1384,14 @@ func _render_champions(v: VBoxContainer) -> void:
 
 
 func _render_recruits(v: VBoxContainer) -> void:
+	if GameState.signing_founders():
+		var fp := PanelContainer.new()
+		fp.theme_type_variation = &"CardPanelEmber"
+		var fc := _vbox(4)
+		fc.add_child(_label(tr("Sign your founders: %d to go") % GameState.founding_picks, 16))
+		fc.add_child(_wrap_label(tr("Every founder signs free and brings their first week's wages. A party of four needs someone in front and someone who heals. Free rerolls left: %d.") % GameState.founding_rerolls, 13))
+		fp.add_child(fc)
+		v.add_child(fp)
 	_coach(v, "recruits", "Hiring heroes", "Recruit heroes below; higher ranks are stronger.")
 	v.add_child(_wrap_label(tr("New faces arrive every day and wait a few days; payday fills the board. Each reroll or commission doubles the next until payday (back to %d Gold).%s") % [GameState.recruit_reroll_base(), tr(" The rival may sign your best offer first.") if GameState.feature_unlocked("rival") else ""], 12, true))
 	v.add_child(_wrap_label(tr("Rank odds: %s%s") % [tr(str(GameData.rank_odds_text())), tr(str(tr("  ·  Scouts' Lodge: a C+ recruit is assured each payday") if GameState.headhunter_guarantee() else ""))], 11, true))
@@ -1433,7 +1442,8 @@ func _render_recruits(v: VBoxContainer) -> void:
 		var mid := _vbox(2)
 		mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		mid.add_child(_label(h.name, 13))
-		mid.add_child(_label(tr("Rank %s %s · %d Gold · Power %d · %d HP · wage %d/week") % [tr(str(h.rank)), tr(str(h.cls_id.capitalize())), int(rank["cost"]), Combat.power_of(h), Combat.max_hp(h), GameState.wage_of(h)], 11, true))
+		var price := tr("free") if GameState.signing_founders() else tr("%d Gold") % int(rank["cost"])
+		mid.add_child(_label(tr("Rank %s %s · %s · Power %d · %d HP · wage %d/week") % [tr(str(h.rank)), tr(str(h.cls_id.capitalize())), price, Combat.power_of(h), Combat.max_hp(h), GameState.wage_of(h)], 11, true))
 		mid.add_child(_recruit_traits(h))
 		# 0.62: a base class; what a hire brings and which trainings it can start.
 		var brings := tr("Brings %d skill and %d attribute points") % [h.skill_points, h.attr_points] if h.skill_points + h.attr_points > 0 else tr("A fresh recruit")
@@ -1452,14 +1462,16 @@ func _render_recruits(v: VBoxContainer) -> void:
 		stay.tooltip_text = tr("Waits on the board until day %d, then takes work elsewhere.") % (GameState.day + left)
 		stay.mouse_filter = Control.MOUSE_FILTER_STOP
 		stay.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(stay)
-		var rr := _button(tr("Reroll (%d Gold)") % GameState.recruit_reroll_cost(), func(id=h.id):
+		if not GameState.signing_founders():   # the founding board waits for you
+			row.add_child(stay)
+		var free_rr := GameState.signing_founders() and GameState.founding_rerolls > 0
+		var rr := _button(tr("Reroll (free, %d left)") % GameState.founding_rerolls if free_rr else tr("Reroll (%d Gold)") % GameState.recruit_reroll_cost(), func(id=h.id):
 			var err := GameState.reroll_recruit_offer(id)
 			if err != "":
 				push_warning(err)
 			render()
 		)
-		rr.disabled = GameState.coins < GameState.recruit_reroll_cost()
+		rr.disabled = not free_rr and GameState.coins < GameState.recruit_reroll_cost()
 		rr.tooltip_text = tr("Swap this offer for a new face. The next reroll costs double, until payday.")
 		row.add_child(rr)
 		var hire := _icon_domain_button("ember", GameData.CAMP_HUB_ICON_PATH["recruits"], "Recruit", func(id=h.id, nm=h.name, rk=h.rank):

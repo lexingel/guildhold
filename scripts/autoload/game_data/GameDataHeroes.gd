@@ -610,6 +610,9 @@ const FORGE_GOLD := 40
 ## playtest: Act I is short of Gold, and training empowers), is paid up front; a hero recalled
 ## early gets back the days not yet started. Stations by yard tier (the
 ## Drill Yard upgrade): TRAIN_SLOTS_BY_TIER.
+const FOUNDING_OFFERS := 6
+const FOUNDING_PICKS := 3
+const FOUNDING_REROLLS := 3
 const ATTR_TRAIN_CAP := 8
 const TRAIN_DAYS := [1, 2, 3]
 const TRAIN_FEE := 2

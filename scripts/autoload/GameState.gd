@@ -43,6 +43,8 @@ func reset() -> void:
 	camp_event_last = {}
 	expedition_board = []
 	expeditions = []
+	founding_picks = 0
+	founding_rerolls = 0
 	next_resolve = 0
 	hardship = 0
 	breach = {}
@@ -315,6 +317,8 @@ func load_save() -> bool:
 	camp_omen = (data.get("camp_omen", {}) as Dictionary).duplicate(true)
 	camp_event_last = (data.get("camp_event_last", {}) as Dictionary).duplicate(true)
 	expedition_board = (data.get("expedition_board", []) as Array).duplicate(true)
+	founding_picks = int(data.get("founding_picks", 0))
+	founding_rerolls = int(data.get("founding_rerolls", 0))
 	expeditions = (data.get("expeditions", []) as Array).duplicate(true)
 	next_resolve = int(data.get("next_resolve", 0))
 	hardship = int(data.get("hardship", 0))
