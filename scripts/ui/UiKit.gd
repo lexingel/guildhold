@@ -1,7 +1,7 @@
 class_name UiKit
 extends Control
 ## Bottom of Main's inheritance chain (UiKit <- RosterView <- BattleView <- RiftRunView <-
-## GuildViews <- Main): every piece of UI state, shared widget builders and
+## QuestsView <- RecordsView <- CodexView <- GuildViews <- RiftHallView <- Main): every piece of UI state, shared widget builders and
 ## text helpers. Nothing here may call a screen renderer; render() is a
 ## virtual that Main overrides so widgets/callbacks can still trigger it.
 
