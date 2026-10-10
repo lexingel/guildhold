@@ -32,10 +32,6 @@ func reset() -> void:
 	runs_finished = 0
 	fallen = []
 	heroes_lost_total = 0
-	best_endless_time = 0
-	endless_runs = 0
-	endless_best = {}
-	endless_milestones = []
 	week_start_coins = -1
 	hero_request = {}
 	camp_event = {}
@@ -308,9 +304,6 @@ func load_save() -> bool:
 	runs_finished = int(data.get("runs_finished", 0))
 	fallen = data.get("fallen", [])
 	heroes_lost_total = int(data.get("heroes_lost_total", 0))
-	best_endless_time = int(data.get("best_endless_time", 0))
-	endless_runs = int(data.get("endless_runs", 0))
-	endless_best = (data.get("endless_best", {}) as Dictionary).duplicate()
 	week_start_coins = int(data.get("week_start_coins", -1))
 	hero_request = (data.get("hero_request", {}) as Dictionary).duplicate(true)
 	camp_event = (data.get("camp_event", {}) as Dictionary).duplicate(true)
@@ -331,7 +324,6 @@ func load_save() -> bool:
 	rival_event = (data.get("rival_event", {}) as Dictionary).duplicate(true)
 	session = (data.get("session", {}) as Dictionary).duplicate()
 	session["n"] = int(session.get("n", 0)) + 1   # times this guild was opened (0.65, for the feedback report)
-	endless_milestones = (data.get("endless_milestones", []) as Array).map(func(x): return int(x))
 	boon_set4_reached = bool(data.get("boon_set4_reached", false))
 	tower_week = int(data.get("tower_week", 0))
 	tower_week_cleared = int(data.get("tower_week_cleared", 0))

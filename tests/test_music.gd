@@ -34,6 +34,8 @@ func run() -> void:
 	GameState.voice_on = true
 	GameState.language = "en"
 	AudioManager.set_music_volume(0.5)
+	AudioManager.stop_voice()   # a line from an earlier test may still be fading the music back up
+	await get_tree().create_timer(0.5).timeout
 	var bus := AudioServer.get_bus_index("Music")
 	var user_db := AudioServer.get_bus_volume_db(bus)
 	AudioManager.play_voice("test:duck", [clip], true)

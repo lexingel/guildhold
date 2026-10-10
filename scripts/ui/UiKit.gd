@@ -1457,9 +1457,7 @@ func _play_rift_entry_flash() -> void:
 var _pending_diff_id: String = "lesser"
 
 
-var _pending_endless: bool = false
 var _pending_breach := false   # 0.63: the party screen is for holding a broken rift
-var _endless_biome := ""   # the Endless Rift region picked on the party screen
 var _pending_finale: bool = false   # Party Assembly is for the current act's finale
 var _pending_tower: bool = false    # Party Assembly is for the next Tower of Trials floor
 var _pending_descent: bool = false  # Party Assembly is for the Descent

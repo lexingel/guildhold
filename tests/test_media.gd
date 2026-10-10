@@ -94,7 +94,7 @@ func run() -> void:
 		var s := _size(p)
 		if s.x > 64 or s.y > 64:
 			odd_walk.append(str(p).get_file())
-	check(walks.size() > 1000 and odd_walk.is_empty(), "%d walk frames fit the 64px cell %s" % [walks.size(), odd_walk.slice(0, 10)])
+	check(walks.size() > 700 and odd_walk.is_empty(), "%d walk frames fit the 64px cell %s" % [walks.size(), odd_walk.slice(0, 10)])
 
 	# 4. Music and voice play where they should.
 	var main: Control = load("res://scenes/Main.tscn").instantiate()
@@ -170,18 +170,6 @@ func run() -> void:
 	await _frames()
 	check(AudioManager._current_music_path in GameData.camp_pool(), "and coming home plays a camp track again")
 
-	var sv := SurvivorsView.new()
-	sv.setup(GameState.heroes.slice(0, 3), "vale")
-	add_child(sv)
-	await _frames()
-	check(AudioManager._current_music_path == GameData.ACCORD_MUSIC, "the Endless Rift plays the Accord Hall's theme")
-	sv.queue_free()
-	var dv := DefenseView.new()
-	dv.setup("vale", 0, GameState.heroes.slice(0, 2), null, GameState.defense_opts())
-	add_child(dv)
-	await _frames()
-	check(AudioManager._current_music_path in GameData.COMBAT_MUSIC, "Riftbreak plays a combat track")
-	dv.queue_free()
 
 	GameState.voice_on = was_on
 	GameState.language = was_lang

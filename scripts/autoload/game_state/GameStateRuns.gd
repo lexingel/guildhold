@@ -1194,62 +1194,6 @@ func seal_rift() -> void:
 	state_changed.emit()
 
 
-## Pays out a finished Endless Rift (survivors) run: a little gold, Essence
-## (which also levels the champions), loot for elites and wardens, and every lost
-## champion freed on the way. The guild spends a day on it (wages, healing).
-## Returns what was earned for the result screen.
-func finish_survivors(r: SurvivorsRun) -> Dictionary:
-	var pay := r.rewards()
-	coins += int(pay["coins"])
-	crystals += int(pay["crystals"])
-	var freed: Array = []
-	for id in r.rescued:
-		var fname := free_lost_champion(str(id))
-		if fname != "":
-			freed.append(fname)
-	var names: Array = []
-	for h in r.heroes:
-		names.append(h["hero"].name.split(" the ")[0])
-	var loot_names: Array = []
-	for i in int(pay["loot"]):
-		var loot := Combat.gen_loot(Combat.weighted_rarity())
-		_grant_loot(loot)
-		loot_names.append(loot["obj"].name)
-	for name in r.kill_counts:
-		monster_kill_counts[name] = int(monster_kill_counts.get(name, 0)) + int(r.kill_counts[name])
-	var t := int(r.time)
-	var best := t > int(endless_best.get(r.biome, 0))
-	best_endless_time = maxi(best_endless_time, t)
-	endless_best[r.biome] = maxi(int(endless_best.get(r.biome, 0)), t)
-	endless_runs += 1
-	# First-time milestones: gold, Essence, an Endless relic, a guild title.
-	var got: Array = []
-	for m in GameData.ENDLESS_MILESTONES:
-		if endless_milestones.has(int(m["at"])) or t < int(m["at"]) or (m.get("sealed", false) and not r.won):
-			continue
-		endless_milestones.append(int(m["at"]))
-		coins += int(m["coins"])
-		crystals += int(m["crystals"])
-		var line := tr("%s: %s+%d essence") % [tr(str(m["name"])), tr("+%d gold, ") % int(m["coins"]) if int(m["coins"]) > 0 else "", int(m["crystals"])]
-		if m.has("relic"):
-			var rl := Combat.relic_from_unique(GameData.ENDLESS_RELICS[m["relic"]])
-			rl.equipped = Combat.equipped_relics().size() < relic_slot_cap()
-			relics.append(rl)
-			line += tr(", the relic %s") % tr(str(rl.name))
-		if m.has("title"):
-			line += tr(", the title \"%s\"") % tr(str(m["title"]))
-		got.append(line)
-	runs_finished += 1
-	pass_time()
-	run_history.push_front({"day": day, "kind": "Endless Rift", "result": "Sealed" if r.won else "Survived", "floor": "", "time": t, "kills": r.kills,
-		"heroes": names, "boons": [], "coins": int(pay["coins"]), "crystals": int(pay["crystals"])})
-	if run_history.size() > GameData.RUN_HISTORY_MAX:
-		run_history.resize(GameData.RUN_HISTORY_MAX)
-	save()
-	state_changed.emit()
-	return {"coins": int(pay["coins"]), "crystals": int(pay["crystals"]), "freed": freed, "loot": loot_names, "best": best, "milestones": got}
-
-
 ## Frees a lost champion (from a pillar in the Descent or a ladder rift, or
 ## the Endless Rift's light): the post they held empties, and a story card.
 ## Returns their full name, or "" if there was no one to free.
@@ -1558,17 +1502,6 @@ func _add_pillar() -> void:
 		return
 	var opts: Array = layers[1 + randi() % (layers.size() - 2)]["options"]
 	opts[randi() % opts.size()] = "pillar"
-
-
-## The guild's Endless Rift title (the last milestone title earned), or "".
-func endless_title() -> String:
-	var t := ""
-	if not GameData.ENDLESS_ENABLED:
-		return t
-	for m in GameData.ENDLESS_MILESTONES:
-		if m.has("title") and endless_milestones.has(int(m["at"])):
-			t = str(m["title"])
-	return t
 
 
 # ---------------- Downed mid-rift ----------------

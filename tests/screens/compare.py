@@ -4,15 +4,15 @@
   python tests/screens/compare.py <captured_dir> --accept   make the captures the new approved images
 
 A screen fails when more than THRESHOLD of its pixels changed visibly (any
-channel off by more than 40). Animated screens (the Endless Rift, Riftbreak,
-a fight) get a looser limit, since sprites move. Writes diff.png next to the
+channel off by more than 40). Animated screens (a fight,
+the title) get a looser limit, since sprites move. Writes diff.png next to the
 captures: approved | captured | changed pixels in red, for every failure.
 Exit code 1 when anything failed."""
 import os, shutil, sys
 from PIL import Image, ImageChops
 
 THRESHOLD = 0.015
-LOOSE = {"endless": 0.12, "riftbreak": 0.12, "fight": 0.06, "title": 0.04}
+LOOSE = {"fight": 0.06, "title": 0.04}
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 

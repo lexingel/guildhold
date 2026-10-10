@@ -92,7 +92,7 @@ func run() -> void:
 	GameState.coins = 1000
 	var e0 := GameState.crystals
 	check(GameState.upgrade_node("def.armory") == "" and GameState.coins == 1000 - 50 and GameState.crystals == e0, "Defenses research costs Gold")
-	check((GameState.defense_opts()["towers"] as Array).has("frost"), "Armory Lv1 opens the Frost Totem")
+	check(float(GameState.breach_foe_mult()[0]) < 1.0, "Armory Lv1 softens breach foes")
 	GameState.upgrades["ops.barracks"] = 3
 	GameState.damaged["ops.barracks"] = 1
 	GameState.coins = 1000

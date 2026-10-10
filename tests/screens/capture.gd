@@ -76,17 +76,6 @@ func _ready() -> void:
 	await _shot("fight")
 	GameState.run = {}
 
-	main.visible = false
-	var sv := SurvivorsView.new()
-	sv.setup(GameState.heroes.slice(0, 3), "vale")
-	add_child(sv)
-	await _shot("endless")
-	sv.queue_free()
-	var dv := DefenseView.new()
-	dv.setup("vale", 0, GameState.heroes.slice(0, 3), null, GameState.defense_opts())
-	add_child(dv)
-	await _shot("riftbreak")
-	dv.queue_free()
 
 	GameState.reduce_motion = reduce
 	GameState.delete_slot(7)

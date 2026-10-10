@@ -231,7 +231,6 @@ func milestone_progress(m: Dictionary) -> int:
 		"campaign_act": return campaign_act
 		"flawless_rifts": return int(quest_tally.get("flawless_rifts", 0))
 		"tower_best": return tower_best
-		"endless_time": return best_endless_time
 		"daily_clears": return daily_clears
 		"daily_streak": return daily_streak
 		"boon_set4": return 1 if boon_set4_reached else 0
@@ -1074,19 +1073,18 @@ func _end_contest() -> void:
 
 
 ## The Guild Standings, best Renown first: your guild, the rival, and three
-## more guilds whose Renown, Tower floor and Endless time grow each day
-## (deterministic, so they don't jump around between looks).
-## [{name, renown, tower, endless, you}].
+## more guilds whose Renown and Tower floor grow each day (deterministic, so
+## they don't jump around between looks). [{name, renown, tower, you}].
 func guild_standings() -> Array:
-	var rows: Array = [{"name": guild_name, "renown": reputation, "tower": tower_best, "endless": best_endless_time, "you": true},
-		{"name": rival_name, "renown": rival_renown, "tower": mini(100, int(day * 0.55)), "endless": mini(1500, day * 11), "you": false}]
+	var rows: Array = [{"name": guild_name, "renown": reputation, "tower": tower_best, "you": true},
+		{"name": rival_name, "renown": rival_renown, "tower": mini(100, int(day * 0.55)), "you": false}]
 	var others: Array = GameData.RIVAL_NAMES.filter(func(n): return n != rival_name).slice(0, GameData.STANDING_STRENGTH.size())
 	for k in others.size():
 		var st: float = GameData.STANDING_STRENGTH[k]
 		var rng := RandomNumberGenerator.new()
 		rng.seed = hash(["standings", others[k]])
 		var pace := st * (0.8 + 0.4 * rng.randf())
-		rows.append({"name": others[k], "renown": int(day * 0.9 * pace), "tower": mini(100, int(day * 0.5 * pace)), "endless": mini(1500, int(day * 10.0 * pace)), "you": false})
+		rows.append({"name": others[k], "renown": int(day * 0.9 * pace), "tower": mini(100, int(day * 0.5 * pace)), "you": false})
 	rows.sort_custom(func(a, b): return int(a["renown"]) > int(b["renown"]) or (int(a["renown"]) == int(b["renown"]) and a["you"]))
 	return rows
 

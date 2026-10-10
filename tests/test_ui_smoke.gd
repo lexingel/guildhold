@@ -2,12 +2,12 @@ extends "res://tests/base_test.gd"
 ## Draws every screen once, headless, so a script error in UI code fails the
 ## suite (the runner and CI fail on any SCRIPT ERROR): each camp tab and
 ## sub-tab, the Rift Hall and party screen, settings and the title with
-## Feedback open, a ranked fight (More, the Guard picker, the victory
-## screen), and an Endless Rift (level-up, chest and result panels).
+## Feedback open, and a ranked fight (More, the Guard picker, the victory
+## screen).
 
 
-## Waits on physics frames: the Endless Rift view shows its panels there,
-## and a headless process frame can outrun the fixed physics tick.
+## Waits on physics frames: a headless process frame can outrun the fixed
+## physics tick.
 func _frames(n: int = 3) -> void:
 	for i in n:
 		await get_tree().physics_frame
@@ -82,18 +82,13 @@ func run() -> void:
 	var built: Node = main.root.get_child(main.root.get_child_count() - 1)
 	await _frames()
 	check(is_instance_valid(built) and not built.is_queued_for_deletion(), "a state change plus a direct redraw rebuilds the screen once")
-	# The Endless Rift's gate: the Descent and the real-time run, or (0.63,
-	# Endless parked) straight down the Descent.
+	# The small gate leads straight down the Descent.
 	await _show(main, "rift_hall")
-	var gate: Array = main.find_children("*", "Button", true, false).filter(func(b): return b.tooltip_text == ("Endless Rift" if GameData.ENDLESS_ENABLED else "The Descent"))
+	var gate: Array = main.find_children("*", "Button", true, false).filter(func(b): return b.tooltip_text == "The Descent")
 	if not gate.is_empty():
 		gate[0].pressed.emit()
 		await _frames()
-	if GameData.ENDLESS_ENABLED:
-		var picks: Array = main.root.find_children("*", "Label", true, false).filter(func(l): return l.text == "The Descent")
-		check(not gate.is_empty() and not picks.is_empty(), "the Endless Rift's gate offers the Descent and the real-time run")
-	else:
-		check(not gate.is_empty() and main.screen == "party_assembly" and main._pending_descent, "the small gate leads down the Descent")
+	check(not gate.is_empty() and main.screen == "party_assembly" and main._pending_descent, "the small gate leads down the Descent")
 	await _show(main, "camp", "camp")
 
 	# Past guilds' banners: the newest six hang in camp; a click opens the Hall of Guilds.
@@ -130,10 +125,8 @@ func run() -> void:
 		await _show(main, scr)
 		drawn += 1
 	main._feedback_open = false
-	main._pending_endless = true
 	main.pending_party.assign(ids)
 	await _show(main, "party_assembly")
-	main._pending_endless = false
 	check(drawn >= 19, "every camp tab and front-end screen draws (%d)" % drawn)
 	main.screen = "rift_hall"
 	main._open_settings()
@@ -213,48 +206,12 @@ func run() -> void:
 	GameState.retreat_now()
 	await _show(main, "camp", "camp")
 
-	# Main switches itself off while the Endless Rift runs: a screen
-	# transition caught mid-fade must still clear, not freeze over the run.
+	# A screen transition caught mid-fade clears even with Main switched off.
 	main._play_transition(false)
 	main.process_mode = Node.PROCESS_MODE_DISABLED
 	await get_tree().create_timer(0.8).timeout
 	check(not main._veil.visible, "a transition clears even while the camp UI is switched off")
 	main.process_mode = Node.PROCESS_MODE_INHERIT
-
-	# The Endless Rift: a level-up, a chest, and the sealed result.
-	var v := SurvivorsView.new()
-	v.setup(party, "ashen")
-	add_child(v)
-	await _frames()
-	var r: SurvivorsRun = v.run
-	while r.time < 130.0 and not r.over:
-		r.step(0.1, r.autopilot_dir())
-		r.settle_picks()
-	# The camera can't be knocked off to NaN (that greyed out the whole field),
-	# banners wait their turn, and the ground around the party gets clutter.
-	v._cam.position = Vector2(NAN, NAN)
-	v._sync()
-	check(is_finite(v._cam.position.x) and is_finite(v._cam.position.y), "a NaN camera snaps back to the party")
-	var shown_before := v._banner_queue.size()
-	v._banner("One", Color.WHITE)
-	v._banner("Two", Color.WHITE, "a line under it")
-	check(v._banner_busy and v._banner_queue.size() >= shown_before + 1, "a second banner waits for the first")
-	check(v._decals.size() == 15, "ground clutter covers the chunks around the party (%d)" % v._decals.size())
-	r.pending_levels = 1
-	await _frames(3)
-	check(v._panel != null, "a level-up shows its picks")
-	v._close_panel()
-	r.pending_levels = 0
-	r.pending_chests = 1
-	await _frames(3)
-	check(v._panel != null, "a chest shows its relics")
-	v._close_panel()
-	r.pending_chests = 0
-	r.won = true
-	r.over = true
-	await _frames(3)
-	check(v._panel != null and not v._summary.is_empty(), "the sealed-rift result draws")
-	v.queue_free()
 
 	# The opening cinematic: skipped early it leaves the prologue card to tell
 	# the story; watched to the end it stands in for it.

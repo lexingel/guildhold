@@ -485,7 +485,7 @@ func _guild_goals() -> Array:
 	var go_screen := func(s: String): return func(): screen = s; render()
 	var act := GameState.current_act()
 	if act.is_empty():
-		out.append(["Story", tr("The campaign is done: push the Endless Rift and the ladder to SSS"), Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
+		out.append(["Story", tr("The campaign is done: push the Descent and the ladder to SSS"), Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
 	elif GameState.finale_ready():
 		out.append(["Story", tr("Face the finale: %s") % tr(str(act["finale"])), Palette.EMBER_BRIGHT, go_screen.call("rift_hall")])
 	else:
@@ -506,7 +506,7 @@ func _guild_goals() -> Array:
 		out.append(["Grow", tr("Seal a Rank %s rift: better gear, more Essence") % tr(GameState.highest_open_rank()), Palette.TEXT, go_screen.call("rift_hall")])
 	# Optional: a lost champion, else a contract, else the Tower.
 	if GameState.feature_unlocked("champions") and GameState.next_lost_champion() != "":
-		out.append(["Optional", tr("Find a lost champion in the Endless Rift"), Palette.MUTED, go_screen.call("rift_hall")])
+		out.append(["Optional", tr("Find a lost champion in the Descent or a Rank B+ rift"), Palette.MUTED, go_screen.call("rift_hall")])
 	elif GameState.feature_unlocked("quests") and GameState.guild_board.any(func(q): return str(q["status"]) == "posted"):
 		out.append(["Optional", tr("Take a contract from the Quest board"), Palette.MUTED, go_term.call("quests")])
 	elif GameState.feature_unlocked("tower") and GameState.tower_next_floor() > 0:
@@ -654,8 +654,6 @@ func _render_stats(v: VBoxContainer) -> void:
 		["Strongest hero", best_hero if best_hero != "" else "—"],
 		["Most-defeated foe", "%s (%d)" % [tr(str(top_foe)), top_n] if top_foe != "" else "—"],
 	]
-	if GameData.ENDLESS_ENABLED:
-		rows.append(["Endless Rift, best time", "%d:%02d" % [GameState.best_endless_time / 60, GameState.best_endless_time % 60]])
 	# Tiles, the number big and the name under it (it was a 2-column wall).
 	var grid := GridContainer.new()
 	grid.columns = 2 if _narrow() else 4
@@ -1160,17 +1158,17 @@ func _rival_card() -> PanelContainer:
 	rv.add_child(_hsep())
 	rv.add_child(_label("Guild Standings", 14))
 	var table := GridContainer.new()
-	table.columns = 5 if GameData.ENDLESS_ENABLED else 4
+	table.columns = 4
 	table.add_theme_constant_override("h_separation", 18)
 	table.add_theme_constant_override("v_separation", 4)
-	for head in (["", "Guild", "Renown", "Tower floor", "Endless best"] if GameData.ENDLESS_ENABLED else ["", "Guild", "Renown", "Tower floor"]):
+	for head in ["", "Guild", "Renown", "Tower floor"]:
 		table.add_child(_label(head, 12, true))
 	var rows: Array = GameState.guild_standings()
 	for k in rows.size():
 		var r: Dictionary = rows[k]
 		var col: Color = Palette.EMBER_BRIGHT if r["you"] else Palette.TEXT
 		for cell in ["#%d" % (k + 1), tr(str(r["name"])) + (tr(" (you)") if r["you"] else (tr(" — rival") if r["name"] == GameState.rival_name else "")),
-				str(r["renown"]), str(r["tower"]), "%d:%02d" % [int(r["endless"]) / 60, int(r["endless"]) % 60]].slice(0, 5 if GameData.ENDLESS_ENABLED else 4):
+				str(r["renown"]), str(r["tower"])]:
 			var l := _label(cell, 13)
 			l.add_theme_color_override("font_color", col)
 			table.add_child(l)
@@ -1310,7 +1308,7 @@ func _champion_card(id: String) -> PanelContainer:
 		else:
 			for e in GameState.lost_champions():
 				if str(e[0]) == id:
-					hint = tr("Lost in the Endless Rift: survive past %d:%02d to find their light.") % [int(e[1]) / 60, int(e[1]) % 60] if GameData.ENDLESS_ENABLED else tr("Lost in the Endless Rift: their light waits in a pillar of the Descent, or of a Rank B+ rift.")
+					hint = tr("Lost in the Endless Rift: their light waits in a pillar of the Descent, or of a Rank B+ rift.")
 		col.add_child(_wrap_label(hint, 12, true))
 		row.add_child(col)
 		card.add_child(row)
@@ -1350,7 +1348,7 @@ func _champion_card(id: String) -> PanelContainer:
 				_payoff(tr("%s reaches level %d") % [GameData.champion_full_name(i), GameState.champion_level(i)], tr("Boon and Call grow stronger"), Palette.CRYSTALS, "level_up")
 		)
 		up.disabled = GameState.crystals < cost
-		up.tooltip_text = (tr("Each level: Boon and Call +%d%%, and +%d%% HP and damage in the Endless Rift. At level %d the Call works twice a rift.") % [int(GameData.CHAMPION_LEVEL_POWER * 100), int(GameData.CHAMPION_LEVEL_STATS * 100), GameData.CHAMPION_EXTRA_CALL_LEVEL] if GameData.ENDLESS_ENABLED else tr("Each level: Boon and Call +%d%%. At level %d the Call works twice a rift.") % [int(GameData.CHAMPION_LEVEL_POWER * 100), GameData.CHAMPION_EXTRA_CALL_LEVEL])
+		up.tooltip_text = tr("Each level: Boon and Call +%d%%. At level %d the Call works twice a rift.") % [int(GameData.CHAMPION_LEVEL_POWER * 100), GameData.CHAMPION_EXTRA_CALL_LEVEL]
 		btns.add_child(up)
 	col.add_child(btns)
 	row.add_child(col)
@@ -1359,13 +1357,13 @@ func _champion_card(id: String) -> PanelContainer:
 
 
 func _render_champions(v: VBoxContainer) -> void:
-	_coach(v, "champions", "Champions", "Champions are freed by the story and rescued in the Endless Rift. One oversees your rift runs: the whole party gets their Boon, and any hero can spend a turn on their Call. In the Endless Rift your champions are the party. Spend Essence here to level them up.")
+	_coach(v, "champions", "Champions", "Champions are freed by the story and rescued from pillars of light in the Descent and Rank B+ rifts. One oversees your rift runs: the whole party gets their Boon, and any hero can spend a turn on their Call. Spend Essence here to level them up.")
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 14)
 	head.add_child(_label("Champions", 20))
 	var ech := _label(tr("Essence: %d") % GameState.crystals, 15)
 	ech.add_theme_color_override("font_color", Palette.CRYSTALS)
-	ech.tooltip_text = tr("Spend it to level up champions. The Endless Rift pays the most.")
+	ech.tooltip_text = tr("Spend it to level up champions.")
 	ech.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	head.add_child(ech)
 	v.add_child(head)
@@ -2250,7 +2248,7 @@ func _render_chronicle(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 	v.add_child(_label(tr("What the champions remember — %d/%d freed") % [freed.size(), GameState.champion_roll.size()], 16))
 	if freed.is_empty():
-		v.add_child(_wrap_label("Each act's finale frees a champion of the old guilds; more wait in the Endless Rift.", 12, true))
+		v.add_child(_wrap_label("Each act's finale frees a champion of the old guilds; more wait in pillars of light in the Descent and Rank B+ rifts.", 12, true))
 	for id in freed:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
@@ -2291,8 +2289,6 @@ func _render_compendium_relics(v: VBoxContainer) -> void:
 		legends.append([u, "An act's finale, an elite, a rift shop or an event"])
 	for f in GameData.TOWER_RELICS:
 		legends.append([GameData.TOWER_RELICS[f], tr("Tower of Trials, floor %d guardian") % int(f)])
-	for k in (GameData.ENDLESS_RELICS if GameData.ENDLESS_ENABLED else {}):
-		legends.append([GameData.ENDLESS_RELICS[k], "An Endless Rift milestone"])
 	var found_n: int = legends.filter(func(e): return GameState.relics_found.has(str(e[0]["id"]))).size()
 	v.add_child(_hsep())
 	v.add_child(_label(tr("Legendaries — %d/%d found") % [found_n, legends.size()], 16))
@@ -2375,9 +2371,6 @@ func _render_compendium_systems(v: VBoxContainer) -> void:
 	var entries := [
 		["The Accord Hall", "Your camp was an Accord hall once. Its 13 rooms are rebuilt with Gold, a few at a time as the guild grows: Operations after two seals, Infrastructure, Logistics and Wardcraft in Act II, Research in Act III. Every level adds its effect and a little upkeep; some levels unlock a perk (a first-strike bonus, a boss Essence cache, extra relic slots…). Guild Tier, and the hall's art, track total levels. At the end of Acts I, III and V you are offered two of the six wings and build one, 3 of 6 per guild. A room damaged by a breach works a level lower until you repair it with Gold."],
 		["Daily twist", "From Act III, the Rift Ladder offers a twist each day: a rule and a starting boon that come from the date, so every guild faces the same one. Tick it and your next ladder rift (any rank) carries it; one try a day. Sealing it pays bonus Essence and grows your streak. Records (Guild > Records) track achievements, lifetime statistics and your last 30 runs; the Memorial remembers heroes lost for good."],
-		[] if not GameData.ENDLESS_ENABLED else ["Endless Rift", "A real-time survival run in the region you pick, and only champions go in (up to 4). You steer the first (WASD, arrows, drag or stick); the rest follow and fight on their own, and each fires their signature move on a timer (the ring over their head fills as it recharges). Your equipped relics come along. Every five minutes the rift runs the same cycle: the horde, a swarm, an elite pack (its leader carries a chest), archers and casters, then a lull with a chest nearby, and a warden at the end of it. At 20:00 the Rift Warden comes: beat it to seal the rift. The rift's strength (shown before you enter) starts gentle and grows with every champion you free and every act you pass. A run pays Essence and a little Gold, and costs the guild a day."],
-		[] if not GameData.ENDLESS_ENABLED else ["Endless picks", "Collect shards to level up and pick 1 of 3; one card is always a signature pick while any are left. Party upgrades (damage, speed, health…), a champion's role skill, a rank in their signature (up to 3: sooner and harder), or one of their two signature mods once it has a rank (Aftershock, Kindled, Frostbite, Expose, Stagger, Leech, Shrapnel, Radiance, Bulwark, Fervor, Renewal, Smokescreen). From level 10, two champions whose signatures are rank 2 can fuse: they fire together, 25% harder, and carry each other's mods. Max an upgrade and the matching role's attack can evolve (Whirlwind, Thousand Cuts, Arrow Storm, Starfall, Sanctum). Chests give one of three rift relics for the run."],
-		[] if not GameData.ENDLESS_ENABLED else ["Endless ground", "The Vale has pillars that block foes, the Marches have pools that slow everyone, the Wastes have lava that burns foes and your lead. Braziers break when you walk into or hit them, dropping a heal, a magnet for shards or a bomb. Elites and wardens slam: step out of the red circle before it fills. Your first 5, 10 and 15 minutes and your first sealed rift each pay once, with two Endless relics and guild titles."],
 		["Hero voices", "A hero's born quirk sets their personality (Bold, Quick, Stoic, Nervous, Devout or Scholarly), shown on their sheet. They speak up in fights when they land a big kill, hang on at low health or see an ally fall, and one of them sums up every win."],
 		["Boss phases", "Every boss changes once it drops to half health: Call the Horde (two foes join), Fury (hits 20% harder and winds up more often) or Last Bastion (a ward worth 12% of its health). Its plate shows which, and the warning bar calls it out as it gets close, so save burst and Defend for the turn."],
 		["Elite affixes", "Elites roll an affix: Vampiric, Thorned, Shielded, Venomous, Juggernaut, Blazing, Hasted (acts twice) or Commander (brings two escorts). Rank B+ rifts give them two. Hover the badges on their plate to read them."],
@@ -2395,11 +2388,10 @@ func _render_compendium_systems(v: VBoxContainer) -> void:
 		["Bestiary", "Every monster, boss, and hazard you've encountered is tracked as a silhouette-to-full-color reveal — pure record-keeping, no reward tied to completion."],
 		["Tower of Trials", "Opens with Act IV, in the Rift Hall. 100 fixed floors, one fight each: a floor is always the same fight, so a loss is something to plan around. Heroes fight at full HP and leave as they came (no downing, scars or days passing). Most floors carry a rule (armored or burning foes, a swarm, a party cap). Every 10th floor is a guardian that gives a unique relic, and floors 10/25/50/75/100 earn guild titles. Only a first clear pays; floors 91-100 reshuffle their rules every week and pay half for a re-clear."],
 		["Foes & regions", "Each rift is in a region (the Vale, the Marshes, the Ashen Wastes) with its own foes. Some foes wind up a heavy blow a turn ahead (x2.5, stuns unless the target Defends); armored foes shrug off part of every basic attack (each hit chips the armor; abilities ignore it); fire foes can burn and frost foes can chill (act late). A Field Tonic cleanses burn, chill, poison and stun."],
-		["Campaign", "Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Endless Rift." if GameData.ENDLESS_ENABLED else "Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Descent."],
+		["Campaign", "Six acts, each ending in a finale rift against a named foe. Meet an act's objectives (shown in the Rift Hall) to open its finale; sealing it pays a reward and a unique relic. Act I opens Greater Rifts, Act II the Descent."],
 		["Relics", "Relics bend rules: each is one of a kind, found from Act I's finale on (finales, elites, shops, events and the Tower's guardians), and sits on the Relic Altar for the whole guild. Stats live on gear. A sealed Rank D+ rift offers a Path relic instead, carried by a hero of that Path (one each) and passed between them at camp; it works while they fight. Declining one pays the seal's Essence."],
 		["Quirks", "Everything personal about a hero beyond class, skills and gear: at most one born quirk (it sets their voice), up to 2 scars from falling in a Rank C+ rift or a perilous expedition (a lasting mark with a small upside), and quirks earned by what they've done. Bad born quirks and scars can be treated for Gold at the Arcane Lab."],
 		["Breaches", "From Act II a rift swells every so often: a rank, a place and a countdown in days (Rift Hall and the camp's status board). Seal a rift of that rank or higher before it runs out to close it, for a little Essence. Otherwise it breaks, and every rift run waits until your guild holds it: a breach rift of back-to-back fights (a fight, an elite and the breach's warden; the Inverted City's gate adds an elite) with no camp, shop or campfire between them. Ranks below S break out in a region; from S up they break at your camp. Holding pays Gold and Essence. Falling or turning back costs a share of your Essence and of the Gold beyond the coming payday's wages, and damages a building (two at the camp). The Accord Hall's Wardcraft rooms soften all of it."],
-		[] if not GameData.DEFENSE_TD_ENABLED else ["Defending", "Foes walk the roads toward the goal. Build towers on the round pads with supplies (you start with some and earn more for every kill); click a tower to upgrade or sell it. Ballistas shoot far, Fire Braziers splash and burn, Frost Totems slow, Ward Stones shield nearby heroes, Chapels mend them; research in the Defenses branch opens the last three and tier 3. Idle heroes stand at posts: warriors and rogues hold foes in place, rangers and mages shoot. Steer one champion by clicking where to go. Every foe that gets through costs integrity (an elite 3, a warden 10); at 0 the defense is lost. Call a wave early for bonus supplies."],
 		["Champions", "Each new guild meets twelve champions, drawn from a pool of twenty-four: three are freed at the end of Acts I, II and III, and nine are lost, each held in a pillar of light (in the Descent, and in ladder rifts from Rank B; reach one to free them). A champion never joins the roster. In rift runs one oversees the party: their Boon lifts everyone, and any hero can spend a turn on their Call (once a rift, twice from level 3). Essence levels them up (to 5)."],
 		["Attributes", "Might (damage, HP), Agility (speed, dodge, first strike) and Focus (ability power, mend). Heroes gain 3 points per level to spend on the Roster's Hero tab; gear adds more, and better gear needs a minimum in its attribute to equip. Train up to 8 extra points at the Training Yard, or reset a hero's points for 5 Essence per level (gear they no longer qualify for comes off)."],
 		["Quests & Milestones", "The quest board posts 6 quests (hunts, boss bounties, rift seals, trials); take up to 3 at a time. Unaccepted postings are replaced every 3 days (a day passes with each rift run or rest). Milestones are a static checklist, auto-granted the moment they're met. A rare escort NPC can also tag along on a fight — surviving pays a small bonus."],

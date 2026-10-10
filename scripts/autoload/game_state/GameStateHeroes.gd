@@ -421,13 +421,6 @@ func story_champion(act: int) -> String:
 	return champion_roll[act - 1] if act >= 1 and act <= mini(GameData.CHAMPION_STORY_ACTS, champion_roll.size()) else ""
 
 
-## How strong the Endless Rift's foes are for this guild (see THREAT_BASE).
-func endless_threat() -> float:
-	var freed := lost_champions().filter(func(e): return champion_unlocked(str(e[0]))).size()
-	var acts_after := maxi(0, campaign_act - 3)   # the rift opens once Act II is done
-	return minf(GameData.THREAT_MAX, GameData.THREAT_BASE + GameData.THREAT_PER_RESCUE * freed + GameData.THREAT_PER_ACT * acts_after)
-
-
 ## [[id, depth seconds], ...]: this guild's champions lost in the Endless Rift.
 func lost_champions() -> Array:
 	var out: Array = []
@@ -534,46 +527,6 @@ func champion_calls_left() -> int:
 func champion_call_ready(_h: Hero = null) -> bool:
 	return not run.is_empty() and champion_calls_left() > 0
 
-
-## A champion as a fighter for the Endless Rift: rank CHAMPION_RANK, as
-## experienced as the guild's best hero, stronger with their own level.
-func champion_hero(id: String) -> Hero:
-	var d := GameData.champion_def(id)
-	var role := str(d.get("role", "warrior"))
-	var template: Dictionary = {}
-	for c in GameData.CLASS_POOL:
-		if str(c["role"]) == role and str(c["rank"]) == GameData.CHAMPION_RANK:
-			template = c
-			break
-	if template.is_empty():
-		template = GameData.CLASS_POOL.filter(func(c): return str(c["role"]) == role)[0]
-	var rank := GameData.find_rank(GameData.CHAMPION_RANK)
-	var h := Hero.new()
-	h.id = "champ:" + id
-	h.name = str(d.get("name", id))
-	h.is_champion = true
-	h.cls_id = role
-	h.pool_id = "champ_" + id
-	h.rank = GameData.CHAMPION_RANK
-	h.type = str(template.get("type", ""))
-	var boon: Dictionary = d.get("boon", {})
-	h.innate_kind = str(boon.get("kind", template.get("kind", "dmg_pct")))
-	h.innate_value = Combat.innate_value_for(template, GameData.rank_index(GameData.CHAMPION_RANK))
-	h.flavor = str(d.get("lore", ""))
-	var lv := 1
-	for o in heroes:
-		lv = maxi(lv, o.level)
-	h.level = lv
-	var grow := pow(1.0 + GameData.LEVEL_GROWTH, lv - 1) * (1.0 + GameData.CHAMPION_LEVEL_STATS * (maxi(1, champion_level(id)) - 1))
-	h.base_hp = int(round(30.0 * float(template["hp_ratio"]) * float(rank["mult"]) * grow))
-	h.base_dmg = int(round(8.0 * float(template["dmg_ratio"]) * float(rank["mult"]) * grow))
-	h.base_spd = int(round(float(GameData.find_role(role)["base_spd"]) * float(rank["mult"])))
-	h.formation = str(GameData.ROLE_POSITION.get(role, {}).get("row", "front"))
-	h.attrs = GameData.role_attrs(role)
-	h.attr_points = (lv - 1) * GameData.ATTR_POINTS_PER_LEVEL
-	Combat.auto_spend_attrs(h)
-	h.hp = Combat.max_hp(h)
-	return h
 
 func current_party() -> Array[Hero]:
 	var out: Array[Hero] = []

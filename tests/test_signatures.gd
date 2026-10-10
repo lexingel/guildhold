@@ -71,8 +71,8 @@ func run() -> void:
 	check(counts.values().max() <= 4, "no effect is shared by more than 4 subclasses")
 	for e in GameData.ABILITY_AWAKENING_BUCKET.keys():
 		pass
-	var missing: Array = effects.keys().filter(func(e): return not GameData.ABILITY_AWAKENING_BUCKET.has(e) or not GameData.ABILITY_EFFECT_ICON.has(e) or not SurvivorsRun.ABILITY_STYLE.has(e) and not e in ["mend_burst", "monster_dmg_mult", "debuff_lowest", "burst_lowest", "execute_burst", "self_sac_burst", "hp_drain_burst", "cleave_burst", "execute_all_low", "shield_lowest", "team_shield_burst", "mend_shield_hybrid"])
-	check(missing.is_empty(), "every effect has an awakening bucket, an icon and an Endless style %s" % [missing])
+	var missing: Array = effects.keys().filter(func(e): return not GameData.ABILITY_AWAKENING_BUCKET.has(e) or not GameData.ABILITY_EFFECT_ICON.has(e))
+	check(missing.is_empty(), "every effect has an awakening bucket and an icon %s" % [missing])
 	var quiet: Array = []
 	for pool in GameData.SUBCLASS_ABILITIES:
 		GameState.heroes.clear()

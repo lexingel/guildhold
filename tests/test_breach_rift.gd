@@ -22,7 +22,6 @@ func run() -> void:
 		ids.append(h.id)
 	GameState.coins = 5000
 	GameState.crystals = 500
-	check(not GameData.DEFENSE_TD_ENABLED, "the tower defense is parked")
 
 	# A broken Rank D breach: the party screen holds it.
 	GameState.breach = {"rank": 2, "region": "marsh", "started": GameState.day, "breaks_on": GameState.day, "broken": true}

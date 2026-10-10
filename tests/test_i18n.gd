@@ -18,7 +18,7 @@ func run() -> void:
 	TranslationServer.set_locale("tr")
 	check(tr("New Game") == "Yeni Oyun", "Turkish loads: New Game → %s" % tr("New Game"))
 	check(tr("Victory!") == "Zafer!", "and switches with the locale")
-	check((tr("%d kills") % 5) == "5 öldürme", "formatted lines translate before the numbers go in")
+	check((tr("%d wounded") % 5) == "5 yaralı", "formatted lines translate before the numbers go in")
 	var kw := func(text: String) -> Array:
 		var hits := []
 		for k in GameData.keyword_regexes():

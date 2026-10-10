@@ -235,7 +235,7 @@ const PATH_RELICS := [
 	 "desc": "Scrappy's patch-up works in the back row too."},
 ]
 
-## Relics only the Endless Rift gives (its milestones, see ENDLESS_MILESTONES).
+## Relics the real-time Endless Rift gave (until 0.63); kept for the guilds that hold them.
 const ENDLESS_RELICS := {
 	"e_warden_shard": {"id": "e_warden_shard", "name": "Warden's Shard", "type": "Arcane", "trigger": {"trigger": "on_kill", "effect": "mend_party", "value": 0.06},
 		"desc": "Every kill mends the party 6%."},

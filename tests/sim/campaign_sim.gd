@@ -18,9 +18,8 @@ extends Node
 ##   ... -- charter=expose|quiet  the Charter War's turn (default: never
 ##                                answered, as before 0.32.0); echoes are
 ##                                given back or kept 50/50, the Accord renewed
-## The Endless Rift: when the act still asks for a freed champion (Act IV),
-## every other day goes to an Endless run with the guild's champions on
-## autopilot, finished through GameState.finish_survivors like a player's.
+## When the act still asks for a freed champion (Act IV), every other day
+## goes to a Descent with the strongest party.
 ## Profiles: "investor" spends like a player who reads the tooltips (quests,
 ## skills, upgrades, training, recruits, champion levels); "casual" takes
 ## quests, spends skill and attribute points, equips gear and hires up to 6,
@@ -44,7 +43,6 @@ var founding := "free"   # the founding charter (founding=mercenary, ...)
 var oaths: Array = []    # oaths sworn (oaths=by_hand,lean_purse)
 var ending := "renew"    # the Accord's ending (ending=break: the Open Hollow's tides)
 var gifts: Array = []    # founding gifts (gifts=veteran,contacts), Laurels free
-var endless_mode := "descent"   # how the sim frees champions: descent (turn-based) or survivors
 var year := ""           # "The Vale this year": year=dry,restless or year=random
 var spire := ""          # the Spire's fall: spire=archive or spire=hollin ("" = either, at random)
 var hand_bonus := 0      # fights that paid the flawless-by-hand bonus
@@ -132,8 +130,6 @@ func _ready() -> void:
 			GameData.TIDE_GROWTH = float(a.substr(12))
 		elif a.begins_with("year="):
 			year = a.substr(5)
-		elif a.begins_with("endless="):
-			endless_mode = a.substr(8)
 		elif a.begins_with("gifts="):
 			gifts = Array(a.substr(6).split(","))
 		elif a.begins_with("ending="):
@@ -356,15 +352,6 @@ func _guild(p: String, s: int) -> void:
 			("halls %d/%d on days %s" % [hall_days.size(), GameData.ACCORD_HALLS.size(), hall_days]) if GameState.accord_ending == "renew" else
 			("tides held %d of %d, lost: %s, %d tidewalls" % [tides.size() - lost.size(), tides.size(), lost.map(func(t): return t[0]), GameState.tidewalls]),
 			GameState.coins, GameState.crystals, GameState.champions.size(), GameState.champion_roll.size()])
-		if GameState.accord_ending == "break":
-			# How strong a tide this guild could hold now (the next tide's defenders).
-			var probe: Array = []
-			for m in [1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0]:
-				var opts := GameState.defense_opts()
-				opts["foe_mult"] = m / GameState.tidewall_factor()
-				var r := DefenseRun.new("camp", GameData.rift_rank_index(GameData.TIDE_RANK), GameState.defense_candidates().slice(0, 2), null, 7, opts)
-				probe.append("x%.1f %s" % [m, "held" if _run_defense(r) else "lost"])
-			print("     tide probe at day %d: %s" % [GameState.day, ", ".join(probe)])
 
 
 var ambush := [0, 0]     # Company Ambush fights [won, lost]
@@ -409,10 +396,7 @@ func _day(p: String) -> void:
 		_defend()
 		return
 	if GameState.day % 2 == 0 and _endless_due():
-		if endless_mode == "survivors":
-			_endless()
-		else:
-			_descent()
+		_descent()
 		return
 	var party := _pick_party()
 	if party.is_empty():
@@ -998,26 +982,6 @@ func _endless_due() -> bool:
 	return (act["objectives"] as Array).any(func(o): return str(o["type"]) == "posts_freed" and not GameState.campaign_objective_met(o))
 
 
-## One Endless run: up to four champions, autopilot, the strongest pick each
-## level-up, until it ends or 25 minutes in.
-func _endless() -> void:
-	var party: Array = []
-	for id in GameState.champion_roll:
-		if GameState.champion_unlocked(str(id)) and party.size() < 4:
-			party.append(GameState.champion_hero(str(id)))
-	var r := SurvivorsRun.new(party, GameState.pick_biome())
-	r.lost = GameState.lost_champions().filter(func(e): return not GameState.champion_unlocked(str(e[0])))
-	r.threat = GameState.endless_threat()
-	while not r.over and r.time < 1500.0:
-		r.step(0.2, r.autopilot_dir())
-		r.events.clear()
-		r.settle_picks(_best_pick)
-	endless_runs += 1
-	if not r.rescued.is_empty() and freed_day < 0:
-		freed_day = GameState.day
-	GameState.finish_survivors(r)
-
-
 ## One Descent with the strongest party: deeper while the party holds up,
 ## out at a landing once a champion is freed, the party is hurt, or depth 5.
 func _descent() -> void:
@@ -1036,55 +1000,20 @@ func _descent() -> void:
 		print("     day %d Descent: %s" % [GameState.day, res])
 
 
-func _best_pick(o: Array) -> String:
-	if o.is_empty():
-		return ""
-	for pref in ["evolve:", "fuse:", "ability:", "mod:", "might", "vigor", "skill:", "haste", "area"]:
-		for id in o:
-			if str(id).begins_with(pref) and not (pref == "skill:" and str(id).split(":")[2] in ["heal", "sanctuary", "taunt", "smoke_bomb"]):
-				return str(id)
-	return str(o[randi() % o.size()])
-
-
+## A broken rift: a breach rift, played like any run.
 func _defend() -> void:
-	if not GameData.DEFENSE_TD_ENABLED:   # 0.63: a breach rift, played like any run
-		var tide0 := int(GameState.breach.get("tide", 0))
-		var gate0 := bool(GameState.breach.get("gate", false))
-		var party := _pick_party()
-		if party.is_empty():
-			GameState.rest_guild()
-			return
-		GameState.start_breach_rift(party)
-		var held := _play_run(GameState.breach_rank_id()) == "sealed"
-		if gate0:
-			gate_tries[0 if held else 1] += 1
-		if tide0 > 0:
-			tides.append([tide0, held])
+	var tide0 := int(GameState.breach.get("tide", 0))
+	var gate0 := bool(GameState.breach.get("gate", false))
+	var party := _pick_party()
+	if party.is_empty():
+		GameState.rest_guild()
 		return
-	var posted: Array = GameState.defense_candidates().slice(0, 2)
-	var r := DefenseRun.new(str(GameState.breach["region"]), int(GameState.breach["rank"]), posted, null, 7, GameState.defense_opts())
-	_run_defense(r)
-	var tide := int(GameState.breach.get("tide", 0))
-	var gate := bool(GameState.breach.get("gate", false))
-	var out := GameState.resolve_breach(r.result())
-	if gate:
-		gate_tries[0 if bool(out["held"]) else 1] += 1
-	if tide > 0:
-		tides.append([tide, bool(out["held"])])
-
-
-## Plays a defense on autoplay to the end; true if it held.
-func _run_defense(r: DefenseRun) -> bool:
-	for k in 6000:
-		if r.over:
-			break
-		if k % 25 == 0:
-			r.autoplay()
-			if r.build_t > 0.0 and r.wave > 0:
-				r.call_early()
-		r.step(0.1)
-		r.events.clear()
-	return bool(r.result().get("held", false))
+	GameState.start_breach_rift(party)
+	var held := _play_run(GameState.breach_rank_id()) == "sealed"
+	if gate0:
+		gate_tries[0 if held else 1] += 1
+	if tide0 > 0:
+		tides.append([tide0, held])
 
 
 func _party_hp() -> float:

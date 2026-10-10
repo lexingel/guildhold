@@ -304,27 +304,14 @@ const FEATS := {
 ## fight it before sealing it: a tester way above the content couldn't.
 const QUICK_FIGHT_FAVORED := 1.2
 
-## The Endless Rift pays once for each of these, the first time the guild
-## survives that long (any region); "sealed" means beating the Rift Warden.
-const ENDLESS_MILESTONES := [
-	{"at": 300, "name": "Five minutes in the rift", "coins": 150, "crystals": 30},
-	{"at": 600, "name": "Ten minutes in the rift", "coins": 250, "crystals": 50, "relic": "e_warden_shard"},
-	{"at": 900, "name": "Fifteen minutes in the rift", "coins": 400, "crystals": 80, "title": "Riftwalkers"},
-	{"at": 1200, "name": "The rift sealed", "coins": 0, "crystals": 120, "relic": "e_rift_heart", "title": "Rift Sealers", "sealed": true},
-]
-
 const TOWER_TITLES := [[10, "Tower Initiate"], [25, "Trial Climber"], [50, "Spire Walker"], [75, "Stormbreaker"], [100, "Summit Keeper"]]
 
-# Lesser and Greater Rift are the two selectable DIFFICULTIES tiers (the
-# Endless Rift is a survival mode, scripts/survivors).
+# Lesser and Greater Rift are the two selectable DIFFICULTIES tiers.
 const DIFFICULTIES := [
 	{"id": "lesser", "name": "Lesser Rift", "floors": 7, "monster_hp": 20, "monster_dmg": 2.6, "coin": [18, 34], "crystal": [5, 11], "seal_essence": 10, "cache_chance": 0.08, "power": "Low", "rec_power": 90},
 	# Unlocked by GameState.greater_rift_unlocked() (Act I complete).
 	{"id": "greater", "name": "Greater Rift", "floors": 8, "monster_hp": 80, "monster_dmg": 8.6, "coin": [40, 70], "crystal": [11, 20], "seal_essence": 18, "cache_chance": 0.14, "power": "Medium", "rec_power": 500},
 ]
-
-## The power the Rift Hall compares against for the Endless Rift (survivors).
-const ENDLESS_REC_POWER := 1000   # a party this strong lasts roughly 8-15 min (balance_sim -- calibrate)
 
 ## Recovery in rift runs rather than real time: a downed hero sits out this
 ## many runs (Medical upgrades shorten it, a bed takes one off), and a wounded
@@ -1077,15 +1064,8 @@ const QUEST_TYPE_LABEL := {
 ## Renown pace, Tower climb and Endless survival.
 const STANDING_STRENGTH := [0.7, 0.95, 1.2]
 
-## 0.63: the real-time Endless (scripts/survivors) is parked, not deleted:
-## the Endless Rift's gate leads into the Descent, and its achievement,
-## records and guide pages are hidden. True brings it all back.
-const ENDLESS_ENABLED := false
-
-
-## MILESTONES without the ones a parked mode can't reach.
 static func milestones() -> Array:
-	return MILESTONES if ENDLESS_ENABLED else MILESTONES.filter(func(m): return str(m["type"]) != "endless_time")
+	return MILESTONES
 
 
 const MILESTONES := [
@@ -1108,7 +1088,6 @@ const MILESTONES := [
 	{"id": "untouched", "label": "Untouched — seal 5 rifts with no one knocked out", "type": "flawless_rifts", "target": 5, "reward": {"crystals": 30}},
 	{"id": "climber", "label": "Climber — reach floor 25 of the Tower", "type": "tower_best", "target": 25, "reward": {"crystals": 30}},
 	{"id": "summit", "label": "Summit — clear floor 100 of the Tower", "type": "tower_best", "target": 100, "reward": {"crystals": 120}},
-	{"id": "endless_five", "label": "Beyond the Edge — survive 10 minutes in the Endless Rift", "type": "endless_time", "target": 600, "reward": {"crystals": 50}},
 	{"id": "daily_first", "label": "Daily Duty — seal a rift with the daily twist", "type": "daily_clears", "target": 1, "reward": {"crystals": 15}},
 	{"id": "daily_streak", "label": "Dedicated — seal the daily twist 7 days in a row", "type": "daily_streak", "target": 7, "reward": {"crystals": 65}},
 	{"id": "full_set", "label": "Build Complete — own a 4-piece boon set", "type": "boon_set4", "target": 1, "reward": {"crystals": 20}},

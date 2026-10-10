@@ -1335,7 +1335,7 @@ func _legacy_champion(src: Dictionary, post: bool, fixed_id: String = "", lore: 
 	if memory_line != "":
 		memory = memory_line
 	legacy["champions"][id] = {"name": first, "guild": guild_name, "role": role, "post": post, "at": int(Time.get_unix_time_from_system()),
-		"boon": (tpl["boon"] as Dictionary).duplicate(), "call": (tpl["call"] as Dictionary).duplicate(), "mods": (tpl["mods"] as Array).duplicate(),
+		"boon": (tpl["boon"] as Dictionary).duplicate(), "call": (tpl["call"] as Dictionary).duplicate(),
 		"portrait": GameData.portrait_for_hero(role, str(src.get("pool_id", ""))),
 		"lore": lore if lore != "" else tr(GameData.LEGACY_POST_LORE) % guild_name if post else tr(GameData.LEGACY_LORE) % [tr(str(src.get("rank", "F"))), guild_name, rifts, int(src.get("kills", 0))],
 		"memory": memory}

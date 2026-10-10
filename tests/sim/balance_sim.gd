@@ -4,7 +4,7 @@ extends Node
 ## loot/XP/attribute gains inside a run are modelled. Never saves. ~1 min:
 ##   godot --headless --path . res://tests/sim/balance_sim.tscn
 ## (`-- ranks`: only the ladder-rank profiles; `-- calibrate`: power at a
-## 65% clear per rank; `-- tower`, `-- survivors`, `-- champions`, `-- defense`)
+## 65% clear per rank; `-- tower`)
 
 const N := 120
 var GAINS := true   # model loot/XP/attribute gains inside a run
@@ -20,7 +20,6 @@ const PROFILES := {
 	"Lesser  | invested": ["lesser", ["E", "D", "D"], 4, 1, "common", 1, "common"],
 	"Greater | underleveled": ["greater", ["E", "D", "D"], 4, 1, "common", 1, "common"],
 	"Greater | invested": ["greater", ["D", "C", "C", "C"], 7, 2, "rare", 2, "rare"],
-	"Endless | endgame": ["endless", ["C", "B", "B", "A"], 10, 3, "epic", 3, "epic"],
 	# Ladder ranks (a rank id instead of a difficulty): a party roughly where
 	# a player reaches that rank.
 	"Rank E  | invested": ["E", ["E", "D", "D"], 4, 1, "common", 1, "common"],
@@ -32,7 +31,7 @@ const PROFILES := {
 	"Rank SSS| endgame": ["SSS", ["C", "B", "B", "A"], 10, 3, "epic", 3, "epic"],
 }
 
-const MODES := ["lesser", "greater", "endless"]
+const MODES := ["lesser", "greater"]
 
 
 var TOWER_ONLY := false   # `-- tower` on the command line: skip the rift profiles
@@ -56,136 +55,14 @@ func _ready() -> void:
 		_calibrate()
 		get_tree().quit()
 		return
-	if OS.get_cmdline_user_args().has("defense"):
-		_defense()
-		get_tree().quit()
-		return
-	if OS.get_cmdline_user_args().has("champions"):
-		_champions()
-		get_tree().quit()
-		return
-	if OS.get_cmdline_user_args().has("survivors"):
-		for name in PROFILES:
-			if PROFILES[name][0] in ["greater", "endless"]:   # Endless opens in Act III
-				_survivors(name, PROFILES[name])
-		get_tree().quit()
-		return
 	if not TOWER_ONLY:
 		for name in PROFILES:
-			if PROFILES[name][0] != "endless" and (not OS.get_cmdline_user_args().has("ranks") or not PROFILES[name][0] in MODES):   # Endless is a survival run: `-- survivors`
+			if not OS.get_cmdline_user_args().has("ranks") or not PROFILES[name][0] in MODES:
 				_profile(name, PROFILES[name])
 	for name in PROFILES:
 		if PROFILES[name][0] in MODES:
 			_tower(name, PROFILES[name])
 	get_tree().quit()
-
-
-## Endless Rift (survivors): how long each profile lasts on autopilot (the
-## Champion stays home; first upgrade offered is taken).
-const SURV_RUNS := 12
-
-
-## A sensible player's level-up pick: Ability ranks, then damage and health,
-## then damage-dealing skills, else whatever is offered.
-func _best_pick(o: Array) -> String:
-	if o.is_empty():
-		return ""
-	for pref in ["evolve:", "fuse:", "ability:", "mod:", "might", "vigor", "skill:", "haste", "area"]:
-		for id in o:
-			if str(id).begins_with(pref) and not (pref == "skill:" and str(id).split(":")[2] in ["heal", "sanctuary", "taunt", "smoke_bomb"]):
-				return str(id)
-	return str(o[randi() % o.size()])
-
-
-func _survivors(name: String, p: Array) -> void:
-	var times: Array = []
-	var kills := 0
-	var levels := 0
-	var wins := 0
-	for i in SURV_RUNS:
-		var party: Array = _build_party(p)
-		var r := SurvivorsRun.new(party, ["vale", "marsh", "ashen"][i % 3], 1000 + i)
-		while not r.over and r.time < 1500.0:
-			r.step(0.2, r.autopilot_dir())
-			r.events.clear()
-			r.settle_picks(_best_pick)
-		times.append(int(r.time))
-		kills += r.kills
-		levels += r.level
-		wins += 1 if r.won else 0
-	times.sort()
-	print("%-24s survivors: median %d:%02d (min %d:%02d, max %d:%02d) · %d kills · level %d · sealed %d/%d" % [name, times[SURV_RUNS / 2] / 60, times[SURV_RUNS / 2] % 60,
-		times[0] / 60, times[0] % 60, times[-1] / 60, times[-1] % 60, kills / SURV_RUNS, levels / SURV_RUNS, wins, SURV_RUNS])
-
-
-## Endless Rift with champions (`-- champions`): how long N champions last,
-## by act (the guild's best hero level sets theirs) and champion level, and
-## how often the first lost champion's light (at its depth) is held long
-## enough to free them.
-func _champions() -> void:
-	# [label, champions, best hero level, champion level, relics (rare), threat]
-	# Threat follows GameState.endless_threat: 0.6 when it opens, +0.15 a rescue, +0.15 for Act III, at most 1.6.
-	var cases := [["Opens · 2 Lv1", 2, 6, 1, 1, 0.6], ["1 freed · 3 Lv1", 3, 6, 1, 1, 0.75],
-		["3 freed · 4 Lv2", 4, 7, 2, 2, 1.05], ["Act III, 3 freed · 4 Lv3", 4, 8, 3, 2, 1.2], ["All freed · 4 Lv5", 4, 10, 5, 3, 1.6]]
-	for c in cases:
-		var times: Array = []
-		var freed := 0
-		for i in SURV_RUNS:
-			GameState.reset()
-			GameState.guild_name = "Sim"
-			_build_party(["", ["C"], c[2], 0, "", c[4], "rare"])
-			var party: Array = []
-			for k in c[1]:
-				var id := GameState.champion_roll[k]
-				GameState.champions[id] = c[3]
-				party.append(GameState.champion_hero(id))
-			var r := SurvivorsRun.new(party, ["vale", "marsh", "ashen"][i % 3], 1000 + i)
-			r.lost = GameState.lost_champions().slice(0, 1)
-			r.threat = c[5]
-			while not r.over and r.time < 1500.0:
-				r.step(0.2, r.autopilot_dir())
-				r.events.clear()
-				r.settle_picks(_best_pick)
-			times.append(int(r.time))
-			freed += r.rescued.size()
-		times.sort()
-		print("%-24s median %d:%02d (min %d:%02d, max %d:%02d) · first light (%d:%02d) held %d/%d" % [c[0], times[SURV_RUNS / 2] / 60, times[SURV_RUNS / 2] % 60,
-			times[0] / 60, times[0] % 60, times[-1] / 60, times[-1] % 60, GameData.CHAMPION_DEPTHS[0] / 60, GameData.CHAMPION_DEPTHS[0] % 60, freed, SURV_RUNS])
-
-
-## Riftbreak defenses (`-- defense`): how often a guild holds a breach of
-## each rank on autoplay, with no research and with it all. The posted heroes
-## are the rank's ladder profile (plus one more), the champion is level 2.
-func _defense() -> void:
-	var research := {"none": {}, "full": {"towers": GameData.DEFENSE_TOWERS.keys(), "max_tier": 3, "supplies": 100, "integrity": 10}}
-	for name in PROFILES:
-		var p: Array = PROFILES[name]
-		if p[0] in MODES:
-			continue
-		var idx := GameData.rift_rank_index(str(p[0]))
-		for rs in research:
-			var held := 0
-			var keep := 0.0
-			var runs := 8
-			for i in runs:
-				GameState.reset()
-				GameState.guild_name = "Sim"
-				var party: Array = _build_party(p)
-				party.append(_build_party(p)[0])
-				var champ_id: String = GameState.champion_roll[0]
-				GameState.champions[champ_id] = 2
-				var region: String = "camp" if idx >= GameData.rift_rank_index(GameData.BREACH_CAMP_RANK) else ["vale", "marsh", "ashen"][i % 3]
-				var r := DefenseRun.new(region, idx, party, GameState.champion_hero(champ_id), 100 + i, research[rs])
-				for k in 30000:
-					if r.over:
-						break
-					if k % 25 == 0:
-						r.autoplay()
-					r.step(0.1)
-					r.events.clear()
-				held += 1 if r.held else 0
-				keep += float(r.integrity) / float(r.max_integrity)
-			print("%-22s research %-4s  held %d/%d · integrity kept %d%%" % [name, rs, held, runs, int(keep / runs * 100.0)])
 
 
 ## Tower of Trials: how high each profile climbs (3 tries a floor, full HP
@@ -295,7 +172,7 @@ func _calibrate() -> void:
 				at = lerpf(pts[i - 1][0], pts[i][0], f)
 				break
 		print("%-4s recommended %4d  power at 65%% clear %4.0f   %s" % [id, Combat.recommended_power("", id), at, ", ".join(pts.map(func(x): return "%.0f:%d%%" % [x[0], int(x[1] * 100)]))])
-	# Tower: median floor each template reaches, and Endless: median survival.
+	# Tower: median floor each template reaches.
 	for t in TEMPLATES:
 		var p: Array = ["tower"]
 		p.append_array(t)
@@ -324,17 +201,7 @@ func _calibrate() -> void:
 				top = f
 			tops.append(top)
 		tops.sort()
-		var times: Array = []
-		for i in 3:
-			party = _build_party(p)
-			var r := SurvivorsRun.new(party, ["vale", "marsh", "ashen"][i % 3], 1000 + i)
-			while not r.over and r.time < 900.0:
-				r.step(0.25, r.autopilot_dir())
-				r.events.clear()
-				r.settle_picks(_best_pick)
-			times.append(int(r.time))
-		times.sort()
-		print("power %4d  tower median floor %3d (rec there %d)  endless median %d:%02d" % [power, tops[3], GameState.tower_recommended_power(maxi(1, tops[3])), times[1] / 60, times[1] % 60])
+		print("power %4d  tower median floor %3d (rec there %d)" % [power, tops[3], GameState.tower_recommended_power(maxi(1, tops[3]))])
 
 
 func _diff_for(id: String) -> Dictionary:

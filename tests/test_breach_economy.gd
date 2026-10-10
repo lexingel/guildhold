@@ -41,7 +41,7 @@ func _guild(g: Array, breaches: bool) -> void:
 		var research := 0
 		for d in WEEKS * GameData.PAYDAY_DAYS:
 			if GameState.breach_broken():
-				var ids: Array = GameState.defense_candidates().slice(0, 2).map(func(h): return h.id)
+				var ids: Array = GameState.idle_heroes().slice(0, 2).map(func(h): return h.id)
 				GameState.resolve_breach({"held": false, "integrity": 0.0, "fallen": ids})   # takes the day
 				lost += 1
 			elif d % 7 == 6:

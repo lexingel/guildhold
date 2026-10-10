@@ -43,8 +43,6 @@ func run() -> void:
 	check(str(GameData.champion_def(cid)["role"]) == veteran.cls_id and not (GameData.champion_def(cid)["call"] as Dictionary).is_empty(), "with their class and a Call")
 	check(ResourceLoader.exists(GameData.champion_portrait(cid)), "and their own portrait")
 	check(GameState.champion_memory_line(cid).contains("Pocket Crows"), "and a memory of their old guild")
-	var ch := GameState.champion_hero(cid)
-	check(ch.base_hp > 0 and ch.is_champion and WalkSprites.hero_key(ch, ch.cls_id) == ch.cls_id, "they fight in the Endless Rift, walking as their class")
 
 	# A new guild: the remembered hero waits at one of the first lost pillars.
 	_guild("Iron Watch")
@@ -200,7 +198,7 @@ func run() -> void:
 	check(GameState.tides_held == 1 and int(GameState.legacy["laurels"]) == lau1 + GameData.TIDE_LAURELS, "holding a tide pays Laurels")
 	check(GameState.breach_next_day + GameData.TIDE_WARN + 1 == GameState.day + GameData.TIDE_DAYS, "the next tide breaks a week later")
 	GameState._swell_breach()
-	check(GameState.tide_strength() > 1.05 and float(GameState.defense_opts()["foe_mult"]) == GameState.tide_strength(), "tide 2 is stronger")
+	check(GameState.tide_strength() > 1.05 and is_equal_approx(float(GameState.breach_foe_mult()[0]), GameState.tide_strength()), "tide 2 is stronger")
 	var s2 := GameState.tide_strength()
 	GameState.resolve_breach({"held": false, "integrity": 0.0, "fallen": []})
 	GameState._swell_breach()
@@ -208,10 +206,10 @@ func run() -> void:
 	# Tidewalls: the Open Hollow's Gold sink.
 	GameState.coins = 100000
 	GameState.crystals = 100000
-	var m0 := float(GameState.defense_opts()["foe_mult"])
+	var m0 := float(GameState.breach_foe_mult()[0])
 	var wc0: Array = GameState.tidewall_cost()
 	check(GameState.raise_tidewall() == "" and GameState.tidewalls == 1 and GameState.coins == 100000 - int(wc0[0]), "a tidewall costs Gold and Essence")
-	check(float(GameState.defense_opts()["foe_mult"]) < m0 and int(GameState.tidewall_cost()[0]) > int(wc0[0]), "a tidewall weakens the tide, and the next costs more")
+	check(float(GameState.breach_foe_mult()[0]) < m0 and int(GameState.tidewall_cost()[0]) > int(wc0[0]), "a tidewall weakens the tide, and the next costs more")
 	GameState.breach = {}
 	_guild("Keepers")
 	GameState.accord_ending = "renew"

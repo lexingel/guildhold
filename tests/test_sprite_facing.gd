@@ -1,6 +1,6 @@
 extends "res://tests/base_test.gd"
 ## Heroes face right and foes face left: art drawn the other way is mirrored
-## in the arena and the Endless Rift. And the Act I intro waits until the
+## in the arena. And the Act I intro waits until the
 ## guild is founded (Settings opened from the naming screen used to show it).
 
 
@@ -57,28 +57,4 @@ func run() -> void:
 	main.queue_free()
 	await _frames()
 
-	# Riftbreak: a foe walking down the road toward the camp (rightward) faces
-	# the way it walks, like the Endless Rift's foes (0.51.2: they walked backwards).
-	GameState.active_slot = 9
-	GameState.reset()
-	GameState.hire_starters()
-	var dv := DefenseView.new()
-	dv.setup("vale", 0, GameState.heroes.slice(0, 2), null, GameState.defense_opts())
-	add_child(dv)
-	await _frames()
-	var base := {"tier": "combat", "route": 0, "d": 0.0, "pos": Vector2(100, 100), "hp": 10.0, "max_hp": 10.0, "dmg": 1.0, "speed": 1.0, "r": 10.0,
-		"slow_t": 0.0, "slow": 0.0, "stun_t": 0.0, "burn_t": 0.0, "burn_dps": 0.0, "held_by": -1, "hit_cd": 0.5, "facing": 1.0, "dead": false, "flash": 0.0}
-	var walker := base.duplicate()
-	walker.merge({"id": 999, "name": "Gloom Stalker"}, true)
-	var odd := base.duplicate()
-	odd.merge({"id": 998, "name": "Korrath"}, true)
-	dv.run.foes.append(walker)
-	dv.run.foes.append(odd)
-	dv._sync()
-	check(dv._foe_nodes[999].flip_h and not dv._foe_nodes[998].flip_h, "a left-drawn foe heading right is mirrored, a right-drawn one isn't")
-	walker["facing"] = -1.0
-	dv._sync()
-	check(not dv._foe_nodes[999].flip_h, "and heading left it's drawn as is")
-	dv.queue_free()
-	await _frames()
 	GameState.delete_slot(9)

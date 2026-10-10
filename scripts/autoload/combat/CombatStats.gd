@@ -172,8 +172,6 @@ func spd_of(h: Hero) -> float:
 ## rank's own "rec", else the difficulty's rec_power (both measured with
 ## balance_sim -- calibrate).
 func recommended_power(diff_id: String, rift_rank: String = "") -> int:
-	if diff_id == "endless":
-		return GameData.ENDLESS_REC_POWER
 	if rift_rank != "":
 		return int(round(int(GameData.find_rift_rank(rift_rank)["rec"]) * GameState.hardship_rec_mult()))
 	var diff: Dictionary = GameData.DIFFICULTIES[0]

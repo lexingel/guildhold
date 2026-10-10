@@ -1,8 +1,8 @@
 extends "res://tests/base_test.gd"
 ## Champions: each guild rolls 12 of the pool; the story frees three, the
-## Endless Rift hides the rest (hold their light to free them). One oversees
-## rift runs (Boon, Call), Echoes level them up, and in the Endless Rift they
-## are the party. Old saves keep their gold-hired champions as heroes.
+## rest are lost (a pillar of light frees them). One oversees rift runs (Boon,
+## Call) and Essence levels them up. Old saves keep their gold-hired champions
+## as heroes.
 
 
 func run() -> void:
@@ -22,31 +22,20 @@ func run() -> void:
 	check(GameState.champions.is_empty() and GameState.overseer == "", "nobody is freed at the start")
 
 	# Every champion in the pool is complete: art, a Boon the stat code
-	# knows, and a Call both combat and the Endless Rift can play.
+	# knows, and a Call combat can play.
 	var bad: Array = []
 	for id in GameData.CHAMPIONS:
 		var d: Dictionary = GameData.CHAMPIONS[id]
 		if not ResourceLoader.exists("res://assets/champions/%s.png" % id):
 			bad.append(id + ": portrait")
-		for dir in ["walk", "skill"]:
-			if not ResourceLoader.exists("res://assets/survivors/%s/sub_champ_%s_7.png" % [dir, id]):
-				bad.append(id + ": " + dir)
 		if Combat.describe_skill(str(d["boon"]["kind"]), float(d["boon"]["value"])) == "":
 			bad.append(id + ": boon")
-		if not SurvivorsRun.ABILITY_STYLE.has(str(d["call"]["effect"])) or not GameData.ABILITY_EFFECT_ICON.has(str(d["call"]["effect"])):
+		if not GameData.ABILITY_EFFECT_ICON.has(str(d["call"]["effect"])):
 			bad.append(id + ": call")
 		if GameData.find_role(str(d["role"])).is_empty():
 			bad.append(id + ": role")
-		var mods: Array = d.get("mods", [])
-		if mods.size() != 2 or mods[0] == mods[1] or not mods.all(func(m): return SurvivorsRun.SIG_MODS.has(m)):
-			bad.append(id + ": mods")
-	check(bad.is_empty(), "every champion has a portrait, walk, signature move, Boon, Call and two mods %s" % [bad])
+	check(bad.is_empty(), "every champion has a portrait, Boon and Call %s" % [bad])
 	check(GameData.CHAMPIONS.size() >= 20, "a pool of %d" % GameData.CHAMPIONS.size())
-	var mod_count := {}
-	for id in GameData.CHAMPIONS:
-		for m in GameData.CHAMPIONS[id]["mods"]:
-			mod_count[m] = int(mod_count.get(m, 0)) + 1
-	check(mod_count.size() == SurvivorsRun.SIG_MODS.size() and mod_count.values().max() - mod_count.values().min() <= 1, "every mod is spread evenly over the pool %s" % [mod_count])
 
 	var ids: Array[String] = []
 	for r in ["D", "C"]:
@@ -115,97 +104,9 @@ func run() -> void:
 		GameState.level_champion(first)
 	check(GameState.champion_level(first) == GameData.CHAMPION_LEVEL_MAX and GameState.champion_level_cost(first) == -1, "levels stop at %d" % GameData.CHAMPION_LEVEL_MAX)
 
-	# The Endless Rift: champions as fighters, a lost one's light, the pay-out.
-	var fighter := GameState.champion_hero(first)
-	check(fighter.is_champion and GameData.portrait_for_hero(fighter.cls_id, fighter.pool_id) == GameData.champion_portrait(first), "a champion fights under their own portrait")
+	# A lost champion's light (a pillar in the Descent or a Rank B+ rift) frees them.
 	var lost_id := str(GameState.lost_champions()[0][0])
-	var r := SurvivorsRun.new([fighter], "vale", 7)
-	check(bool(r.heroes[0]["has_ability"]) and str(r.heroes[0]["ability_name"]) == str(GameState.champion_call_of(first)["name"]), "their Call is their signature move")
-	r.lost = [[lost_id, 5]]
-	r.step(0.1, Vector2.ZERO)
-	check(r.beacon.is_empty(), "no light before its depth")
-	r.time = 5.0
-	r.step(0.1, Vector2.ZERO)
-	check(not r.beacon.is_empty() and str(r.beacon["id"]) == lost_id, "a lost champion's light appears")
-	r.foes.clear()
-	for k in 200:
-		r.heroes[0]["pos"] = r.beacon["pos"]
-		r.heroes[0]["hp"] = r.heroes[0]["max_hp"]
-		r.foes.clear()
-		r._tick_beacon(0.1)
-		if r.beacon.is_empty():
-			break
-	check(r.rescued == [lost_id], "standing in it for %d s frees them" % int(GameData.BEACON_HOLD))
-	# The rift is gentle when it opens and hardens with each rescue and act.
-	var act0 := GameState.campaign_act
-	GameState.campaign_act = 3
-	var t0 := GameState.endless_threat()
-	GameState.champions[lost_id] = 1
-	var t1 := GameState.endless_threat()
-	GameState.campaign_act = 4
-	var t2 := GameState.endless_threat()
-	GameState.champions.erase(lost_id)
-	GameState.campaign_act = act0
-	check(is_equal_approx(t0, GameData.THREAT_BASE) and t1 > t0 and t2 > t1 and t2 <= GameData.THREAT_MAX, "rift strength %.2f → %.2f after a rescue → %.2f after Act III" % [t0, t1, t2])
-	var soft := SurvivorsRun.new([fighter], "vale", 7)
-	soft.threat = t0
-	check(is_equal_approx(soft.foe_hp_mult(), t0) and is_equal_approx(soft.foe_dmg_mult(), t0), "foes start at that strength")
-
-	# Signature mods: the champion's own two, once the signature has a rank.
-	var pair := SurvivorsRun.new([GameState.champion_hero(first), GameState.champion_hero(lost_id)], "vale", 9)
-	var own: Array = GameData.champion_def(first)["mods"]
-	var offered := {}
-	for k in 120:
-		for id in pair.offer():
-			offered[id] = true
-	check(not offered.keys().any(func(o): return str(o).begins_with("mod:")), "no mods before the signature has a rank")
-	pair.heroes[0]["ab_rank"] = 1
-	offered = {}
-	for k in 200:
-		for id in pair.offer():
-			offered[id] = true
-	var seen_mods: Array = offered.keys().filter(func(o): return str(o).begins_with("mod:0:")).map(func(o): return str(o).split(":")[2])
-	seen_mods.sort()
-	var own_sorted := own.duplicate()
-	own_sorted.sort()
-	check(seen_mods == own_sorted, "%s's mods on offer: %s" % [first, seen_mods])
-	pair.pending_levels = 1
-	pair.pick("mod:0:" + str(own[0]))
-	check(pair.heroes[0]["mods"] == [own[0]], "a mod is learned")
-	# A mod fires with the signature: stun is the easiest to see.
-	pair.heroes[0]["mods"] = ["stagger"]
-	var dummy := pair._add_foe("combat", pair.heroes[0]["pos"] + Vector2(60, 0))
-	dummy["hp"] = 1e9
-	dummy["max_hp"] = 1e9
-	pair._ability(pair.heroes[0], SurvivorsRun.WEAPONS[pair.heroes[0]["role"]], 1.0)
-	check(pair.foes.any(func(f): return float(f.get("stun_t", 0.0)) > 0.0), "Stagger stuns the foes the signature touches")
-	pair.heroes[0]["mods"] = ["aftershock"]
-	pair._ability(pair.heroes[0], SurvivorsRun.WEAPONS[pair.heroes[0]["role"]], 1.0)
-	check(pair._after.size() == 1, "Aftershock queues a second cast")
-
-	# Fusion: from FUSION_LEVEL, both signatures at FUSION_RANK.
-	pair.heroes[1]["ab_rank"] = SurvivorsRun.FUSION_RANK
-	pair.heroes[0]["ab_rank"] = SurvivorsRun.FUSION_RANK
-	check(pair.fusions_ready().is_empty(), "no fusion before level %d" % SurvivorsRun.FUSION_LEVEL)
-	pair.level = SurvivorsRun.FUSION_LEVEL
-	check(pair.fusions_ready() == ["fuse:0:1"] and pair.offer().has("fuse:0:1"), "a ready fusion is offered")
-	pair.heroes[1]["mods"] = ["frostbite"]
-	var p0 := pair._ability_power(pair.heroes[0])
-	pair.pending_levels = 1
-	pair.pick("fuse:0:1")
-	check(int(pair.heroes[0]["fused"]) == 1 and int(pair.heroes[1]["fused"]) == 0 and pair.fusions_ready().is_empty(), "fused, once")
-	check(pair._ability_power(pair.heroes[0]) > p0 and pair.sig_mods(pair.heroes[0]).has("frostbite"), "a fused signature hits harder and carries its partner's mods")
-	pair.heroes[1]["ab_cd"] = 99.0
-	pair.heroes[0]["ab_cd"] = 0.0
-	pair._add_foe("combat", pair.heroes[0]["pos"] + Vector2(80, 0))
-	pair._attacks(0.01)
-	check(float(pair.heroes[1]["ab_cd"]) < 99.0, "the partner fires with it")
-	var day0 := GameState.day
-	var e0 := GameState.crystals
-	var sum := GameState.finish_survivors(r)
-	check(GameState.champion_unlocked(lost_id) and (sum["freed"] as Array).size() == 1, "a freed champion joins after the run")
-	check(GameState.crystals > e0 and int(sum["crystals"]) >= 10, "the run pays Essence (with the rescue's share)")
-	check(GameState.day == day0 + 1, "an Endless run costs the guild a day")
+	check(GameState.free_lost_champion(lost_id) != "" and GameState.champion_unlocked(lost_id), "a freed lost champion joins")
 
 	# Saves: the roll and the champions persist; an old save's hired
 	# champion stays on as a hero.

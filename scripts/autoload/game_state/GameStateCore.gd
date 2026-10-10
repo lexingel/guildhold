@@ -60,10 +60,6 @@ var run_history: Array = []      # newest first, capped (GameData.RUN_HISTORY_MA
 var runs_finished: int = 0
 var fallen: Array = []           # memorial: heroes lost for good
 var heroes_lost_total: int = 0
-var best_endless_time: int = 0   # seconds survived in the Endless Rift (survivors mode)
-var endless_runs: int = 0
-var endless_best := {}             # region id -> best seconds there
-var endless_milestones: Array = []   # ENDLESS_MILESTONES "at" values already paid
 var boon_set4_reached: bool = false
 var tower_best: int = 0          # highest Tower of Trials floor ever cleared
 var role_seals: Dictionary = {}     # role -> rifts sealed with a hero of that role in the party (0.62, subclass unlocks)
@@ -1042,7 +1038,7 @@ func save() -> void:
 		"tower_best": tower_best, "role_seals": role_seals, "flawless_bosses": flawless_bosses, "riftbreak_best": riftbreak_best,
 		"subclass_known": subclass_known, "subclass_carried": subclass_carried, "tower_week": tower_week, "tower_week_cleared": tower_week_cleared,
 		"daily_attempt_day": daily_attempt_day, "daily_clears": daily_clears, "daily_streak": daily_streak, "daily_last_clear": daily_last_clear,
-		"run_history": run_history, "runs_finished": runs_finished, "fallen": fallen, "heroes_lost_total": heroes_lost_total, "best_endless_time": best_endless_time, "endless_runs": endless_runs, "endless_best": endless_best, "endless_milestones": endless_milestones, "boon_set4_reached": boon_set4_reached,
+		"run_history": run_history, "runs_finished": runs_finished, "fallen": fallen, "heroes_lost_total": heroes_lost_total, "boon_set4_reached": boon_set4_reached,
 		"rifts_sealed": rifts_sealed, "best_rift_rank_sealed": best_rift_rank_sealed, "rival_name": rival_name, "rival_renown": rival_renown, "rival_ahead": rival_ahead, "feast_week": feast_week, "payday_report": payday_report, "week_start_coins": week_start_coins, "hero_request": hero_request, "camp_event": camp_event, "camp_omen": camp_omen, "camp_event_last": camp_event_last, "expedition_board": expedition_board, "founding_picks": founding_picks, "founding_rerolls": founding_rerolls, "expeditions": expeditions, "next_resolve": next_resolve, "hardship": hardship, "wage_raise": wage_raise, "pay_rate": pay_rate, "contest_start": contest_start, "rival_event": rival_event, "session": session, "guild_news": guild_news, "breach": breach, "breach_next_day": breach_next_day, "damaged": damaged,
 		"triage_used_this_cycle": triage_used_this_cycle,
 		"pending_shop_boost": pending_shop_boost,

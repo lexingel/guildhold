@@ -180,6 +180,7 @@ const SFX_PATH := {
 const LANGUAGES := [["en", "English"], ["tr", "Türkçe (beta)"], ["es", "Español (beta)"], ["zh_CN", "简体中文 (beta)"]]
 
 const WHATS_NEW := [
+	"Quicker screens. A click now redraws the screen once instead of twice, a hero's Power is quicker to work out, and an item's card is built when you point at it, so the Roster opens in about half the time. The real-time Endless Rift and the tower defense, set aside since 0.63, are gone for good, and the lines that still sent you to the Endless Rift now point to the pillars of light in the Descent and in Rank B+ rifts.",
 	"The deep road. From Rank S the ordinary fights before the boss are tougher and hit harder, and every unguarded hit leaves a small trace on max HP for the rest of the run. Momentum now decides who strikes first there: start a fight with 5 or more and your party keeps the initiative, otherwise the foes act first. Momentum left after a won fight carries into the next, so finishing fast and banking for the next fight is a real choice.",
 	"Fights with stakes. From Rank C a heavy blow that lands wounds its target: half the damage also comes off their max HP, and no healing gives it back until the fight ends (from Rank S, until a campfire or the run's end). Defend, Guard or dodge and it never wounds, and every ordinary fight there has a wind-up to answer. A hero who falls in a Rank C+ rift may keep a scar and drops a piece of gear, back only if the party seals the rift; from Rank SS a hero with two scars can die, and the Party screen names them before you go. Below Rank C a fall no longer scars. Also: the founding screen has a Main menu button, and the language is a drop-down.",
 	"An expedition now warns you when it would leave too few heroes at camp to cover for one who is ready for a Path course. Spanish and Chinese cover the founders, expeditions and fixes of 0.67.",
@@ -825,7 +826,7 @@ static func _faces_away_table() -> Dictionary:
 	return out
 
 
-## `key_or_path`: a sprite path, a monster sprite key or an Endless walk key.
+## `key_or_path`: a sprite path, a monster sprite key or a walk key.
 static func faces_away(key_or_path: String) -> bool:
 	return SPRITE_FACES_AWAY.has(key_or_path.get_file().get_basename().trim_prefix("sub_"))
 
