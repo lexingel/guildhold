@@ -371,6 +371,7 @@ func render() -> void:
 		GameState.pending_toasts.append({"cls_id": "", "pool_id": "", "title": "", "text": _flavor_toast})
 		_flavor_toast = ""
 	_drain_toasts()
+	_render_queued = false   # this rebuild covers every change so far, the bookkeeping's own included
 	if not GameState.pending_s_rank_reveal.is_empty() and _s_rank_celebration.is_empty():
 		_s_rank_celebration = GameState.pending_s_rank_reveal
 		GameState.pending_s_rank_reveal = {}

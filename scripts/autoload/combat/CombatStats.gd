@@ -20,18 +20,12 @@ func hero_skill_total(h: Hero, kind: String) -> float:
 			s += n["value"]
 	for summary in GameData.hero_tree_summaries(h):
 		var tree_kind: String = summary["kind"]
-		for n in GameData.KIND_SKILL_PACKAGE.get(tree_kind, []):
-			if n["kind"] == kind and h.skills.get(GameData.skill_storage_key(tree_kind, n["id"]), false):
-				s += n["value"]
+		for pair in _tree_nodes(tree_kind):
+			var n: Dictionary = pair[1]
+			if n["kind"] == kind and h.skills.get(pair[0], false):
+				s += float(n["value"])
 				if n.has("combo_kind") and GameState.party_has_other_kind_capstone(h.id, str(n["combo_kind"])):
 					s += float(n.get("combo_bonus", 0.0))
-		for n in GameData.rift_nodes(tree_kind):
-			if n["kind"] == kind and h.skills.get(GameData.skill_storage_key(tree_kind, n["id"]), false):
-				s += float(n["value"])
-		# A learned keystone's drawback is a plain flat stat.
-		var ks := GameData.keystone_node(tree_kind)
-		if not ks.is_empty() and ks["kind"] == kind and h.skills.get(GameData.skill_storage_key(tree_kind, "keystone"), false):
-			s += float(ks["value"])
 	s += GameState.champion_boon(kind)
 	if h.battered and kind == "hp_pct":
 		s -= GameData.BATTERED_HP_PCT
@@ -48,6 +42,24 @@ func hero_skill_total(h: Hero, kind: String) -> float:
 	for q in h.quirks:
 		s += float(GameData.quirk(q).get("stats", {}).get(kind, 0.0))
 	return s
+
+
+## A tree's stat nodes as [storage key, node]: the package, the rift nodes
+## and the keystone (its drawback is a plain flat stat). Built once a kind
+## (0.69.1): hero_skill_total runs thousands of times a screen.
+var _tree_nodes_cache := {}
+
+
+func _tree_nodes(tree_kind: String) -> Array:
+	if not _tree_nodes_cache.has(tree_kind):
+		var out: Array = []
+		for n in GameData.KIND_SKILL_PACKAGE.get(tree_kind, []) + GameData.rift_nodes(tree_kind):
+			out.append([GameData.skill_storage_key(tree_kind, n["id"]), n])
+		var ks := GameData.keystone_node(tree_kind)
+		if not ks.is_empty():
+			out.append([GameData.skill_storage_key(tree_kind, "keystone"), ks])
+		_tree_nodes_cache[tree_kind] = out
+	return _tree_nodes_cache[tree_kind]
 
 
 ## Where hero_skill_total(h, kind) comes from, term by term, as

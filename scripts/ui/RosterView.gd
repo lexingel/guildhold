@@ -7,7 +7,10 @@ func _sorted_heroes() -> Array[Hero]:
 	out.assign(GameState.heroes)
 	match roster_sort:
 		"power":
-			out.sort_custom(func(a, b): return Combat.power_of(a) > Combat.power_of(b))
+			var pw := {}   # once a hero, not once a comparison
+			for h in out:
+				pw[h] = Combat.power_of(h)
+			out.sort_custom(func(a, b): return pw[a] > pw[b])
 		"level":
 			out.sort_custom(func(a, b): return a.level > b.level)
 		"rank":

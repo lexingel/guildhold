@@ -41,3 +41,12 @@ func _gui_input(event: InputEvent) -> void:
 ## BBCode tooltips render as item cards (see RichTip).
 func _make_custom_tooltip(for_text: String) -> Object:
 	return RichTip.card(for_text)
+
+
+## Builds the tooltip on hover instead of with the icon: an item card weighs
+## the swap on the hero (Power with and without it), ~2 ms a tile (0.69.1).
+var tooltip_fn := Callable()
+
+
+func _get_tooltip(_at_position: Vector2) -> String:
+	return str(tooltip_fn.call()) if tooltip_fn.is_valid() else tooltip_text

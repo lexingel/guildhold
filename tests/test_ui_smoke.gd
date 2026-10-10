@@ -76,6 +76,12 @@ func run() -> void:
 	# above lets clicks through; other screens keep a normal UI over a backdrop.
 	await _show(main, "camp", "camp")
 	check(main._scene_ui.get_child_count() > 0 and main.root.mouse_filter == Control.MOUSE_FILTER_IGNORE, "the camp fills the window and its buildings take clicks")
+	# A click that changes state and redraws at once builds the screen once, not again at frame end (0.69.1).
+	GameState.state_changed.emit()
+	main.render()
+	var built: Node = main.root.get_child(main.root.get_child_count() - 1)
+	await _frames()
+	check(is_instance_valid(built) and not built.is_queued_for_deletion(), "a state change plus a direct redraw rebuilds the screen once")
 	# The Endless Rift's gate: the Descent and the real-time run, or (0.63,
 	# Endless parked) straight down the Descent.
 	await _show(main, "rift_hall")

@@ -66,8 +66,6 @@ var _s_rank_celebration: Dictionary = {}   # {} = not showing; else GameState.pe
 var _last_guild_tier_name: String = ""   # tracks Guild Tier across renders to detect "just reached a new tier" (tier itself is derived, not stored)
 
 
-
-
 var mgmt_branch: String = ""       # "" = branch hub, else a GameData.BRANCHES id
 
 
@@ -127,6 +125,8 @@ func _on_state_changed() -> void:
 
 
 func _flush_render() -> void:
+	if not _render_queued:   # a direct render() already drew this change
+		return
 	_render_queued = false
 	if not GameState.state_changed.is_connected(_on_state_changed) or not is_inside_tree():
 		return
@@ -648,99 +648,6 @@ func _action_slot(icon_path: String, cooldown_text: String, selected: bool, disa
 	return wrap
 
 
-## A compact clickable reward-choice card — icon on top, name/rarity/a short
-## wrapped description below, replacing the old full-width text button so
-## 2-3 rewards read as a row of cards (reference victory screens) instead of
-## a stack of buttons taking up the full column height. Same layered-hotspot
-## technique as _action_slot: decorative content first, an invisible flat
-## Button overlaid last for the actual click handling.
-func _reward_tile(icon_path: String, name_text: String, rarity_text: String, desc_text: String, cb: Callable, tip_bbcode: String = "", note: Array = []) -> Control:
-	const TILE_W := 184.0
-	var TILE_H := 132.0 if note.is_empty() else 160.0
-	# A container, so the card grows with its wrapped text: sizing it by hand
-	# before layout (when a wrapped label still reads as one line) let long
-	# item text spill out of the card and past the Victory box.
-	var wrap := MarginContainer.new()
-	wrap.custom_minimum_size = Vector2(TILE_W, TILE_H)
-	wrap.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-
-	var panel := PanelContainer.new()
-	panel.theme_type_variation = &"CardPanelViolet"
-	var col := _vbox(2)
-	if icon_path != "":
-		var icon_row := HBoxContainer.new()
-		icon_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		icon_row.alignment = BoxContainer.ALIGNMENT_CENTER
-		icon_row.add_child(_icon(icon_path, 32))
-		col.add_child(icon_row)
-	var name_lbl := _label(name_text, 12)
-	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
-	name_lbl.custom_minimum_size = Vector2(TILE_W - 24.0, 0)
-	col.add_child(name_lbl)
-	if rarity_text != "":
-		var rarity_lbl := _label(rarity_text.capitalize(), 10, true)
-		rarity_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		col.add_child(rarity_lbl)
-	var desc_lbl := _label(desc_text, 10, true)
-	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
-	desc_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	desc_lbl.custom_minimum_size = Vector2(TILE_W - 24.0, 0)
-	col.add_child(desc_lbl)
-	if not note.is_empty():
-		var note_lbl := _label(str(note[0]), 12)
-		note_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
-		note_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		note_lbl.custom_minimum_size = Vector2(TILE_W - 24.0, 0)
-		note_lbl.add_theme_color_override("font_color", note[1])
-		col.add_child(note_lbl)
-	panel.add_child(col)
-	wrap.add_child(panel)
-
-	var btn := Button.new()   # over the whole card
-	btn.flat = true
-	var clear_style := StyleBoxEmpty.new()
-	for style_name in ["normal", "hover", "pressed", "focus", "disabled"]:
-		btn.add_theme_stylebox_override(style_name, clear_style)
-	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	btn.tooltip_text = "%s — %s" % [tr(str(name_text)), tr(str(desc_text))]
-	if tip_bbcode != "":
-		_rich_tip(btn, tip_bbcode)
-	btn.pressed.connect(cb)
-	wrap.add_child(btn)
-	return wrap
-
-
-## A row of _action_slot controls on a wooden "ability bar" shelf background
-## (GameData.ABILITY_BAR_STRIP_PATH, 9-sliced via StyleBoxTexture so it
-## stretches to fit however many slots a hero has this fight).
-func _slot_row(children: Array) -> PanelContainer:
-	var panel := PanelContainer.new()
-	# Without this, a VBoxContainer parent stretches the panel to its own
-	# full width — the StyleBoxTexture then stretches its tileable middle
-	# band across that whole leftover width, showing stray bits of the
-	# source art (looks like unrelated furniture) to the right of the actual
-	# buttons instead of the bar just hugging its own content.
-	panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	var style := StyleBoxTexture.new()
-	style.texture = load(GameData.ABILITY_BAR_STRIP_PATH)
-	style.texture_margin_left = 60
-	style.texture_margin_right = 60
-	style.texture_margin_top = 14
-	style.texture_margin_bottom = 14
-	style.content_margin_left = 8.0
-	style.content_margin_top = 6.0
-	style.content_margin_right = 8.0
-	style.content_margin_bottom = 6.0
-	panel.add_theme_stylebox_override("panel", style)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 6)
-	for c in children:
-		row.add_child(c)
-	panel.add_child(row)
-	return panel
-
-
 ## Pixel-art icon at a fixed size, nearest-neighbor filtered to stay crisp
 ## (matches the HTML's image-rendering:pixelated).
 ## The size to draw a small pixel-art icon (64 px or less) at so its pixels
@@ -828,7 +735,7 @@ func _draggable_item_icon(it: Item, size: int = 32, compare_for: Hero = null) ->
 	t.size = Vector2(size, size)
 	t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	t.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	t.tooltip_text = _item_card(it, compare_for)
+	t.tooltip_fn = _item_card.bind(it, compare_for)
 	t.mouse_default_cursor_shape = Control.CURSOR_MOVE
 	t.drag_payload = {"kind": "inventory_item", "item_id": it.id, "slot_type": it.slot_type()}
 	return t
@@ -1030,18 +937,6 @@ func _build_bb(h: Hero) -> String:
 ## badge on roster portraits and party cards.
 func _main_arch(h: Hero) -> String:
 	return Combat.hero_main_arch(h)
-
-
-## _info_row with a BBCode body (see _rich_line).
-func _rich_info_row(bbcode: String, size: int, actions: Array[Control], leading: Control = null) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	if leading:
-		row.add_child(leading)
-	row.add_child(_rich_line(bbcode, size))
-	for a in actions:
-		row.add_child(a)
-	return row
 
 
 ## A wrapping RichTextLabel line for BBCode text (colored chips etc.) —
@@ -1334,33 +1229,6 @@ func _item_stat_map(it: Item) -> Dictionary:
 	return GameState.item_stat_map(it)
 
 
-## "vs Swift Blade: +5% turn speed, -12% damage" — how equipping `it` into
-## the slot a quick-equip would pick (_best_swap_slot) changes `h`'s flat
-## stats. Situational effects can't be netted as numbers, so they're listed
-## as gained/lost instead.
-func _item_compare_text(it: Item, h: Hero, slot: int = -2) -> String:
-	if slot == -2:
-		slot = _best_swap_slot(h, it.slot_type())
-	var current: Item = _find_equipped_at(h.id, it.slot_type(), slot) if slot >= 0 else null
-	var a := _item_stat_map(it)
-	var b := _item_stat_map(current)
-	var lines: Array[String] = []
-	for kind in GameData.BUILD_KINDS:
-		var d: float = float(a.get(kind, 0.0)) - float(b.get(kind, 0.0))
-		if absf(d) >= 0.001:
-			lines.append(Combat.describe_skill(kind, d))
-	var gained: Array = GameData.find_unique_item(it.unique_id).get("effects", []) if it.unique_id != "" else it.effects
-	for e in gained:
-		lines.append(tr("gains: ") + Combat.describe_effect(e))
-	if current:
-		var lost: Array = GameData.find_unique_item(current.unique_id).get("effects", []) if current.unique_id != "" else current.effects
-		for e in lost:
-			lines.append(tr("loses: ") + Combat.describe_effect(e))
-	if lines.is_empty():
-		return ""
-	return "%s:\n%s" % [tr(str(tr("vs ") + current.name if current else tr("Into an empty slot"))), tr(str("\n".join(lines)))]
-
-
 ## Who a piece of loot helps, for shop offers and victory rewards:
 ## [text, color, hero to compare against or null]. An item names the party
 ## member it helps (an empty slot first); a relic says whether a slot is free.
@@ -1586,8 +1454,6 @@ func _play_rift_entry_flash() -> void:
 	flash_tw.tween_callback(flash.queue_free)
 
 
-
-
 var _pending_diff_id: String = "lesser"
 
 
@@ -1608,8 +1474,6 @@ func _speed_label() -> String:
 	return tr("Instant") if GameState.combat_speed >= INSTANT_SPEED else "×%d" % int(GameState.combat_speed)
 var _auto_battle: bool = false   # hero turns play themselves (Combat.auto_action)
 var _sfx_seen := {}   # one-shot sounds already played for a given result/card (by id)
-
-
 
 
 ## The ladder rank Party Assembly launches (start_ladder_rift); "" for the
@@ -1958,43 +1822,6 @@ func _count_badge(text: String, tooltip: String) -> Control:
 	l.add_theme_color_override("font_color", Palette.INK)
 	badge.add_child(l)
 	return badge
-
-
-## The camp's one icon-based hotspot (Rift Hall, no matching background
-## prop) — a bare TextureButton (no Button chrome/box) with a caption label
-## underneath and a hover brighten for click affordance.
-func _camp_hotspot(icon_path: String, size: float, label_text: String, cb: Callable) -> Control:
-	var wrap := Control.new()
-	wrap.custom_minimum_size = Vector2(size, size + 18)
-	wrap.size = Vector2(size, size + 18)
-
-	var tb := TextureButton.new()
-	tb.texture_normal = load(icon_path)
-	tb.ignore_texture_size = true
-	tb.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	tb.custom_minimum_size = Vector2(size, size)
-	tb.size = Vector2(size, size)
-	tb.pivot_offset = Vector2(size, size) / 2.0
-	tb.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	tb.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	tb.pressed.connect(cb)
-	tb.mouse_entered.connect(func():
-		var tw := create_tween()
-		tw.tween_property(tb, "scale", Vector2(1.1, 1.1), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	)
-	tb.mouse_exited.connect(func():
-		var tw := create_tween()
-		tw.tween_property(tb, "scale", Vector2(1, 1), 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	)
-	wrap.add_child(tb)
-
-	var caption := _label(label_text, 11, true)
-	caption.position = Vector2(0, size + 2)
-	caption.custom_minimum_size = Vector2(size, 0)
-	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	wrap.add_child(caption)
-
-	return wrap
 
 
 ## True while a craft's brief reveal flourish is playing — guards against a

@@ -498,13 +498,6 @@ func _spawn_barks(state: Dictionary, hero_wrappers: Dictionary) -> void:
 		tw.tween_callback(bubble.queue_free)
 
 
-func _spawn_ability_bucket_burst(pool_id: String, wrapper: Control) -> void:
-	var ab: Dictionary = GameData.SUBCLASS_ABILITIES.get(pool_id, {})
-	var bucket: String = GameData.ABILITY_AWAKENING_BUCKET.get(str(ab.get("effect", "")), "buff")
-	var color: Color = ABILITY_BUCKET_COLOR.get(bucket, Color(1, 1, 1))
-	_spawn_impact_particles(wrapper, wrapper.custom_minimum_size * 0.5, color, bucket in ["aoe_dmg", "single_dmg"])
-
-
 func _hero_by_id(party: Array[Hero], hero_id: String) -> Hero:
 	for h in party:
 		if h.id == hero_id:
@@ -1822,23 +1815,6 @@ func _run_report() -> Control:
 		col.add_child(ll)
 	panel.add_child(col)
 	return panel
-
-
-func _run_summary_lines() -> Array[String]:
-	var lines: Array[String] = []
-	var layers: Array = GameState.run.get("layers", [])
-	if not layers.is_empty():
-		lines.append(tr("Floor %d/%d reached") % [int(GameState.run.get("pos", 0)) + 1, layers.size()])
-	var coin_delta := GameState.coins - int(GameState.run.get("start_coins", GameState.coins))
-	var crystal_delta := GameState.crystals - int(GameState.run.get("start_crystals", GameState.crystals))
-	lines.append(tr("%+d Gold, %+d Essence this run") % [coin_delta, crystal_delta])
-	var dropped: Array = GameState.run.get("haul_lost", [0, 0])
-	if int(dropped[0]) + int(dropped[1]) > 0:
-		lines.append(tr("Lost on the way out: %d Gold, %d Essence") % [int(dropped[0]), int(dropped[1])])
-	var lost := int(GameState.run.get("heroes_lost", 0))
-	if lost > 0:
-		lines.append(tr("%d hero%s lost") % [lost, tr(str(_pl(lost, "es")))])
-	return lines
 
 
 # ----------------------------------------------------------------------------

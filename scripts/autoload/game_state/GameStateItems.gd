@@ -239,10 +239,6 @@ func find_item(item_id: String) -> Item:
 	return null
 
 
-func item_slot_type_of(it: Item) -> String:
-	return it.slot_type()
-
-
 ## Every flat kind->value an item contributes (what Combat.hero_item_total
 ## sums for it).
 ## How much `h`'s Power changes with `it` in their slot `idx` (replacing

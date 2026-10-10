@@ -433,7 +433,22 @@ const ROLE_SIGNATURES := {
 const RIFTBORN_MIN_RANK := "C"
 
 
+## Built once per kind and read-only: every stat read walks these (0.69.1).
+static var _rift_nodes_cache := {}
+static var _keystone_cache := {}
+
+
 static func rift_nodes(kind: String) -> Array:
+	if not _rift_nodes_cache.has(kind):
+		var built := _build_rift_nodes(kind)
+		for n in built:
+			(n as Dictionary).make_read_only()
+		built.make_read_only()
+		_rift_nodes_cache[kind] = built
+	return _rift_nodes_cache[kind]
+
+
+static func _build_rift_nodes(kind: String) -> Array:
 	var cap_val := 0.0
 	for n in KIND_SKILL_PACKAGE.get(kind, []):
 		if n["id"] == "cap":
@@ -451,9 +466,12 @@ static func rift_nodes(kind: String) -> Array:
 static func keystone_node(kind: String) -> Dictionary:
 	if not KEYSTONES.has(kind):
 		return {}
-	var n: Dictionary = KEYSTONES[kind].duplicate(true)
-	n.merge({"id": "keystone", "tier": 5, "req_level": 10, "cost": 3, "requires": [], "requires_any": KEYSTONE_REQUIRES_ANY})
-	return n
+	if not _keystone_cache.has(kind):
+		var n: Dictionary = KEYSTONES[kind].duplicate(true)
+		n.merge({"id": "keystone", "tier": 5, "req_level": 10, "cost": 3, "requires": [], "requires_any": KEYSTONE_REQUIRES_ANY})
+		n.make_read_only()
+		_keystone_cache[kind] = n
+	return _keystone_cache[kind]
 
 
 ## `role`'s signature as a full skill node (Tier 5 column, shared/bare key).
@@ -473,18 +491,6 @@ static func signature_node(role: String) -> Dictionary:
 static func skill_storage_key(kind: String, node_id: String) -> String:
 	return node_id if node_id in ["edge", "hide", "signature"] else "%s:%s" % [kind, node_id]
 
-
-## Every subclass a hero at `cls`'s rank could evolve into — every CLASS_POOL
-## entry sharing `cls`'s role at the next rank up, not just the first match
-## (CLASS_POOL's array order shouldn't matter). The player picks one of these
-## in the Roster's evolution picker; GameState.evolve_hero() validates it.
-static func evolution_choices(cls: Dictionary) -> Array:
-	var rank_idx := rank_index(cls["rank"])
-	for i in range(rank_idx + 1, RANKS.size()):
-		var matches: Array = CLASS_POOL.filter(func(c): return c["role"] == cls["role"] and c["rank"] == RANKS[i]["id"])
-		if not matches.is_empty():
-			return matches
-	return []
 
 ## The "stonebound" skill node costs this many Crystals on top of its SP.
 const STONEBOUND_CRYSTALS := 40
