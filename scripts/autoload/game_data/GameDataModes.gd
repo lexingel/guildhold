@@ -738,7 +738,7 @@ const RIFT_RANKS := [
 ## The lane map (0.65): how many lanes a rank's rift has, and floors added
 ## on top of its base length (width grows faster than length).
 const RANK_LANES := {"F": 3, "E": 3, "D": 4, "C": 4, "B": 4, "A": 5, "S": 5, "SS": 5, "SSS": 5}
-const RANK_EXTRA_FLOORS := {}   # 0.63: width only for now; longer top ranks need the readout recalibrated (campaign_sim)
+var RANK_EXTRA_FLOORS := {}   # 0.63: width only for now; longer top ranks need the readout recalibrated (campaign_sim -- floors=A:1,S:2)
 
 
 ## What each rank's extra rules read as on the Rift Hall.
