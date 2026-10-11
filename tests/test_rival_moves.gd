@@ -26,7 +26,24 @@ func run() -> void:
 	for i in 20:
 		GameState.maybe_rival_move()
 	check(GameState.rival_event.is_empty(), "no moves before Act II")
-	GameState.features_seen.append("rival")
+	# Act I (0.70): the guild thinks it is the only one. No race, no taunts,
+	# no standings achievement until the rivals arrive.
+	var news0 := GameState.guild_news.size()
+	GameState.rival_renown = 0
+	GameState.reputation = 30
+	for i in 10:
+		GameState.rival_day()
+	check(GameState.rival_renown == 0 and GameState.guild_news.size() == news0, "before the rivals arrive: no rival Renown, no taunts")
+	check(not GameData.milestones(GameState.rival_present()).any(func(m): return str(m["type"]) == "standings_top"), "the standings achievement waits for the rivals")
+	GameState.campaign_act = 3
+	GameState.pending_stories.clear()
+	GameState.check_feature_unlocks()
+	check(GameState.rival_present() and GameState.rival_renown == int(GameState.day * 1.5), "the rivals arrive with the Renown they earned out of sight")
+	check(GameState.pending_stories.any(func(c): return str(c.get("text", "")).contains("Dobbs")), "with the card that says so")
+	check(GameData.milestones(GameState.rival_present()).any(func(m): return str(m["type"]) == "standings_top"), "then the standings achievement shows")
+	GameState.campaign_act = 1
+	if not GameState.features_seen.has("rival"):
+		GameState.features_seen.append("rival")
 	GameState.rifts_sealed = 3
 
 	# A move comes only on its day of the week.

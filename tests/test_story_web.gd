@@ -73,6 +73,8 @@ func run() -> void:
 
 	# The rival's letters: Orla Venn's claims, one per letter, and her fragment.
 	GameState.rival_name = "The Iron Chorus"
+	if not GameState.features_seen.has("rival"):   # rival letters come once the rivals have arrived (0.70)
+		GameState.features_seen.append("rival")
 	var ps1 := GameState.lore_letter_ps()
 	check(GameState.claim_heard("orla_attack") and ps1.contains("came for the Vale"), "the Chorus's first letter says the Hollow attacked")
 	var ps2 := GameState.lore_letter_ps()

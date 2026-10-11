@@ -127,6 +127,8 @@ func run() -> void:
 	check(GameState.fragment_known("f_lamps_light") and GameState.fragment_known("f_last_finding") and both.contains("\n\n"), "a restored hall can hold two fragments")
 	# The Gilded Lance's letters: claims in order, the cousin on its fragment.
 	GameState.rival_name = "The Gilded Lance"
+	if not GameState.features_seen.has("rival"):   # rival letters come once the rivals have arrived (0.70)
+		GameState.features_seen.append("rival")
 	GameState.lore_letter_ps()
 	GameState.lore_letter_ps()
 	GameState.lore_letter_ps()
@@ -148,6 +150,8 @@ func run() -> void:
 	check(GameState.unlock_founding("rangers") == "" and GameState.founding_unlocked("rangers"), "then they can be bought")
 	_guild("Deserters")
 	GameState.rival_name = "The Iron Chorus"
+	if not GameState.features_seen.has("rival"):   # rival letters come once the rivals have arrived (0.70)
+		GameState.features_seen.append("rival")
 	var c0 := GameState.coins
 	GameState.apply_founding("rangers")
 	check(GameState.coins == c0 - 100 and GameState.rival_name != "The Iron Chorus", "the Rangers start leaner, and the Iron Chorus won't race them")

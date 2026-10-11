@@ -647,6 +647,13 @@ func _news(line: String) -> void:
 ## Whether a staged feature (GameData.FEATURE_UNLOCKS) is open yet; anything
 ## not in the table is always open, and so is anything already announced.
 ## Gates are a seal count, an act (and days into it), or a rule of their own.
+## Whether the rival guild has shown itself (0.70). A new guild believes it
+## is the only one left: the rivals arrive a day into Act II, with the Royal
+## Charter card. Before that there is no race, no taunts and no standings.
+func rival_present() -> bool:
+	return feature_unlocked("rival")
+
+
 func feature_unlocked(id: String) -> bool:
 	if features_seen.has(id):
 		return true

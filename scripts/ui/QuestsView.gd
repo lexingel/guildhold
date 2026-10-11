@@ -86,7 +86,7 @@ func _render_quests(v: VBoxContainer) -> void:
 	v.add_child(_hsep())
 
 	v.add_child(_label("Milestones", 16))
-	for m in GameData.milestones():
+	for m in GameData.milestones(GameState.rival_present()):
 		var mid := str(m["id"])
 		var claimed: bool = GameState.milestones_claimed.has(mid)
 		var mprogress := GameState.milestone_progress(m)

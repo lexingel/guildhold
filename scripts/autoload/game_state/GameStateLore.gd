@@ -48,7 +48,7 @@ func lore_gate(f: Dictionary, ctx: Dictionary = {}) -> bool:
 		return false
 	if g.has("truth") and not truth_known(str(g["truth"])):
 		return false
-	if g.has("rival") and rival_name != str(g["rival"]):
+	if g.has("rival") and (rival_name != str(g["rival"]) or not rival_present()):
 		return false
 	if g.has("charter") and founding != str(g["charter"]):
 		return false

@@ -1614,11 +1614,15 @@ func _topbar(container: Control, breadcrumb: String = "") -> void:
 		tile.theme_type_variation = &"StatTileEmber"
 		tile.tooltip_text = CURRENCY_TIPS.get(str(entry[0]), "")
 		if entry[0] == GameData.CURRENCY_ICON_PATH["reputation"]:
-			# Renown is the race with the rival: the tile shows where you stand.
-			var lead := GameState.reputation - GameState.rival_renown
-			count.add_theme_color_override("font_color", Palette.good() if lead > 0 else (Palette.HAZARD if lead < 0 else Palette.TEXT))
-			tile.tooltip_text = tr("Renown %d — %s %s (%d). The leader at payday gets the better recruits; every 20 arms an Epic at your next rift shop. See Guild > Ledger.") % [GameState.reputation,
-				tr("you lead") if lead > 0 else (tr("you trail") if lead < 0 else tr("level with")), tr(str(GameState.rival_name)), GameState.rival_renown]
+			# Renown is the race with the rival: the tile shows where you stand
+			# (before the rivals arrive, just what it is).
+			if GameState.rival_present():
+				var lead := GameState.reputation - GameState.rival_renown
+				count.add_theme_color_override("font_color", Palette.good() if lead > 0 else (Palette.HAZARD if lead < 0 else Palette.TEXT))
+				tile.tooltip_text = tr("Renown %d — %s %s (%d). The leader at payday gets the better recruits. See Guild > Ledger.") % [GameState.reputation,
+					tr("you lead") if lead > 0 else (tr("you trail") if lead < 0 else tr("level with")), tr(str(GameState.rival_name)), GameState.rival_renown]
+			else:
+				tile.tooltip_text = tr("Renown %d: how far the guild's name carries. Sealed rifts and finished contracts raise it; failed contracts and unpaid upkeep cost it.") % GameState.reputation
 		tile.mouse_filter = Control.MOUSE_FILTER_STOP
 		tile.add_child(stat_row)
 		row.add_child(tile)

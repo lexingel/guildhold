@@ -71,7 +71,11 @@ func check_feature_unlocks() -> Array:
 		if not features_seen.has(f) and feature_unlocked(f):
 			features_seen.append(f)
 			fresh.append(f)
-	if fresh.has("rival"):   # the Charter War begins
+	if fresh.has("rival"):   # the Charter War begins: the rivals arrive (0.70)
+		# with the Renown they earned out of sight in Act I (1.5 a day, as when
+		# the race ran from day one; starting level cost casual guilds Act V).
+		rival_renown = maxi(rival_renown, int(day * 1.5))
+		contest_start = {"ours": reputation, "theirs": rival_renown}
 		var card: Dictionary = (GameData.MOOT_NOTICE if moot() else GameData.ROYAL_CHARTER).duplicate()   # the epilogue's Vale
 		card["text"] = tr(str(card["text"])) % [tr(str(rival_name)), tr(str(rival_leader()["leader"]))]
 		if grudge != "":   # the Vale remembers: an old score
@@ -587,7 +591,7 @@ func ensure_event() -> void:
 	ns["type"] = "event"
 	var seen: Array = run.get("events_seen", [])
 	# Region events ("biome") only happen in their region.
-	var here: Array = GameData.RIFT_EVENTS.filter(func(e): return str(e.get("biome", run_biome())) == run_biome() and campaign_act >= int(e.get("min_act", 1)))
+	var here: Array = GameData.RIFT_EVENTS.filter(func(e): return str(e.get("biome", run_biome())) == run_biome() and campaign_act >= int(e.get("min_act", 1)) and (not e.get("rival", false) or rival_present()))
 	var fresh: Array = here.filter(func(e): return not seen.has(e["id"]))
 	if fresh.is_empty():
 		fresh = here

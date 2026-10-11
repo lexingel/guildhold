@@ -9,10 +9,10 @@ extends QuestsView
 
 func _render_records(v: VBoxContainer) -> void:
 	v.add_child(_label("Records", 20))
-	var done := GameData.milestones().filter(func(m): return GameState.milestones_claimed.has(str(m["id"]))).size()
+	var done := GameData.milestones(GameState.rival_present()).filter(func(m): return GameState.milestones_claimed.has(str(m["id"]))).size()
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override("separation", 6)
-	for t in [["achievements", tr("Achievements %d/%d") % [done, GameData.milestones().size()]], ["stats", "Statistics"], ["history", "Run history"]]:
+	for t in [["achievements", tr("Achievements %d/%d") % [done, GameData.milestones(GameState.rival_present()).size()]], ["stats", "Statistics"], ["history", "Run history"]]:
 		var b := _button(str(t[1]), func(id=t[0]):
 			records_tab = id
 			render()
@@ -51,7 +51,7 @@ var _show_done_achievements := false
 ## Unfinished achievements first, each with a progress bar; the done ones
 ## fold into one line (playtest 2026-10-09: the full list was a wall of text).
 func _render_achievements(v: VBoxContainer) -> void:
-	var all: Array = GameData.milestones()
+	var all: Array = GameData.milestones(GameState.rival_present())
 	var done: Array = all.filter(func(m): return GameState.milestones_claimed.has(str(m["id"])))
 	var grid := GridContainer.new()
 	grid.columns = 1 if _narrow() else 2
@@ -369,7 +369,7 @@ func _week_board() -> Control:
 				events.append([tr("Contract due"), Palette.HAZARD, GameState.quest_desc(q)])
 		if GameState.breach_active() and not GameState.breach_broken() and int(GameState.breach.get("breaks_on", -1)) == d:
 			events.append([tr("Rift breaks"), Palette.HAZARD, tr("A Rank %s rift breaks near %s.") % [tr(GameState.breach_rank_id()), GameState.breach_place()]])
-		if d > 0 and d % GameData.CONTEST_DAYS == 0:
+		if d > 0 and d % GameData.CONTEST_DAYS == 0 and GameState.rival_present():
 			events.append([tr("Contest ends"), Palette.RANK_S, tr("The month's Renown contest with %s ends.") % tr(str(GameState.rival_name))])
 		var tile := PanelContainer.new()
 		tile.theme_type_variation = &"CardPanelEmber" if d == today else &"CardPanel"
@@ -416,7 +416,8 @@ func _render_ledger(v: VBoxContainer) -> void:
 		v.add_child(_matter_card("rival"))
 	v.add_child(_treasury_card())
 	v.add_child(_payroll_card())
-	v.add_child(_rival_card())
+	if GameState.rival_present():   # no rivals yet in Act I (0.70)
+		v.add_child(_rival_card())
 
 	if not GameState.guild_news.is_empty():
 		v.add_child(_hsep())

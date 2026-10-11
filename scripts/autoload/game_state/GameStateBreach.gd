@@ -397,7 +397,7 @@ func camp_event_possible(id: String) -> bool:
 		"smith":
 			return _camp_smith_item() != null
 		"rival_buyer":
-			return _camp_spare_item() != null and rival_name != ""
+			return _camp_spare_item() != null and rival_name != "" and rival_present()
 		"visitor":
 			return not _camp_trainees().is_empty()
 		"wanderer":

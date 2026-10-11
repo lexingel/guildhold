@@ -447,7 +447,7 @@ const RIFT_EVENTS := [
 			{"label": "Salvage it", "desc": "+10 Gold", "effect": {"coins": 10}},
 		]},
 	# Content pass (0.18): more events; "biome" keeps one to its region.
-	{"id": "deserter", "name": "A Deserter", "text": "A rival guild's hireling crouches in a side passage, clutching a stolen purse.",
+	{"id": "deserter", "rival": true, "name": "A Deserter", "text": "A rival guild's hireling crouches in a side passage, clutching a stolen purse.",
 		"choices": [
 			{"label": "Turn them in", "desc": "+10 Gold · +3 Renown", "effect": {"coins": 10, "reputation": 3}},
 			{"label": "Split the purse", "desc": "+20-30 Gold · -2 Renown", "effect": {"coins": [20, 30], "reputation": -2}},
@@ -1064,8 +1064,12 @@ const QUEST_TYPE_LABEL := {
 ## Renown pace, Tower climb and Endless survival.
 const STANDING_STRENGTH := [0.7, 0.95, 1.2]
 
-static func milestones() -> Array:
-	return MILESTONES
+## MILESTONES a guild can see now: the standings race waits for the rivals
+## (0.70; pass GameState.rival_present()).
+static func milestones(rivals := true) -> Array:
+	if rivals:
+		return MILESTONES
+	return MILESTONES.filter(func(m): return str(m["type"]) != "standings_top")
 
 
 const MILESTONES := [
@@ -1242,7 +1246,7 @@ const LEDGER_PAGES := [
 ## The Charter War: the Crown will grant one Royal Charter. This notice is
 ## shown once, when the rival's weekly moves begin (%s: the rival, its leader).
 const ROYAL_CHARTER := {"title": "By Royal Hand", "subtitle": "A notice on every guild door in the Vale",
-	"text": "The Crown will return to the Vale. A single Royal Charter will go to the company that has done the most to close the rifts: every contract, for a generation. Until then, all chartered companies compete on equal terms.\n\nThe loudest of them, %s, led by %s, has noticed your guild."}
+	"text": "Smoke on the north road, and banners at the ford. Before noon Wen counts four new guild signs along the Marches road.\n\n\"We weren't the only ones who saw the empty halls,\" Dobbs says. \"Just the first.\"\n\nThe same day a herald nails a notice to every door: the Crown is coming back to the Vale, and a single Royal Charter will go to the company that closes the most rifts. Every contract, for a generation.\n\nThe loudest of them, %s, led by %s, has already noticed your guild."}
 
 ## Each rival leader's voice: a signed letter with each weekly move (poach:
 ## %s the hero; challenge: %s the rank) and what they say about you in the

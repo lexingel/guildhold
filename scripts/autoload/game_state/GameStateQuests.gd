@@ -235,7 +235,7 @@ func milestone_progress(m: Dictionary) -> int:
 		"daily_streak": return daily_streak
 		"boon_set4": return 1 if boon_set4_reached else 0
 		"guild_tier_legendary": return 1 if str(Combat.guild_tier_info()["name"]) == "Legendary Guild" else 0
-		"standings_top": return 1 if day > 0 and str(guild_standings()[0]["name"]) == guild_name else 0
+		"standings_top": return 1 if day > 0 and rival_present() and str(guild_standings()[0]["name"]) == guild_name else 0
 		"max_level": return 1 if heroes.any(func(h): return h.level >= 10) else 0
 		"roster_size": return heroes.size()
 		_: return 0
@@ -246,7 +246,7 @@ func milestone_progress(m: Dictionary) -> int:
 ## granted this call (usually 0 or 1) so the caller can show a flavor toast.
 func check_milestones() -> Array[String]:
 	var newly: Array[String] = []
-	for m in GameData.milestones():
+	for m in GameData.milestones(rival_present()):
 		var mid := str(m["id"])
 		if milestones_claimed.has(mid):
 			continue
@@ -402,7 +402,7 @@ func _request_need_ok(h: Hero, need: Dictionary) -> bool:
 			"rank_min": ok = GameData.rank_index(h.rank) >= GameData.rank_index(str(v))
 			"level_max": ok = h.level <= int(v) and h.seasoned == 0
 			"knockouts_min": ok = int(h.history.get("knockouts", 0)) >= int(v)
-			"rival": ok = rival_name != ""
+			"rival": ok = rival_name != "" and rival_present()
 			"act_min": ok = campaign_act >= int(v)
 			"worn_forgeable": ok = _request_forge_item(h) != null
 		if not ok:
@@ -663,7 +663,7 @@ func run_payday() -> void:
 		_news(tr("Volunteers joined the guild: %s.") % ", ".join(volunteers))
 		pending_toasts.append({"cls_id": "", "pool_id": "", "title": tr("Volunteers"), "text": tr("%s joined for free. A guild short on heroes and Gold draws volunteers; Rank F rifts pay enough to rebuild.") % ", ".join(volunteers)})
 	var was_ahead := int(payday_report.get("ahead", 0))
-	rival_ahead = 1 if reputation > rival_renown else (-1 if reputation < rival_renown else 0)
+	rival_ahead = 0 if not rival_present() else (1 if reputation > rival_renown else (-1 if reputation < rival_renown else 0))
 	var past := _past_pick()
 	var scene := _payday_scene(payday_report, left, unpaid, was_ahead, past)
 	payday_report = {"day": day, "due": paid + unpaid.size(), "paid": paid, "unpaid": unpaid, "left": left, "ahead": rival_ahead, "upkeep": up, "upkeep_paid": upkeep_paid,
@@ -677,7 +677,8 @@ func run_payday() -> void:
 	if not left.is_empty():
 		line += tr(" Walked out: %s.") % tr(str(", ".join(left)))
 	_news(line)
-	_news(tr("%s the %s (Renown %d vs %d).") % [tr(str(tr("Your guild leads") if rival_ahead > 0 else (tr("The guild trails") if rival_ahead < 0 else tr("Your guild is level with")))), tr(str(rival_name)), reputation, rival_renown] + (tr(" Recruits favor you this week: +1 offer.") if rival_ahead > 0 else (tr(" Recruits favor them this week: -1 offer.") if rival_ahead < 0 else "")))
+	if rival_present():
+		_news(tr("%s the %s (Renown %d vs %d).") % [tr(str(tr("Your guild leads") if rival_ahead > 0 else (tr("The guild trails") if rival_ahead < 0 else tr("Your guild is level with")))), tr(str(rival_name)), reputation, rival_renown] + (tr(" Recruits favor you this week: +1 offer.") if rival_ahead > 0 else (tr(" Recruits favor them this week: -1 offer.") if rival_ahead < 0 else "")))
 	recruit_top_up()
 	var text := tr("%d Gold in wages, %s") % [paid, tr(str((tr("%d upkeep") % up) if upkeep_paid else tr("upkeep unpaid (-%d Renown)") % GameData.UPKEEP_UNPAID_RENOWN))]
 	if not unpaid.is_empty():
@@ -813,6 +814,8 @@ func hold_feast() -> String:
 ## The rival's day: it gains Renown (more each act), and once a week it may
 ## make a move you have to answer (maybe_rival_move).
 func rival_day() -> void:
+	if not rival_present():
+		return
 	var span: Array = GameData.RIVAL_DAILY_RENOWN[mini(3, campaign_act)]
 	rival_renown += int(round((int(span[0]) + randi() % (int(span[1]) - int(span[0]) + 1)) * year_mult("rival_renown") * (GameData.GRUDGE_RENOWN if grudge != "" else 1.0))) + (1 if reputation - rival_renown >= GameData.RIVAL_CATCH_UP else 0)
 	maybe_rival_move()
